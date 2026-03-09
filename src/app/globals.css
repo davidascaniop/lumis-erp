@@ -1,0 +1,199 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
+
+  --color-card: var(--bg-card);
+  --color-card-foreground: var(--text-primary);
+
+  --color-popover: var(--bg-card);
+  --color-popover-foreground: var(--text-primary);
+
+  --color-primary: var(--accent-primary);
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: var(--accent-secondary);
+  --color-secondary-foreground: #ffffff;
+
+  --color-muted: var(--bg-secondary);
+  --color-muted-foreground: var(--text-muted);
+
+  --color-accent: var(--accent-highlight);
+  --color-accent-foreground: var(--bg-primary);
+
+  --color-destructive: var(--accent-danger);
+  --color-destructive-foreground: #ffffff;
+
+  --color-warning: var(--accent-warning);
+  --color-warning-foreground: #ffffff;
+
+  --color-info: var(--accent-info);
+  --color-info-foreground: #ffffff;
+
+  --color-border: var(--border-subtle);
+  --color-input: var(--border-subtle);
+  --color-ring: var(--border-active);
+
+  --color-sidebar: var(--bg-secondary);
+  --color-sidebar-foreground: var(--text-primary);
+  --color-sidebar-primary: var(--accent-primary);
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: var(--bg-card);
+  --color-sidebar-accent-foreground: var(--text-primary);
+  --color-sidebar-border: var(--border-subtle);
+  --color-sidebar-ring: var(--border-active);
+
+  --color-chart-1: #E040FB;
+  --color-chart-2: #7C4DFF;
+  --color-chart-3: #F8C0FF;
+  --color-chart-4: #B388FF;
+  --color-chart-5: #FF80AB;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 1.75rem;
+  --radius-4xl: 2rem;
+  --radius-full: 999px;
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+
+    to {
+      height: 0;
+    }
+  }
+}
+
+/* =============================================
+   LUMIS — Titanium Rose Theme
+   ============================================= */
+:root {
+  --bg-primary: #0F0A12;
+  --bg-secondary: #1A1220;
+  --bg-card: #201728;
+  --bg-glass: rgba(224, 64, 251, 0.04);
+
+  --accent-primary: #E040FB;
+  --accent-secondary: #7C4DFF;
+  --accent-highlight: #F8C0FF;
+  --accent-danger: #FF4757;
+  --accent-warning: #FFB800;
+  --accent-info: #7C4DFF;
+
+  --text-primary: #F5EEFF;
+  --text-secondary: #B8A0D0;
+  --text-muted: #6B5280;
+
+  --border-subtle: rgba(224, 64, 251, 0.08);
+  --border-active: rgba(224, 64, 251, 0.45);
+
+  --gradient-hero: linear-gradient(135deg, rgba(224, 64, 251, 0.2) 0%, rgba(124, 77, 255, 0.15) 100%);
+  --shadow-glow: 0 0 30px rgba(224, 64, 251, 0.2);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.5);
+
+  color-scheme: dark;
+}
+
+/* Glassmorphism utility */
+@utility glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+}
+
+@utility shadow-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+@utility shadow-card {
+  box-shadow: var(--shadow-card);
+}
+
+@layer base {
+
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-border, currentColor);
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading tracking-tight;
+  }
+
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans;
+  }
+}
+
+/* Scrollbar hide */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-primary);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-secondary);
+}
