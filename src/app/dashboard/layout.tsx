@@ -1,24 +1,28 @@
-import { Sidebar } from "@/components/layout/sidebar"
-import { Topbar } from "@/components/layout/topbar"
+import { Sidebar } from "@/components/layout/sidebar";
+import { Toaster } from "sonner";
 
 export default function DashboardLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode
+  children: React.ReactNode;
 }) {
-    return (
-        <div className="min-h-screen bg-[#0F0A12] flex overflow-hidden">
-            {/* Ambient Glows */}
-            <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[#E040FB]/5 blur-[120px] pointer-events-none" />
-            <div className="fixed bottom-[-10%] right-[-5%] w-[30%] h-[30%] rounded-full bg-[#7C4DFF]/5 blur-[100px] pointer-events-none" />
-
-            <Sidebar />
-            <div className="flex-1 flex flex-col relative z-10 w-full">
-                <Topbar />
-                <main className="flex-1 p-4 lg:p-8 overflow-y-auto no-scrollbar">
-                    {children}
-                </main>
-            </div>
-        </div>
-    )
+  return (
+    <div className="flex h-screen overflow-hidden bg-surface-base">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+      </div>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: "#1C1228",
+            border: "1px solid rgba(224,64,251,0.20)",
+            color: "#F0E8FF",
+            fontFamily: "DM Sans, sans-serif",
+          },
+        }}
+      />
+    </div>
+  );
 }

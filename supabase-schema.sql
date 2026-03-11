@@ -6,6 +6,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- ============================================
 CREATE TABLE companies (
   id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  auth_id       UUID, -- Creador original de la empresa
   name          VARCHAR(255) NOT NULL,
   rif           VARCHAR(20)  UNIQUE NOT NULL,
   logo_url      TEXT,
@@ -201,51 +202,45 @@ ALTER TABLE receivables  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payments     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;
 
--- Política base: cada usuario solo ve datos de su empresa
-CREATE POLICY "tenant_isolation" ON partners
-  FOR ALL USING (company_id = (
-    SELECT company_id FROM users WHERE auth_id = auth.uid()
-  ));
+-- ============================================
+-- FUNCIONES AUXILIARES PARA RLS
+-- ============================================
+-- Esta función elude el RLS para no crear un ciclo infinito al consultar la tabla users
+CREATE OR REPLACE FUNCTION get_auth_company_id()
+RETURNS uuid
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT company_id FROM users WHERE auth_id = auth.uid();
+$$;
 
-CREATE POLICY "tenant_isolation_companies" ON companies
-  FOR ALL USING (id = (
-    SELECT company_id FROM users WHERE auth_id = auth.uid()
-  ));
+-- ============================================
+-- POLÍTICAS: COMPANIES
+-- ============================================
+CREATE POLICY "companies_select" ON companies FOR SELECT USING (id = get_auth_company_id() OR auth_id = auth.uid());
+CREATE POLICY "companies_update" ON companies FOR UPDATE USING (id = get_auth_company_id() OR auth_id = auth.uid());
+CREATE POLICY "companies_insert" ON companies FOR INSERT WITH CHECK (auth_id = auth.uid());
 
-CREATE POLICY "tenant_isolation_users" ON users
-  FOR ALL USING (company_id = (
-    SELECT company_id FROM users WHERE auth_id = auth.uid()
-  ));
+-- ============================================
+-- POLÍTICAS: USERS
+-- ============================================
+CREATE POLICY "users_select" ON users FOR SELECT USING (company_id = get_auth_company_id() OR auth_id = auth.uid());
+CREATE POLICY "users_update" ON users FOR UPDATE USING (company_id = get_auth_company_id() OR auth_id = auth.uid());
+CREATE POLICY "users_insert" ON users FOR INSERT WITH CHECK (auth_id = auth.uid());
 
-CREATE POLICY "tenant_isolation_products" ON products
-  FOR ALL USING (company_id = (
-    SELECT company_id FROM users WHERE auth_id = auth.uid()
-  ));
-
-CREATE POLICY "tenant_isolation_orders" ON orders
-  FOR ALL USING (company_id = (
-    SELECT company_id FROM users WHERE auth_id = auth.uid()
-  ));
-
-CREATE POLICY "tenant_isolation_order_items" ON order_items
-  FOR ALL USING (
-    order_id IN (SELECT id FROM orders WHERE company_id = (SELECT company_id FROM users WHERE auth_id = auth.uid()))
-  );
-
-CREATE POLICY "tenant_isolation_receivables" ON receivables
-  FOR ALL USING (company_id = (
-    SELECT company_id FROM users WHERE auth_id = auth.uid()
-  ));
-
-CREATE POLICY "tenant_isolation_payments" ON payments
-  FOR ALL USING (company_id = (
-    SELECT company_id FROM users WHERE auth_id = auth.uid()
-  ));
-
-CREATE POLICY "tenant_isolation_activity_log" ON activity_log
-  FOR ALL USING (company_id = (
-    SELECT company_id FROM users WHERE auth_id = auth.uid()
-  ));
+-- ============================================
+-- POLÍTICAS: OTROS (Tenant Isolation Base)
+-- ============================================
+CREATE POLICY "tenant_isolation_partners"     ON partners     FOR ALL USING (company_id = get_auth_company_id());
+CREATE POLICY "tenant_isolation_products"     ON products     FOR ALL USING (company_id = get_auth_company_id());
+CREATE POLICY "tenant_isolation_orders"       ON orders       FOR ALL USING (company_id = get_auth_company_id());
+CREATE POLICY "tenant_isolation_order_items"  ON order_items  FOR ALL USING (
+  order_id IN (SELECT id FROM orders WHERE company_id = get_auth_company_id())
+);
+CREATE POLICY "tenant_isolation_receivables"  ON receivables  FOR ALL USING (company_id = get_auth_company_id());
+CREATE POLICY "tenant_isolation_payments"     ON payments     FOR ALL USING (company_id = get_auth_company_id());
+CREATE POLICY "tenant_isolation_activity_log" ON activity_log FOR ALL USING (company_id = get_auth_company_id());
 
 
 -- ============================================
