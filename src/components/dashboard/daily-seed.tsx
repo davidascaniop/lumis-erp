@@ -98,7 +98,7 @@ export function DailySeed({ companyId }: { companyId: string }) {
 
       {/* Versículo — estilizado y con menos margen */}
       <div className="relative pl-3 border-l-[1.5px] border-[rgba(224,64,251,0.4)] mb-2.5">
-        <blockquote className="text-[14px] font-medium text-[#F4EDFF] italic leading-tight m-0">
+        <blockquote className="font-primary text-sm leading-tight m-0">
           &ldquo;{seed.verse}&rdquo;
         </blockquote>
         <cite className="text-[12px] font-bold text-[#E040FB]/80 not-italic block mt-1.5">

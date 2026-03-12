@@ -125,7 +125,7 @@ export default function ProductosPage() {
             <p className="text-xs text-text-3 font-bold uppercase tracking-wider">
               Total Items
             </p>
-            <p className="text-2xl font-bold text-white">{stats.total}</p>
+            <p className="text-2xl font-primary text-white">{stats.total}</p>
           </div>
         </Card>
         <Card className="p-4 bg-surface-card border-border flex items-center gap-4">
@@ -136,7 +136,7 @@ export default function ProductosPage() {
             <p className="text-xs text-text-3 font-bold uppercase tracking-wider">
               Stock Crítico
             </p>
-            <p className="text-2xl font-bold text-white">{stats.lowStock}</p>
+            <p className="text-2xl font-primary text-white">{stats.lowStock}</p>
           </div>
         </Card>
         <Card className="p-4 bg-surface-card border-border flex items-center gap-4">
@@ -147,7 +147,7 @@ export default function ProductosPage() {
             <p className="text-xs text-text-3 font-bold uppercase tracking-wider">
               Valor Estimado
             </p>
-            <p className="text-2xl font-bold text-white">
+            <p className="text-2xl font-primary text-white">
               ${stats.inventoryValue.toLocaleString()}
             </p>
           </div>
@@ -243,10 +243,10 @@ export default function ProductosPage() {
                   </div>
                   <div className="p-5 space-y-4">
                     <div className="min-h-[48px]">
-                      <p className="text-xs text-brand font-bold uppercase tracking-widest mb-1">
+                      <p className="text-[10px] text-[#E040FB] font-primary uppercase tracking-widest mb-1.5">
                         {p.category || "General"}
                       </p>
-                      <h3 className="text-white font-bold line-clamp-2 leading-snug group-hover:text-brand transition-colors">
+                      <h3 className="text-white font-secondary text-sm leading-snug">
                         {p.name}
                       </h3>
                     </div>

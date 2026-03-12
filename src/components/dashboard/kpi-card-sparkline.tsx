@@ -62,7 +62,7 @@ export function KpiCardWithSparkline({
       </div>
 
       {/* Valor */}
-      <div className="font-mono text-xl font-bold text-white leading-tight mb-0.5 relative">
+      <div className="font-primary text-2xl leading-tight mb-0.5 relative">
         {value}
       </div>
       <p className="text-[11px] text-[#9585B8] relative">

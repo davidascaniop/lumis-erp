@@ -517,7 +517,7 @@ export default function DashboardPage() {
               este mes
             </span>
           </div>
-          <div className="font-mono text-xl font-bold text-white leading-tight mb-0.5 relative">
+          <div className="font-primary text-2xl leading-tight mb-0.5 relative">
             {data.collectionRate}%
           </div>
           <p className="text-[11px] text-[#9585B8] mb-3 relative">
@@ -570,7 +570,7 @@ export default function DashboardPage() {
         <div className="space-y-3">
           {/* Acciones Rápidas */}
           <div className="bg-[#18102A] border border-white/[0.06] rounded-2xl p-4">
-            <h3 className="text-[10px] font-semibold text-[#3D2D5C] uppercase tracking-[0.12em] mb-3">
+            <h3 className="text-[10px] font-primary text-[#3D2D5C] uppercase tracking-[0.12em] mb-3">
               Acciones Rápidas
             </h3>
             <div className="grid grid-cols-2 gap-2">
@@ -679,7 +679,7 @@ export default function DashboardPage() {
                     <p className="text-xs font-medium text-white truncate max-w-[140px]">
                       {item.client_name}
                     </p>
-                    <span className="font-mono text-xs font-bold text-[#FFB800]">
+                    <span className="font-primary text-xs text-[#FFB800]">
                       {formatCurrency(item.amount)}
                     </span>
                   </div>
@@ -760,7 +760,7 @@ export default function DashboardPage() {
                           {client.name}
                         </span>
                       </div>
-                      <span className="font-mono text-xs font-bold text-[#FF2D55]">
+                      <span className="font-primary text-xs text-[#FF2D55]">
                         {formatCurrency(client.total)}
                       </span>
                     </div>
@@ -812,7 +812,7 @@ export default function DashboardPage() {
                         <span className="text-xs font-medium text-white truncate max-w-[140px]">
                           {p.name}
                         </span>
-                        <span className="font-mono text-[11px] font-bold text-[#00E5CC] ml-2 flex-shrink-0">
+                        <span className="font-primary text-[11px] text-[#00E5CC] ml-2 flex-shrink-0">
                           {formatCurrency(p.revenue)}
                         </span>
                       </div>
@@ -860,7 +860,7 @@ function SalesChart({ data }: { data: { month: string; total: number }[] }) {
   if (!data || data.length === 0) {
     return (
       <div className="bg-[#18102A] border border-white/[0.06] rounded-2xl p-6">
-        <h2 className="font-display text-base font-bold text-white mb-2">
+        <h2 className="font-primary text-base text-white mb-2">
           Ventas por Mes
         </h2>
         <div className="flex items-center justify-center h-48">
@@ -901,7 +901,7 @@ function SalesChart({ data }: { data: { month: string; total: number }[] }) {
     <div className="bg-[#18102A] border border-white/[0.06] rounded-2xl p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="font-display text-base font-bold text-white">
+          <h2 className="font-primary text-base">
             Ventas por Mes
           </h2>
           <p className="text-xs text-[#9585B8] mt-0.5">
@@ -914,7 +914,7 @@ function SalesChart({ data }: { data: { month: string; total: number }[] }) {
             Ventas
           </span>
           {totalVentas > 0 && (
-            <span className="font-mono font-bold text-white">
+            <span className="font-primary text-white">
               {formatCurrency(totalVentas)}
             </span>
           )}
@@ -935,7 +935,7 @@ function SalesChart({ data }: { data: { month: string; total: number }[] }) {
             >
               {/* Valor al hover (siempre visible si hay datos) */}
               <span
-                className={`text-[10px] font-mono transition-opacity ${
+                className={`text-[10px] font-primary transition-opacity ${
                   hasValue
                     ? "text-[#E040FB] opacity-100"
                     : "text-[#3D2D5C] opacity-0 group-hover:opacity-100"
