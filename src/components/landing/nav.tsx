@@ -37,7 +37,7 @@ export function Nav() {
           <Zap className="w-5 h-5 text-white fill-white" />
         </div>
         <span className="
-          font-display font-bold text-xl text-white tracking-tight
+          font-outfit font-bold text-lg text-white tracking-tight
         ">
           LUMIS
         </span>
@@ -49,7 +49,7 @@ export function Nav() {
           <a
             key={item}
             href={`#${item.toLowerCase()}`}
-            className="text-[13px] text-[#9585B8] hover:text-white transition-colors font-medium tracking-wide uppercase"
+            className="text-[12px] text-[#9585B8] hover:text-white transition-colors font-semibold tracking-widest uppercase font-outfit"
           >
             {item}
           </a>
@@ -60,7 +60,7 @@ export function Nav() {
       <div className="flex items-center gap-6">
         <a
           href="/login"
-          className="hidden md:block text-[13px] text-[#9585B8] hover:text-white transition-colors font-medium tracking-wide uppercase"
+          className="hidden md:block text-[12px] text-[#9585B8] hover:text-white transition-colors font-semibold tracking-widest uppercase font-outfit"
         >
           Iniciar sesión
         </a>
@@ -70,11 +70,11 @@ export function Nav() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className="
-            px-6 py-2.5 rounded-xl
-            text-[13px] font-bold text-white uppercase tracking-wider
+            px-5 py-2 rounded-lg
+            text-[12px] font-bold text-white uppercase tracking-widest font-outfit
             bg-gradient-to-r from-[#E040FB] to-[#7C4DFF]
-            shadow-[0_4px_20px_rgba(224,64,251,0.25)]
-            hover:shadow-[0_4px_30px_rgba(224,64,251,0.4)]
+            shadow-[0_4px_20px_rgba(224,64,251,0.2)]
+            hover:shadow-[0_4px_30px_rgba(224,64,251,0.3)]
             transition-all duration-300
           "
         >

@@ -1,5 +1,5 @@
 'use client'
-import { motion, useScroll, useTransform, useSpring, useInView } from 'framer-motion'
+import { motion, useScroll, useTransform, useInView } from 'framer-motion'
 import { useRef, useEffect, useState } from 'react'
 import { ArrowRight, Play } from 'lucide-react'
 
@@ -32,55 +32,43 @@ function NumberCounter({ target, duration = 2 }: { target: number, duration?: nu
 
 export function Hero() {
   const containerRef = useRef(null)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"]
-  })
-
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "20%"])
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
-
+  
   return (
     <section 
       ref={containerRef}
-      className="relative min-h-[100vh] flex flex-col items-center justify-center pt-24 pb-20 overflow-hidden bg-[#08050F]"
+      className="relative min-h-[90vh] md:min-h-screen flex flex-col items-center justify-center pt-20 pb-12 overflow-hidden bg-[#08050F]"
     >
       {/* ══════════════════════════════════════════
           FONDO
           ══════════════════════════════════════════ */}
       
-      {/* Orbe magenta centrado arriba */}
-      <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[#E040FB]/10 blur-[120px] rounded-full pointer-events-none" />
-      
-      {/* Orbe violeta abajo izquierda */}
-      <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-[#7C4DFF]/10 blur-[120px] rounded-full pointer-events-none" />
-
-      {/* Grid sutil */}
-      <div className="absolute inset-0 bg-[radial-gradient(#1A1525_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 pointer-events-none" />
+      <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[#E040FB]/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-[#7C4DFF]/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(#1A1525_1px,transparent_1px)] bg-[size:40px_40px] opacity-10 pointer-events-none" />
 
       {/* ══════════════════════════════════════════
           CONTENIDO
           ══════════════════════════════════════════ */}
       
-      <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
+      <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
         
-        {/* Badge */}
+        {/* Badge Sutil */}
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-5 py-2 rounded-full mb-10
-                     bg-[#E040FB]/5 border border-[#E040FB]/20 backdrop-blur-sm"
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6
+                     bg-[#E040FB]/5 border border-[#E040FB]/10 backdrop-blur-sm"
         >
-          <span className="text-xs font-bold text-[#E040FB] tracking-[0.2em] uppercase">
-            ⚡ HECHO PARA VENEZUELA POR VENEZOLANOS
+          <span className="text-[10px] font-bold text-[#E040FB]/80 tracking-[0.2em] uppercase font-outfit">
+            ⚡ Hecho en Venezuela para el mundo
           </span>
         </motion.div>
 
-        {/* Headline */}
-        <div className="font-display font-extrabold text-[56px] md:text-[88px] leading-[0.9] tracking-tighter mb-10">
+        {/* Headline Refinado (Outfit + Zilla Slab) */}
+        <div className="font-outfit font-bold text-[42px] md:text-[68px] leading-[1.1] tracking-tight mb-8">
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-white"
@@ -88,81 +76,80 @@ export function Hero() {
             Vendes mucho.
           </motion.div>
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-[#E040FB]"
-            style={{ textShadow: '0 0 40px rgba(224,64,251,0.3)' }}
+            className="text-[#E040FB] font-zilla italic font-medium"
           >
             Cobras poco.
           </motion.div>
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-white/70"
+            className="text-white/60"
           >
             Y no sabes por qué.
           </motion.div>
         </div>
 
-        {/* Subtexto */}
+        {/* Subtexto (Zilla Slab) */}
         <motion.p 
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
-          className="text-lg md:text-xl text-[#9585B8] max-w-2xl mx-auto mb-12 leading-relaxed"
+          className="font-zilla text-lg md:text-xl text-[#9585B8] max-w-2xl mx-auto mb-10 leading-relaxed opacity-90"
         >
-          Pedidos por WhatsApp, inventario en cuaderno, cobros en Excel — mientras el{' '}
-          <span className="text-white">BCV cambia</span> y tus{' '}
-          <span className="text-white">clientes te deben</span> desde hace meses. 
-          Así no se escala un negocio.
+          WhatsApp, cuadernos y Excel no escalan un negocio. Mientras el{' '}
+          <span className="text-white border-b border-white/20">BCV cambia</span>, tus{' '}
+          <span className="text-white border-b border-white/20">cuentas por cobrar</span> crecen sin control. 
+          Es hora de tomar el mando.
         </motion.p>
 
-        {/* CTAs */}
+        {/* CTAs (Compactos para estar "Above the fold") */}
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-5 mb-16"
+          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12"
         >
           <motion.a 
             href="https://wa.me/584240000000"
             target="_blank"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="px-10 py-5 rounded-2xl text-lg font-bold text-white
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="px-8 py-4 rounded-xl text-base font-bold text-white font-outfit
                        bg-gradient-to-r from-[#E040FB] to-[#7C4DFF]
-                       shadow-[0_10px_40px_rgba(224,64,251,0.3)]"
+                       shadow-[0_8px_30px_rgba(224,64,251,0.25)]"
           >
             Solicitar acceso →
           </motion.a>
           
           <motion.a 
             href="#funciones"
-            whileHover={{ scale: 1.03, background: 'rgba(255,255,255,0.08)' }}
-            className="flex items-center gap-3 px-10 py-5 rounded-2xl text-lg font-bold
-                       text-[#F4EDFF] bg-white/[0.03] border border-white/10 transition-all font-body group"
+            whileHover={{ scale: 1.02, background: 'rgba(255,255,255,0.06)' }}
+            className="flex items-center gap-2.5 px-8 py-4 rounded-xl text-base font-bold font-outfit
+                       text-[#F4EDFF]/80 bg-white/[0.02] border border-white/5 transition-all group"
           >
-             <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-[#E040FB]/20 transition-all">
-                <Play className="w-3.5 h-3.5 fill-current" />
+             <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#E040FB]/10 transition-all">
+                <Play className="w-2.5 h-2.5 fill-current" />
              </div>
              Ver cómo funciona
           </motion.a>
         </motion.div>
 
-        {/* Social Proof */}
+        {/* Social Proof (Sutil) */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1.5 }}
-          className="flex flex-col items-center gap-4"
+          transition={{ duration: 1, delay: 1.2 }}
+          className="flex flex-col items-center gap-3"
         >
-          <div className="flex -space-x-3">
+          <div className="flex -space-x-2">
             {['A', 'J', 'M', 'R', 'E'].map((char, i) => (
               <div 
                 key={i}
-                className="w-10 h-10 rounded-full border-2 border-[#08050F] flex items-center justify-center text-xs font-bold text-white shadow-xl"
+                className="w-8 h-8 rounded-full border border-[#08050F] flex items-center justify-center text-[10px] font-bold text-white shadow-lg"
                 style={{
                   background: [
                     'linear-gradient(135deg, #E040FB, #7C4DFF)',
@@ -177,31 +164,23 @@ export function Hero() {
               </div>
             ))}
           </div>
-          <div className="flex flex-col items-center">
-            <div className="flex gap-1 mb-1">
-              {[...Array(5)].map((_, i) => (
-                <span key={i} className="text-[#FFB800] text-sm">★</span>
-              ))}
-            </div>
-            <p className="text-sm text-[#9585B8] tracking-tight">
-              <span className="text-white font-bold tracking-normal">
-                +<NumberCounter target={200} /> negocios
-              </span> venezolanos ya dejaron el Excel
-            </p>
-          </div>
+          <p className="font-zilla text-sm text-[#9585B8] opacity-70">
+            <span className="text-white/80 font-medium">
+              +<NumberCounter target={200} /> negocios
+            </span> ya automatizaron su flujo
+          </p>
         </motion.div>
 
       </div>
 
-      {/* Scroll indicator */}
+      {/* Scroll indicator (Sutil) */}
       <motion.div 
         initial={{ opacity: 0 }}
-        animate={{ opacity: 0.3 }}
-        transition={{ delay: 2.5, duration: 1 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
+        animate={{ opacity: 0.2 }}
+        transition={{ delay: 2, duration: 1 }}
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
       >
-        <span className="text-[10px] text-[#9585B8] uppercase tracking-[0.4em] font-bold">SCROLL</span>
-        <div className="w-[1px] h-12 bg-gradient-to-b from-[#E040FB] to-transparent animate-bounce" />
+        <div className="w-[1px] h-8 bg-gradient-to-b from-[#E040FB] to-transparent" />
       </motion.div>
     </section>
   )

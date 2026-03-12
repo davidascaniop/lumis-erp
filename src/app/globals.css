@@ -11,6 +11,8 @@
   --font-syne: 'Syne', sans-serif;
   --font-dm: 'DM Sans', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+  --font-outfit: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-zilla: var(--font-zilla), serif;
 
   --color-background: var(--bg-base);
   --color-foreground: var(--text-1);
@@ -135,6 +137,8 @@
   .font-display { font-family: 'Syne', sans-serif; }
   .font-syne    { font-family: 'Syne', sans-serif; }
   .font-mono    { font-family: 'JetBrains Mono', monospace; }
+  .font-outfit  { font-family: var(--font-outfit), sans-serif; }
+  .font-zilla   { font-family: var(--font-zilla), serif; }
   .financial    { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
 }
 
