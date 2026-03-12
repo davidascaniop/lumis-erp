@@ -24,7 +24,7 @@ export default async function SuperAdminLayout({
   if (userData?.role !== "superadmin") redirect("/dashboard");
 
   return (
-    <div className="flex h-screen bg-[#08050F] overflow-hidden">
+    <div className="flex h-screen bg-[#08050F] overflow-hidden font-montserrat">
       <SuperAdminSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <SuperAdminTopbar admin={userData} />

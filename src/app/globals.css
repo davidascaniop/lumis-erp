@@ -13,6 +13,7 @@
   --font-mono: 'JetBrains Mono', monospace;
   --font-outfit: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
   --font-zilla: var(--font-zilla), serif;
+  --font-montserrat: var(--font-montserrat), sans-serif;
 
   --color-background: var(--bg-base);
   --color-foreground: var(--text-1);
@@ -37,6 +38,33 @@
 
   --color-border: var(--border);
   --color-border-brand: var(--border-brand);
+}
+
+/* Typography Utilities */
+@utility font-montserrat {
+  font-family: var(--font-montserrat);
+}
+
+@layer base {
+  .font-primary {
+    font-family: var(--font-montserrat);
+    font-weight: 900;
+    color: #FFFFFF;
+    text-shadow: 0 0 30px rgba(224, 64, 251, 0.4);
+    letter-spacing: -0.02em;
+  }
+  
+  .font-secondary {
+    font-family: var(--font-montserrat);
+    font-weight: 300;
+    color: #E0E0FF; /* Soft highlighted lavender */
+  }
+  
+  .font-tertiary {
+    font-family: var(--font-montserrat);
+    font-weight: 200;
+    color: #B0A0D0; /* Muted but professional purple */
+  }
 }
 
 /* =============================================
