@@ -1,162 +1,205 @@
 'use client'
-import Link from 'next/link'
-import { ArrowRight, Zap, Play } from 'lucide-react'
 import { motion, useScroll, useTransform } from 'framer-motion'
+import { ArrowRight, Play, CheckCircle2 } from 'lucide-react'
 import { useRef } from 'react'
-
-export function Hero() {
-  const containerRef = useRef(null)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"]
-  })
-
-  // Sutil movimiento de subida pero menos agresivo para mantener visibilidad
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "15%"])
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.98])
+ 
+export function LandingHero() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { scrollY } = useScroll()
+  
+  // Parallax effects
+  const y1 = useTransform(scrollY, [0, 500], [0, -100])
+  const y2 = useTransform(scrollY, [0, 500], [0, -50])
+  const opacity = useTransform(scrollY, [0, 300], [1, 0])
 
   return (
     <section 
       ref={containerRef}
-      className="relative min-h-screen flex items-center justify-center
-                        pt-32 pb-24 overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center px-6 md:px-12 pt-[64px] pb-20 overflow-hidden bg-[#08050F]"
     >
+      {/* ══════════════════════════════════════════
+          FONDO — Atmósfera oscura con glow magenta
+          ══════════════════════════════════════════ */}
+ 
+      {/* Mesh Gradients Animados */}
+      <motion.div 
+        style={{ y: y1 }}
+        className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[1000px] h-[600px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(224,64,251,0.15)_0%,transparent_70%)] pointer-events-none blur-3xl"
+      />
+      
+      <motion.div 
+        style={{ y: y2 }}
+        className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(124,77,255,0.1)_0%,transparent_70%)] pointer-events-none blur-3xl"
+      />
 
-      {/* Fondo con glow animado sutil */}
-      <div className="absolute inset-0 pointer-events-none select-none">
+      {/* Grid de fondo con máscara radial */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(224,64,251,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(224,64,251,0.03)_1px,transparent_1px)] bg-[size:64px_64px] pointer-events-none [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_90%)]" />
+
+      {/* Decorative lines */}
+      <div className="absolute top-[64px] left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand/20 to-transparent" />
+ 
+      {/* ══════════════════════════════════════════
+          CONTENIDO
+          ══════════════════════════════════════════ */}
+ 
+      <motion.div 
+        style={{ opacity }}
+        className="relative z-10 max-w-5xl mx-auto text-center"
+      >
+        {/* BADGE */}
         <motion.div 
-          animate={{ opacity: [0.08, 0.12, 0.08] }}
-          transition={{ duration: 10, repeat: Infinity }}
-          className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2
-                        w-[800px] h-[800px] rounded-full
-                        bg-[radial-gradient(circle,rgba(224,64,251,0.1)_0%,transparent_70%)] blur-3xl" 
-        />
-        <div className="absolute inset-0 opacity-[0.03]"
-             style={{
-               backgroundImage: `linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px),
-                                  linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)`,
-               backgroundSize: '80px 80px'
-             }} />
-      </div>
-
-      <div className="relative max-w-5xl mx-auto px-6 text-center">
-
-        {/* Badge minimal */}
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8
-                        bg-white/[0.03] border border-white/10 backdrop-blur-sm"
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-8 bg-brand/5 border border-brand/20 text-brand text-xs font-bold tracking-widest uppercase backdrop-blur-sm"
         >
-          <Zap className="w-3.5 h-3.5 text-[#E040FB]" />
-          <span className="text-xs font-bold text-[#9585B8] tracking-wider uppercase">
-             Hecho para Venezuela 🇻🇪
+          <span className="text-sm">⚡</span>
+          <span>Hecho para Venezuela</span>
+          <span className="text-sm">🇻🇪</span>
+        </motion.div>
+ 
+        {/* HEADLINE */}
+        <div className="space-y-2 mb-8">
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="font-display font-black leading-[0.95] tracking-tight text-[64px] md:text-[88px] lg:text-[110px] text-white"
+          >
+            Vendes mucho.
+          </motion.h1>
+ 
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.35 }}
+            className="font-display font-black leading-[0.95] tracking-tight text-[64px] md:text-[88px] lg:text-[110px] block"
+            style={{
+              color: '#E040FB',
+              textShadow: '0 0 60px rgba(224,64,251,0.4), 0 0 120px rgba(224,64,251,0.2)',
+            }}
+          >
+            Cobras poco.
+          </motion.h1>
+ 
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="font-display font-black leading-[0.95] tracking-tight text-[64px] md:text-[88px] lg:text-[110px] text-white/40"
+          >
+            Y no sabes por qué.
+          </motion.h1>
+        </div>
+ 
+        {/* SUBTITLE */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.7 }}
+          className="font-body text-lg md:text-2xl text-[#9585B8] leading-relaxed max-w-2xl mx-auto mb-12"
+        >
+          Pedidos por WhatsApp, inventario en cuaderno,
+          cobros en Excel —{' '}
+          <span className="text-white/90 font-medium">
+            mientras el BCV cambia y tus clientes
+            te deben desde hace meses.
           </span>
-        </motion.div>
-
-        {/* Headline minimalista */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl text-white
-                         leading-[1.15] tracking-tight mb-6"
+          {' '}Así no se escala un negocio.
+        </p>
+ 
+        {/* CTAs */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.85 }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-5 mb-16"
         >
-          Gestión inteligente de
-          <br />
-          <span className="text-[#E040FB]">pedidos y cobranza.</span>
-        </motion.h1>
-
-        {/* Subheadline minimalista */}
-        <motion.p 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-          className="text-base md:text-lg text-[#9585B8] max-w-xl mx-auto mb-10
-                      leading-relaxed font-body font-normal opacity-80"
-        >
-          LUMIS centraliza tu inventario y cartera en un solo lugar. 
-          Con tasa BCV automática y portal de pago para tus clientes.
-        </motion.p>
-
-        {/* CTAs refinados */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20"
-        >
-          <motion.a 
-            href="https://wa.me/584240000000"
-            target="_blank"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="px-8 py-4 rounded-xl text-base font-bold
-                        text-white bg-[#E040FB] shadow-[0_10px_30px_rgba(224,64,251,0.2)]
-                        transition-all duration-300"
+          <a
+            href="#contacto"
+            className="group relative flex items-center gap-3 px-10 py-5 rounded-2xl text-lg font-bold text-white overflow-hidden transition-all hover:scale-[1.03] active:scale-[0.98]"
           >
-            Empezar Gratis
-          </motion.a>
-          
-          <motion.a 
+            <div className="absolute inset-0 bg-gradient-to-r from-[#E040FB] to-[#7C4DFF] transition-transform group-hover:scale-110" />
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-[radial-gradient(circle_at_center,white_0%,transparent_70%)] transition-opacity" />
+            <span className="relative z-10">Solicitar acceso</span>
+            <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </a>
+ 
+          <a
             href="#funciones"
-            whileHover={{ scale: 1.02, background: 'rgba(255,255,255,0.08)' }}
-            className="px-8 py-4 rounded-xl text-base font-bold
-                        text-[#F4EDFF] bg-white/5 border border-white/10 transition-all"
+            className="group flex items-center gap-3 px-10 py-5 rounded-2xl text-lg font-semibold text-[#9585B8] bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all"
           >
-            Ver más funciones
-          </motion.a>
+            <div className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center group-hover:bg-brand/20 group-hover:border-brand/30 transition-all">
+              <Play className="w-3 h-3 ml-0.5 fill-current" />
+            </div>
+            Ver cómo funciona
+          </a>
         </motion.div>
-
-        {/* Dashboard mockup (Visible y Minimal) */}
-        <motion.div 
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 1 }}
-          style={{ y, scale }}
-          className="relative max-w-4xl mx-auto"
+ 
+        {/* SOCIAL PROOF */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1.1 }}
+          className="flex items-center justify-center gap-4 bg-white/[0.02] border border-white/5 py-4 px-8 rounded-2xl inline-flex mx-auto"
         >
-          <div className="absolute -inset-1 bg-gradient-to-r from-[#E040FB20] to-[#7C4DFF20]
-                          rounded-[2rem] blur-xl opacity-50" />
-          
-          <div className="relative bg-[#0F0A1A] border border-white/10 rounded-2xl
-                          overflow-hidden shadow-2xl backdrop-blur-xl">
-            {/* Topbar minimal */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-white/5">
-              <div className="flex gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
-                <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
-                <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
+          <div className="flex -space-x-3">
+            {['C', 'M', 'R', 'A', 'L'].map((initial, i) => (
+              <div
+                key={i}
+                className="w-10 h-10 rounded-full border-2 border-[#08050F] flex items-center justify-center text-[11px] font-bold text-white shadow-xl"
+                style={{
+                  background: [
+                    'linear-gradient(135deg, #E040FB, #7C4DFF)',
+                    'linear-gradient(135deg, #7C4DFF, #4FC3F7)',
+                    'linear-gradient(135deg, #00E5CC, #7C4DFF)',
+                    'linear-gradient(135deg, #E040FB, #FF2D55)',
+                    'linear-gradient(135deg, #FFB800, #E040FB)',
+                  ][i]
+                }}
+              >
+                {initial}
               </div>
-              <div className="h-1.5 w-24 bg-white/5 rounded-full" />
-              <div className="w-5 h-5 rounded-full bg-white/5" />
+            ))}
+          </div>
+ 
+          <div className="flex flex-col items-start">
+            <div className="flex items-center gap-1">
+              {[...Array(5)].map((_, i) => (
+                <motion.span 
+                  autoFocus={false}
+                  key={i} 
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1.2 + i * 0.1 }}
+                  className="text-[#FFB800] text-sm"
+                >
+                  ★
+                </motion.span>
+              ))}
             </div>
-
-            <div className="p-6 space-y-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[
-                  { label: 'Ingresos', value: '$2,480', color: '#E040FB' },
-                  { label: 'Cartera', value: '$45k', color: '#7C4DFF' },
-                  { label: 'BCV', value: 'Bs 41.22', color: '#00E5CC' },
-                  { label: 'Pedidos', value: '34', color: '#A37EF5' },
-                ].map((kpi) => (
-                  <div key={kpi.label} className="bg-white/[0.02] border border-white/5 rounded-xl p-4 text-left">
-                    <div className="text-[10px] font-bold text-[#9585B8] uppercase tracking-wider mb-1">{kpi.label}</div>
-                    <div className="text-xl font-bold text-white tracking-tight">{kpi.value}</div>
-                  </div>
-                ))}
-              </div>
-              {/* Línea decorativa */}
-              <div className="h-32 bg-white/[0.02] border border-white/5 rounded-xl flex items-end p-4 gap-2">
-                 {[40, 70, 45, 90, 65, 80, 55, 95].map((h, i) => (
-                   <div key={i} className="flex-1 bg-[#E040FB20] rounded-t-sm" style={{ height: `${h}%` }} />
-                 ))}
-              </div>
-            </div>
+            <p className="text-sm text-[#9585B8]">
+              <span className="text-white font-bold">+200 negocios</span>
+              {' '}ya automatizaron su flujo
+            </p>
           </div>
         </motion.div>
-
-      </div>
+      </motion.div>
+ 
+      {/* ══════════════════════════════════════════
+          FLECHA SCROLL DOWN
+          ══════════════════════════════════════════ */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.4 }}
+        transition={{ delay: 2, duration: 1 }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
+      >
+        <span className="text-[10px] text-[#9585B8] uppercase tracking-[0.2em] font-bold">
+          desliza
+        </span>
+        <div className="w-px h-12 bg-gradient-to-b from-brand to-transparent" />
+      </motion.div>
     </section>
   )
 }

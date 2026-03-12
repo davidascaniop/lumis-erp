@@ -191,3 +191,30 @@
 /* No scrollbar */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── LANDING ANIMATIONS ──────────────────────────── */
+ 
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+ 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+ 
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(224, 64, 251, 0.40);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(224, 64, 251, 0.70);
+  }
+}
