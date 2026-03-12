@@ -5,18 +5,18 @@ import { useRef } from 'react'
 const STEPS = [
   {
     num: '01',
-    title: 'Carga tu Inventario',
-    desc: 'Importa tus productos desde Excel en minutos o usa el escáner de códigos.',
+    title: 'Crea tu cuenta',
+    desc: 'Sin contrato de permanencia. Sin instalaciones complejas. Todo en la nube, listo desde hoy mismo.',
   },
   {
     num: '02',
-    title: 'Registra tus Ventas',
-    desc: 'Toma pedidos desde el dashboard. Se calcula automáticamente con la tasa BCV del día.',
+    title: 'Configura tu negocio',
+    desc: 'Carga tus productos, clientes y sedes. Si ya tienes un Excel, lo importamos en menos de 5 minutos.',
   },
   {
     num: '03',
-    title: 'Controla tu Cartera',
-    desc: 'Visualiza qué clientes deben y permite que paguen a través de su portal dedicado.',
+    title: 'Invita a tu equipo',
+    desc: 'Crea múltiples usuarios con roles y permisos específicos. Empieza a vender y cobrar con orden.',
   },
 ]
 
@@ -27,50 +27,62 @@ export function HowItWorks() {
   return (
     <section 
       ref={ref}
-      className="py-24 px-6 bg-[#08050F] relative overflow-hidden"
+      className="py-32 bg-[#110B1A] relative px-6 border-y border-white/5"
     >
-      <div className="max-w-4xl mx-auto relative text-center">
-
-        <div className="mb-20">
-          <motion.p 
-             initial={{ opacity: 0, scale: 0.95 }}
-             animate={isInView ? { opacity: 1, scale: 1 } : {}}
-             className="text-[#E040FB] text-[10px] font-bold uppercase tracking-[0.4em] mb-4"
-          >
-            Metodología
-          </motion.p>
+      <div className="max-w-6xl mx-auto text-center relative">
+        
+        <div className="mb-24">
           <motion.h2 
-             initial={{ opacity: 0, y: 10 }}
-             animate={isInView ? { opacity: 1, y: 0 } : {}}
-             className="font-display font-bold text-3xl md:text-5xl text-white mb-4 tracking-tight"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : {}}
+            className="font-display font-bold text-4xl md:text-6xl text-white mb-6 tracking-tight leading-tight"
           >
-            LUMIS es para hoy.
+            Tres pasos para 
             <br />
-            <span className="text-[#9585B8] opacity-60">En menos de un día.</span>
+            <span className="text-[#E040FB]">tomar el control.</span>
           </motion.h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-          {STEPS.map(({ num, title, desc }, i) => (
+        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-20">
+          {/* Línea punteada decorativa (Desktop) */}
+          <div className="hidden md:block absolute top-[40px] left-[15%] right-[15%] h-px border-t border-dashed border-[#E040FB]/30 z-0" />
+
+          {STEPS.map((step, i) => (
             <motion.div 
-                 key={num}
-                 initial={{ opacity: 0, y: 10 }}
-                 animate={isInView ? { opacity: 1, y: 0 } : {}}
-                 transition={{ delay: 0.3 + (i * 0.1), duration: 0.5 }}
-                 className="group p-8 rounded-2xl bg-white/[0.02] border border-white/5 transition-all hover:bg-white/[0.03] hover:border-white/10"
+               key={i}
+               initial={{ opacity: 0, y: 30 }}
+               animate={isInView ? { opacity: 1, y: 0 } : {}}
+               transition={{ delay: 0.2 + (i * 0.2), duration: 0.8 }}
+               className="relative z-10 flex flex-col items-center group"
             >
-              <div className="text-xl font-bold text-[#E040FB] mb-6 opacity-60 font-mono tracking-tighter">
-                {num}
-              </div>
-              <h3 className="text-xl font-bold text-white mb-4 tracking-tight">
-                {title}
-              </h3>
-              <p className="text-sm text-[#9585B8] leading-relaxed opacity-80 font-normal">
-                {desc}
-              </p>
+               <div className="w-20 h-20 rounded-2xl bg-[#08050F] border border-[#E040FB]/30 flex items-center justify-center mb-10
+                               shadow-[0_0_30px_rgba(224,64,251,0.1)] group-hover:border-[#E040FB] transition-colors duration-500">
+                  <span className="font-display text-3xl font-bold bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] bg-clip-text text-transparent">
+                     {step.num}
+                  </span>
+               </div>
+               
+               <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">
+                  {step.title}
+               </h3>
+               <p className="text-[#9585B8] text-base leading-relaxed font-normal max-w-[280px]">
+                  {step.desc}
+               </p>
             </motion.div>
           ))}
         </div>
+
+        {/* Support Badge */}
+        <motion.div 
+           initial={{ opacity: 0 }}
+           animate={isInView ? { opacity: 1 } : {}}
+           transition={{ delay: 1 }}
+           className="mt-20 inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/[0.02] border border-white/5 shadow-xl"
+        >
+           <div className="w-2 h-2 rounded-full bg-[#00E5CC] animate-pulse" />
+           <span className="text-xs font-bold text-[#9585B8] uppercase tracking-widest">Soporte por WhatsApp incluido</span>
+        </motion.div>
+
       </div>
     </section>
   )

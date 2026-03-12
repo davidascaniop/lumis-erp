@@ -1,17 +1,21 @@
 'use client'
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
+import { 
+  Truck, Store, Wrench, Pill, Settings, 
+  FileBox, Wine, BookOpen, Globe 
+} from 'lucide-react'
 
 const INDUSTRIES = [
-  { emoji: '🏭', name: 'Distribuidoras de consumo masivo'  },
-  { emoji: '🏪', name: 'Mayoristas y depósitos'            },
-  { emoji: '🔧', name: 'Ferreterías y materiales'          },
-  { emoji: '💊', name: 'Farmacias y botiquines'            },
-  { emoji: '🚗', name: 'Repuestos y autopartes'            },
-  { emoji: '📦', name: 'Empresas de servicios'             },
-  { emoji: '🍺', name: 'Licorerías y abastos'              },
-  { emoji: '📎', name: 'Papelerías y suministros'          },
-  { emoji: '💻', name: 'Electrónica y accesorios'          },
+  { icon: Truck, name: 'Distribuidoras de consumo masivo', desc: 'Control multi-sede y rutas.' },
+  { icon: Store, name: 'Mayoristas y depósitos', desc: 'Gestión de bultos y paletas.' },
+  { icon: Wrench, name: 'Ferreterías y construcción', desc: 'Skus infinitos organizados.' },
+  { icon: Pill, name: 'Farmacias y botiquines', desc: 'Lotes y fechas de vencimiento.' },
+  { icon: Settings, name: 'Repuestos y autopartes', desc: 'Búsqueda por código de fábrica.' },
+  { icon: FileBox, name: 'Empresas de servicios', desc: 'Facturación rápida y cobros.' },
+  { icon: Wine, name: 'Licorerías y abastos', desc: 'Rapidez en caja y stock.' },
+  { icon: BookOpen, name: 'Papelerías y suministros', desc: 'Variedad de artículos controlados.' },
+  { icon: Globe, name: 'Negocios Bs. y USD', desc: 'Multimoneda real en cada venta.' },
 ]
 
 export function Industries() {
@@ -21,74 +25,53 @@ export function Industries() {
   return (
     <section 
       ref={ref}
-      className="py-24 px-6 bg-[#08050F] relative overflow-hidden" id="industrias"
+      className="py-32 bg-[#08050F] relative px-6 overflow-hidden"
+      id="industrias"
     >
-      <div className="max-w-4xl mx-auto relative text-center">
-
-        <div className="mb-20">
-          <motion.p 
-             initial={{ opacity: 0, x: -10 }}
-             animate={isInView ? { opacity: 1, x: 0 } : {}}
-             className="text-[#E040FB] text-[10px] font-bold uppercase tracking-[0.4em] mb-4"
-          >
-            Para quién es LUMIS
-          </motion.p>
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-24">
           <motion.h2 
-             initial={{ opacity: 0, y: 10 }}
-             animate={isInView ? { opacity: 1, y: 0 } : {}}
-             className="font-display font-bold text-3xl md:text-5xl text-white mb-6 tracking-tight"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : {}}
+            className="font-display font-bold text-4xl md:text-6xl text-white mb-6 tracking-tight leading-tight"
           >
-            Si vendes,
+            Si vendes, 
             <br />
-            <span className="text-[#E040FB]"> LUMIS es para ti.</span>
+            <span className="text-[#E040FB]">LUMIS es para ti.</span>
           </motion.h2>
           <motion.p 
-             initial={{ opacity: 0, y: 10 }}
-             animate={isInView ? { opacity: 1, y: 0 } : {}}
-             className="text-[#9585B8] text-base md:text-lg max-w-xl mx-auto font-body leading-relaxed font-normal opacity-80"
+            initial={{ opacity: 0 }}
+            animate={isInView ? { opacity: 1 } : {}}
+            className="text-[#9585B8] text-lg max-w-xl mx-auto"
           >
             Diseñado para cualquier negocio venezolano que maneje inventario,
-            clientes y cobros.
+            clientes y cobros recurrentes.
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {INDUSTRIES.map(({ emoji, name }, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {INDUSTRIES.map((ind, i) => (
             <motion.div 
-                 key={name}
-                 initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                 animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
-                 transition={{ delay: 0.3 + (i * 0.05), duration: 0.5 }}
-                 className="flex items-center gap-4 p-6 rounded-2xl
-                            bg-[#110B1A] border border-white/5 transition-all group cursor-default
-                            hover:bg-white/[0.03] hover:border-white/10"
+               key={i}
+               initial={{ opacity: 0, y: 20 }}
+               animate={isInView ? { opacity: 1, y: 0 } : {}}
+               transition={{ delay: 0.1 * i, duration: 0.5 }}
+               whileHover={{ y: -5, backgroundColor: 'rgba(255,255,255,0.03)' }}
+               className="group flex flex-col p-8 rounded-3xl bg-[#110B1A] border border-white/5 transition-all duration-300 hover:border-[#E040FB]/30 shadow-xl"
             >
-              <span className="text-2xl group-hover:scale-110 transition-transform duration-300 transform-gpu">{emoji}</span>
-              <span className="text-sm font-bold text-[#9585B8] group-hover:text-white transition-colors leading-tight">
-                {name}
-              </span>
+               <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-8 group-hover:bg-[#E040FB]/10 transition-colors">
+                  <ind.icon className="w-6 h-6 text-[#9585B8] group-hover:text-[#E040FB] transition-colors" />
+               </div>
+               
+               <h3 className="text-[17px] font-bold text-white mb-2 tracking-tight group-hover:text-[#E040FB] transition-colors">
+                  {ind.name}
+               </h3>
+               <p className="text-sm text-[#9585B8] leading-relaxed font-normal opacity-80">
+                  {ind.desc}
+               </p>
             </motion.div>
           ))}
         </div>
-
-        {/* Tagline final minimal */}
-        <motion.div 
-           initial={{ opacity: 0, y: 10 }}
-           animate={isInView ? { opacity: 1, y: 0 } : {}}
-           transition={{ delay: 1 }}
-           className="mt-12"
-        >
-          <p className="text-[#9585B8] text-sm font-normal">
-            ¿Tu industria no aparece?{' '}
-            <motion.a 
-               href="https://wa.me/584240000000" 
-               target="_blank"
-               className="text-[#E040FB] hover:underline font-bold inline-flex items-center gap-2 border-b border-transparent hover:border-[#E040FB30]"
-            >
-              Consultar WhatsApp →
-            </motion.a>
-          </p>
-        </motion.div>
       </div>
     </section>
   )
