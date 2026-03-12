@@ -61,51 +61,59 @@ export function ProductShowcase() {
         <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-12 items-start">
           {/* Tabs minimalistas */}
           <div className="space-y-3">
-            {TABS.map((tab, i) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(i)}
-                className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl text-left transition-all border
-                            ${activeTab === i 
-                               ? 'bg-white/[0.03] border-white/10 text-white' 
-                               : 'bg-transparent border-transparent text-[#9585B8] opacity-60 hover:opacity-100 hover:bg-white/[0.02]'}`}
-              >
-                <tab.icon className="w-4 h-4" style={{ color: activeTab === i ? tab.color : 'inherit' }} />
-                <span className="text-sm font-bold tracking-tight">{tab.label}</span>
-              </button>
-            ))}
+            {TABS.map((tab, i) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(i)}
+                  className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl text-left transition-all border
+                              ${activeTab === i 
+                                 ? 'bg-white/[0.03] border-white/10 text-white' 
+                                 : 'bg-transparent border-transparent text-[#9585B8] opacity-60 hover:opacity-100 hover:bg-white/[0.02]'}`}
+                >
+                  <Icon className="w-4 h-4" style={{ color: activeTab === i ? tab.color : 'inherit' }} />
+                  <span className="text-sm font-bold tracking-tight">{tab.label}</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Content area minimal */}
           <div className="relative bg-[#110B1A] border border-white/5 rounded-2xl p-8 overflow-hidden min-h-[350px]">
             <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-                className="max-w-md"
-              >
-                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mb-6"
-                     style={{ color: TABS[activeTab].color, border: `1px solid ${TABS[activeTab].color}20` }}>
-                  <TABS[activeTab].icon className="w-5 h-5" />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">
-                   {TABS[activeTab].title}
-                </h3>
-                <p className="text-[#9585B8] text-base leading-relaxed opacity-80 mb-8 font-normal">
-                   {TABS[activeTab].desc}
-                </p>
-                
-                <div className="h-40 bg-white/[0.03] border border-white/5 rounded-xl flex items-center justify-center overflow-hidden">
-                   <div className="flex flex-col gap-2 w-full p-6 text-left">
-                      <div className="h-2 w-2/3 bg-white/5 rounded-full" />
-                      <div className="h-2 w-1/2 bg-white/5 rounded-full" />
-                      <div className="h-2 w-3/4 bg-white/5 rounded-full opacity-50" />
-                   </div>
-                </div>
-              </motion.div>
+              {(() => {
+                const ActiveIcon = TABS[activeTab].icon;
+                return (
+                  <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="max-w-md"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mb-6"
+                         style={{ color: TABS[activeTab].color, border: `1px solid ${TABS[activeTab].color}20` }}>
+                      <ActiveIcon className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">
+                       {TABS[activeTab].title}
+                    </h3>
+                    <p className="text-[#9585B8] text-base leading-relaxed opacity-80 mb-8 font-normal">
+                       {TABS[activeTab].desc}
+                    </p>
+                    
+                    <div className="h-40 bg-white/[0.03] border border-white/5 rounded-xl flex items-center justify-center overflow-hidden">
+                       <div className="flex flex-col gap-2 w-full p-6 text-left">
+                          <div className="h-2 w-2/3 bg-white/5 rounded-full" />
+                          <div className="h-2 w-1/2 bg-white/5 rounded-full" />
+                          <div className="h-2 w-3/4 bg-white/5 rounded-full opacity-50" />
+                       </div>
+                    </div>
+                  </motion.div>
+                );
+              })()}
             </AnimatePresence>
             
             {/* Background decorative minimal */}
