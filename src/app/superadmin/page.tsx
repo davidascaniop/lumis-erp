@@ -105,7 +105,7 @@ export default async function SuperAdminHome() {
     <div className="space-y-6 page-enter">
       {/* HEADER */}
       <div>
-        <h1 className="font-display text-2xl font-bold text-white">
+        <h1 className="font-primary text-2xl">
           Command Center
         </h1>
         <p className="text-sm text-[#9585B8] mt-0.5">
@@ -284,9 +284,9 @@ export default async function SuperAdminHome() {
         <div className="bg-[#18102A] border border-white/6 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="font-display text-base font-bold text-white">
+              <h1 className="text-xl font-primary">
                 Crecimiento de Empresas
-              </h2>
+              </h1>
               <p className="text-xs text-[#9585B8] mt-0.5">
                 Nuevas empresas por mes
               </p>
@@ -297,7 +297,7 @@ export default async function SuperAdminHome() {
 
         {/* Distribución por plan */}
         <div className="bg-[#18102A] border border-white/6 rounded-2xl p-6">
-          <h2 className="font-display text-base font-bold text-white mb-1">
+          <h2 className="text-lg font-primary mb-1">
             Por Plan
           </h2>
           <p className="text-xs text-[#9585B8] mb-4">Distribución actual</p>
@@ -331,7 +331,7 @@ export default async function SuperAdminHome() {
       {/* ÚLTIMAS EMPRESAS REGISTRADAS */}
       <div className="bg-[#18102A] border border-white/6 rounded-2xl p-6">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="font-display text-base font-bold text-white">
+          <h2 className="text-lg font-primary">
             Últimas Empresas
           </h2>
           <a

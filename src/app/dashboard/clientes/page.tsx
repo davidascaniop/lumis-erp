@@ -79,7 +79,7 @@ export default function ClientesPage() {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-syne font-bold text-white">
+          <h1 className="text-3xl font-primary">
             Directorio de Clientes
           </h1>
           <p className="text-text-2 mt-1text-sm">

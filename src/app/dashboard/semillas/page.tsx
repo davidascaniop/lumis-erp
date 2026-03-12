@@ -87,7 +87,7 @@ export default function SemillasAppPage() {
           <Sparkles className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h1 className="text-3xl font-display font-bold text-white tracking-tight">
+          <h1 className="text-3xl font-primary tracking-tight">
             Semilla Diaria
           </h1>
           <p className="text-[#9585B8] text-sm">
@@ -122,7 +122,7 @@ export default function SemillasAppPage() {
               NUEVO HOY
             </div>
 
-            <blockquote className="text-2xl lg:text-3xl font-bold text-white leading-tight italic m-0 mb-6 font-display">
+            <blockquote className="text-2xl lg:text-3xl font-primary leading-tight italic m-0 mb-6">
               &ldquo;{latestSeed.verse}&rdquo;
             </blockquote>
             <cite className="text-lg font-bold text-[#E040FB] not-italic block mb-10">

@@ -96,7 +96,7 @@ export default function ProductosPage() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-syne font-bold text-white tracking-tight">
+          <h1 className="text-3xl font-primary">
             Inventario Global
           </h1>
           <p className="text-text-3 font-medium">
@@ -256,7 +256,7 @@ export default function ProductosPage() {
                         <span className="text-[10px] text-text-3 uppercase font-bold tracking-wider">
                           Precio Unit.
                         </span>
-                        <span className="text-xl font-syne font-extrabold text-white">
+                        <span className="text-xl font-primary">
                           ${Number(p.price_usd).toFixed(2)}
                         </span>
                       </div>

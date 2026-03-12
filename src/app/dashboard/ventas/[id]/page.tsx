@@ -194,7 +194,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
           <Card className="p-6 bg-surface-card border-border-brand shadow-brand flex justify-between items-center">
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-mono font-bold text-brand">
+                <h1 className="text-2xl font-primary">
                   {order.order_number}
                 </h1>
                 <StatusBadge status={order.status} />
@@ -219,7 +219,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
           {/* CLIENTE */}
           <Card className="p-6 bg-surface-card border-border shadow-card">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-syne font-bold text-white flex items-center gap-2">
+              <h2 className="text-lg font-primary flex items-center gap-2">
                 <User className="w-5 h-5 text-brand" /> Información del Cliente
               </h2>
               <Semaforo
@@ -303,7 +303,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
                 <span>TOTAL</span>
                 <span>${Number(order.total_usd).toFixed(2)}</span>
               </div>
-              <p className="text-[10px] text-text-3 font-mono">
+              <p className="currency-bs">
                 Factor BCV: Bs. {order.total_bs / order.total_usd} | Eq: Bs.{" "}
                 {Number(order.total_bs).toLocaleString()}
               </p>

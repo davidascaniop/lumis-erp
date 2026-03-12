@@ -76,7 +76,7 @@ export default function VentasPage() {
     <div className="space-y-6 max-w-7xl mx-auto animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-syne font-bold text-white">
+          <h1 className="text-3xl font-primary">
             Ventas y Pedidos
           </h1>
           <p className="text-text-2 mt-1text-sm">
@@ -188,7 +188,7 @@ export default function VentasPage() {
                       <span className="font-bold text-white block">
                         {formatCurrency(o.total_usd)}
                       </span>
-                      <span className="text-[10px] text-text-3">
+                      <span className="currency-bs">
                         Bs. {formatCurrency(o.total_bs, "")}
                       </span>
                     </td>
@@ -198,7 +198,7 @@ export default function VentasPage() {
                       >
                         {formatCurrency(o.amount_due)}
                       </span>
-                      <span className="text-[10px] text-text-3">
+                      <span className="currency-bs">
                         Abono: {formatCurrency(o.amount_paid)}
                       </span>
                     </td>

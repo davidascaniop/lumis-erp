@@ -257,13 +257,13 @@ function NuevaVentaContent() {
           <ArrowLeft className="w-4 h-4" />
         </button>
         <div>
-          <h1 className="font-display text-lg font-bold text-white leading-tight">
+          <h1 className="text-xl font-primary leading-tight">
             Nueva Venta
           </h1>
           {rate !== null && rate > 0 && (
-            <p className="text-[11px] text-[#9585B8]">
+            <p className="currency-bs">
               BCV:{" "}
-              <span className="text-[#00E5CC] font-mono font-semibold">
+              <span className="text-white font-mono font-semibold">
                 Bs.{Number(rate).toFixed(2)}/$
               </span>
             </p>

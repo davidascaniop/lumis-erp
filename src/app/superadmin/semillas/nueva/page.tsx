@@ -70,7 +70,7 @@ export default function NuevaSemillaPage() {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-xl font-display font-bold text-white">
+          <h1 className="text-xl font-primary">
             Nueva Semilla
           </h1>
           <p className="text-xs text-[#9585B8]">Contenido espiritual diario</p>

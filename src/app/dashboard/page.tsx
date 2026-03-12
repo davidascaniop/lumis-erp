@@ -406,7 +406,7 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-2xl">{getGreetingEmoji()}</span>
-            <h1 className="font-display text-2xl font-bold text-white">
+            <h1 className="font-primary text-2xl">
               ¡{getGreeting()}, {firstName}!
             </h1>
           </div>
@@ -728,7 +728,7 @@ export default function DashboardPage() {
         {/* Top Clientes */}
         <div className="bg-[#18102A] border border-white/[0.06] rounded-2xl p-5">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="font-display text-sm font-bold text-white">
+            <h2 className="font-primary text-sm">
               Top Clientes
             </h2>
             <Link
@@ -791,7 +791,7 @@ export default function DashboardPage() {
         {/* Top Productos */}
         <div className="bg-[#18102A] border border-white/[0.06] rounded-2xl p-5">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="font-display text-sm font-bold text-white">
+            <h2 className="font-primary text-sm">
               Más Vendidos
             </h2>
             <span className="text-[10px] text-[#3D2D5C]">este mes</span>

@@ -211,9 +211,9 @@ export function Sidebar() {
             <div className="absolute inset-0 rounded-full bg-[#00E5CC]" />
             <div className="absolute inset-0 rounded-full bg-[#00E5CC] animate-ping opacity-40" />
           </div>
-          <span className="text-[10px] font-mono font-semibold text-[#9585B8] tracking-tight">
+          <span className="currency-bs">
             BCV:{" "}
-            <span className="text-[#00E5CC]">Bs.{formatNumber(rate)}/$</span>
+            <span className="text-white">Bs.{formatNumber(rate)}/$</span>
           </span>
         </div>
       </div>

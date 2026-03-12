@@ -145,7 +145,7 @@ export default function ClientDetailsPage({ params }: { params: any }) {
           </div>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-syne font-bold text-white">
+              <h1 className="text-3xl font-primary">
                 {clientData.name}
               </h1>
               <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-text-3 font-mono">
@@ -244,7 +244,7 @@ export default function ClientDetailsPage({ params }: { params: any }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <Card className="p-6 bg-surface-card border-border shadow-card h-full">
-            <h3 className="text-xl font-syne font-bold text-white mb-4">
+            <h3 className="text-xl font-primary mb-4">
               Información de Contacto
             </h3>
             <div className="space-y-4 text-sm">
@@ -284,7 +284,7 @@ export default function ClientDetailsPage({ params }: { params: any }) {
 
         <div className="lg:col-span-1">
           <Card className="p-6 bg-surface-card border-border shadow-card h-full">
-            <h3 className="text-lg font-syne font-bold text-white mb-4 flex justify-between items-center">
+            <h3 className="text-lg font-primary mb-4 flex justify-between items-center">
               Facturas Pen.
               <span className="bg-status-danger/10 text-status-danger px-2 py-0.5 rounded-md text-xs">
                 {receivables.length}

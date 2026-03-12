@@ -277,7 +277,7 @@ function CobranzaContent() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto animate-fade-in pb-20">
       <div>
-        <h1 className="text-3xl font-syne font-bold text-white">
+        <h1 className="text-3xl font-primary">
           Cobranza & CxC
         </h1>
         <p className="text-text-2 mt-1 text-sm">
@@ -296,7 +296,7 @@ function CobranzaContent() {
           </div>
           <div>
             <p className="text-sm text-text-2 font-medium">Total por Cobrar</p>
-            <p className="text-2xl font-syne font-bold text-white tracking-tight">
+            <p className="text-2xl font-primary">
               {loading ? "-" : formatCurrency(totalReceivable)}
             </p>
           </div>

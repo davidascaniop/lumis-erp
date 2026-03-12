@@ -135,7 +135,7 @@ export default function SemillasPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-bold text-white flex items-center gap-3">
+          <h1 className="text-2xl font-primary flex items-center gap-3">
             ✨ Semilla Diaria — CMS
           </h1>
           <p className="text-sm text-[#9585B8] mt-1">
