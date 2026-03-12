@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
+import { Outfit, Plus_Jakarta_Sans, Syne, DM_Sans, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -11,6 +11,21 @@ const plusJakarta = Plus_Jakarta_Sans({
 
 const outfit = Outfit({
   variable: "--font-heading",
+  subsets: ["latin"],
+});
+
+const syne = Syne({
+  variable: "--font-syne",
+  subsets: ["latin"],
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-dm",
+  subsets: ["latin"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
 });
 
@@ -28,7 +43,7 @@ export default function RootLayout({
   return (
     <html lang="es" className="dark">
       <body
-        className={`${plusJakarta.variable} ${outfit.variable} antialiased font-sans`}
+        className={`${plusJakarta.variable} ${outfit.variable} ${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable} antialiased font-sans`}
       >
         {children}
         <Toaster richColors position="top-right" />
