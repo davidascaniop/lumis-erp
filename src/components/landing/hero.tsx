@@ -106,7 +106,7 @@ export function LandingHero() {
             te deben desde hace meses.
           </span>
           {' '}Así no se escala un negocio.
-        </p>
+        </motion.p>
  
         {/* CTAs */}
         <motion.div
