@@ -1,89 +1,56 @@
 'use client'
 import { useState, useRef } from 'react'
-import {
-  LayoutDashboard, ShoppingCart, CreditCard,
-  Package, Globe, Sparkles
-} from 'lucide-react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
+import { Zap, Shield, Search, Database, Globe } from 'lucide-react'
 
 const TABS = [
   {
-    id: 'dashboard',
-    label: 'Dashboard',
-    icon: LayoutDashboard,
-    title: 'Todo tu negocio en una pantalla',
-    desc: 'KPIs en tiempo real, tasa BCV automática, cartera vencida y alertas de inventario. El pulso de tu empresa al abrir el sistema.',
-    color: '#E040FB'
-  },
-  {
-    id: 'pedidos',
-    label: 'Pedidos',
-    icon: ShoppingCart,
-    title: 'De la orden a la factura en segundos',
-    desc: 'Crea pedidos, asigna vendedores, calcula totales en Bs. y USD. Compatible con pistolas de código de barras.',
-    color: '#7C4DFF'
-  },
-  {
-    id: 'cobranza',
-    label: 'Cobranza',
-    icon: CreditCard,
-    title: 'Semáforo de crédito para cada cliente',
-    desc: 'Verde, amarillo o rojo según su deuda. Bloquea pedidos a clientes morosos. Registra pagos por Zelle, Pago Móvil, efectivo y más.',
-    color: '#FFB800'
-  },
-  {
-    id: 'inventario',
+    id: 'inventory',
     label: 'Inventario',
-    icon: Package,
-    title: 'Stock en tiempo real, en todas tus sedes',
-    desc: 'Inventario multi-sede consolidado. Alertas de quiebre, movimientos y ajustes. Compatible con escáner de barras.',
-    color: '#00E5CC'
+    title: 'Control de Stock en Tiempo Real',
+    desc: 'Escanea códigos de barras, gestiona sedes y recibe alertas de quiebre automáticamente.',
+    icon: Database,
+    color: '#E040FB',
   },
   {
-    id: 'portal',
-    label: 'Portal de Pago',
-    icon: Globe,
-    title: 'Tu cliente ve lo que debe, sin llamarte',
-    desc: 'Cada cliente tiene su portal personal. Ve sus facturas, registra su pago con foto de referencia. Tú confirmas en segundos.',
-    color: '#4FC3F7'
+    id: 'bcv',
+    label: 'Tasa BCV',
+    title: 'Actualización Automática',
+    desc: 'Tus precios y deudas se recalculan en tiempo real con la tasa oficial cada 30 minutos.',
+    icon: Zap,
+    color: '#00E5CC',
   },
   {
-    id: 'semilla',
-    label: 'Semilla Diaria',
-    icon: Sparkles,
-    title: 'El detalle que fideliza clientes',
-    desc: 'Cada día, tus clientes abren LUMIS y encuentran un mensaje motivacional personalizado para su negocio. Nadie más hace esto.',
-    color: '#E040FB'
+    id: 'cartera',
+    label: 'Cobranza',
+    title: 'Cartera de Clientes Digital',
+    desc: 'Semáforo de crédito para saber quién debe y hace cuánto. Recordatorios automáticos.',
+    icon: Shield,
+    color: '#7C4DFF',
   },
 ]
 
 export function ProductShowcase() {
-  const [active, setActive] = useState('dashboard')
-  const tab = TABS.find(t => t.id === active)!
+  const [activeTab, setActiveTab] = useState(0)
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
 
   return (
-    <section 
-      ref={ref}
-      className="py-32 px-6 bg-[#08050F]"
-    >
-      <div className="max-w-6xl mx-auto">
+    <section ref={ref} className="py-24 px-6 bg-[#08050F]">
+      <div className="max-w-4xl mx-auto">
 
-        {/* Header con diseño focalizado */}
-        <div className="text-center mb-24">
+        <div className="mb-20 text-center">
           <motion.p 
-             initial={{ opacity: 0, scale: 0.9 }}
-             animate={isInView ? { opacity: 1, scale: 1 } : {}}
-             className="text-[#E040FB] text-sm font-bold uppercase tracking-[0.3em] mb-6"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : {}}
+            className="text-[#E040FB] text-[10px] font-bold uppercase tracking-[0.4em] mb-4"
           >
-            Funcionalidades Premium
+            Capabilities
           </motion.p>
           <motion.h2 
-             initial={{ opacity: 0, y: 30 }}
-             animate={isInView ? { opacity: 1, y: 0 } : {}}
-             transition={{ duration: 0.8 }}
-             className="font-display font-bold text-5xl md:text-7xl text-white tracking-tighter"
+            initial={{ opacity: 0, y: 10 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            className="font-display font-bold text-3xl md:text-5xl text-white mb-6 tracking-tight"
           >
             Todo lo que necesita tu negocio.
             <br />
@@ -91,108 +58,65 @@ export function ProductShowcase() {
           </motion.h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-12 items-start">
+          {/* Tabs minimalistas */}
+          <div className="space-y-3">
+            {TABS.map((tab, i) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(i)}
+                className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl text-left transition-all border
+                            ${activeTab === i 
+                               ? 'bg-white/[0.03] border-white/10 text-white' 
+                               : 'bg-transparent border-transparent text-[#9585B8] opacity-60 hover:opacity-100 hover:bg-white/[0.02]'}`}
+              >
+                <tab.icon className="w-4 h-4" style={{ color: activeTab === i ? tab.color : 'inherit' }} />
+                <span className="text-sm font-bold tracking-tight">{tab.label}</span>
+              </button>
+            ))}
+          </div>
 
-          {/* Tabs verticales SV style */}
-          <motion.div 
-            initial={{ opacity: 0, x: -50 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            className="flex flex-row lg:flex-col gap-3 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 scroll-smooth no-scrollbar"
-          >
-            {TABS.map((t, i) => {
-              const Icon = t.icon
-              const isActive = t.id === active
-              return (
-                <button 
-                  key={t.id} 
-                  onClick={() => setActive(t.id)}
-                  className={`flex items-center gap-4 px-6 py-4 rounded-2xl text-left 
-                              transition-all flex-shrink-0 lg:flex-shrink w-full group relative ${
-                          isActive
-                            ? 'bg-gradient-to-r from-[rgba(255,255,255,0.08)] to-transparent border border-white/10 text-white shadow-[0_4px_12px_rgba(0,0,0,0.2)]'
-                            : 'text-[#9585B8] hover:bg-white/5 hover:text-white border border-transparent'
-                        }`}
-                >
-                  <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${isActive ? '' : 'group-hover:text-white'}`} style={{ color: isActive ? t.color : '' }} />
-                  <span className="text-base font-bold tracking-tight">{t.label}</span>
-                  
-                  {isActive && (
-                    <motion.div 
-                       layoutId="tabindicator"
-                       className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-2/3 rounded-full" 
-                       style={{ backgroundColor: t.color }}
-                    />
-                  )}
-                </button>
-              )
-            })}
-          </motion.div>
-
-          {/* Preview interactiva */}
-          <AnimatePresence mode="wait">
-            <motion.div 
-              key={active}
-              initial={{ opacity: 0, y: 20, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.98 }}
-              transition={{ duration: 0.4, ease: 'easeOut' }}
-              className="bg-[#110B1A] border border-white/10 rounded-[2.5rem] p-10 md:p-16
-                          min-h-[500px] flex flex-col justify-between shadow-[0_60px_100px_rgba(0,0,0,0.8)] relative group overflow-hidden"
-            >
-              {/* Fondo decorativo de tab */}
-              <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none group-hover:scale-110 transition-transform">
-                 <tab.icon className="w-64 h-64" style={{ color: tab.color }} />
-              </div>
-
-              <div className="relative z-10 flex flex-col justify-center h-full">
-                <motion.div 
-                   initial={{ opacity: 0, x: -20 }}
-                   animate={{ opacity: 1, x: 0 }}
-                   className="w-16 h-16 rounded-2xl flex items-center justify-center mb-8"
-                   style={{ backgroundColor: `${tab.color}15`, border: `2px solid ${tab.color}30` }}
-                >
-                  <tab.icon className="w-8 h-8" style={{ color: tab.color }} />
-                </motion.div>
-                
-                <h3 className="font-display font-bold text-4xl md:text-5xl text-white mb-6 leading-tight tracking-tighter">
-                  {tab.title}
-                </h3>
-                <p className="text-[#9585B8] text-xl leading-relaxed max-w-2xl font-body font-medium mb-12">
-                  {tab.desc}
-                </p>
-
-                {/* Simulación visual pro */}
-                <div className="bg-[#18102A]/80 border border-white/10 rounded-3xl p-8 backdrop-blur-xl">
-                  <div className="flex items-center gap-3 mb-8">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: tab.color }} />
-                    <span className="text-xs text-[#9585B8] font-extrabold uppercase tracking-[0.3em]">
-                      Acceso rápido — {active}
-                    </span>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {[90, 75, 85].map((w, i) => (
-                      <motion.div 
-                        key={i}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${w}%` }}
-                        transition={{ delay: 0.2 + (i * 0.1), duration: 1, ease: 'circOut' }}
-                        className="h-3 rounded-full bg-white/5 relative overflow-hidden"
-                      >
-                         <motion.div 
-                            initial={{ x: '-100%' }}
-                            animate={{ x: '100%' }}
-                            transition={{ repeat: Infinity, duration: 2, delay: i * 0.5 }}
-                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent w-20"
-                         />
-                      </motion.div>
-                    ))}
-                  </div>
+          {/* Content area minimal */}
+          <div className="relative bg-[#110B1A] border border-white/5 rounded-2xl p-8 overflow-hidden min-h-[350px]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="max-w-md"
+              >
+                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mb-6"
+                     style={{ color: TABS[activeTab].color, border: `1px solid ${TABS[activeTab].color}20` }}>
+                  <TABS[activeTab].icon className="w-5 h-5" />
                 </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+                <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">
+                   {TABS[activeTab].title}
+                </h3>
+                <p className="text-[#9585B8] text-base leading-relaxed opacity-80 mb-8 font-normal">
+                   {TABS[activeTab].desc}
+                </p>
+                
+                <div className="h-40 bg-white/[0.03] border border-white/5 rounded-xl flex items-center justify-center overflow-hidden">
+                   <div className="flex flex-col gap-2 w-full p-6 text-left">
+                      <div className="h-2 w-2/3 bg-white/5 rounded-full" />
+                      <div className="h-2 w-1/2 bg-white/5 rounded-full" />
+                      <div className="h-2 w-3/4 bg-white/5 rounded-full opacity-50" />
+                   </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+            
+            {/* Background decorative minimal */}
+            <motion.div 
+               animate={{ opacity: [0.1, 0.2, 0.1] }}
+               className="absolute top-0 right-0 w-32 h-32 blur-[80px]"
+               style={{ backgroundColor: TABS[activeTab].color }}
+            />
+          </div>
         </div>
+
       </div>
     </section>
   )

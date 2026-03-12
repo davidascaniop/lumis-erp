@@ -36,23 +36,23 @@ export function Testimonials() {
   return (
     <section 
       ref={ref}
-      className="py-32 px-6 bg-[#08050F] relative overflow-hidden"
+      className="py-24 px-6 bg-[#08050F] relative overflow-hidden"
     >
-      <div className="max-w-6xl mx-auto relative group">
+      <div className="max-w-4xl mx-auto relative group">
 
-        <div className="text-center mb-24">
+        <div className="text-center mb-20">
           <motion.p 
-             initial={{ opacity: 0, scale: 0.8 }}
+             initial={{ opacity: 0, scale: 0.95 }}
              animate={isInView ? { opacity: 1, scale: 1 } : {}}
-             className="text-[#E040FB] text-sm font-black uppercase tracking-[0.4em] mb-6"
+             className="text-[#E040FB] text-[10px] font-bold uppercase tracking-[0.4em] mb-4"
           >
             Voces de nuestro impacto
           </motion.p>
           <motion.h2 
-             initial={{ opacity: 0, y: 30 }}
+             initial={{ opacity: 0, y: 10 }}
              animate={isInView ? { opacity: 1, y: 0 } : {}}
              transition={{ duration: 0.8, ease: 'circOut' }}
-             className="font-display font-extrabold text-5xl md:text-7xl text-white mb-4 tracking-tighter"
+             className="font-display font-bold text-3xl md:text-5xl text-white mb-4 tracking-tight"
           >
             Negocios reales.
             <br />
@@ -60,51 +60,39 @@ export function Testimonials() {
           </motion.h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {TESTIMONIOS.map(({ quote, name, empresa, ciudad, initial, color }, i) => (
             <motion.div 
                  key={name}
-                 initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                 initial={{ opacity: 0, y: 10, scale: 0.98 }}
                  animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
-                 transition={{ delay: 0.3 + (i * 0.15), duration: 0.6 }}
-                 whileHover={{ y: -10, scale: 1.02, backgroundColor: 'rgba(255,255,255,0.02)' }}
-                 className="bg-[#110B1A] border border-white/10 rounded-[2.5rem] p-10
-                            hover:border-[#E040FB30] shadow-[0_20px_60px_rgba(0,0,0,0.5)] transition-all flex flex-col group"
+                 transition={{ delay: 0.3 + (i * 0.1), duration: 0.6 }}
+                 className="bg-[#110B1A] border border-white/5 rounded-2xl p-8
+                            hover:border-white/10 shadow-2xl transition-all flex flex-col group overflow-hidden"
             >
-
-              {/* Stars pro */}
-              <div className="flex gap-1.5 mb-8">
+              <div className="flex gap-1 mb-6 opacity-60 group-hover:opacity-100 transition-opacity">
                 {[...Array(5)].map((_, i) => (
-                  <motion.span 
-                    key={i} 
-                    animate={{ scale: [1, 1.2, 1] }} 
-                    transition={{ delay: i * 0.1, duration: 2, repeat: Infinity }}
-                    className="text-[#FFB800] text-lg font-black"
-                  >
-                    ★
-                  </motion.span>
+                  <span key={i} className="text-[#FFB800] text-sm">★</span>
                 ))}
               </div>
 
-              {/* Quote con tipografía premium */}
-              <p className="text-[#F4EDFF] text-lg leading-relaxed flex-1 mb-10 font-medium italic opacity-90 tracking-tight">
+              <p className="text-[#F4EDFF] text-sm leading-relaxed flex-1 mb-8 font-normal italic opacity-90 tracking-tight">
                 "{quote}"
               </p>
 
-              {/* Author SV style */}
-              <div className="flex items-center gap-4 pt-8 border-t border-white/5">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center
-                                font-black text-white text-xl flex-shrink-0 relative overflow-hidden"
+              <div className="flex items-center gap-3 pt-6 border-t border-white/5">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center
+                                font-bold text-white text-sm flex-shrink-0 relative overflow-hidden"
                      style={{
                        background: `linear-gradient(135deg, ${color}30, ${color}10)`,
-                       border: `2px solid ${color}40`
+                       border: `1px solid ${color}20`
                      }}>
-                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                   {initial}
                 </div>
                 <div>
-                  <div className="text-base font-extrabold text-white tracking-tight">{name}</div>
-                  <div className="text-xs font-bold text-[#9585B8] uppercase tracking-[0.15em] opacity-80">{empresa} · {ciudad}</div>
+                  <div className="text-sm font-bold text-white tracking-tight">{name}</div>
+                  <div className="text-[10px] font-bold text-[#9585B8] uppercase tracking-widest opacity-60">{empresa}</div>
                 </div>
               </div>
             </motion.div>

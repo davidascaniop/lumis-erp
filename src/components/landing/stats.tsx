@@ -3,10 +3,10 @@ import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
 
 const STATS = [
-  { value: '250',   suffix: '+',  label: 'negocios activos',         color: '#E040FB' },
-  { value: '0',     suffix: '$',  label: 'en deuda sin rastrear',    color: '#00E5CC' },
-  { value: '30',    suffix: 'min', label: 'actualización BCV',        color: '#7C4DFF' },
-  { value: '99',    suffix: '.9%', label: 'uptime garantizado',       color: '#FFB800' },
+  { label: 'Negocios Activos', value: '200+', color: '#E040FB' },
+  { label: 'Transacciones/mes', value: '150k+', color: '#7C4DFF' },
+  { label: 'Ahorro de Tiempo', value: '85%', color: '#00E5CC' },
+  { label: 'Uptime Sistema', value: '99.9%', color: '#A37EF5' },
 ]
 
 export function Stats() {
@@ -16,38 +16,26 @@ export function Stats() {
   return (
     <section 
       ref={ref}
-      className="py-24 border-y border-white/5 relative bg-[#110B1A]/50 backdrop-blur-sm"
+      className="py-16 px-6 bg-[#08050F]"
     >
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 lg:gap-20">
-          {STATS.map(({ value, suffix, label, color }, i) => (
-            <motion.div 
-              key={label} 
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: i * 0.1, duration: 0.5 }}
-              className="text-center group"
-            >
-              <div 
-                className="font-display font-extrabold text-5xl md:text-6xl mb-4 
-                           tracking-tighter flex items-center justify-center gap-1
-                           group-hover:scale-110 transition-transform duration-300"
-                style={{ color }}
-              >
-                <span>{value}</span>
-                <span className="text-2xl md:text-3xl opacity-80">{suffix}</span>
-              </div>
-              <div className="text-xs font-bold text-[#9585B8] uppercase tracking-[0.2em] font-body opacity-80">
-                {label}
-              </div>
-              
-              {/* Glow debajo del número */}
-              <div className="mt-4 flex justify-center">
-                 <div className="w-12 h-1 rounded-full blur-md" style={{ backgroundColor: `${color}40` }} />
-              </div>
-            </motion.div>
-          ))}
-        </div>
+      <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+        {STATS.map((stat, i) => (
+          <motion.div 
+            key={stat.label}
+            initial={{ opacity: 0, y: 10 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.1 * i, duration: 0.8 }}
+            className="text-center group"
+          >
+            <div className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tighter"
+                 style={{ textShadow: `0 0 20px ${stat.color}20` }}>
+               {stat.value}
+            </div>
+            <div className="text-[10px] font-bold text-[#9585B8] uppercase tracking-[0.2em] opacity-60 group-hover:opacity-100 transition-opacity">
+               {stat.label}
+            </div>
+          </motion.div>
+        ))}
       </div>
     </section>
   )
