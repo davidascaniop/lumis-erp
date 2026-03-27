@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Papa from "papaparse";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
@@ -11,8 +11,15 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useUser } from "@/hooks/use-user";
-import { UploadCloud, FileSpreadsheet, X, CheckCircle2, AlertCircle } from "lucide-react";
+import { UploadCloud, FileSpreadsheet, X, CheckCircle2, AlertCircle, Warehouse } from "lucide-react";
 
 export function BulkUploadModal({
   open,
@@ -25,10 +32,25 @@ export function BulkUploadModal({
 }) {
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
+  const [warehouses, setWarehouses] = useState<any[]>([]);
+  const [selectedWarehouse, setSelectedWarehouse] = useState<string>("");
   const [parsedData, setParsedData] = useState<any[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
+
+  useEffect(() => {
+    async function fetchWarehouses() {
+      if (!user?.company_id) return;
+      const { data } = await supabase
+        .from("warehouses")
+        .select("*")
+        .eq("company_id", user.company_id)
+        .eq("is_active", true);
+      setWarehouses(data || []);
+    }
+    fetchWarehouses();
+  }, [user?.company_id]);
 
   // Template to download
   const downloadTemplate = () => {
@@ -105,12 +127,23 @@ export function BulkUploadModal({
         company_id: user.company_id
       }));
 
-      // Split in chunks of 50 for safety
-      const chunkSize = 50;
-      for (let i = 0; i < payload.length; i += chunkSize) {
-        const chunk = payload.slice(i, i + chunkSize);
-        const { error } = await supabase.from("products").insert(chunk);
-        if (error) throw error;
+      // Insert products
+      const { data: insertedProducts, error: pError } = await supabase.from("products").insert(payload).select('id, name, sku, stock');
+      if (pError) throw pError;
+
+      // If warehouse is selected, insert warehouse_stock
+      if (selectedWarehouse && insertedProducts) {
+        const stockPayload = insertedProducts.map(p => ({
+          warehouse_id: selectedWarehouse,
+          product_id: p.id,
+          qty: p.stock
+        }));
+
+        const { error: sError } = await supabase.from("warehouse_stock").insert(stockPayload);
+        if (sError) {
+          console.error("Bulk stock error:", sError);
+          toast.warning("Productos creados, pero falló la asignación al almacén.");
+        }
       }
 
       toast.success(`${parsedData.length} productos registrados correctamente.`);
@@ -147,14 +180,30 @@ export function BulkUploadModal({
         </DialogHeader>
 
         <div className="pt-4 space-y-6">
-          <div className="flex justify-between items-center bg-slate-50 border border-slate-200 rounded-xl p-4">
-            <p className="text-sm font-medium text-slate-700">Para evitar errores, por favor usa un formato validado.</p>
-            <button 
-              onClick={downloadTemplate}
-              className="px-4 py-2 border border-slate-300 rounded-lg text-sm font-bold text-slate-700 hover:bg-slate-100 hover:border-slate-400 transition-all font-syne"
-            >
-              Descargar Plantilla CSV
-            </button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-center">
+              <p className="text-xs font-bold text-slate-500 uppercase mb-2">1. Estructura</p>
+              <button 
+                onClick={downloadTemplate}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all"
+              >
+                Descargar Plantilla CSV
+              </button>
+            </div>
+            
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+              <p className="text-xs font-bold text-slate-500 uppercase mb-2">2. Destino del Stock</p>
+              <Select value={selectedWarehouse} onValueChange={setSelectedWarehouse}>
+                <SelectTrigger className="h-9 bg-white border-slate-200 text-slate-900 rounded-lg text-xs shadow-sm">
+                  <SelectValue placeholder="Almacén (Opcional)" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200 text-slate-900">
+                  {warehouses.map(w => (
+                    <SelectItem key={w.id} value={w.id}>🏪 {w.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div 

@@ -52,6 +52,7 @@ const productSchema = z.object({
   price_usd_5: z.union([z.number(), z.string()]).transform((val) => Number(val) || 0),
   stock: z.union([z.number(), z.string()]).transform((val) => Number(val) || 0),
   unit: z.string().default("Unidad"),
+  warehouse_id: z.string().optional(),
   image_url: z.string().optional(),
 });
 
@@ -70,6 +71,7 @@ export function ProductForm({
 }) {
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
+  const [warehouses, setWarehouses] = useState<any[]>([]);
   const supabase = createClient();
 
   const form = useForm<ProductFormValues>({
@@ -89,13 +91,32 @@ export function ProductForm({
       price_usd_5: product?.price_usd_5 || 0,
       stock: product?.stock || 0,
       unit: product?.unit || "Unidad",
+      warehouse_id: "",
       image_url: product?.image_url || "",
     },
   });
 
   useEffect(() => {
+    async function fetchWarehouses() {
+      if (!user?.company_id) return;
+      const { data } = await supabase
+        .from("warehouses")
+        .select("*")
+        .eq("company_id", user.company_id)
+        .eq("is_active", true);
+      setWarehouses(data || []);
+    }
+    fetchWarehouses();
+  }, [user?.company_id]);
+
+  useEffect(() => {
     if (product) {
-      form.reset(product);
+      form.reset({
+        ...product,
+        unit: product.unit || "Unidad",
+        warehouse_id: "", // Reset warehouse_id for existing product to empty string, or fetch its specific stock later
+        image_url: product.image_url || "",
+      });
     } else {
       form.reset({
         name: "",
@@ -112,6 +133,7 @@ export function ProductForm({
         price_usd_5: 0,
         stock: 0,
         unit: "Unidad",
+        warehouse_id: "",
         image_url: "",
       });
     }
@@ -122,22 +144,38 @@ export function ProductForm({
     setLoading(true);
 
     try {
+      const { warehouse_id, ...rest } = values;
       const payload = {
         company_id: user.company_id,
-        ...values,
+        ...rest,
         status: values.stock > 0 ? "active" : "out_of_stock",
       };
 
-      let error;
+      let productData;
       if (product?.id) {
-        const { error: err } = await supabase.from("products").update(payload).eq("id", product.id);
-        error = err;
+        const { data, error } = await supabase.from("products").update(payload).eq("id", product.id).select().single();
+        if (error) throw error;
+        productData = data;
       } else {
-        const { error: err } = await supabase.from("products").insert(payload);
-        error = err;
+        const { data, error } = await supabase.from("products").insert(payload).select().single();
+        if (error) throw error;
+        productData = data;
       }
 
-      if (error) throw error;
+      // If a warehouse is selected, update or insert stock
+      if (warehouse_id && productData) {
+        const { error: stockErr } = await supabase.from("warehouse_stock").upsert({
+          warehouse_id,
+          product_id: productData.id,
+          qty: values.stock
+        }, { onConflict: 'warehouse_id,product_id' });
+        
+        if (stockErr) {
+          console.error("Error updating warehouse stock:", stockErr);
+          toast.warning("Producto guardado pero falló el registro en almacén.");
+        }
+      }
+
       toast.success(product?.id ? "Producto actualizado" : "Producto creado");
       setOpen(false);
       if (onSuccess) onSuccess();
@@ -258,7 +296,19 @@ export function ProductForm({
                   <FormField label="Cód. Proveedor">
                     <Input {...form.register("supplier_code")} placeholder="SUP-123" className="h-11 bg-slate-50 border-slate-200 text-slate-900 rounded-xl shadow-sm" />
                   </FormField>
-                  <FormField label="Existencia Actual">
+                  <FormField label="Depósito / Sucursal">
+                    <Select value={form.watch("warehouse_id")} onValueChange={(v) => form.setValue("warehouse_id", v)}>
+                      <SelectTrigger className="h-11 bg-brand/5 border-brand/20 text-slate-900 rounded-xl shadow-sm font-bold">
+                        <SelectValue placeholder="Seleccionar" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-slate-200 text-slate-900">
+                        {warehouses.map(w => (
+                          <SelectItem key={w.id} value={w.id}>🏪 {w.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormField>
+                  <FormField label="Existencia Inicial">
                     <div className="relative">
                        <Layers className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#00D4AA]" />
                        <Input {...form.register("stock")} type="number" className="h-11 pl-10 bg-[#00D4AA]/5 border-[#00D4AA]/30 text-slate-900 font-bold rounded-xl shadow-sm" />
