@@ -56,29 +56,29 @@ export function ProductoGrid({
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden p-6 space-y-6">
+    <div className="flex-1 flex flex-col overflow-hidden p-4 xl:p-6 space-y-4 xl:space-y-6 bg-white">
       {/* ── BARRA DE BÚSQUEDA + FILTROS ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         {/* Filtros a la izquierda */}
-        <div className="flex items-center gap-2 bg-white/50 p-1 rounded-2xl border border-white flex-shrink-0">
+        <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
           <button
             onClick={() => setCat(null)}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+            className={`px-4 py-2 rounded-xl text-sm font-black transition-all border-b-2 ${
               !categoria
-                ? "bg-white text-text-1 shadow-sm"
-                : "text-text-3 hover:text-text-1"
+                ? "border-brand text-brand bg-brand/5"
+                : "border-transparent text-text-3 hover:text-text-1"
             }`}
           >
             Todos
           </button>
-          {categorias.slice(0, 3).map((cat) => (
+          {categorias.slice(0, 4).map((cat) => (
             <button
               key={cat}
               onClick={() => setCat(cat)}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+              className={`px-4 py-2 rounded-xl text-sm font-black transition-all border-b-2 ${
                 categoria === cat
-                  ? "bg-white text-text-1 shadow-sm"
-                  : "text-text-3 hover:text-text-1"
+                  ? "border-brand text-brand bg-brand/5"
+                  : "border-transparent text-text-3 hover:text-text-1"
               }`}
             >
               {cat}
@@ -86,46 +86,36 @@ export function ProductoGrid({
           ))}
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 px-4 py-2 text-text-3 hover:text-text-1 text-sm font-semibold transition-all"
+            className="flex items-center gap-2 px-4 py-2 text-text-3 hover:text-brand text-sm font-black transition-all"
           >
             <RotateCcw className="w-4 h-4" /> Regresar
           </button>
         </div>
 
         {/* Buscador a la derecha */}
-        <div className="flex-1 max-w-md relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
+        <div className="flex-1 max-w-lg relative group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3 group-focus-within:text-brand transition-colors" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar..."
-            className="w-full pl-11 pr-24 py-3 bg-white border border-white rounded-2xl 
-                       text-sm text-text-1 placeholder:text-text-3
-                       focus:outline-none focus:ring-4 focus:ring-brand/5 focus:border-brand/20
-                       transition-all shadow-sm"
+            placeholder="Buscar productos o SKUs..."
+            className="w-full pl-11 pr-4 py-3 bg-[#F8F9FA] border border-border rounded-2xl 
+                       text-sm text-text-1 font-bold placeholder:text-text-3
+                       focus:outline-none focus:ring-4 focus:ring-brand/5 focus:border-brand/40
+                       transition-all"
           />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
-            <span className="px-3 py-1 bg-brand text-white text-[10px] font-bold rounded-lg shadow-brand/20">
-              Pills 9
-            </span>
-            <span className="px-3 py-1 bg-white border text-text-2 text-[10px] font-bold rounded-lg shadow-sm">
-              Rescompaño 3
-            </span>
-          </div>
         </div>
       </div>
 
       {/* ── GRID DE PRODUCTOS ── */}
       <div className="flex-1 overflow-y-auto no-scrollbar scroll-smooth">
         {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full py-16 text-center">
-            <div className="w-14 h-14 rounded-3xl bg-white border border-white flex items-center justify-center mb-4 shadow-sm">
-              <Package className="w-7 h-7 text-text-3" />
-            </div>
-            <p className="text-sm font-bold text-text-1">Sin resultados</p>
+          <div className="flex flex-col items-center justify-center h-full py-16 text-center opacity-40">
+            <Package className="w-12 h-12 text-text-3 mb-2" />
+            <p className="text-sm font-black text-text-1">Sin coincidencias</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6 pb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 xl:gap-6 pb-6 stagger">
             {filtered.map((p: any) => (
               <ProductCard
                 key={p.id}

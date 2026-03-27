@@ -1,6 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
-import { Loader2, Receipt, Trash2, X } from "lucide-react";
+import { Loader2, Trash2, X, User, CreditCard, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 
 export function CarritoPanel({
@@ -67,7 +67,7 @@ export function CarritoPanel({
     setNewClientRif(p.rif || "");
     setNewClientPhone(p.phone || "");
     setShowSuggestions(false);
-    toast.info("Cliente seleccionado");
+    toast.info("Cliente identificado");
   };
 
   const handleClearClient = () => {
@@ -78,24 +78,34 @@ export function CarritoPanel({
   };
 
   return (
-    <div className="w-full h-full flex flex-col p-6 overflow-hidden">
-      <div className="flex-1 bg-white shadow-sm rounded-[32px] border border-[#E2E8F0] flex flex-col overflow-hidden">
+    <div className="w-full h-full flex flex-col p-4 xl:p-6 overflow-hidden bg-[#F8F9FA]">
+      <div className="flex-1 bg-white shadow-brand-lg rounded-[40px] border border-border flex flex-col overflow-hidden p-6 xl:p-8 space-y-6">
         
-        {/* -- ENCABEZADO FIJO -- */}
-        <div className="px-6 py-5 border-b border-[#F1F5F9] flex-shrink-0">
-          <h2 className="text-[17px] font-bold text-[#1E293B]">Resumen del Pedido</h2>
+        {/* -- ENCABEZADO -- */}
+        <div className="flex items-center justify-between flex-shrink-0">
+          <h2 className="text-2xl font-black font-syne text-[#1A1125] tracking-tight">
+            Resumen del Pedido
+          </h2>
+          <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand/5 text-brand border border-brand/10">
+            <ShoppingBag className="w-4 h-4" />
+            <span className="text-sm font-black">{cart.length} Ítems</span>
+          </div>
         </div>
 
-        {/* -- CUERPO CON SCROLL -- */}
-        <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-6">
-          {/* -- CLIENTE -- */}
-          <div className="space-y-4">
-            <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">
-              {cliente ? "Cliente Seleccionado" : "Nuevo Cliente"}
-            </p>
+        {/* -- CONTENIDO EN DOS COLUMNAS (Para evitar Scroll) -- */}
+        <div className="flex-1 grid grid-cols-2 gap-8 overflow-hidden min-h-0">
+          
+          {/* COLUMNA IZQUIERDA: CLIENTE + ÍTEMS */}
+          <div className="flex flex-col space-y-6 overflow-hidden border-r border-border pr-6">
+            
+            {/* Cliente */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-brand">
+                <User className="w-4 h-4" />
+                <p className="text-[11px] font-black uppercase tracking-widest">{cliente ? "Cliente Registrado" : "Nuevo Cliente"}</p>
+              </div>
 
-            <div className="space-y-3">
-              <div className="relative">
+              <div className="space-y-2 relative">
                 <input
                   value={newClientName}
                   onChange={(e) => {
@@ -105,205 +115,179 @@ export function CarritoPanel({
                   }}
                   onFocus={() => setShowSuggestions(true)}
                   placeholder="Nombre y Apellido"
-                  className="w-full px-4 py-3 rounded-xl bg-white border border-[#E2E8F0] text-[14px] text-[#1E293B] font-medium placeholder:text-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] transition-all"
+                  className="w-full px-4 py-3 rounded-2xl bg-[#F8F9FA] border border-border text-[14px] text-text-1 font-bold placeholder:text-text-3 focus:outline-none focus:ring-4 focus:ring-brand/5 focus:border-brand/40 transition-all"
                 />
                 {cliente && (
-                  <button
-                    onClick={handleClearClient}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#64748B]"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                   <button onClick={handleClearClient} className="absolute right-3 top-3 text-text-3 hover:text-brand transition-colors">
+                     <X className="w-4 h-4" />
+                   </button>
                 )}
 
                 {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl border border-[#E2E8F0] shadow-xl z-[100] overflow-hidden">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl border border-brand/20 shadow-brand-lg z-[100] overflow-hidden stagger">
                     {suggestions.map((p) => (
                       <button
                         key={p.id}
                         onClick={() => handleSelectSuggestion(p)}
-                        className="w-full px-4 py-3 text-left hover:bg-[#F8FAFC] transition-colors border-b border-[#F1F5F9] last:border-0"
+                        className="w-full px-4 py-3 text-left hover:bg-brand/5 transition-colors border-b border-border last:border-0"
                       >
-                        <div className="text-[14px] font-bold text-[#1E293B]">{p.name}</div>
-                        <div className="text-[11px] text-[#64748B]">{p.rif || "Sin RIF"}</div>
+                        <div className="text-[14px] font-black text-text-1">{p.name}</div>
+                        <div className="text-[11px] text-text-3 font-bold">{p.rif || "Sin RIF"}</div>
                       </button>
                     ))}
                   </div>
                 )}
+                
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    value={newClientRif}
+                    onChange={(e) => setNewClientRif(e.target.value)}
+                    placeholder="Cédula / RIF"
+                    disabled={!!cliente}
+                    className="w-full px-4 py-3 rounded-2xl bg-[#F8F9FA] border border-border text-[13px] font-bold text-text-1 transition-all disabled:opacity-50"
+                  />
+                  <input
+                    value={newClientPhone}
+                    onChange={(e) => setNewClientPhone(e.target.value)}
+                    placeholder="Teléfono"
+                    disabled={!!cliente}
+                    className="w-full px-4 py-3 rounded-2xl bg-[#F8F9FA] border border-border text-[13px] font-bold text-text-1 transition-all disabled:opacity-50"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Lista de Ítems (Ocupa el resto de la columna) */}
+            <div className="flex-1 flex flex-col space-y-4 overflow-hidden border-t border-dashed border-border pt-4">
+               <p className="text-[11px] font-black text-text-3 uppercase tracking-widest">Detalle del Carrito</p>
+               <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pr-2">
+                  {cart.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full opacity-30">
+                       <ShoppingBag className="w-8 h-8 mb-2" />
+                       <span className="text-xs font-bold">Carrito Vacío</span>
+                    </div>
+                  ) : (
+                    cart.map((item: any) => (
+                      <div key={item.id} className="flex items-center justify-between group relative bg-[#F8F9FA]/50 p-2.5 rounded-2xl border border-transparent hover:border-brand/20 transition-all">
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[13px] font-black text-text-1 truncate pr-6">{item.name}</span>
+                          <span className="text-[11px] font-bold text-text-3">{item.qty}x ${Number(item.price_usd).toFixed(2)}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                           <span className="font-mono text-[14px] font-black text-text-1">${(item.price_usd * item.qty).toFixed(2)}</span>
+                           <button onClick={() => onRemove(item.id)} className="p-1.5 text-danger bg-danger/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all active:scale-90">
+                              <Trash2 className="w-3.5 h-3.5" />
+                           </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+               </div>
+            </div>
+          </div>
+
+          {/* COLUMNA DERECHA: PAGO + TOTALES + BOTONES */}
+          <div className="flex flex-col space-y-6 overflow-hidden">
+            
+            {/* Condición */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-brand">
+                <CreditCard className="w-4 h-4" />
+                <p className="text-[11px] font-black uppercase tracking-widest">Condición y Cobro</p>
               </div>
 
-              <input
-                value={newClientRif}
-                onChange={(e) => setNewClientRif(e.target.value)}
-                placeholder="Cédula / RIF"
-                disabled={!!cliente}
-                className="w-full px-4 py-3 rounded-xl bg-white border border-[#E2E8F0] text-[14px] font-medium text-[#1E293B] disabled:bg-[#F8FAFC] disabled:text-[#94A3B8] focus:outline-none focus:border-[#7C3AED] transition-all"
-              />
-              <input
-                value={newClientPhone}
-                onChange={(e) => setNewClientPhone(e.target.value)}
-                placeholder="Teléfono"
-                disabled={!!cliente}
-                className="w-full px-4 py-3 rounded-xl bg-white border border-[#E2E8F0] text-[14px] font-medium text-[#1E293B] disabled:bg-[#F8FAFC] disabled:text-[#94A3B8] focus:outline-none focus:border-[#7C3AED] transition-all"
-              />
+              <div className="flex gap-4">
+                {["contado", "credito"].map((c) => (
+                   <button
+                    key={c}
+                    onClick={() => onConditionChange(c as any)}
+                    className={`flex-1 py-3 rounded-2xl border-2 font-black text-[13px] transition-all capitalize ${condition === c ? "bg-brand text-white border-brand shadow-brand" : "bg-white text-text-3 border-border hover:border-brand/30"}`}
+                   >
+                    {c}
+                   </button>
+                ))}
+              </div>
+
+              {condition === "credito" && (
+                <div className="relative animate-in slide-in-from-top-2 duration-300">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-brand">$</span>
+                  <input
+                    type="number"
+                    value={amountPaid}
+                    onChange={(e) => onAmountPaidChange(Number(e.target.value))}
+                    placeholder="Monto Abonado"
+                    className="w-full pl-8 pr-4 py-3 rounded-2xl border-2 border-brand/20 bg-brand/5 text-[15px] font-black text-brand focus:outline-none focus:border-brand"
+                  />
+                </div>
+              )}
             </div>
-          </div>
 
-          <div className="h-px bg-[#F1F5F9]" />
-
-          {/* -- CONDICIÓN -- */}
-          <div className="space-y-4">
-            <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Condición</p>
-            <div className="flex gap-8">
-              <button
-                onClick={() => onConditionChange("contado")}
-                className="flex items-center gap-2.5"
-              >
-                <div className={`w-6 h-6 rounded-full border-[3px] flex items-center justify-center transition-all ${condition === "contado" ? "border-[#7C3AED] bg-[#7C3AED]" : "border-[#E2E8F0]"}`}>
-                  {condition === "contado" && <div className="w-2.5 h-2.5 rounded-full bg-white shadow-sm" />}
-                </div>
-                <span className={`text-[15px] font-bold ${condition === "contado" ? "text-[#1E293B]" : "text-[#64748B]"}`}>Contado</span>
-              </button>
-
-              <button
-                onClick={() => onConditionChange("credito")}
-                className="flex items-center gap-2.5"
-              >
-                <div className={`w-6 h-6 rounded-full border-[3px] flex items-center justify-center transition-all ${condition === "credito" ? "border-[#7C3AED] bg-[#7C3AED]" : "border-[#E2E8F0]"}`}>
-                  {condition === "credito" && <div className="w-2.5 h-2.5 rounded-full bg-white shadow-sm" />}
-                </div>
-                <span className={`text-[15px] font-bold ${condition === "credito" ? "text-[#1E293B]" : "text-[#64748B]"}`}>Crédito</span>
-              </button>
-            </div>
-          </div>
-
-          {/* -- MÉTODO PAGO / ABONO -- */}
-          <div className="space-y-4">
-             {condition === "credito" && (
-                <div className="space-y-2">
-                  <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Monto Abonado</p>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-[#64748B] opacity-50">$</span>
-                    <input
-                      type="number"
-                      value={amountPaid}
-                      onChange={(e) => onAmountPaidChange(Number(e.target.value))}
-                      placeholder="Monto de entrega"
-                      className="w-full pl-8 pr-4 py-3 rounded-xl bg-white border border-[#E2E8F0] text-[15px] font-bold text-[#1E293B] focus:border-[#7C3AED] focus:outline-none"
-                    />
-                  </div>
-                </div>
-             )}
-
-            <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider mt-2">Método de Cobro</p>
+            {/* Métodos de Pago */}
             <div className="grid grid-cols-2 gap-2">
               {[
                 { id: "efectivo", label: "Efectivo $" },
                 { id: "zelle", label: "Zelle" },
-                { id: "transferencia", label: "Transf." },
+                { id: "transferencia", label: "Transferencia" },
                 { id: "pago_movil", label: "Pago Móvil" },
-                { id: "punto", label: "Punto" },
+                { id: "punto", label: "Punto Venta" },
                 { id: "otro", label: "Otro" },
               ].map((m) => (
                 <button
                   key={m.id}
                   onClick={() => onMethodChange(m.id)}
                   className={`
-                    py-2.5 px-3 rounded-xl border text-[12px] font-bold transition-all
-                    ${
-                      method === m.id
-                        ? "bg-[#7C3AED] border-[#7C3AED] text-white shadow-sm shadow-[#7C3AED]/20"
-                        : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC]"
-                    }
+                    py-3 px-2 rounded-2xl border font-bold text-[11px] transition-all uppercase tracking-tighter
+                    ${method === m.id ? "bg-text-1 text-white border-text-1 shadow-lg" : "bg-[#F8F9FA] text-text-3 border-border hover:bg-white hover:border-brand/40"}
                   `}
                 >
                   {m.label}
                 </button>
               ))}
             </div>
-          </div>
 
-          <div className="h-px bg-[#F1F5F9]" />
-
-          {/* -- DETALLE DEL PEDIDO -- */}
-          <div className="space-y-4">
-            <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Ítems ({cart.length})</p>
-            {cart.length === 0 ? (
-               <div className="py-8 text-center bg-[#F8FAFC] rounded-2xl border border-dashed border-[#E2E8F0]">
-                  <p className="text-[13px] font-bold text-[#94A3B8]">Sin productos seleccionados</p>
-               </div>
-            ) : (
-                <div className="space-y-4">
-                  {cart.map((item: any) => (
-                    <div key={item.id} className="flex items-start justify-between group relative pr-8">
-                      <div className="flex flex-col gap-0.5 max-w-[80%]">
-                        <span className="text-[14px] font-bold text-[#1E293B] leading-tight">
-                          {item.name}
-                        </span>
-                        <div className="flex items-center gap-2">
-                           <span className="text-[12px] text-[#64748B] font-medium">Cant: {item.qty}</span>
-                           <span className="text-[12px] text-[#94A3B8] font-medium">x $ {Number(item.price_usd).toFixed(2)}</span>
-                        </div>
-                      </div>
-                      <span className="text-[15px] font-black text-[#1E293B] font-mono whitespace-nowrap">
-                        ${(item.price_usd * item.qty).toFixed(2)}
-                      </span>
-                      <button
-                        onClick={() => onRemove(item.id)}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
+            {/* Pie de Página: Totales y Botones (Fijos al final) */}
+            <div className="mt-auto space-y-6 pt-6 border-t border-border">
+              <div className="flex items-end justify-between">
+                <div className="flex flex-col">
+                   <span className="text-[12px] font-black text-text-3 uppercase tracking-tighter">Total a Cobrar</span>
+                   <p className="font-mono text-[13px] font-bold text-text-2">Bs. {totalBs.toLocaleString("es-VE", { maximumFractionDigits: 2 })}</p>
                 </div>
-            )}
-          </div>
-        </div>
-
-        {/* -- TOTALES Y BOTONES FIJOS -- */}
-        <div className="px-6 py-6 bg-white border-t border-[#F1F5F9] flex-shrink-0 space-y-5">
-          <div className="flex items-end justify-between">
-            <div className="space-y-0.5">
-              <span className="text-[14px] font-bold text-[#64748B]">Total:</span>
-              <p className="text-[11px] font-bold text-[#94A3B8]">
-                 Bs. {totalBs.toLocaleString("es-VE", { maximumFractionDigits: 2 })}
-              </p>
-            </div>
-            <span className="text-[32px] font-black text-[#7C3AED] leading-none tracking-tighter">
-              ${total.toFixed(2)}
-            </span>
-          </div>
-
-          <div className="flex flex-col gap-2.5">
-            <button
-              onClick={onSubmit}
-              disabled={submitting || cart.length === 0 || (!cliente && (!newClientName || !newClientRif))}
-              className={`
-                w-full py-4 rounded-xl font-black text-[14px] transition-all shadow-lg active:scale-[0.98]
-                ${
-                  submitting || cart.length === 0 || (!cliente && (!newClientName || !newClientRif))
-                    ? "bg-[#F1F5F9] text-[#CBD5E1] border border-[#E2E8F0] shadow-none cursor-not-allowed"
-                    : "bg-[#7C3AED] text-white hover:bg-[#6D28D9] shadow-[#7C3AED]/20 border border-[#7C3AED]"
-                }
-              `}
-            >
-              {submitting ? (
-                <div className="flex items-center justify-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" /> PROCESANDO...
+                <div className="flex flex-col items-end">
+                   <span className="font-syne text-[42px] font-black text-brand leading-none tracking-tighter animate-in zoom-in-75 duration-500">
+                    ${total.toFixed(2)}
+                   </span>
                 </div>
-              ) : (
-                "FINALIZAR COMPRA"
-              )}
-            </button>
+              </div>
 
-            <div className="grid grid-cols-2 gap-2.5">
-              <button className="py-3 rounded-lg font-bold text-[12px] text-[#475569] bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] transition-all tracking-wider">
-                COTIZAR
-              </button>
-              <button className="py-3 rounded-lg font-bold text-[12px] text-[#475569] bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] transition-all tracking-wider">
-                CANCELAR
-              </button>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={onSubmit}
+                  disabled={submitting || cart.length === 0 || (!cliente && (!newClientName || !newClientRif))}
+                  className={`
+                    w-full py-5 rounded-[24px] font-black text-sm transition-all shadow-brand-lg active:scale-95 flex items-center justify-center gap-3 uppercase tracking-widest
+                    ${
+                      submitting || cart.length === 0 || (!cliente && (!newClientName || !newClientRif))
+                        ? "bg-[#EDF0F7] text-text-3 opacity-60 cursor-not-allowed"
+                        : "bg-brand-gradient text-white hover:shadow-brand hover:-translate-y-1"
+                    }
+                  `}
+                >
+                  {submitting ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    "PROCESAR VENTA"
+                  )}
+                </button>
+
+                <div className="grid grid-cols-2 gap-3">
+                   <button className="py-4 rounded-[20px] font-black text-[12px] text-text-2 bg-white border border-border hover:bg-[#F8F9FA] transition-all tracking-widest">
+                     COTIZAR
+                   </button>
+                   <button className="py-4 rounded-[20px] font-black text-[12px] text-danger bg-danger/5 border border-danger/10 hover:bg-danger/10 transition-all tracking-widest">
+                     CANCELAR
+                   </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
