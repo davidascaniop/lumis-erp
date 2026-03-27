@@ -70,7 +70,7 @@ export default function ClientesPage() {
   );
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto animate-fade-in">
+    <div className="space-y-6 max-w-7xl mx-auto min-h-[80vh] flex flex-col animate-fade-in pb-8">
       <ClientForm
         open={formOpen}
         setOpen={setFormOpen}
@@ -96,7 +96,7 @@ export default function ClientesPage() {
         </div>
       </div>
 
-      <div className="glass rounded-2xl overflow-hidden shadow-card flex flex-col h-[70vh]">
+      <div className="glass rounded-2xl overflow-hidden shadow-card flex flex-col flex-1 min-h-[500px]">
         <div className="p-4 border-b border-white/5 bg-surface-card/40 flex justify-between items-center">
           <div className="relative w-full sm:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />

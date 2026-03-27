@@ -73,7 +73,7 @@ export default function VentasPage() {
   );
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto animate-fade-in">
+    <div className="space-y-6 max-w-7xl mx-auto min-h-[80vh] flex flex-col animate-fade-in pb-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-primary text-text-1">
@@ -94,7 +94,7 @@ export default function VentasPage() {
         </div>
       </div>
 
-      <div className="bg-surface-card border border-border rounded-2xl overflow-hidden shadow-card flex flex-col h-[70vh]">
+      <div className="bg-surface-card border border-border rounded-2xl overflow-hidden shadow-card flex flex-col flex-1 min-h-[500px]">
         <div className="p-4 border-b border-border bg-surface-base/50 flex justify-between items-center">
           <div className="relative w-full sm:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
