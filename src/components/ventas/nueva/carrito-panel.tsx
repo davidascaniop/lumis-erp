@@ -196,17 +196,17 @@ export function CarritoPanel({
         </div>
       </div>
 
-      {/* ── SECCIÓN: TOTALES ── */}
-      <div className="pt-6 border-t border-[#F1F5F9] space-y-6">
-        <div className="flex flex-col gap-1 items-end">
-           <div className="flex items-baseline gap-3">
-             <span className="text-xl font-bold text-[#1A1125] font-outfit">Total:</span>
-             <span className="text-4xl font-bold text-brand font-outfit tracking-tighter">
+      {/* ── SECCIÓN: TOTALES REFINADOS ── */}
+      <div className="pt-8 border-t border-[#F1F5F9] space-y-5">
+        <div className="flex flex-col gap-0.5 items-end">
+           <div className="flex items-baseline gap-2">
+             <span className="text-base font-bold text-text-3 font-outfit uppercase tracking-wider">Monto Total:</span>
+             <span className="text-2xl font-bold text-brand font-outfit">
                $ {total.toFixed(2)}
              </span>
            </div>
-           <p className="text-[12px] font-bold text-text-3 font-outfit uppercase">
-             Bs. {totalBs.toLocaleString("es-VE", { maximumFractionDigits: 2 })} <span className="text-[10px] font-medium opacity-60">(Tasa BCV: {bcvRate.toFixed(2)})</span>
+           <p className="text-[11px] font-bold text-[#94A3B8] font-outfit uppercase">
+             Bs. {totalBs.toLocaleString("es-VE", { maximumFractionDigits: 2 })} <span className="text-[9px] font-medium opacity-50">(BCV: {bcvRate.toFixed(2)})</span>
            </p>
         </div>
 
