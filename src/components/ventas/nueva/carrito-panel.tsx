@@ -201,7 +201,7 @@ export function CarritoPanel({
         {/* Abono inicial si es a crédito */}
         {condition === "credito" && (
           <div className="space-y-1.5">
-            <p className="text-[10px] font-semibold text-text-3 uppercase tracking-widest">
+            <p className="text-[10px] font-bold text-text-3 uppercase tracking-widest">
               Abono Inicial ($)
             </p>
             <input
@@ -241,7 +241,7 @@ export function CarritoPanel({
                 ${total.toFixed(2)}
               </p>
               {bcvRate > 0 && (
-                <p className="font-mono text-[11px] text-text-3">
+                <p className="font-mono text-[11px] text-text-3 font-semibold">
                   Bs.{" "}
                   {totalBs.toLocaleString("es-VE", {
                     maximumFractionDigits: 2,

@@ -188,7 +188,7 @@ export default function VentasPage() {
                       <span className="font-bold text-text-1 block">
                         {formatCurrency(o.total_usd)}
                       </span>
-                      <span className="text-[10px] text-text-3 block">
+                      <span className="text-[10px] text-text-3 block font-semibold">
                         Bs. {formatCurrency(o.total_bs, "")}
                       </span>
                     </td>
@@ -198,7 +198,7 @@ export default function VentasPage() {
                       >
                         {formatCurrency(o.amount_due)}
                       </span>
-                      <span className="text-[10px] text-text-3 block transition-colors">
+                      <span className="text-[10px] text-text-3 block font-semibold transition-colors">
                         Abono {formatCurrency(o.amount_paid)}
                       </span>
                     </td>

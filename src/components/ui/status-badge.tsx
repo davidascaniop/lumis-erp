@@ -2,56 +2,56 @@ import { cn } from "@/lib/utils";
 
 const BADGE_CONFIG: Record<string, { label: string; cls: string }> = {
   // Pedidos
-  draft: { label: "Borrador", cls: "bg-white/6 text-[#9585B8] border-white/8" },
+  draft: { label: "Borrador", cls: "bg-surface-base text-text-3 border-border" },
   confirmed: {
     label: "Confirmado",
-    cls: "bg-[rgba(79,195,247,0.10)] text-[#4FC3F7] border-[rgba(79,195,247,0.20)]",
+    cls: "bg-status-info/10 text-status-info border-status-info/20",
   },
   dispatched: {
     label: "Despachado",
-    cls: "bg-[rgba(255,184,0,0.10)] text-[#FFB800] border-[rgba(255,184,0,0.20)]",
+    cls: "bg-status-warn/10 text-status-warn border-status-warn/20",
   },
   delivered: {
     label: "Entregado",
-    cls: "bg-[rgba(0,229,204,0.10)] text-[#00E5CC] border-[rgba(0,229,204,0.20)]",
+    cls: "bg-status-ok/10 text-status-ok border-status-ok/20",
   },
   cancelled: {
     label: "Cancelado",
-    cls: "bg-[rgba(255,45,85,0.10)] text-[#FF2D55] border-[rgba(255,45,85,0.20)]",
+    cls: "bg-status-danger/10 text-status-danger border-status-danger/20",
   },
   pending: {
     label: "Pendiente",
-    cls: "bg-[rgba(255,184,0,0.10)] text-[#FFB800] border-[rgba(255,184,0,0.20)]",
+    cls: "bg-status-warn/10 text-status-warn border-status-warn/20",
   },
   completed: {
     label: "Pagado",
-    cls: "bg-[rgba(0,229,204,0.10)] text-[#00E5CC] border-[rgba(0,229,204,0.20)]",
+    cls: "bg-status-ok/10 text-status-ok border-status-ok/20",
   },
   // Cobranza
   open: {
     label: "Abierta",
-    cls: "bg-[rgba(79,195,247,0.10)] text-[#4FC3F7] border-[rgba(79,195,247,0.20)]",
+    cls: "bg-status-info/10 text-status-info border-status-info/20",
   },
   partial: {
     label: "Con Abono",
-    cls: "bg-[rgba(255,184,0,0.10)] text-[#FFB800] border-[rgba(255,184,0,0.20)]",
+    cls: "bg-status-warn/10 text-status-warn border-status-warn/20",
   },
   paid: {
     label: "Pagado",
-    cls: "bg-[rgba(0,229,204,0.10)] text-[#00E5CC] border-[rgba(0,229,204,0.20)]",
+    cls: "bg-status-ok/10 text-status-ok border-status-ok/20",
   },
   overdue: {
     label: "Vencida",
-    cls: "bg-[rgba(255,45,85,0.10)] text-[#FF2D55] border-[rgba(255,45,85,0.20)]",
+    cls: "bg-status-danger/10 text-status-danger border-status-danger/20",
   },
   // Pagos
   verified: {
     label: "Verificado",
-    cls: "bg-[rgba(0,229,204,0.10)] text-[#00E5CC] border-[rgba(0,229,204,0.20)]",
+    cls: "bg-status-ok/10 text-status-ok border-status-ok/20",
   },
   rejected: {
     label: "Rechazado",
-    cls: "bg-[rgba(255,45,85,0.10)] text-[#FF2D55] border-[rgba(255,45,85,0.20)]",
+    cls: "bg-status-danger/10 text-status-danger border-status-danger/20",
   },
 };
 
@@ -60,7 +60,7 @@ type StatusKey = keyof typeof BADGE_CONFIG;
 export function StatusBadge({ status }: { status: string }) {
   const c = BADGE_CONFIG[status as StatusKey] ?? {
     label: status,
-    cls: "bg-white/6 text-[#9585B8] border-white/8",
+    cls: "bg-surface-base text-text-3 border-border",
   };
   return (
     <span

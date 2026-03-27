@@ -303,7 +303,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
                 <span>TOTAL</span>
                 <span>${Number(order.total_usd).toFixed(2)}</span>
               </div>
-              <p className="text-[11px] text-text-3 font-mono">
+              <p className="text-[11px] text-text-3 font-mono font-semibold">
                 Factor BCV: Bs. {order.total_bs / order.total_usd} | Eq: Bs.{" "}
                 {Number(order.total_bs).toLocaleString()}
               </p>
@@ -349,13 +349,13 @@ export default function OrderDetailsPage({ params }: { params: any }) {
                 </span>
               </div>
               <div className="p-4 bg-surface-base rounded-xl space-y-2 border border-border">
-                <div className="flex justify-between text-xs text-text-3">
+                <div className="flex justify-between text-xs text-text-3 font-semibold">
                   <span>Pagado ($)</span>
                   <span className="text-status-ok font-bold">
                     ${Number(order.amount_paid || 0).toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between text-xs text-text-3">
+                <div className="flex justify-between text-xs text-text-3 font-semibold">
                   <span>Deuda Restante ($)</span>
                   <span className="text-status-danger font-bold">
                     ${Number(order.amount_due || 0).toFixed(2)}
