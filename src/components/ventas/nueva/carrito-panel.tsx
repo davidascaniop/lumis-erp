@@ -1,6 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
-import { Loader2, Trash2, X, User, CreditCard, ShoppingBag, FileText, XCircle } from "lucide-react";
+import { Loader2, Trash2, X, User, CreditCard, ShoppingBag, FileText, Wallet } from "lucide-react";
 import { toast } from "sonner";
 
 export function CarritoPanel({
@@ -76,22 +76,31 @@ export function CarritoPanel({
     setNewClientPhone("");
   };
 
+  const paymentMethods = [
+    { id: "efectivo_usd", label: "Efectivo $" },
+    { id: "efectivo_bs", label: "Efectivo Bs." },
+    { id: "pago_movil", label: "Pago Móvil" },
+    { id: "zelle", label: "Zelle" },
+    { id: "transferencia", label: "Transf." },
+    { id: "punto", label: "Punto" },
+  ];
+
   return (
     <div className="w-full h-full flex flex-col p-6 overflow-hidden bg-white">
-      {/* ── HEADER ── */}
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center text-brand">
-          <ShoppingBag className="w-5 h-5" />
+      {/* ── HEADER COMPACTO ── */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-9 h-9 rounded-lg bg-brand/5 flex items-center justify-center text-brand">
+          <ShoppingBag className="w-4.5 h-4.5" />
         </div>
-        <h2 className="text-xl font-bold font-outfit text-[#1A1125]">
-          Resumen del Pedido
-        </h2>
+        <h2 className="text-lg font-bold font-outfit text-[#1A1125]">Resumen del Pedido</h2>
       </div>
 
-      <div className="flex-1 flex flex-col space-y-6 overflow-y-auto no-scrollbar pb-6">
+      <div className="flex-1 flex flex-col space-y-6 overflow-y-auto no-scrollbar pb-4 pr-1">
         {/* ── SECCIÓN: CLIENTE ── */}
         <div className="space-y-3">
-          <p className="text-[12px] font-bold text-text-3 font-outfit uppercase tracking-wider">Nuevo Cliente</p>
+          <div className="flex items-center gap-2 text-text-3 font-bold text-[11px] font-outfit uppercase tracking-widest">
+            <User className="w-3 h-3" /> Datos del Cliente
+          </div>
           <div className="space-y-2 relative">
             <input
               value={newClientName}
@@ -102,11 +111,11 @@ export function CarritoPanel({
               }}
               onFocus={() => setShowSuggestions(true)}
               placeholder="Nombre y Apellido"
-              className="w-full px-4 py-3 rounded-xl border border-[#E2E8F0] text-sm font-medium focus:outline-none focus:border-brand/40 transition-all font-outfit bg-[#F8FAFC]"
+              className="w-full px-4 py-2.5 rounded-xl border border-[#E2E8F0] text-[13px] font-medium focus:outline-none focus:border-brand/40 transition-all font-outfit bg-[#F8FAFC]"
             />
             {cliente && (
-              <button onClick={handleClearClient} className="absolute right-3 top-3.5 text-text-3 hover:text-danger">
-                <X className="w-4 h-4" />
+              <button onClick={handleClearClient} className="absolute right-3 top-3 text-text-3 hover:text-danger p-0.5">
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
 
@@ -116,77 +125,126 @@ export function CarritoPanel({
                   <button
                     key={p.id}
                     onClick={() => handleSelectSuggestion(p)}
-                    className="w-full px-4 py-3 text-left hover:bg-brand/5 border-b border-[#F1F5F9] last:border-0"
+                    className="w-full px-4 py-2.5 text-left hover:bg-brand/5 border-b border-[#F1F5F9] last:border-0"
                   >
-                    <div className="text-[13px] font-bold text-text-1 font-outfit">{p.name}</div>
-                    <div className="text-[10px] text-text-3 font-outfit uppercase">{p.rif || "Sin RIF"}</div>
+                    <div className="text-[12px] font-bold text-text-1 font-outfit">{p.name}</div>
+                    <div className="text-[9px] text-text-3 font-outfit uppercase">{p.rif || "Sin RIF"}</div>
                   </button>
                 ))}
               </div>
             )}
-
-            <input
-              value={newClientRif}
-              onChange={(e) => setNewClientRif(e.target.value)}
-              placeholder="Cédula / RIF"
-              disabled={!!cliente}
-              className="w-full px-4 py-3 rounded-xl border border-[#E2E8F0] text-sm font-medium focus:outline-none focus:border-brand/40 transition-all font-outfit bg-[#F8FAFC] disabled:opacity-50"
-            />
-            <input
-              value={newClientPhone}
-              onChange={(e) => setNewClientPhone(e.target.value)}
-              placeholder="Teléfono"
-              disabled={!!cliente}
-              className="w-full px-4 py-3 rounded-xl border border-[#E2E8F0] text-sm font-medium focus:outline-none focus:border-brand/40 transition-all font-outfit bg-[#F8FAFC] disabled:opacity-50"
-            />
+            
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                value={newClientRif}
+                onChange={(e) => setNewClientRif(e.target.value)}
+                placeholder="Cédula / RIF"
+                disabled={!!cliente}
+                className="w-full px-4 py-2.5 rounded-xl border border-[#E2E8F0] text-[13px] font-medium focus:outline-none focus:border-brand/40 transition-all font-outfit bg-[#F8FAFC] disabled:opacity-50"
+              />
+              <input
+                value={newClientPhone}
+                onChange={(e) => setNewClientPhone(e.target.value)}
+                placeholder="Teléfono"
+                disabled={!!cliente}
+                className="w-full px-4 py-2.5 rounded-xl border border-[#E2E8F0] text-[13px] font-medium focus:outline-none focus:border-brand/40 transition-all font-outfit bg-[#F8FAFC] disabled:opacity-50"
+              />
+            </div>
           </div>
         </div>
 
-        {/* ── SECCIÓN: CONDICIÓN PAGO ── */}
-        <div className="flex items-center gap-6 py-2">
-           <label className="flex items-center gap-2 cursor-pointer group">
-             <input 
-              type="radio" 
-              checked={condition === "contado"} 
-              onChange={() => onConditionChange("contado")}
-              className="w-4 h-4 accent-brand"
-             />
-             <span className={`text-sm font-bold font-outfit ${condition === "contado" ? "text-[#1A1125]" : "text-text-3"}`}>Contado</span>
-           </label>
-           <label className="flex items-center gap-2 cursor-pointer group">
-             <input 
-              type="radio" 
-              checked={condition === "credito"} 
-              onChange={() => onConditionChange("credito")}
-              className="w-4 h-4 accent-brand"
-             />
-             <span className={`text-sm font-bold font-outfit ${condition === "credito" ? "text-[#1A1125]" : "text-text-3"}`}>Crédito</span>
-           </label>
+        {/* ── SECCIÓN: MODALIDAD Y MÉTODOS ── */}
+        <div className="space-y-4 pt-4 border-t border-[#F1F5F9]">
+          <div className="flex items-center justify-between">
+             <div className="flex items-center gap-2 text-text-3 font-bold text-[11px] font-outfit uppercase tracking-widest">
+               <CreditCard className="w-3 h-3" /> Modalidad de Pago
+             </div>
+          </div>
+          
+          <div className="flex items-center gap-6">
+             <label className="flex items-center gap-2 cursor-pointer">
+               <input 
+                type="radio" 
+                name="condition"
+                checked={condition === "contado"} 
+                onChange={() => onConditionChange("contado")}
+                className="w-3.5 h-3.5 accent-brand"
+               />
+               <span className={`text-[13px] font-bold font-outfit ${condition === "contado" ? "text-[#1A1125]" : "text-text-3"}`}>Contado</span>
+             </label>
+             <label className="flex items-center gap-2 cursor-pointer">
+               <input 
+                type="radio" 
+                name="condition"
+                checked={condition === "credito"} 
+                onChange={() => onConditionChange("credito")}
+                className="w-3.5 h-3.5 accent-brand"
+               />
+               <span className={`text-[13px] font-bold font-outfit ${condition === "credito" ? "text-[#1A1125]" : "text-text-3"}`}>Crédito</span>
+             </label>
+          </div>
+
+          {condition === "credito" && (
+            <div className="animate-in slide-in-from-top-2 duration-300">
+               <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[13px] font-bold text-brand font-outfit">$</span>
+                  <input
+                    type="number"
+                    value={amountPaid}
+                    onChange={(e) => onAmountPaidChange(Number(e.target.value))}
+                    placeholder="Ingrese monto a abonar..."
+                    className="w-full pl-7 pr-4 py-2.5 rounded-xl border border-brand/20 bg-brand/[0.02] text-[13px] font-bold text-brand focus:outline-none focus:border-brand font-outfit"
+                  />
+               </div>
+               <p className="text-[10px] text-text-3 font-outfit mt-1 ml-1 opacity-70 italic">Ingrese el pago inicial del cliente</p>
+            </div>
+          )}
+
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-2 text-text-3 font-bold text-[11px] font-outfit uppercase tracking-widest">
+               <Wallet className="w-3 h-3" /> Método de Pago
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+               {paymentMethods.map((m) => (
+                 <button
+                  key={m.id}
+                  onClick={() => onMethodChange(m.id)}
+                  className={`
+                    py-2 rounded-lg text-[10px] font-bold font-outfit transition-all uppercase tracking-tighter border
+                    ${method === m.id ? "bg-brand text-white border-brand shadow-md" : "bg-[#F8FAFC] text-text-3 border-[#EDF2F7] hover:bg-white hover:border-brand/30"}
+                  `}
+                 >
+                  {m.label}
+                 </button>
+               ))}
+            </div>
+          </div>
         </div>
 
-        {/* ── SECCIÓN: LISTA DE PRODUCTOS ── */}
+        {/* ── SECCIÓN: ITEMS ── */}
         <div className="space-y-3 pt-4 border-t border-[#F1F5F9]">
+          <p className="text-text-3 font-bold text-[11px] font-outfit uppercase tracking-widest">Productos Seleccionados</p>
           {cart.length === 0 ? (
-            <div className="py-8 text-center opacity-30">
-               <p className="text-xs font-bold font-outfit uppercase tracking-widest">Sin productos</p>
+            <div className="py-4 text-center opacity-20">
+               <p className="text-[11px] font-bold font-outfit uppercase">Sin items</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5 max-h-[150px] overflow-y-auto no-scrollbar pr-1">
               {cart.map((item: any) => (
                 <div key={item.id} className="flex items-start justify-between group">
                   <div className="flex gap-2 min-w-0">
-                    <FileText className="w-4 h-4 text-text-3 mt-0.5 flex-shrink-0" />
+                    <FileText className="w-3.5 h-3.5 text-text-3 mt-0.5 flex-shrink-0" />
                     <div className="flex flex-col min-w-0">
-                       <span className="text-[13px] font-bold text-text-1 truncate font-outfit">{item.name}</span>
-                       <span className="text-[11px] font-medium text-text-3 font-outfit italic">
-                         ({item.qty}x ${Number(item.price_usd).toFixed(2)})
+                       <span className="text-[12px] font-bold text-text-1 truncate font-outfit max-w-[120px]">{item.name}</span>
+                       <span className="text-[10px] font-medium text-text-3 font-outfit leading-none mt-0.5">
+                         {item.qty}x ${Number(item.price_usd).toFixed(2)}
                        </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-bold text-[#1A1125] font-outfit">${(item.price_usd * item.qty).toFixed(2)}</span>
-                    <button onClick={() => onRemove(item.id)} className="text-danger opacity-0 group-hover:opacity-100 transition-opacity p-1">
-                      <Trash2 className="w-3.5 h-3.5" />
+                    <span className="text-[13px] font-bold text-[#1A1125] font-outfit">${(item.price_usd * item.qty).toFixed(2)}</span>
+                    <button onClick={() => onRemove(item.id)} className="text-danger opacity-0 group-hover:opacity-100 transition-opacity p-0.5">
+                      <Trash2 className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
@@ -196,41 +254,41 @@ export function CarritoPanel({
         </div>
       </div>
 
-      {/* ── SECCIÓN: TOTALES REFINADOS ── */}
-      <div className="pt-8 border-t border-[#F1F5F9] space-y-5">
+      {/* ── TOTALES Y ACCIONES ── */}
+      <div className="pt-4 border-t border-[#F1F5F9] space-y-4">
         <div className="flex flex-col gap-0.5 items-end">
            <div className="flex items-baseline gap-2">
-             <span className="text-base font-bold text-text-3 font-outfit uppercase tracking-wider">Monto Total:</span>
-             <span className="text-2xl font-bold text-brand font-outfit">
+             <span className="text-[13px] font-bold text-text-3 font-outfit uppercase tracking-wider">Total Venta:</span>
+             <span className="text-xl font-bold text-brand font-outfit">
                $ {total.toFixed(2)}
              </span>
            </div>
-           <p className="text-[11px] font-bold text-[#94A3B8] font-outfit uppercase">
-             Bs. {totalBs.toLocaleString("es-VE", { maximumFractionDigits: 2 })} <span className="text-[9px] font-medium opacity-50">(BCV: {bcvRate.toFixed(2)})</span>
+           <p className="text-[10px] font-bold text-[#94A3B8] font-outfit uppercase">
+             Bs. {totalBs.toLocaleString("es-VE", { maximumFractionDigits: 2 })} <span className="text-[8px] font-medium opacity-50">(BCV: {bcvRate.toFixed(2)})</span>
            </p>
         </div>
 
-        {/* ── ACCIONES ── */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5">
            <button
              onClick={onSubmit}
              disabled={submitting || cart.length === 0 || (!cliente && (!newClientName || !newClientRif))}
-             className={`w-full py-4 rounded-xl font-bold font-outfit text-sm uppercase tracking-widest transition-all shadow-lg active:scale-95 ${
+             className={`w-full py-3 rounded-lg font-bold font-outfit text-[12px] uppercase tracking-widest transition-all shadow-md active:scale-95 ${
                submitting || cart.length === 0 || (!cliente && (!newClientName || !newClientRif))
-               ? "bg-[#F1F5F9] text-[#94A3B8] cursor-not-allowed shadow-none"
-               : "bg-brand text-white shadow-brand/20 hover:opacity-90"
+               ? "bg-[#F4F7FA] text-[#B0BCCB] cursor-not-allowed shadow-none"
+               : "bg-brand text-white shadow-brand/10 hover:opacity-90"
              }`}
            >
-             {submitting ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Finalizar Pedido"}
+             {submitting ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Finalizar Pedido"}
            </button>
            
-           <button className="w-full py-3.5 rounded-xl font-bold font-outfit text-xs uppercase tracking-widest border border-[#E2E8F0] text-text-2 hover:bg-[#F8FAFC] transition-all">
-             Cotizar
-           </button>
-           
-           <button className="w-full py-3.5 rounded-xl font-bold font-outfit text-xs uppercase tracking-widest border border-danger/10 text-danger hover:bg-danger/5 transition-all">
-             Cancelar Pedido
-           </button>
+           <div className="grid grid-cols-2 gap-1.5">
+              <button className="py-2.5 rounded-lg font-bold font-outfit text-[10px] uppercase tracking-widest border border-[#E2E8F0] text-text-2 hover:bg-[#F8FAFC] transition-all">
+                Cotizar
+              </button>
+              <button className="py-2.5 rounded-lg font-bold font-outfit text-[10px] uppercase tracking-widest border border-danger/5 text-danger hover:bg-danger/5 transition-all">
+                Cancelar
+              </button>
+           </div>
         </div>
       </div>
     </div>
