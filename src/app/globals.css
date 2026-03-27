@@ -49,21 +49,21 @@
   .font-primary {
     font-family: var(--font-montserrat);
     font-weight: 900;
-    color: #FFFFFF;
-    text-shadow: 0 0 30px rgba(224, 64, 251, 0.4);
+    color: var(--text-1);
+    text-shadow: 0 0 30px var(--brand-glow);
     letter-spacing: -0.02em;
   }
   
   .font-secondary {
     font-family: var(--font-montserrat);
     font-weight: 300;
-    color: #E0E0FF; /* Soft highlighted lavender */
+    color: var(--text-2);
   }
   
   .font-tertiary {
     font-family: var(--font-montserrat);
     font-weight: 200;
-    color: #B0A0D0; /* Muted but professional purple */
+    color: var(--text-3);
   }
 }
 

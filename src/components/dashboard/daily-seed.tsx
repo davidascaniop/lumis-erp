@@ -149,8 +149,8 @@ export function DailySeed({ companyId }: { companyId: string }) {
       <div className="flex items-center justify-between mt-2.5">
         <button
           onClick={() => setExpanded(!expanded)}
-          className="flex items-center gap-1 text-[11px] font-bold text-[#E040FB]
-                               hover:text-[#F060FF] transition-colors"
+          className="flex items-center gap-1 text-[11px] font-bold text-brand
+                               hover:opacity-80 transition-colors"
         >
           {expanded ? (
             <>
