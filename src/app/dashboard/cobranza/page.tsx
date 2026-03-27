@@ -314,7 +314,7 @@ function CobranzaContent() {
             <p className="text-sm text-status-danger font-medium">
               Cartera Vencida
             </p>
-            <p className="text-2xl font-syne font-bold text-white tracking-tight">
+            <p className="text-2xl font-syne font-bold text-text-1 tracking-tight">
               {loading ? "-" : formatCurrency(totalOverdue)}
             </p>
           </div>
@@ -417,7 +417,7 @@ function CobranzaContent() {
                             status={r.partners?.credit_status || "green"}
                           />
                           <div>
-                            <p className="font-bold text-white">
+                            <p className="font-bold text-text-1">
                               {r.partners?.name}
                             </p>
                             <p className="text-[10px] text-text-3 font-mono">
@@ -449,7 +449,7 @@ function CobranzaContent() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <span
-                          className={`font-mono text-lg font-black ${isOverdue ? "text-status-danger" : "text-white"}`}
+                          className={`font-mono text-lg font-black ${isOverdue ? "text-status-danger" : "text-text-1"}`}
                         >
                           {formatCurrency(r.balance_usd)}
                         </span>
@@ -460,7 +460,7 @@ function CobranzaContent() {
                         />
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                        <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => {
                               setSelectedReceivable(r);
