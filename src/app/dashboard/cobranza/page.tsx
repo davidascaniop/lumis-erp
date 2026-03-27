@@ -289,7 +289,7 @@ function CobranzaContent() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 stagger">
         <Card
           onClick={() => setFilterType("all")}
-          className={`p-6 bg-surface-card shadow-card flex items-center gap-4 cursor-pointer transition-all hover:scale-105 active:scale-95 ${filterType === "all" ? "ring-2 ring-brand ring-offset-2 ring-offset-surface-base border-brand" : "border-brand/20"}`}
+          className={`p-6 bg-surface-card shadow-card flex items-center gap-4 cursor-pointer transition-all hover-card-effect ${filterType === "all" ? "ring-2 ring-brand ring-offset-2 ring-offset-surface-base border-brand" : "border-brand/20"}`}
         >
           <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-brand/15 text-brand">
             <Wallet className="w-6 h-6" />
@@ -304,7 +304,7 @@ function CobranzaContent() {
 
         <Card
           onClick={() => setFilterType("overdue")}
-          className={`p-6 bg-surface-card shadow-card flex items-center gap-4 relative overflow-hidden cursor-pointer transition-all hover:scale-105 active:scale-95 ${filterType === "overdue" ? "ring-2 ring-status-danger ring-offset-2 ring-offset-surface-base border-status-danger" : "border-status-danger/20"}`}
+          className={`p-6 bg-surface-card shadow-card flex items-center gap-4 relative overflow-hidden cursor-pointer transition-all hover-card-effect ${filterType === "overdue" ? "ring-2 ring-status-danger ring-offset-2 ring-offset-surface-base border-status-danger" : "border-status-danger/20"}`}
         >
           <div className="absolute -top-10 -right-10 w-32 h-32 bg-status-danger/10 rounded-full blur-[40px] pointer-events-none" />
           <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-status-danger/15 text-status-danger relative z-10">
@@ -345,7 +345,7 @@ function CobranzaContent() {
       </div>
 
       {/* TABLA DINAMICA */}
-      <div className="glass rounded-2xl overflow-hidden shadow-card-lg border border-white/5 flex flex-col h-[65vh]">
+      <div className="bg-surface-card border border-border rounded-2xl overflow-hidden shadow-card hover-card-effect transition-all flex flex-col h-[65vh]">
         <div className="p-4 border-b border-white/5 bg-surface-card/40 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="relative w-full sm:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
@@ -353,14 +353,14 @@ function CobranzaContent() {
               placeholder="Buscar por factura, cliente o RIF..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 border-none bg-surface-input text-white placeholder:text-text-3 h-11 focus:ring-brand/30"
+              className="pl-10 border border-border/40 bg-surface-input text-text-1 placeholder:text-text-3 h-11 focus:border-brand/40 focus:ring-4 focus:ring-brand/5 transition-all shadow-sm"
             />
           </div>
         </div>
 
         <div className="overflow-y-auto flex-1 no-scrollbar">
           <table className="w-full text-sm text-left whitespace-nowrap">
-            <thead className="bg-surface-card/90 text-text-3 sticky top-0 z-10 backdrop-blur-md">
+            <thead className="bg-surface-base/80 text-text-2 sticky top-0 z-10 backdrop-blur-lg border-b-2 border-border/50">
               <tr className="border-b border-white/5">
                 <th className="px-6 py-4 font-bold uppercase text-[10px] tracking-widest">
                   Clte / Deudor

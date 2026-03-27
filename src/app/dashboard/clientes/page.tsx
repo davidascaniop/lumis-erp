@@ -96,7 +96,7 @@ export default function ClientesPage() {
         </div>
       </div>
 
-      <div className="glass rounded-2xl overflow-hidden shadow-card flex flex-col flex-1 min-h-[500px]">
+      <div className="bg-surface-card border border-border rounded-2xl overflow-hidden shadow-card hover-card-effect transition-all flex flex-col flex-1 min-h-[500px]">
         <div className="p-4 border-b border-white/5 bg-surface-card/40 flex justify-between items-center">
           <div className="relative w-full sm:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
@@ -104,14 +104,14 @@ export default function ClientesPage() {
               placeholder="Buscar por nombre o RIF..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 border-none bg-surface-input text-white placeholder:text-text-3"
+              className="pl-10 border border-border/40 bg-surface-input text-text-1 placeholder:text-text-3 focus:border-brand/40 focus:ring-4 focus:ring-brand/5 transition-all shadow-sm"
             />
           </div>
         </div>
 
         <div className="overflow-y-auto flex-1 no-scrollbar p-0">
           <table className="w-full text-sm text-left">
-            <thead className="bg-surface-card/80 text-text-3 sticky top-0 z-10 backdrop-blur-md">
+            <thead className="bg-surface-base/80 text-text-2 sticky top-0 z-10 backdrop-blur-lg border-b-2 border-border/50">
               <tr>
                 <th className="px-6 py-4 font-semibold uppercase text-xs">
                   Clte / Razón Social
