@@ -279,29 +279,25 @@ function NuevaVentaContent() {
   // ── RENDER ───────────────────────────────────────────────
   return (
     <div className="flex flex-col h-[calc(100vh-48px)] -m-6 bg-surface-base">
-      {/* ── TOPBAR POS ── */}
-      <div
-        className="flex items-center justify-between px-6 py-4
-                            border-b border-border bg-surface-card
-                            flex-shrink-0 z-20"
-      >
-        <div className="flex items-center gap-6">
-          <h1 className="text-xl font-bold font-syne tracking-widest text-text-1 uppercase">
-            Nueva Venta
-          </h1>
-        </div>
-
-        <div className="flex items-center gap-6 text-text-3">
-          {rate !== null && rate > 0 && (
-            <div className="text-right">
-              <p className="text-[10px] uppercase font-bold tracking-tighter opacity-60">
-                Tasa BCV
+      {/* ── TOPBAR ORIGINAL ── */}
+      <div className="px-6 py-4 flex-shrink-0 z-20">
+        <div className="flex items-start gap-4">
+          <button 
+            onClick={() => router.push("/dashboard/ventas")}
+            className="p-1.5 hover:bg-surface-card rounded-full transition-colors mt-0.5"
+          >
+            <ArrowLeft className="w-5 h-5 text-text-3" />
+          </button>
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-black font-syne text-[#1E293B]">
+              Nueva Venta
+            </h1>
+            {rate !== null && rate > 0 && (
+              <p className="text-[12px] font-bold text-[#64748B] tracking-wide mt-0.5">
+                BCV: <span className="text-text-1">Bs. {Number(rate).toFixed(2)}/$</span>
               </p>
-              <p className="text-sm font-mono font-black text-text-1">
-                Bs.{Number(rate).toFixed(2)}
-              </p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
