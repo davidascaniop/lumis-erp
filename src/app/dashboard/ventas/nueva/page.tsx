@@ -8,7 +8,6 @@ import { useUser } from "@/hooks/use-user";
 import { useBCV } from "@/hooks/use-bcv";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { ClientePicker } from "@/components/ventas/nueva/cliente-picker";
 import { ProductoGrid } from "@/components/ventas/nueva/producto-grid";
 import { CarritoPanel } from "@/components/ventas/nueva/carrito-panel";
 
@@ -51,6 +50,11 @@ function NuevaVentaContent() {
   const [paymentMethod, setPaymentMethod] = useState("Efectivo");
   const [amountPaid, setAmountPaid] = useState(0);
   const [saving, setSaving] = useState(false);
+
+  // New Client State
+  const [newClientName, setNewClientName] = useState("");
+  const [newClientRif, setNewClientRif] = useState("");
+  const [newClientPhone, setNewClientPhone] = useState("");
 
   // ── Carga inicial de datos ──────────────────────────────
   useEffect(() => {
@@ -101,15 +105,15 @@ function NuevaVentaContent() {
   }, []);
 
   // ── Cart Logic (idéntica al original) ───────────────────
-  const addToCart = (product: any) => {
+  const addToCart = (product: any, qty: number = 1) => {
     setCart((prev) => {
       const exists = prev.find((item) => item.id === product.id);
       if (exists) {
         return prev.map((item) =>
-          item.id === product.id ? { ...item, qty: item.qty + 1 } : item,
+          item.id === product.id ? { ...item, qty: item.qty + qty } : item,
         );
       }
-      return [...prev, { ...product, qty: 1 }];
+      return [...prev, { ...product, qty }];
     });
     toast.success(`${product.name} añadido`);
 
@@ -144,7 +148,39 @@ function NuevaVentaContent() {
 
   // ── Crear Pedido (lógica de negocio IDÉNTICA al original) ──
   const handleCreateOrder = async () => {
-    if (!selectedPartner) return toast.error("Selecciona un cliente");
+    // Si no hay cliente seleccionado pero hay datos de nuevo cliente, intentamos crearlo
+    let targetPartner = selectedPartner;
+
+    if (!targetPartner && newClientName && newClientRif) {
+      setSaving(true);
+      try {
+        const { data: newP, error: pErr } = await supabase
+          .from("partners")
+          .insert({
+            company_id: user?.company_id,
+            name: newClientName,
+            rif: newClientRif,
+            phone: newClientPhone,
+            status: "active",
+            credit_status: "green",
+            current_balance: 0,
+          } as any)
+          .select()
+          .single();
+
+        if (pErr) throw pErr;
+        targetPartner = newP;
+        setSelectedPartner(newP); // Actualizar estado local
+      } catch (err: any) {
+        toast.error("Error al crear cliente rápido", {
+          description: err.message,
+        });
+        setSaving(false);
+        return;
+      }
+    }
+
+    if (!targetPartner) return toast.error("Selecciona o registra un cliente");
     if (cart.length === 0) return toast.error("El carrito está vacío");
     if (!user?.company_id) return;
 
@@ -159,7 +195,7 @@ function NuevaVentaContent() {
         .from("orders")
         .insert({
           company_id: user.company_id,
-          partner_id: selectedPartner.id,
+          partner_id: targetPartner.id,
           user_id: user.id,
           order_number: orderNumber,
           status: status,
@@ -204,7 +240,7 @@ function NuevaVentaContent() {
       if (paymentType === "credito" || amountDue > 0) {
         const { error: cxcErr } = await supabase.from("receivables").insert({
           company_id: user.company_id,
-          partner_id: selectedPartner.id,
+          partner_id: targetPartner.id,
           order_id: order.id,
           invoice_number: `INV-${orderNumber.split("-")[1]}`,
           amount_usd: total,
@@ -245,64 +281,55 @@ function NuevaVentaContent() {
     <div className="flex flex-col h-[calc(100vh-48px)] -m-6 bg-surface-base">
       {/* ── TOPBAR POS ── */}
       <div
-        className="flex items-center gap-4 px-6 py-3
-                            border-b border-border bg-surface-card/60 backdrop-blur-xl
+        className="flex items-center justify-between px-6 py-4
+                            border-b border-border bg-surface-card
                             flex-shrink-0 z-20"
       >
-        <button
-          onClick={() => router.back()}
-          className="p-2 rounded-xl hover:bg-surface-base text-text-3
-                               hover:text-text-1 transition-all"
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </button>
-        <div>
-          <h1 className="text-xl font-primary leading-tight text-text-1">
+        <div className="flex items-center gap-6">
+          <h1 className="text-xl font-bold font-syne tracking-widest text-text-1 uppercase">
             Nueva Venta
           </h1>
-          {rate !== null && rate > 0 && (
-            <p className="text-[10px] text-text-3 font-medium">
-              BCV:{" "}
-              <span className="text-text-1 font-mono font-semibold">
-                Bs.{Number(rate).toFixed(2)}/$
-              </span>
-            </p>
-          )}
         </div>
 
-        {/* Indicador de items en carrito */}
-        {cart.length > 0 && (
-          <div
-            className="ml-auto flex items-center gap-2 px-3 py-1.5 rounded-full
-                                    bg-brand/10 border border-brand/20"
-          >
-            <span className="text-xs font-bold text-brand">
-              {cart.length} {cart.length === 1 ? "producto" : "productos"}
-            </span>
-            <span className="text-xs font-mono font-bold text-text-1">
-              ${subtotal.toFixed(2)}
-            </span>
+        <div className="flex items-center gap-6 text-text-3">
+          {rate !== null && rate > 0 && (
+            <div className="hidden md:block text-right">
+              <p className="text-[10px] uppercase font-bold tracking-tighter opacity-60">
+                Tasa BCV
+              </p>
+              <p className="text-sm font-mono font-black text-text-1">
+                Bs.{Number(rate).toFixed(2)}
+              </p>
+            </div>
+          )}
+          <div className="flex items-center gap-4">
+            <button className="p-2 hover:bg-surface-base rounded-full transition-colors">
+              <span className="sr-only">Notificaciones</span>
+              <div className="w-5 h-5 flex items-center justify-center">🔔</div>
+            </button>
+            <button className="p-2 hover:bg-surface-base rounded-full transition-colors">
+              <span className="sr-only">Ayuda</span>
+              <div className="w-5 h-5 flex items-center justify-center">❓</div>
+            </button>
+            <button className="p-2 hover:bg-surface-base rounded-full transition-colors">
+              <span className="sr-only">Idioma</span>
+              <div className="w-5 h-5 flex items-center justify-center">🌐</div>
+            </button>
+            <div className="h-8 w-8 rounded-full bg-brand-gradient flex items-center justify-center text-white font-bold text-xs shadow-brand">
+              {user?.full_name?.substring(0, 1) || "L"}
+            </div>
           </div>
-        )}
+        </div>
       </div>
 
       {/* ── CUERPO: 2 ZONAS ── */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* ZONA A: CLIENTE + CATÁLOGO */}
-        <div className="flex-1 flex flex-col overflow-hidden border-r border-border">
-          <ClientePicker
-            clientes={partners}
-            selected={selectedPartner}
-            onSelect={(partner) => setSelectedPartner(partner)}
-            onClear={() => {
-              setSelectedPartner(null);
-              setPaymentType("contado");
-            }}
-          />
+      <div className="flex flex-1 overflow-hidden bg-[#F4F4F9]">
+        {/* ZONA A: CATÁLOGO */}
+        <div className="flex-1 flex flex-col overflow-hidden">
           <ProductoGrid productos={products} cart={cart} onAdd={addToCart} />
         </div>
 
-        {/* ZONA B: CARRITO */}
+        {/* ZONA B: CARRITO / RESUMEN */}
         <CarritoPanel
           cart={cart}
           onUpdateQty={updateQty}
@@ -321,6 +348,15 @@ function NuevaVentaContent() {
           submitting={saving}
           amountPaid={amountPaid}
           onAmountPaidChange={setAmountPaid}
+          // New Client Props
+          newClientName={newClientName}
+          setNewClientName={setNewClientName}
+          newClientRif={newClientRif}
+          setNewClientRif={setNewClientRif}
+          newClientPhone={newClientPhone}
+          setNewClientPhone={setNewClientPhone}
+          partners={partners}
+          onSelectPartner={setSelectedPartner}
         />
       </div>
     </div>
