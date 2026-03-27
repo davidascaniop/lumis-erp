@@ -78,8 +78,8 @@ export function CarritoPanel({
   };
 
   return (
-    <div className="w-[380px] h-full flex flex-col p-4 flex-shrink-0 overflow-hidden">
-      <div className="flex-1 bg-white shadow-sm rounded-[32px] border border-[#F1F5F9] flex flex-col overflow-hidden">
+    <div className="w-full h-full flex flex-col p-6 overflow-hidden">
+      <div className="flex-1 bg-white shadow-sm rounded-[32px] border border-[#E2E8F0] flex flex-col overflow-hidden">
         
         {/* -- ENCABEZADO FIJO -- */}
         <div className="px-6 py-5 border-b border-[#F1F5F9] flex-shrink-0">

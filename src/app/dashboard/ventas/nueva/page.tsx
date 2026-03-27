@@ -301,42 +301,44 @@ function NuevaVentaContent() {
         </div>
       </div>
 
-      {/* ── CUERPO: 2 ZONAS ── */}
-      <div className="flex flex-1 overflow-hidden bg-[#F4F4F9]">
-        {/* ZONA A: CATÁLOGO */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+      {/* ── CUERPO: DIVISIÓN 50/50 ── */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* ZONA A: CATÁLOGO (50%) */}
+        <div className="flex-[5] flex flex-col overflow-hidden border-r border-[#EDF2F7] bg-white">
           <ProductoGrid productos={products} cart={cart} onAdd={addToCart} />
         </div>
 
-        {/* ZONA B: CARRITO / RESUMEN */}
-        <CarritoPanel
-          cart={cart}
-          onUpdateQty={updateQty}
-          onRemove={removeFromCart}
-          condition={paymentType}
-          onConditionChange={(v) => {
-            setPaymentType(v);
-            if (v === "contado") setAmountPaid(total);
-          }}
-          method={paymentMethod}
-          onMethodChange={setPaymentMethod}
-          subtotal={subtotal}
-          bcvRate={rate || 0}
-          cliente={selectedPartner}
-          onSubmit={handleCreateOrder}
-          submitting={saving}
-          amountPaid={amountPaid}
-          onAmountPaidChange={setAmountPaid}
-          // New Client Props
-          newClientName={newClientName}
-          setNewClientName={setNewClientName}
-          newClientRif={newClientRif}
-          setNewClientRif={setNewClientRif}
-          newClientPhone={newClientPhone}
-          setNewClientPhone={setNewClientPhone}
-          partners={partners}
-          onSelectPartner={setSelectedPartner}
-        />
+        {/* ZONA B: CARRITO / RESUMEN (50%) */}
+        <div className="flex-[5] flex flex-col overflow-hidden bg-[#F8FAFC]">
+          <CarritoPanel
+            cart={cart}
+            onUpdateQty={updateQty}
+            onRemove={removeFromCart}
+            condition={paymentType}
+            onConditionChange={(v) => {
+              setPaymentType(v);
+              if (v === "contado") setAmountPaid(total);
+            }}
+            method={paymentMethod}
+            onMethodChange={setPaymentMethod}
+            subtotal={subtotal}
+            bcvRate={rate || 0}
+            cliente={selectedPartner}
+            onSubmit={handleCreateOrder}
+            submitting={saving}
+            amountPaid={amountPaid}
+            onAmountPaidChange={setAmountPaid}
+            // New Client Props
+            newClientName={newClientName}
+            setNewClientName={setNewClientName}
+            newClientRif={newClientRif}
+            setNewClientRif={setNewClientRif}
+            newClientPhone={newClientPhone}
+            setNewClientPhone={setNewClientPhone}
+            partners={partners}
+            onSelectPartner={setSelectedPartner}
+          />
+        </div>
       </div>
     </div>
   );
