@@ -30,8 +30,23 @@ const productSchema = z.object({
   name: z.string().min(3, "Mínimo 3 caracteres"),
   sku: z.string().min(2, "SKU Requerido"),
   category: z.string().optional(),
+  brand: z.string().optional(),
+  department: z.string().optional(),
   description: z.string().optional(),
+  supplier_code: z.string().optional(),
   price_usd: z
+    .union([z.number(), z.string()])
+    .transform((val) => Number(val) || 0),
+  price_usd_2: z
+    .union([z.number(), z.string()])
+    .transform((val) => Number(val) || 0),
+  price_usd_3: z
+    .union([z.number(), z.string()])
+    .transform((val) => Number(val) || 0),
+  price_usd_4: z
+    .union([z.number(), z.string()])
+    .transform((val) => Number(val) || 0),
+  price_usd_5: z
     .union([z.number(), z.string()])
     .transform((val) => Number(val) || 0),
   stock: z.union([z.number(), z.string()]).transform((val) => Number(val) || 0),
@@ -62,8 +77,15 @@ export function ProductForm({
       name: product?.name || "",
       sku: product?.sku || "",
       category: product?.category || "",
+      brand: product?.brand || "",
+      department: product?.department || "",
       description: product?.description || "",
+      supplier_code: product?.supplier_code || "",
       price_usd: product?.price_usd || 0,
+      price_usd_2: product?.price_usd_2 || 0,
+      price_usd_3: product?.price_usd_3 || 0,
+      price_usd_4: product?.price_usd_4 || 0,
+      price_usd_5: product?.price_usd_5 || 0,
       stock: product?.stock || 0,
       unit: product?.unit || "Unidad",
       image_url: product?.image_url || "",
@@ -76,8 +98,15 @@ export function ProductForm({
         name: product.name,
         sku: product.sku,
         category: product.category || "",
+        brand: product.brand || "",
+        department: product.department || "",
         description: product.description || "",
+        supplier_code: product.supplier_code || "",
         price_usd: product.price_usd,
+        price_usd_2: product.price_usd_2 || 0,
+        price_usd_3: product.price_usd_3 || 0,
+        price_usd_4: product.price_usd_4 || 0,
+        price_usd_5: product.price_usd_5 || 0,
         stock: product.stock,
         unit: product.unit || "Unidad",
         image_url: product.image_url || "",
@@ -87,8 +116,15 @@ export function ProductForm({
         name: "",
         sku: "",
         category: "",
+        brand: "",
+        department: "",
         description: "",
+        supplier_code: "",
         price_usd: 0,
+        price_usd_2: 0,
+        price_usd_3: 0,
+        price_usd_4: 0,
+        price_usd_5: 0,
         stock: 0,
         unit: "Unidad",
         image_url: "",
@@ -106,8 +142,15 @@ export function ProductForm({
         name: values.name,
         sku: values.sku,
         category: values.category || "General",
+        brand: values.brand,
+        department: values.department,
         description: values.description,
+        supplier_code: values.supplier_code,
         price_usd: values.price_usd,
+        price_usd_2: values.price_usd_2,
+        price_usd_3: values.price_usd_3,
+        price_usd_4: values.price_usd_4,
+        price_usd_5: values.price_usd_5,
         stock: values.stock,
         unit: values.unit,
         image_url: values.image_url,
@@ -226,12 +269,61 @@ export function ProductForm({
 
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-text-2 uppercase tracking-wider">
+                Marca
+              </label>
+              <Input {...form.register("brand")} placeholder="Polar" />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-text-2 uppercase tracking-wider">
+                Departamento
+              </label>
+              <Input {...form.register("department")} placeholder="Alimentos" />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-text-2 uppercase tracking-wider">
+                Código Proveedor
+              </label>
+              <Input {...form.register("supplier_code")} placeholder="SUP-001" />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-text-2 uppercase tracking-wider">
                 URL Imagen (Opcional)
               </label>
               <Input
                 {...form.register("image_url")}
                 placeholder="https://..."
               />
+            </div>
+
+            <div className="col-span-2 border-t border-white/5 pt-4 mt-2">
+              <h4 className="text-[10px] font-bold text-brand uppercase tracking-widest mb-4">
+                Listado de Precios de Venta
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-medium text-text-3 uppercase">P1: General ($)</label>
+                  <Input {...form.register("price_usd")} type="number" step="0.01" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-medium text-text-3 uppercase">P2: Mayorista ($)</label>
+                  <Input {...form.register("price_usd_2")} type="number" step="0.01" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-medium text-text-3 uppercase">P3: Distribuidor ($)</label>
+                  <Input {...form.register("price_usd_3")} type="number" step="0.01" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-medium text-text-3 uppercase">P4: Oferta ($)</label>
+                  <Input {...form.register("price_usd_4")} type="number" step="0.01" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-medium text-text-3 uppercase">P5: VIP ($)</label>
+                  <Input {...form.register("price_usd_5")} type="number" step="0.01" />
+                </div>
+              </div>
             </div>
           </div>
 

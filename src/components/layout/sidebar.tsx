@@ -3,22 +3,24 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
-  Users,
-  ShoppingCart,
-  CreditCard,
-  Package,
-  BarChart3,
-  Settings,
-  LogOut,
-  Plus,
-  ChevronRight,
-  Bell,
   X,
+  Bell,
+  ChevronRight,
+  Plus,
+  LogOut,
+  Settings,
+  BarChart3,
+  Package,
+  CreditCard,
+  ShoppingCart,
+  Users,
+  LayoutDashboard,
+  Truck,
+  Warehouse,
+  Sparkles,
   DollarSign,
   AlertTriangle,
   CheckCircle2,
-  Sparkles,
 } from "lucide-react";
 import { cn, formatNumber } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -109,6 +111,13 @@ const navItems = [
     icon: BarChart3,
     section: "MÓDULOS",
     description: "Métricas y análisis",
+  },
+  {
+    href: "/dashboard/compras",
+    label: "Logística",
+    icon: Truck,
+    section: "MÓDULOS",
+    description: "Compras y proveedores",
   },
   {
     href: "/dashboard/semillas",

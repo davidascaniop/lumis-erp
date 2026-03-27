@@ -41,6 +41,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Suspense } from "react";
+import { CommissionRulesEditor } from "@/components/users/commission-rules-editor";
+import { Percent } from "lucide-react";
 
 function SettingsContent() {
   const supabase = createClient();
@@ -73,6 +75,9 @@ function SettingsContent() {
     email: "",
     role: "vendedor",
   });
+
+  const [showCommissionModal, setShowCommissionModal] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<any>(null);
 
   useEffect(() => {
     async function loadProfile() {
@@ -208,6 +213,16 @@ function SettingsContent() {
           sistema.
         </p>
       </div>
+
+      <CommissionRulesEditor 
+        open={showCommissionModal}
+        onOpenChange={setShowCommissionModal}
+        user={selectedMember}
+        onSuccess={() => {
+          // Re-fetch users to get updated rules
+          window.location.reload(); 
+        }}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Navigation Sidebar para Settings */}
@@ -522,6 +537,15 @@ function SettingsContent() {
                           <Badge className="bg-[#0F0A12] text-[#00D4AA] border-[#00D4AA]/20 uppercase">
                             {member.role || "USUARIO"}
                           </Badge>
+                          {(member.role === "vendedor" || member.role === "admin") && (
+                            <button
+                              onClick={() => { setSelectedMember(member); setShowCommissionModal(true); }}
+                              className="text-[#E040FB] hover:bg-[#E040FB]/10 p-2 rounded-lg transition-colors"
+                              title="Configurar Comisiones"
+                            >
+                              <Percent className="w-4 h-4" />
+                            </button>
+                          )}
                           {profile?.email !== member.email && (
                             <button
                               onClick={() => handleRemoveUser(member.email)}

@@ -29,6 +29,7 @@ CREATE TABLE users (
   role          VARCHAR(20) DEFAULT 'vendedor', -- admin | supervisor | vendedor | almacen
   avatar_url    TEXT,
   zone          VARCHAR(100),
+  commission_rules JSONB DEFAULT '[]', -- rules by brand/dept/price_type
   is_active     BOOLEAN DEFAULT true,
   created_at    TIMESTAMPTZ DEFAULT NOW()
 );
@@ -75,9 +76,17 @@ CREATE TABLE products (
   sku           VARCHAR(50),
   name          VARCHAR(255) NOT NULL,
   description   TEXT,
+  brand         VARCHAR(100),
+  department    VARCHAR(100),
   category      VARCHAR(100),
-  price_usd     DECIMAL(14,4),
+  price_usd     DECIMAL(14,4), -- Precio 1 (General)
+  price_usd_2   DECIMAL(14,4), -- Precio 2
+  price_usd_3   DECIMAL(14,4), -- Precio 3
+  price_usd_4   DECIMAL(14,4), -- Precio 4
+  price_usd_5   DECIMAL(14,4), -- Precio 5
   cost_usd      DECIMAL(14,4),
+  supplier_code VARCHAR(50),
+  last_purchase_at TIMESTAMPTZ,
   stock_qty     INTEGER DEFAULT 0,
   min_stock     INTEGER DEFAULT 5,
   unit          VARCHAR(20) DEFAULT 'und',
@@ -175,6 +184,79 @@ CREATE TABLE payments (
 );
 
 -- ============================================
+-- TABLA: ALMACENES / BODEGAS
+-- ============================================
+CREATE TABLE warehouses (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  company_id    UUID REFERENCES companies(id) ON DELETE CASCADE,
+  name          VARCHAR(150) NOT NULL,
+  location      TEXT,
+  is_active     BOOLEAN DEFAULT true,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================
+-- TABLA: STOCK POR ALMACÉN
+-- ============================================
+CREATE TABLE warehouse_stock (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  warehouse_id  UUID REFERENCES warehouses(id) ON DELETE CASCADE,
+  product_id    UUID REFERENCES products(id) ON DELETE CASCADE,
+  qty           INTEGER DEFAULT 0,
+  UNIQUE(warehouse_id, product_id)
+);
+
+-- ============================================
+-- TABLA: PROVEEDORES
+-- ============================================
+CREATE TABLE suppliers (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  company_id    UUID REFERENCES companies(id) ON DELETE CASCADE,
+  rif           VARCHAR(20) NOT NULL,
+  name          VARCHAR(255) NOT NULL,
+  contact_name  VARCHAR(150),
+  phone         VARCHAR(20),
+  email         VARCHAR(150),
+  address       TEXT,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================
+-- TABLA: COMPRAS
+-- ============================================
+CREATE TABLE purchases (
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  company_id        UUID REFERENCES companies(id) ON DELETE CASCADE,
+  supplier_id       UUID REFERENCES suppliers(id),
+  warehouse_id      UUID REFERENCES warehouses(id), -- Almacén donde entra la mercancía
+  purchase_number   VARCHAR(30),
+  subtotal_usd      DECIMAL(14,2),
+  freight_usd       DECIMAL(14,2) DEFAULT 0.00,
+  tax_usd           DECIMAL(14,2) DEFAULT 0.00,
+  total_usd         DECIMAL(14,2),
+  exchange_rate     DECIMAL(14,4),
+  status            VARCHAR(20) DEFAULT 'draft', -- draft | confirmed | received | cancelled
+  notes             TEXT,
+  received_at       TIMESTAMPTZ,
+  created_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================
+-- TABLA: LÍNEAS DE COMPRA (con Prorrateo)
+-- ============================================
+CREATE TABLE purchase_items (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  purchase_id   UUID REFERENCES purchases(id) ON DELETE CASCADE,
+  product_id    UUID REFERENCES products(id),
+  qty           INTEGER NOT NULL,
+  unit_cost_usd DECIMAL(14,4), -- Costo base
+  prorated_freight_usd DECIMAL(14,4) DEFAULT 0.00, -- Monto de flete aplicado
+  total_unit_cost_usd  DECIMAL(14,4), -- Costo + flete
+  subtotal_usd  DECIMAL(14,2),
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================
 -- TABLA: CHATTER / HISTORIAL DE ACTIVIDAD
 -- ============================================
 CREATE TABLE activity_log (
@@ -192,15 +274,20 @@ CREATE TABLE activity_log (
 -- ============================================
 -- ROW LEVEL SECURITY (Multi-tenancy)
 -- ============================================
-ALTER TABLE companies    ENABLE ROW LEVEL SECURITY;
-ALTER TABLE users        ENABLE ROW LEVEL SECURITY;
-ALTER TABLE partners     ENABLE ROW LEVEL SECURITY;
-ALTER TABLE products     ENABLE ROW LEVEL SECURITY;
-ALTER TABLE orders       ENABLE ROW LEVEL SECURITY;
-ALTER TABLE order_items  ENABLE ROW LEVEL SECURITY;
-ALTER TABLE receivables  ENABLE ROW LEVEL SECURITY;
-ALTER TABLE payments     ENABLE ROW LEVEL SECURITY;
-ALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;
+ALTER TABLE companies         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE partners          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE products          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE orders            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE order_items       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE receivables       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE activity_log      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE warehouses        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE warehouse_stock   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE suppliers         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE purchases         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE purchase_items    ENABLE ROW LEVEL SECURITY;
 
 -- ============================================
 -- FUNCIONES AUXILIARES PARA RLS
@@ -213,6 +300,17 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
   SELECT company_id FROM users WHERE auth_id = auth.uid();
+$$;
+
+-- Función para incrementar stock de forma segura
+CREATE OR REPLACE FUNCTION increment_stock(p_id uuid, qty_to_add int)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  UPDATE products SET stock = stock + qty_to_add WHERE id = p_id;
+END;
 $$;
 
 -- ============================================
@@ -241,6 +339,16 @@ CREATE POLICY "tenant_isolation_order_items"  ON order_items  FOR ALL USING (
 CREATE POLICY "tenant_isolation_receivables"  ON receivables  FOR ALL USING (company_id = get_auth_company_id());
 CREATE POLICY "tenant_isolation_payments"     ON payments     FOR ALL USING (company_id = get_auth_company_id());
 CREATE POLICY "tenant_isolation_activity_log" ON activity_log FOR ALL USING (company_id = get_auth_company_id());
+CREATE POLICY "tenant_isolation_warehouses"    ON warehouses    FOR ALL USING (company_id = get_auth_company_id());
+CREATE POLICY "tenant_isolation_suppliers"     ON suppliers     FOR ALL USING (company_id = get_auth_company_id());
+CREATE POLICY "tenant_isolation_purchases"     ON purchases     FOR ALL USING (company_id = get_auth_company_id());
+
+CREATE POLICY "tenant_isolation_warehouse_stock" ON warehouse_stock FOR ALL USING (
+  warehouse_id IN (SELECT id FROM warehouses WHERE company_id = get_auth_company_id())
+);
+CREATE POLICY "tenant_isolation_purchase_items" ON purchase_items FOR ALL USING (
+  purchase_id IN (SELECT id FROM purchases WHERE company_id = get_auth_company_id())
+);
 
 
 -- ============================================
@@ -253,3 +361,10 @@ CREATE INDEX idx_receivables_company  ON receivables(company_id);
 CREATE INDEX idx_receivables_status   ON receivables(status);
 CREATE INDEX idx_payments_company     ON payments(company_id);
 CREATE INDEX idx_activity_entity      ON activity_log(entity_type, entity_id);
+
+CREATE INDEX idx_warehouses_company   ON warehouses(company_id);
+CREATE INDEX idx_suppliers_company    ON suppliers(company_id);
+CREATE INDEX idx_purchases_company    ON purchases(company_id);
+CREATE INDEX idx_purchases_status     ON purchases(status);
+CREATE INDEX idx_product_sku          ON products(sku);
+CREATE INDEX idx_product_company      ON products(company_id);

@@ -10,6 +10,8 @@ import {
   Target,
   BarChart3,
   Calendar,
+  Wallet,
+  Coins,
 } from "lucide-react";
 import {
   AreaChart,
@@ -360,6 +362,67 @@ export default function ReportesPage() {
           </div>
         </motion.div>
       </div>
+
+      {/* Commission Report Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="glass p-6 rounded-2xl border-[#E040FB]/10 hover:shadow-glow transition-shadow duration-300"
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div>
+            <h2 className="text-xl font-heading font-semibold text-[#F5EEFF] flex items-center gap-2">
+              <Coins className="text-[#E040FB]" /> Informe de Comisiones
+            </h2>
+            <p className="text-[#6B5280] text-sm">Resumen de incentivos por ventas y recaudación.</p>
+          </div>
+          <div className="flex gap-2 bg-[#0F0A12] p-1 rounded-xl border border-white/5">
+             <button className="px-4 py-1.5 text-xs font-bold rounded-lg bg-[#E040FB] text-white">Ventas</button>
+             <button className="px-4 py-1.5 text-xs font-bold rounded-lg text-text-3 hover:text-white transition-all">Cobranzas</button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="text-[10px] text-[#6B5280] font-bold uppercase tracking-wider border-b border-white/5">
+              <tr>
+                <th className="px-4 py-3">Vendedor</th>
+                <th className="px-4 py-3">Vendido (USD)</th>
+                <th className="px-4 py-3">Eficiencia</th>
+                <th className="px-4 py-3">Comisión Base</th>
+                <th className="px-4 py-3">Bonus Marca/Depto</th>
+                <th className="px-4 py-3 text-right">Comisión Total</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5 text-white">
+              {salesrepData.map((rep, i) => (
+                <tr key={rep.name} className="hover:bg-white/5 transition-colors group">
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold text-[10px]">{rep.name.charAt(0)}</div>
+                      <span className="font-medium">{rep.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 font-mono">${rep.ventas.toLocaleString()}</td>
+                  <td className="px-4 py-4">
+                    <div className="w-24 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                       <div className="h-full bg-[#00D4AA] w-[85%]" />
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 text-[#B8A0D0]">$ { (rep.ventas * 0.01).toFixed(2) }</td>
+                  <td className="px-4 py-4 text-[#B8A0D0]">$ { (rep.ventas * 0.005).toFixed(2) }</td>
+                  <td className="px-4 py-4 text-right">
+                    <span className="px-3 py-1 bg-brand/10 text-brand rounded-lg font-bold">
+                       $ { (rep.ventas * 0.015).toFixed(2) }
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </motion.div>
     </div>
   );
 }
