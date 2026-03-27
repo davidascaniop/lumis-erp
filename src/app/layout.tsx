@@ -7,7 +7,7 @@ import "./globals.css";
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
-  weight: ["200", "300", "900"],
+  weight: ["200", "300", "400", "500", "600", "900"],
 });
 
 const plusJakarta = Plus_Jakarta_Sans({

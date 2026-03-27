@@ -32,8 +32,8 @@ export function RecentActivity({ companyId }: { companyId: string }) {
   ];
 
   return (
-    <Card className="p-6 bg-surface-card border-border shadow-card no-scrollbar">
-      <h3 className="text-lg font-syne font-bold text-text-1 mb-6">
+    <Card className="p-6 bg-surface-card border-border shadow-card hover-card-effect no-scrollbar">
+      <h3 className="text-lg font-primary text-text-1 mb-6">
         Actividad Reciente
       </h3>
       <div className="space-y-4">

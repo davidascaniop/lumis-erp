@@ -70,7 +70,7 @@ export function BroadcastBanner({
 
   return (
     <div
-      className={`flex items-start gap-3 px-5 py-3.5 mb-4 rounded-2xl border ${
+      className={`flex items-start gap-3 px-5 py-3.5 mb-4 rounded-2xl border shadow-card hover-card-effect ${
         STYLES[b.type as keyof typeof STYLES] ?? STYLES.info
       }`}
     >

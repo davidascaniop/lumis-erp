@@ -400,7 +400,7 @@ export default function DashboardPage() {
   const firstName = user?.full_name?.split(" ")[0] || "Usuario";
 
   return (
-    <div className="space-y-5 animate-fade-up max-w-7xl mx-auto">
+    <div className="space-y-5 animate-fade-up max-w-7xl mx-auto font-montserrat font-light">
       {/* ═══ ZONA 0: HEADER ═══ */}
       <div className="flex items-start justify-between">
         <div>
@@ -414,7 +414,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Selector de período */}
-        <div className="flex items-center gap-1 p-1 bg-surface-card rounded-xl border border-border">
+        <div className="flex items-center gap-1 p-1 bg-surface-card rounded-xl border border-border shadow-card">
           {["hoy", "semana", "mes", "año"].map((p) => (
             <button
               key={p}
@@ -501,8 +501,8 @@ export default function DashboardPage() {
         {/* KPI 5: Eficiencia de Cobro */}
         <div
           className="relative bg-surface-card border border-border rounded-2xl p-4 overflow-hidden
-                                hover:border-border-brand/50 hover:-translate-y-0.5
-                                transition-all duration-200 group card-enter h-[140px]"
+                                shadow-card hover-card-effect
+                                group card-enter h-[140px]"
         >
           <div
             className="absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl pointer-events-none
@@ -569,7 +569,7 @@ export default function DashboardPage() {
         {/* Panel lateral: Acciones + Alertas */}
         <div className="space-y-3">
           {/* Acciones Rápidas */}
-          <div className="bg-surface-card border border-border rounded-2xl p-4">
+          <div className="bg-surface-card border border-border rounded-2xl p-4 shadow-card hover-card-effect">
             <h3 className="text-[10px] font-primary text-text-3 uppercase tracking-[0.12em] mb-3">
               Acciones Rápidas
             </h3>
@@ -629,7 +629,7 @@ export default function DashboardPage() {
           {data.pendingVerifications > 0 && (
             <div
               className="bg-gradient-to-r from-[rgba(224,64,251,0.10)] to-[rgba(124,77,255,0.06)]
-                                        border border-[rgba(224,64,251,0.20)] rounded-2xl p-4"
+                                        border border-[rgba(224,64,251,0.20)] rounded-2xl p-4 shadow-card hover-card-effect"
             >
               <div className="flex items-center gap-3 mb-3">
                 <div
@@ -662,7 +662,7 @@ export default function DashboardPage() {
           {data.creditsDueToday.length > 0 && (
             <div
               className="bg-status-warn/5 border border-status-warn/15
-                                        rounded-2xl p-4 shadow-sm"
+                                        rounded-2xl p-4 shadow-card hover-card-effect"
             >
               <div className="flex items-center gap-2 mb-3">
                 <Clock className="w-4 h-4 text-status-warn flex-shrink-0" />
@@ -692,7 +692,7 @@ export default function DashboardPage() {
           {data.lowStockProducts.length > 0 && (
             <div
               className="bg-status-danger/5 border border-status-danger/12
-                                        rounded-2xl p-4 shadow-sm"
+                                        rounded-2xl p-4 shadow-card hover-card-effect"
             >
               <div className="flex items-center gap-2 mb-3">
                 <Package className="w-4 h-4 text-status-danger flex-shrink-0" />
@@ -726,7 +726,7 @@ export default function DashboardPage() {
       {/* ═══ ZONA 4-5: Top Clientes + Top Productos ═══ */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Top Clientes */}
-        <div className="bg-surface-card border border-border rounded-2xl p-5">
+        <div className="bg-surface-card border border-border rounded-2xl p-5 shadow-card hover-card-effect">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-primary text-sm text-text-1">
               Top Clientes
@@ -789,7 +789,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Top Productos */}
-        <div className="bg-surface-card border border-border rounded-2xl p-5 shadow-sm">
+        <div className="bg-surface-card border border-border rounded-2xl p-5 shadow-card hover-card-effect">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-primary text-sm text-text-1">
               Más Vendidos
@@ -859,7 +859,7 @@ export default function DashboardPage() {
 function SalesChart({ data }: { data: { month: string; total: number }[] }) {
   if (!data || data.length === 0) {
     return (
-      <div className="bg-surface-card border border-border rounded-2xl p-6">
+      <div className="bg-surface-card border border-border rounded-2xl p-6 shadow-card hover-card-effect">
         <h2 className="font-primary text-base text-text-1 mb-2">
           Ventas por Mes
         </h2>
@@ -898,7 +898,7 @@ function SalesChart({ data }: { data: { month: string; total: number }[] }) {
   const totalVentas = filledData.reduce((s, d) => s + d.total, 0);
 
   return (
-    <div className="bg-surface-card border border-border rounded-2xl p-6 shadow-sm">
+    <div className="bg-surface-card border border-border rounded-2xl p-6 shadow-card hover-card-effect">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="font-primary text-base text-text-1">

@@ -6,8 +6,8 @@ import Link from "next/link";
 export function AlertsPanel({ clients }: { clients: any[] }) {
   if (!clients || clients.length === 0) {
     return (
-      <Card className="p-6 bg-surface-card border-border shadow-card">
-        <h3 className="text-lg font-syne font-bold text-text-1 mb-4">
+      <Card className="p-6 bg-surface-card border-border shadow-card hover-card-effect">
+        <h3 className="text-lg font-primary text-text-1 mb-4">
           Requieren Atención
         </h3>
         <p className="text-sm text-text-3">
@@ -18,10 +18,10 @@ export function AlertsPanel({ clients }: { clients: any[] }) {
   }
 
   return (
-    <Card className="p-6 bg-surface-card border-border shadow-card no-scrollbar overflow-y-auto">
+    <Card className="p-6 bg-surface-card border-border shadow-card hover-card-effect no-scrollbar overflow-y-auto">
       <div className="flex items-center gap-2 mb-4">
         <AlertCircle className="w-5 h-5 text-status-danger" />
-        <h3 className="text-lg font-syne font-bold text-text-1">
+        <h3 className="text-lg font-primary text-text-1">
           Riesgo Alto (Mora)
         </h3>
       </div>

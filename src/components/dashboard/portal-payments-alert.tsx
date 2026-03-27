@@ -78,7 +78,7 @@ export function PortalPaymentsAlert({ companyId }: { companyId: string }) {
     <div
       className="relative bg-brand/10
                         border border-brand/30 rounded-2xl p-5 mb-4
-                        shadow-brand/10"
+                        shadow-card hover-card-effect"
     >
       {/* Ping */}
       <div className="absolute -top-1.5 -right-1.5">

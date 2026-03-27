@@ -35,7 +35,7 @@ export function DailySeed({ companyId }: { companyId: string }) {
 
   if (!seed) {
     return (
-      <div className="relative bg-surface-card border border-border rounded-2xl p-6 overflow-hidden mb-4 flex items-center gap-4">
+      <div className="relative bg-surface-card border border-border rounded-2xl p-6 overflow-hidden mb-4 flex items-center gap-4 shadow-card hover-card-effect">
         <div className="w-10 h-10 rounded-xl bg-surface-base/10 border border-border flex items-center justify-center text-lg flex-shrink-0 opacity-50">
           ✨
         </div>
@@ -59,7 +59,7 @@ export function DailySeed({ companyId }: { companyId: string }) {
   return (
     <div
       className="relative glass border border-border
-                        shadow-brand/5 rounded-2xl p-4 lg:p-5 overflow-hidden mb-4
+                        shadow-card hover-card-effect rounded-2xl p-4 lg:p-5 overflow-hidden mb-4
                         animate-[fadeUp_0.5s_ease_both]"
     >
       {/* Glow decorativo — más sutil y distribuido */}

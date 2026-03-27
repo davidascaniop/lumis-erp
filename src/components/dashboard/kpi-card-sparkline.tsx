@@ -32,8 +32,8 @@ export function KpiCardWithSparkline({
   return (
     <div
       className="relative bg-surface-card border border-border rounded-2xl p-4 overflow-hidden
-                        hover:border-border-brand/40 hover:-translate-y-0.5
-                        transition-all duration-200 group card-enter h-[140px] flex flex-col justify-between"
+                        shadow-card hover-card-effect
+                        group card-enter h-[140px] flex flex-col justify-between"
     >
       {/* Glow en hover */}
       <div
