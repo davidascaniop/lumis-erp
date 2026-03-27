@@ -97,26 +97,26 @@ export function Topbar() {
   return (
     <header
       className="h-12 flex items-center justify-between px-6 flex-shrink-0
-                           bg-transparent"
+                           bg-transparent border-b border-border/5 transition-colors duration-300"
     >
       {/* Buscador — compacto y elegante */}
       <div
         className="flex items-center gap-2 w-64 px-3 py-1.5
-                            bg-white/[0.03] border border-white/[0.06] rounded-lg
-                            hover:border-white/[0.10]
-                            focus-within:border-[rgba(224,64,251,0.30)]
-                            focus-within:bg-white/[0.04]
-                            transition-all duration-200 group cursor-pointer"
+                             bg-surface-hover/5 border border-border
+                             hover:border-brand/40
+                             focus-within:border-brand/60
+                             focus-within:bg-surface-hover/10
+                             transition-all duration-200 group cursor-pointer"
       >
-        <Search className="w-3.5 h-3.5 text-[#3D2D5C] group-focus-within:text-[#9585B8] transition-colors" />
+        <Search className="w-3.5 h-3.5 text-text-3 group-focus-within:text-text-2 transition-colors" />
         <input
           placeholder="Buscar..."
-          className="bg-transparent text-xs text-white placeholder-[#3D2D5C]
-                               focus:outline-none flex-1"
+          className="bg-transparent text-xs text-text-1 placeholder-text-3
+                                focus:outline-none flex-1"
         />
         <kbd
-          className="text-[8px] font-mono text-[#3D2D5C]
-                                px-1 py-0.5 rounded border border-white/[0.06] bg-white/[0.03]
+          className="text-[8px] font-mono text-text-3
+                                px-1 py-0.5 rounded border border-border bg-surface-hover/5
                                 hidden sm:inline"
         >
           ⌘K
@@ -128,16 +128,16 @@ export function Topbar() {
         {/* BCV — pastilla compacta */}
         <div
           className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg
-                                bg-white/[0.03] border border-white/[0.06]
-                                hover:border-[rgba(0,229,204,0.20)] transition-colors"
+                                bg-surface-hover/5 border border-border
+                                hover:border-ok/40 transition-colors"
         >
           <div className="relative w-1.5 h-1.5">
-            <div className="absolute inset-0 rounded-full bg-[#00E5CC]" />
-            <div className="absolute inset-0 rounded-full bg-[#00E5CC] animate-ping opacity-40" />
+            <div className="absolute inset-0 rounded-full bg-ok" />
+            <div className="absolute inset-0 rounded-full bg-ok animate-ping opacity-40" />
           </div>
-          <span className="currency-bs">
+          <span className="currency-bs !text-text-1/80">
             BCV:{" "}
-            <span className="text-white">Bs.{formatNumber(rate)}/$</span>
+            <span className="text-text-1">Bs.{formatNumber(rate)}/$</span>
           </span>
         </div>
 
@@ -147,15 +147,15 @@ export function Topbar() {
             onClick={() => setShowNotifications(!showNotifications)}
             className={`relative p-2 rounded-lg transition-all duration-150 ${
               showNotifications
-                ? "bg-white/[0.08] text-white"
-                : "hover:bg-white/[0.04] text-[#9585B8] hover:text-white"
+                ? "bg-surface-hover/20 text-text-1"
+                : "hover:bg-surface-hover/10 text-text-2 hover:text-text-1"
             }`}
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
               <span
                 className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full
-                                             bg-[#FF2D55] border-2 border-[#0D0818]
+                                             bg-danger border-2 border-background
                                              flex items-center justify-center text-[7px] font-bold text-white
                                              animate-pulse"
               >
@@ -168,20 +168,20 @@ export function Topbar() {
           {showNotifications && (
             <div
               className="absolute right-0 top-full mt-2 w-80 z-50
-                                        bg-[#130D22] border border-white/[0.08] rounded-2xl
-                                        shadow-[0_16px_48px_rgba(0,0,0,0.50)] overflow-hidden
+                                        bg-surface-elevated border border-border rounded-2xl
+                                        shadow-elevated overflow-hidden
                                         animate-fade-up"
             >
               {/* Header del dropdown */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-semibold text-white">
+                  <h3 className="text-sm font-semibold text-text-1">
                     Notificaciones
                   </h3>
                   {unreadCount > 0 && (
                     <span
                       className="text-[9px] font-bold px-1.5 py-0.5 rounded-full
-                                                         bg-[rgba(224,64,251,0.15)] text-[#E040FB]"
+                                                         bg-brand/15 text-brand"
                     >
                       {unreadCount} nueva{unreadCount > 1 ? "s" : ""}
                     </span>
@@ -191,17 +191,17 @@ export function Topbar() {
                   {unreadCount > 0 && (
                     <button
                       onClick={markAllRead}
-                      className="text-[10px] font-semibold text-[#E040FB] hover:text-white
-                                                       transition-colors px-2 py-1 rounded-md hover:bg-white/[0.04]"
+                      className="text-[10px] font-semibold text-brand hover:text-text-1
+                                                       transition-colors px-2 py-1 rounded-md hover:bg-surface-hover/10"
                     >
                       Marcar todas
                     </button>
                   )}
                   <button
                     onClick={() => setShowNotifications(false)}
-                    className="p-1 rounded-md hover:bg-white/[0.06] transition-colors"
+                    className="p-1 rounded-md hover:bg-surface-hover/10 transition-colors"
                   >
-                    <X className="w-3.5 h-3.5 text-[#3D2D5C]" />
+                    <X className="w-3.5 h-3.5 text-text-3" />
                   </button>
                 </div>
               </div>
@@ -210,8 +210,8 @@ export function Topbar() {
               <div className="max-h-80 overflow-y-auto no-scrollbar">
                 {notifications.length === 0 ? (
                   <div className="py-10 text-center">
-                    <Bell className="w-8 h-8 text-[#3D2D5C] mx-auto mb-2" />
-                    <p className="text-xs text-[#9585B8]">Sin notificaciones</p>
+                    <Bell className="w-8 h-8 text-text-3 mx-auto mb-2" />
+                    <p className="text-xs text-text-2">Sin notificaciones</p>
                   </div>
                 ) : (
                   notifications.map((n) => {
@@ -228,12 +228,12 @@ export function Topbar() {
                           markAsRead(n.id);
                           setShowNotifications(false);
                         }}
-                        className={`flex items-start gap-3 px-4 py-3 border-b border-white/[0.04]
+                        className={`flex items-start gap-3 px-4 py-3 border-b border-border/10
                                                             last:border-0 transition-colors
                                                             ${
                                                               n.read
-                                                                ? "hover:bg-white/[0.02] opacity-60"
-                                                                : "bg-white/[0.02] hover:bg-white/[0.05]"
+                                                                ? "hover:bg-surface-hover/5 opacity-60"
+                                                                : "bg-surface-hover/5 hover:bg-surface-hover/10"
                                                             }`}
                       >
                         {/* Icono */}
@@ -250,20 +250,20 @@ export function Topbar() {
                             <p
                               className={`text-xs leading-tight ${
                                 n.read
-                                  ? "text-[#9585B8]"
-                                  : "text-white font-medium"
+                                  ? "text-text-2"
+                                  : "text-text-1 font-medium"
                               }`}
                             >
                               {n.title}
                             </p>
                             {!n.read && (
-                              <span className="w-1.5 h-1.5 rounded-full bg-[#E040FB] flex-shrink-0 mt-1" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-brand flex-shrink-0 mt-1" />
                             )}
                           </div>
-                          <p className="text-[10px] text-[#3D2D5C] mt-0.5 truncate">
+                          <p className="text-[10px] text-text-3 mt-0.5 truncate">
                             {n.description}
                           </p>
-                          <p className="text-[9px] text-[#3D2D5C] mt-1">
+                          <p className="text-[9px] text-text-3 mt-1">
                             {n.time}
                           </p>
                         </div>
@@ -274,11 +274,11 @@ export function Topbar() {
               </div>
 
               {/* Footer */}
-              <div className="px-4 py-2.5 border-t border-white/[0.06] bg-white/[0.02]">
+              <div className="px-4 py-2.5 border-t border-border bg-surface-hover/5">
                 <Link
                   href="/dashboard/settings"
                   onClick={() => setShowNotifications(false)}
-                  className="text-[10px] font-semibold text-[#E040FB] hover:text-white
+                  className="text-[10px] font-semibold text-brand hover:text-text-1
                                                transition-colors block text-center"
                 >
                   Ver historial completo
@@ -291,7 +291,7 @@ export function Topbar() {
         {/* Avatar — compacto */}
         <Link
           href="/dashboard/settings"
-          className="flex items-center gap-2 pl-2 ml-1 border-l border-white/[0.06]
+          className="flex items-center gap-2 pl-2 ml-1 border-l border-border
                                hover:opacity-80 transition-opacity cursor-pointer"
         >
           <div
@@ -303,10 +303,10 @@ export function Topbar() {
             {user?.full_name?.[0] ?? "U"}
           </div>
           <div className="hidden md:block">
-            <p className="text-xs font-medium text-white leading-none">
+            <p className="text-xs font-medium text-text-1 leading-none uppercase">
               {user?.full_name ?? "Usuario"}
             </p>
-            <p className="text-[9px] text-[#3D2D5C] capitalize mt-0.5">
+            <p className="text-[9px] text-text-3 capitalize mt-0.5">
               {user?.role ?? "admin"}
             </p>
           </div>

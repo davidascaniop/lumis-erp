@@ -33,19 +33,19 @@ export function SuperAdminSidebar() {
   return (
     <aside
       className="w-[220px] flex-shrink-0 flex flex-col h-full
-                      bg-[#08050F] border-r border-white/5"
+                      bg-surface-base border-r border-border transition-colors duration-300"
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-5 border-b border-white/5">
+      <div className="flex items-center gap-3 px-5 py-5 border-b border-border">
         <div
           className="relative w-9 h-9 rounded-xl flex items-center justify-center
                         bg-gradient-to-br from-[#E040FB] to-[#7C4DFF]
-                        shadow-[0_0_20px_rgba(224,64,251,0.40)]"
+                        shadow-[0_0_20px_rgba(224,64,251,0.20)]"
         >
           <Shield className="w-4 h-4 text-white" strokeWidth={2.5} />
         </div>
         <div>
-          <span className="font-display font-bold text-[15px] text-white tracking-tight">
+          <span className="font-display font-bold text-[15px] text-text-1 tracking-tight">
             LUMIS
           </span>
           <p className="text-[9px] text-[#FF2D55] font-bold tracking-widest uppercase leading-none mt-0.5">
@@ -69,8 +69,8 @@ export function SuperAdminSidebar() {
               className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl
                           transition-all duration-150 group ${
                             isActive
-                              ? "bg-gradient-to-r from-[rgba(224,64,251,0.12)] to-[rgba(124,77,255,0.06)] border border-[rgba(224,64,251,0.20)]"
-                              : "hover:bg-white/4"
+                              ? "bg-brand/10 border border-brand/20"
+                              : "hover:bg-surface-hover/10"
                           }`}
             >
               {/* Indicador lateral activo */}
@@ -85,7 +85,7 @@ export function SuperAdminSidebar() {
                 className={`w-4 h-4 flex-shrink-0 ${
                   isActive
                     ? "text-[#E040FB]"
-                    : "text-[#9585B8] group-hover:text-white"
+                    : "text-text-3 group-hover:text-text-1"
                 } transition-colors`}
               />
 
@@ -93,7 +93,7 @@ export function SuperAdminSidebar() {
                 className={`text-sm font-medium ${
                   isActive
                     ? "text-[#E040FB] font-semibold"
-                    : "text-[#9585B8] group-hover:text-white"
+                    : "text-text-2 group-hover:text-text-1"
                 } transition-colors`}
               >
                 {label}
@@ -101,7 +101,7 @@ export function SuperAdminSidebar() {
 
               {!isActive && (
                 <ChevronRight
-                  className="w-3 h-3 text-[#3D2D5C] ml-auto
+                  className="w-3 h-3 text-text-3 ml-auto
                                          opacity-0 group-hover:opacity-100 transition-opacity"
                 />
               )}
@@ -111,12 +111,12 @@ export function SuperAdminSidebar() {
       </nav>
 
       {/* Footer — volver al dashboard */}
-      <div className="p-3 border-t border-white/5">
+      <div className="p-3 border-t border-border">
         <Link
           href="/dashboard"
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl
-                     bg-white/4 hover:bg-white/8 transition-colors text-[#9585B8]
-                     hover:text-white text-xs font-medium"
+                     bg-surface-hover/5 hover:bg-surface-hover/10 transition-colors text-text-3
+                     hover:text-text-1 text-xs font-medium"
         >
           ← Volver al Dashboard
         </Link>

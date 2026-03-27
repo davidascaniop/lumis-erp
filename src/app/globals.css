@@ -68,10 +68,50 @@
 }
 
 /* =============================================
-   LUMIS — Titanium Rose Refinado
+   LUMIS — Sistema de Variables de Tema
    ============================================= */
 :root {
-  /* Fondos con más profundidad */
+  /* --- MODO CLARO (Default) --- */
+  --bg-base:        #F8F9FA;
+  --bg-surface:     #FFFFFF;
+  --bg-card:        #FFFFFF;
+  --bg-card-hover:  #F1F3F5;
+  --bg-elevated:    #FFFFFF;
+  --bg-input:       #FFFFFF;
+
+  /* Marca (Se mantiene igual en ambos) */
+  --brand:          #E040FB;
+  --brand-dark:     #7C4DFF;
+  --brand-glow:     rgba(224, 64, 251, 0.10);
+  --brand-gradient: linear-gradient(135deg, #E040FB 0%, #7C4DFF 100%);
+
+  /* Semánticos */
+  --ok:      #00BFA5;
+  --warn:    #F57C00;
+  --danger:  #D32F2F;
+  --info:    #0288D1;
+
+  /* Texto */
+  --text-1:  #1A1125; /* Casi negro con matiz púrpura */
+  --text-2:  #6B5E84; /* Gris púrpura medio */
+  --text-3:  #9E94B0; /* Gris púrpura claro */
+
+  /* Bordes */
+  --border:       rgba(0, 0, 0, 0.08);
+  --border-brand: rgba(224, 64, 251, 0.20);
+  --border-focus: rgba(224, 64, 251, 0.45);
+
+  /* Sombras */
+  --shadow-card:     0 2px 12px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.02);
+  --shadow-brand:    0 8px 32px rgba(224,64,251,0.15);
+  --shadow-brand-lg: 0 16px 48px rgba(224,64,251,0.20);
+  --shadow-elevated: 0 20px 40px rgba(0,0,0,0.1);
+
+  color-scheme: light;
+}
+
+.dark {
+  /* --- MODO OSCURO --- */
   --bg-base:        #08050F;
   --bg-surface:     #110B1A;
   --bg-card:        #18102A;
@@ -79,13 +119,7 @@
   --bg-elevated:    #241840;
   --bg-input:       #0F0818;
 
-  /* Marca */
-  --brand:          #E040FB;
-  --brand-dark:     #7C4DFF;
-  --brand-glow:     rgba(224, 64, 251, 0.15);
-  --brand-gradient: linear-gradient(135deg, #E040FB 0%, #7C4DFF 100%);
-
-  /* Semánticos */
+  /* Semánticos (Ajustados para oscuridad) */
   --ok:      #00E5CC;
   --warn:    #FFB800;
   --danger:  #FF2D55;
@@ -162,9 +196,9 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  .font-primary   { font-family: var(--font-montserrat); font-weight: 900; color: #FFFFFF; }
-  .font-secondary { font-family: var(--font-montserrat); font-weight: 300; }
-  .font-tertiary  { font-family: var(--font-montserrat); font-weight: 200; }
+  .font-primary   { font-family: var(--font-montserrat); font-weight: 900; color: var(--text-1); }
+  .font-secondary { font-family: var(--font-montserrat); font-weight: 300; color: var(--text-2); }
+  .font-tertiary  { font-family: var(--font-montserrat); font-weight: 200; color: var(--text-3); }
 
   .font-display { font-family: var(--font-montserrat); font-weight: 900; }
   .font-syne    { font-family: var(--font-montserrat); font-weight: 900; }
@@ -176,7 +210,7 @@
   .currency-bs {
     font-family: var(--font-montserrat);
     font-weight: 300;
-    color: #FFFFFF;
+    color: var(--text-1);
     font-size: 10px;
     opacity: 0.9;
   }
@@ -215,7 +249,12 @@
 .dot-pulse     { animation: glowPulse 2s infinite; }
 
 .skeleton {
-  background: linear-gradient(90deg, #18102A 25%, #241840 50%, #18102A 75%);
+  background: linear-gradient(
+    90deg, 
+    var(--bg-card) 25%, 
+    var(--bg-card-hover) 50%, 
+    var(--bg-card) 75%
+  );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat, Outfit, Plus_Jakarta_Sans, Syne, DM_Sans, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -47,12 +48,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="dark">
+    <html lang="es" suppressHydrationWarning>
       <body
-        className={`${plusJakarta.variable} ${montserrat.variable} ${outfit.variable} ${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable} antialiased font-sans`}
+        className={`${plusJakarta.variable} ${montserrat.variable} ${outfit.variable} ${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable} antialiased font-sans transition-colors duration-300`}
       >
-        {children}
-        <Toaster richColors position="top-right" />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster richColors position="top-right" />
+        </ThemeProvider>
       </body>
     </html>
   );
