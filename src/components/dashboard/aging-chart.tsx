@@ -5,9 +5,9 @@ export function AgingChart({ data }: { data: any[] }) {
   // A simple representation of an aging chart since recharts component causes size bloat initially.
   // I will implement a visual flex-bar for now to keep it lightweight, or basic Recharts if requested.
   return (
-    <Card className="p-6 bg-surface-card border-border-brand shadow-card">
-      <h3 className="text-lg font-syne font-bold text-white mb-4">
-        Aging de Cartera (Gráfico)
+    <Card className="p-6 bg-surface-card border-border shadow-card">
+      <h3 className="text-lg font-syne font-bold text-text-1 mb-4">
+        Aging de Cartera
       </h3>
       <div className="flex h-48 items-end gap-2">
         {data.map((d, i) => {

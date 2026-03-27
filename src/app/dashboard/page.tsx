@@ -410,19 +410,19 @@ export default function DashboardPage() {
               ¡{getGreeting()}, {firstName}!
             </h1>
           </div>
-          <p className="text-sm text-[#9585B8]">{formatDateEs(new Date())}</p>
+          <p className="text-sm text-text-2">{formatDateEs(new Date())}</p>
         </div>
 
         {/* Selector de período */}
-        <div className="flex items-center gap-1 p-1 bg-[#18102A] rounded-xl border border-white/[0.06]">
+        <div className="flex items-center gap-1 p-1 bg-surface-card rounded-xl border border-border">
           {["hoy", "semana", "mes", "año"].map((p) => (
             <button
               key={p}
               onClick={() => setPeriod(p)}
               className={`px-4 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${
                 period === p
-                  ? "bg-gradient-to-r from-[#E040FB] to-[#7C4DFF] text-white shadow-[0_2px_8px_rgba(224,64,251,0.30)]"
-                  : "text-[#9585B8] hover:text-white"
+                  ? "bg-gradient-to-r from-brand to-brand-dark text-white shadow-brand"
+                  : "text-text-2 hover:text-text-1"
               }`}
             >
               {p}
@@ -500,40 +500,40 @@ export default function DashboardPage() {
 
         {/* KPI 5: Eficiencia de Cobro */}
         <div
-          className="relative bg-[#18102A] border border-white/[0.06] rounded-2xl p-4 overflow-hidden
-                                hover:border-[rgba(224,64,251,0.20)] hover:-translate-y-0.5
+          className="relative bg-surface-card border border-border rounded-2xl p-4 overflow-hidden
+                                hover:border-border-brand/50 hover:-translate-y-0.5
                                 transition-all duration-200 group card-enter h-[140px]"
         >
           <div
             className="absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl pointer-events-none
                                     opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-            style={{ background: "rgba(124,77,255,0.10)" }}
+            style={{ background: "var(--brand-glow)" }}
           />
           <div className="flex items-start justify-between mb-2 relative">
-            <div className="p-2 rounded-xl bg-[rgba(124,77,255,0.10)]">
-              <Target className="w-4 h-4 text-[#7C4DFF]" />
+            <div className="p-2 rounded-xl bg-brand/10">
+              <Target className="w-4 h-4 text-brand" />
             </div>
-            <span className="text-[10px] font-semibold text-[#3D2D5C]">
+            <span className="text-[10px] font-semibold text-text-3">
               este mes
             </span>
           </div>
           <div className="font-primary text-2xl leading-tight mb-0.5 relative">
             {data.collectionRate}%
           </div>
-          <p className="text-[11px] text-[#9585B8] mb-3 relative">
+          <p className="text-[11px] text-text-2 mb-3 relative">
             Efic. de Cobro
           </p>
-          <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden relative">
+          <div className="h-1 bg-surface-card/10 rounded-full overflow-hidden relative">
             <div
               className="h-full rounded-full transition-all duration-700"
               style={{
                 width: `${Math.min(data.collectionRate, 100)}%`,
                 background:
                   data.collectionRate > 70
-                    ? "linear-gradient(90deg, #00E5CC, #7C4DFF)"
+                    ? "linear-gradient(90deg, var(--ok), var(--brand))"
                     : data.collectionRate > 40
-                      ? "linear-gradient(90deg, #FFB800, #E040FB)"
-                      : "linear-gradient(90deg, #FF2D55, #FFB800)",
+                      ? "linear-gradient(90deg, var(--warn), var(--brand))"
+                      : "linear-gradient(90deg, var(--danger), var(--warn))",
               }}
             />
           </div>
@@ -541,7 +541,7 @@ export default function DashboardPage() {
             className="absolute bottom-0 left-0 right-0 h-[1.5px] rounded-b-2xl
                                     opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
             style={{
-              background: "linear-gradient(90deg, #7C4DFF, transparent)",
+              background: "linear-gradient(90deg, var(--brand), transparent)",
             }}
           />
         </div>
@@ -569,8 +569,8 @@ export default function DashboardPage() {
         {/* Panel lateral: Acciones + Alertas */}
         <div className="space-y-3">
           {/* Acciones Rápidas */}
-          <div className="bg-[#18102A] border border-white/[0.06] rounded-2xl p-4">
-            <h3 className="text-[10px] font-primary text-[#3D2D5C] uppercase tracking-[0.12em] mb-3">
+          <div className="bg-surface-card border border-border rounded-2xl p-4">
+            <h3 className="text-[10px] font-primary text-text-3 uppercase tracking-[0.12em] mb-3">
               Acciones Rápidas
             </h3>
             <div className="grid grid-cols-2 gap-2">
@@ -604,8 +604,8 @@ export default function DashboardPage() {
                   key={label}
                   href={href}
                   className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl
-                                               bg-white/[0.03] border border-white/[0.06]
-                                               hover:bg-white/[0.06] hover:border-white/[0.10]
+                                               bg-surface-base/10 border border-border
+                                               hover:bg-surface-hover/20 hover:border-border-brand/30
                                                transition-all duration-150 group text-center"
                 >
                   <div
@@ -615,8 +615,8 @@ export default function DashboardPage() {
                     <Icon className="w-4 h-4" style={{ color }} />
                   </div>
                   <span
-                    className="text-[10px] font-semibold text-[#9585B8]
-                                                     group-hover:text-white transition-colors leading-tight"
+                    className="text-[10px] font-semibold text-text-2
+                                                     group-hover:text-text-1 transition-colors leading-tight"
                   >
                     {label}
                   </span>
@@ -639,10 +639,10 @@ export default function DashboardPage() {
                   <ShieldCheck className="w-4 h-4 text-[#E040FB]" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-sm font-semibold text-text-1">
                     Verificar Cobros
                   </p>
-                  <p className="text-[11px] text-[#9585B8]">
+                  <p className="text-[11px] text-text-2">
                     {data.pendingVerifications} pago(s) esperando
                   </p>
                 </div>
@@ -661,12 +661,12 @@ export default function DashboardPage() {
           {/* Créditos venciendo HOY */}
           {data.creditsDueToday.length > 0 && (
             <div
-              className="bg-[rgba(255,184,0,0.06)] border border-[rgba(255,184,0,0.15)]
-                                        rounded-2xl p-4"
+              className="bg-status-warn/5 border border-status-warn/15
+                                        rounded-2xl p-4 shadow-sm"
             >
               <div className="flex items-center gap-2 mb-3">
-                <Clock className="w-4 h-4 text-[#FFB800] flex-shrink-0" />
-                <p className="text-xs font-semibold text-[#FFB800]">
+                <Clock className="w-4 h-4 text-status-warn flex-shrink-0" />
+                <p className="text-xs font-semibold text-status-warn">
                   Vencen HOY ({data.creditsDueToday.length})
                 </p>
               </div>
@@ -674,12 +674,12 @@ export default function DashboardPage() {
                 {data.creditsDueToday.slice(0, 3).map((item: any) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between py-1.5 border-b border-white/[0.04] last:border-0"
+                    className="flex items-center justify-between py-1.5 border-b border-border last:border-0"
                   >
-                    <p className="text-xs font-medium text-white truncate max-w-[140px]">
+                    <p className="text-xs font-medium text-text-1 truncate max-w-[140px]">
                       {item.client_name}
                     </p>
-                    <span className="font-primary text-xs text-[#FFB800]">
+                    <span className="font-primary text-xs text-status-warn">
                       {formatCurrency(item.amount)}
                     </span>
                   </div>
@@ -691,12 +691,12 @@ export default function DashboardPage() {
           {/* Alertas Stock Bajo */}
           {data.lowStockProducts.length > 0 && (
             <div
-              className="bg-[rgba(255,45,85,0.05)] border border-[rgba(255,45,85,0.12)]
-                                        rounded-2xl p-4"
+              className="bg-status-danger/5 border border-status-danger/12
+                                        rounded-2xl p-4 shadow-sm"
             >
               <div className="flex items-center gap-2 mb-3">
-                <Package className="w-4 h-4 text-[#FF2D55] flex-shrink-0" />
-                <p className="text-xs font-semibold text-[#FF2D55]">
+                <Package className="w-4 h-4 text-status-danger flex-shrink-0" />
+                <p className="text-xs font-semibold text-status-danger">
                   Stock Bajo ({data.lowStockProducts.length})
                 </p>
               </div>
@@ -704,14 +704,14 @@ export default function DashboardPage() {
                 {data.lowStockProducts.slice(0, 3).map((p: any) => (
                   <div
                     key={p.id}
-                    className="flex items-center justify-between py-1.5 border-b border-white/[0.04] last:border-0"
+                    className="flex items-center justify-between py-1.5 border-b border-border last:border-0"
                   >
-                    <p className="text-xs font-medium text-white truncate max-w-[140px]">
+                    <p className="text-xs font-medium text-text-1 truncate max-w-[140px]">
                       {p.name}
                     </p>
                     <span
                       className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-md
-                                                         bg-[rgba(255,45,85,0.10)] text-[#FF2D55]"
+                                                         bg-status-danger/10 text-status-danger"
                     >
                       {p.stock} {p.unit}
                     </span>
@@ -726,14 +726,14 @@ export default function DashboardPage() {
       {/* ═══ ZONA 4-5: Top Clientes + Top Productos ═══ */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Top Clientes */}
-        <div className="bg-[#18102A] border border-white/[0.06] rounded-2xl p-5">
+        <div className="bg-surface-card border border-border rounded-2xl p-5">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="font-primary text-sm">
+            <h2 className="font-primary text-sm text-text-1">
               Top Clientes
             </h2>
             <Link
               href="/dashboard/clientes"
-              className="text-[11px] font-semibold text-[#E040FB] hover:text-white transition-colors flex items-center gap-1"
+              className="text-[11px] font-semibold text-brand hover:text-brand-dark transition-colors flex items-center gap-1"
             >
               Ver todos <ChevronRight className="w-3 h-3" />
             </Link>
@@ -747,7 +747,7 @@ export default function DashboardPage() {
                   <div key={client.partner_id}>
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-[10px] text-[#3D2D5C] w-4">
+                        <span className="font-mono text-[10px] text-text-3 w-4">
                           #{i + 1}
                         </span>
                         <div
@@ -756,15 +756,15 @@ export default function DashboardPage() {
                         >
                           {client.name?.[0]?.toUpperCase() ?? "?"}
                         </div>
-                        <span className="text-xs font-medium text-white truncate max-w-[120px]">
+                        <span className="text-xs font-medium text-text-1 truncate max-w-[120px]">
                           {client.name}
                         </span>
                       </div>
-                      <span className="font-primary text-xs text-[#FF2D55]">
+                      <span className="font-primary text-xs text-status-danger">
                         {formatCurrency(client.total)}
                       </span>
                     </div>
-                    <div className="h-1 bg-white/[0.05] rounded-full overflow-hidden ml-6">
+                    <div className="h-1 bg-surface-card/10 rounded-full overflow-hidden ml-6">
                       <div
                         className="h-full rounded-full transition-all duration-700"
                         style={{
@@ -789,12 +789,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Top Productos */}
-        <div className="bg-[#18102A] border border-white/[0.06] rounded-2xl p-5">
+        <div className="bg-surface-card border border-border rounded-2xl p-5 shadow-sm">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="font-primary text-sm">
+            <h2 className="font-primary text-sm text-text-1">
               Más Vendidos
             </h2>
-            <span className="text-[10px] text-[#3D2D5C]">este mes</span>
+            <span className="text-[10px] text-text-3">este mes</span>
           </div>
           {data.topProducts.length > 0 ? (
             <div className="space-y-3">
@@ -809,24 +809,24 @@ export default function DashboardPage() {
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-medium text-white truncate max-w-[140px]">
+                        <span className="text-xs font-medium text-text-1 truncate max-w-[140px]">
                           {p.name}
                         </span>
-                        <span className="font-primary text-[11px] text-[#00E5CC] ml-2 flex-shrink-0">
+                        <span className="font-primary text-[11px] text-ok ml-2 flex-shrink-0">
                           {formatCurrency(p.revenue)}
                         </span>
                       </div>
-                      <div className="h-1 bg-white/[0.05] rounded-full overflow-hidden">
+                      <div className="h-1 bg-surface-card/10 rounded-full overflow-hidden">
                         <div
                           className="h-full rounded-full"
                           style={{
                             width: `${pct}%`,
                             background:
-                              "linear-gradient(90deg, #00E5CC, #7C4DFF)",
+                              "linear-gradient(90deg, var(--ok), var(--brand))",
                           }}
                         />
                       </div>
-                      <span className="text-[9px] text-[#3D2D5C] mt-0.5 block">
+                      <span className="text-[9px] text-text-3 mt-0.5 block">
                         {p.qty} {p.unit}
                       </span>
                     </div>
@@ -836,8 +836,8 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="text-center py-8">
-              <Package className="w-8 h-8 text-[#3D2D5C] mx-auto mb-2" />
-              <p className="text-xs text-[#9585B8]">Sin ventas este mes</p>
+              <Package className="w-8 h-8 text-text-3 mx-auto mb-2" />
+              <p className="text-xs text-text-2">Sin ventas este mes</p>
             </div>
           )}
         </div>
@@ -859,12 +859,12 @@ export default function DashboardPage() {
 function SalesChart({ data }: { data: { month: string; total: number }[] }) {
   if (!data || data.length === 0) {
     return (
-      <div className="bg-[#18102A] border border-white/[0.06] rounded-2xl p-6">
-        <h2 className="font-primary text-base text-white mb-2">
+      <div className="bg-surface-card border border-border rounded-2xl p-6">
+        <h2 className="font-primary text-base text-text-1 mb-2">
           Ventas por Mes
         </h2>
         <div className="flex items-center justify-center h-48">
-          <p className="text-xs text-[#9585B8]">Sin datos de ventas aún</p>
+          <p className="text-xs text-text-2">Sin datos de ventas aún</p>
         </div>
       </div>
     );
@@ -898,23 +898,23 @@ function SalesChart({ data }: { data: { month: string; total: number }[] }) {
   const totalVentas = filledData.reduce((s, d) => s + d.total, 0);
 
   return (
-    <div className="bg-[#18102A] border border-white/[0.06] rounded-2xl p-6">
+    <div className="bg-surface-card border border-border rounded-2xl p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="font-primary text-base">
+          <h2 className="font-primary text-base text-text-1">
             Ventas por Mes
           </h2>
-          <p className="text-xs text-[#9585B8] mt-0.5">
+          <p className="text-xs text-text-2 mt-0.5">
             Facturación total en USD
           </p>
         </div>
         <div className="flex items-center gap-3 text-xs">
-          <span className="flex items-center gap-1.5 text-[#9585B8]">
-            <span className="w-3 h-1 bg-gradient-to-r from-[#E040FB] to-[#7C4DFF] rounded-full inline-block" />
+          <span className="flex items-center gap-1.5 text-text-2">
+            <span className="w-3 h-1 bg-gradient-to-r from-brand to-brand-dark rounded-full inline-block" />
             Ventas
           </span>
           {totalVentas > 0 && (
-            <span className="font-primary text-white">
+            <span className="font-primary text-text-1">
               {formatCurrency(totalVentas)}
             </span>
           )}
@@ -937,8 +937,8 @@ function SalesChart({ data }: { data: { month: string; total: number }[] }) {
               <span
                 className={`text-[10px] font-primary transition-opacity ${
                   hasValue
-                    ? "text-[#E040FB] opacity-100"
-                    : "text-[#3D2D5C] opacity-0 group-hover:opacity-100"
+                    ? "text-brand opacity-100"
+                    : "text-text-3 opacity-0 group-hover:opacity-100"
                 }`}
               >
                 {hasValue ? formatCurrency(d.total) : "$0"}
@@ -950,12 +950,12 @@ function SalesChart({ data }: { data: { month: string; total: number }[] }) {
                   height: `${heightPct}%`,
                   background: hasValue
                     ? isLast
-                      ? "linear-gradient(180deg, #E040FB, #7C4DFF)"
-                      : "linear-gradient(180deg, rgba(224,64,251,0.40), rgba(124,77,255,0.15))"
-                    : "rgba(255,255,255,0.03)",
+                      ? "linear-gradient(180deg, var(--brand), var(--brand-dark))"
+                      : "linear-gradient(180deg, var(--brand-glow), var(--bg-card-hover))"
+                    : "var(--bg-card-hover)",
                   boxShadow:
                     hasValue && isLast
-                      ? "0 0 20px rgba(224,64,251,0.35)"
+                      ? "var(--shadow-brand)"
                       : "none",
                   borderRadius: "6px 6px 0 0",
                 }}
@@ -963,10 +963,10 @@ function SalesChart({ data }: { data: { month: string; total: number }[] }) {
               <span
                 className={`text-[10px] font-semibold ${
                   isLast
-                    ? "text-[#E040FB]"
+                    ? "text-brand"
                     : hasValue
-                      ? "text-[#9585B8]"
-                      : "text-[#3D2D5C]"
+                      ? "text-text-2"
+                      : "text-text-3"
                 }`}
               >
                 {d.month}

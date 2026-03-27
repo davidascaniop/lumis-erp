@@ -35,15 +35,15 @@ export function DailySeed({ companyId }: { companyId: string }) {
 
   if (!seed) {
     return (
-      <div className="relative bg-[#120D1A] border border-white/[0.04] rounded-2xl p-6 overflow-hidden mb-4 flex items-center gap-4">
-        <div className="w-10 h-10 rounded-xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-center text-lg flex-shrink-0 opacity-50">
+      <div className="relative bg-surface-card border border-border rounded-2xl p-6 overflow-hidden mb-4 flex items-center gap-4">
+        <div className="w-10 h-10 rounded-xl bg-surface-base/10 border border-border flex items-center justify-center text-lg flex-shrink-0 opacity-50">
           ✨
         </div>
         <div>
-          <h4 className="text-xs font-bold text-white mb-0.5">
+          <h4 className="text-xs font-bold text-text-1 mb-0.5">
             Semilla Diaria no disponible
           </h4>
-          <p className="text-[10px] text-[#9585B8]">
+          <p className="text-[10px] text-text-3">
             No hay contenido programado para hoy.
           </p>
         </div>
@@ -58,34 +58,34 @@ export function DailySeed({ companyId }: { companyId: string }) {
 
   return (
     <div
-      className="relative bg-white/[0.015] backdrop-blur-3xl border border-white/[0.06]
-                        shadow-[0_4px_24px_rgba(224,64,251,0.08)] rounded-2xl p-4 lg:p-5 overflow-hidden mb-4
+      className="relative glass border border-border
+                        shadow-brand/5 rounded-2xl p-4 lg:p-5 overflow-hidden mb-4
                         animate-[fadeUp_0.5s_ease_both]"
     >
       {/* Glow decorativo — más sutil y distribuido */}
       <div
         className="absolute -top-12 -right-12 w-48 h-48 rounded-full blur-[80px]
-                            bg-[rgba(224,64,251,0.08)] pointer-events-none"
+                            bg-brand/10 pointer-events-none"
       />
       <div
         className="absolute -bottom-12 -left-12 w-40 h-40 rounded-full blur-[60px]
-                            bg-[rgba(124,77,255,0.1)] pointer-events-none"
+                            bg-brand-dark/10 pointer-events-none"
       />
 
       {/* Header — más compacto */}
       <div className="relative flex items-center justify-between mb-3.5">
         <div className="flex items-center gap-2.5">
           <div
-            className="w-8 h-8 rounded-lg bg-[rgba(224,64,251,0.12)] border border-[rgba(224,64,251,0.2)]
-                                    flex items-center justify-center text-sm flex-shrink-0 shadow-[0_0_15px_rgba(224,64,251,0.1)]"
+            className="w-8 h-8 rounded-lg bg-brand/10 border border-brand/20
+                                    flex items-center justify-center text-sm flex-shrink-0 shadow-brand/10"
           >
             ✨
           </div>
           <div>
-            <p className="text-[10px] font-bold text-[#E040FB] uppercase tracking-[0.12em] leading-none mb-1">
+            <p className="text-[10px] font-bold text-brand uppercase tracking-[0.12em] leading-none mb-1">
               Semilla del Día
             </p>
-            <p className="text-[9px] text-[#9585B8] leading-none">
+            <p className="text-[9px] text-text-3 leading-none">
               {new Date().toLocaleDateString("es-VE", {
                 weekday: "long",
                 day: "numeric",
@@ -97,26 +97,26 @@ export function DailySeed({ companyId }: { companyId: string }) {
       </div>
 
       {/* Versículo — estilizado y con menos margen */}
-      <div className="relative pl-3 border-l-[1.5px] border-[rgba(224,64,251,0.4)] mb-2.5">
-        <blockquote className="font-primary text-sm leading-tight m-0">
+      <div className="relative pl-3 border-l-[1.5px] border-brand mb-2.5">
+        <blockquote className="font-primary text-sm leading-tight m-0 text-text-1">
           &ldquo;{seed.verse}&rdquo;
         </blockquote>
-        <cite className="text-[12px] font-bold text-[#E040FB]/80 not-italic block mt-1.5">
+        <cite className="text-[12px] font-bold text-brand/80 not-italic block mt-1.5">
           — {seed.verse_reference}
         </cite>
       </div>
 
       {/* Contenido expandible */}
       {expanded && (
-        <div className="pt-3.5 border-t border-white/[0.04] space-y-3.5">
+        <div className="pt-3.5 border-t border-border space-y-3.5">
           {seed.reflection && (
-            <p className="text-[13px] text-[#9585B8] leading-relaxed">
+            <p className="text-[13px] text-text-2 leading-relaxed">
               {seed.reflection}
             </p>
           )}
 
           {seed.video_url && (
-            <div className="rounded-xl overflow-hidden shadow-lg border border-white/[0.04]">
+            <div className="rounded-xl overflow-hidden shadow-lg border border-border">
               {isYoutube && ytId ? (
                 <iframe
                   src={`https://www.youtube.com/embed/${ytId}`}
@@ -133,11 +133,11 @@ export function DailySeed({ companyId }: { companyId: string }) {
           )}
 
           {seed.case_story && (
-            <div className="bg-white/[0.02] p-3 rounded-xl border border-white/[0.04]">
-              <p className="text-[9px] font-bold text-[#7C4DFF] uppercase tracking-widest mb-1.5 leading-none">
+            <div className="bg-surface-base/40 p-3 rounded-xl border border-border">
+              <p className="text-[9px] font-bold text-brand-dark uppercase tracking-widest mb-1.5 leading-none">
                 Caso de Éxito
               </p>
-              <p className="text-[13px] text-[#9585B8] leading-relaxed">
+              <p className="text-[13px] text-text-2 leading-relaxed">
                 {seed.case_story}
               </p>
             </div>

@@ -13,13 +13,10 @@ const ICONS = {
   maintenance: Wrench,
 };
 const STYLES = {
-  info: "bg-[rgba(79,195,247,0.08)] border-[rgba(79,195,247,0.20)] text-[#4FC3F7]",
-  warning:
-    "bg-[rgba(255,184,0,0.08)]  border-[rgba(255,184,0,0.20)]  text-[#FFB800]",
-  success:
-    "bg-[rgba(0,229,204,0.08)]  border-[rgba(0,229,204,0.20)]  text-[#00E5CC]",
-  maintenance:
-    "bg-white/4               border-white/10               text-[#9585B8]",
+  info: "bg-surface-base border-border text-brand",
+  warning: "bg-status-warning/10 border-status-warning/20 text-status-warning",
+  success: "bg-status-ok/10 border-status-ok/20 text-status-ok",
+  maintenance: "bg-surface-card border-border text-text-3",
 };
 
 export function BroadcastBanner({
@@ -79,8 +76,8 @@ export function BroadcastBanner({
     >
       <Icon className="w-4 h-4 mt-0.5 flex-shrink-0" />
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-white">{b.title}</p>
-        <p className="text-xs text-[#9585B8] mt-0.5">{b.message}</p>
+        <p className="text-sm font-semibold text-text-1">{b.title}</p>
+        <p className="text-xs text-text-2 mt-0.5">{b.message}</p>
       </div>
       {broadcasts.length > 1 && (
         <span className="text-[10px] text-[#9585B8] flex-shrink-0 self-center">

@@ -31,8 +31,8 @@ export function KpiCardWithSparkline({
 
   return (
     <div
-      className="relative bg-[#18102A] border border-white/[0.06] rounded-2xl p-4 overflow-hidden
-                        hover:border-[rgba(224,64,251,0.20)] hover:-translate-y-0.5
+      className="relative bg-surface-card border border-border rounded-2xl p-4 overflow-hidden
+                        hover:border-border-brand/40 hover:-translate-y-0.5
                         transition-all duration-200 group card-enter h-[140px] flex flex-col justify-between"
     >
       {/* Glow en hover */}
@@ -51,8 +51,8 @@ export function KpiCardWithSparkline({
           <span
             className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
               delta >= 0
-                ? "bg-[rgba(0,229,204,0.10)] text-[#00E5CC]"
-                : "bg-[rgba(255,45,85,0.10)] text-[#FF2D55]"
+                ? "bg-status-ok/10 text-status-ok"
+                : "bg-status-danger/10 text-status-danger"
             }`}
           >
             {delta >= 0 ? "↑" : "↓"}
@@ -62,12 +62,12 @@ export function KpiCardWithSparkline({
       </div>
 
       {/* Valor */}
-      <div className="font-primary text-2xl leading-tight mb-0.5 relative">
+      <div className="font-primary text-2xl leading-tight mb-0.5 relative text-text-1">
         {value}
       </div>
-      <p className="text-[11px] text-[#9585B8] relative">
+      <p className="text-[11px] text-text-2 relative">
         {label}{" "}
-        {sublabel && <span className="text-[#3D2D5C]">· {sublabel}</span>}
+        {sublabel && <span className="text-text-3">· {sublabel}</span>}
       </p>
 
       {/* Sparkline */}
@@ -94,8 +94,8 @@ export function KpiCardWithSparkline({
                 content={({ active, payload }) =>
                   active && payload?.[0] ? (
                     <div
-                      className="bg-[#1F1535] border border-white/10 rounded-lg
-                                                        px-2 py-1 text-[10px] font-mono text-white shadow-elevated"
+                      className="bg-surface-elevated border border-border rounded-lg
+                                                        px-2 py-1 text-[10px] font-mono text-text-1 shadow-elevated"
                     >
                       {payload[0].value}
                     </div>
