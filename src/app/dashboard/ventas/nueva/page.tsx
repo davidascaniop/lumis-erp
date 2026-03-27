@@ -279,47 +279,40 @@ function NuevaVentaContent() {
   // ── RENDER ───────────────────────────────────────────────
   return (
     <div className="flex flex-col h-[calc(100vh-48px)] -m-6 bg-surface-base">
-      {/* ── TOPBAR REFINADO ── */}
-      <div className="px-6 py-8 flex-shrink-0 z-20 bg-white border-b border-[#F1F5F9]">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-6">
-            <button 
-              onClick={() => router.push("/dashboard/ventas")}
-              className="p-3 bg-[#F8F9FA] hover:bg-[#F1F5F9] rounded-2xl transition-all group border border-transparent hover:border-brand/10"
-            >
-              <ArrowLeft className="w-5 h-5 text-text-3 group-hover:-translate-x-1 transition-transform" />
-            </button>
-            <div className="flex flex-col space-y-1">
-              <h1 className="text-4xl font-bold font-outfit text-[#1A1125] tracking-tight">
-                Nueva Venta
-              </h1>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-brand animate-pulse"></div>
-                <p className="text-[12px] font-bold font-outfit text-text-3 uppercase tracking-[0.2em]">Punto de Venta Activo</p>
-              </div>
-            </div>
+      {/* ── TOPBAR SOBRIO ── */}
+      <div className="px-6 py-4 flex-shrink-0 z-20 bg-white border-b border-[#F1F5F9] flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => router.push("/dashboard/ventas")}
+            className="p-2 hover:bg-[#F8F9FA] rounded-full transition-all text-text-3"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="flex flex-col">
+            <h1 className="text-xl font-bold font-outfit text-[#1A1125]">
+              Nueva Venta
+            </h1>
+            <p className="text-[11px] font-medium text-text-3 font-outfit uppercase tracking-wider">Facturación POS</p>
           </div>
+        </div>
 
-          <div className="flex items-center gap-4">
-            <div className="px-6 py-3 rounded-2xl bg-brand/5 border border-brand/10 flex flex-col items-end shadow-sm">
-                <span className="text-[10px] font-bold text-brand uppercase tracking-widest mb-0.5">Tasa Cambiaria BCV</span>
-                <p className="text-[18px] font-bold text-[#1A1125] font-outfit leading-none">
-                  Bs. {rate?.toFixed(2)} <span className="text-[12px] font-medium text-text-3">/$</span>
-                </p>
-            </div>
-          </div>
+        <div className="flex items-center gap-3 bg-[#F8F9FA] px-4 py-2 rounded-xl border border-[#E2E8F0]">
+            <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest text-right">Tasa BCV del día:</span>
+            <p className="text-[15px] font-bold text-brand font-outfit">
+              Bs. {rate?.toFixed(2)}
+            </p>
         </div>
       </div>
 
-      {/* ── CUERPO: DIVISIÓN 50/50 ── */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* ZONA A: CATÁLOGO (50%) */}
-        <div className="flex-[5] flex flex-col overflow-hidden border-r border-[#EDF2F7] bg-white">
+      {/* ── CUERPO: DIVISIÓN DE TRABAJO (65% CATÁLOGO / 35% SIDEBAR) ── */}
+      <div className="flex flex-1 overflow-hidden bg-[#F8FAFC]">
+        {/* CATÁLOGO (ANCHO) */}
+        <div className="flex-[7] flex flex-col overflow-hidden">
           <ProductoGrid productos={products} cart={cart} onAdd={addToCart} />
         </div>
 
-        {/* ZONA B: CARRITO / RESUMEN (50%) */}
-        <div className="flex-[5] flex flex-col overflow-hidden bg-[#F8FAFC]">
+        {/* SIDEBAR DE PAGO (COMPACTO) */}
+        <div className="flex-[3] flex flex-col overflow-hidden border-l border-[#F1F5F9] bg-white shadow-[-8px_0_30px_rgba(0,0,0,0.02)]">
           <CarritoPanel
             cart={cart}
             onUpdateQty={updateQty}
