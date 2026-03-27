@@ -311,36 +311,38 @@ function NuevaVentaContent() {
           <ProductoGrid productos={products} cart={cart} onAdd={addToCart} />
         </div>
 
-        {/* SIDEBAR DE PAGO (COMPACTO) */}
-        <div className="flex-[3] flex flex-col overflow-hidden border-l border-[#F1F5F9] bg-white shadow-[-8px_0_30px_rgba(0,0,0,0.02)]">
-          <CarritoPanel
-            cart={cart}
-            onUpdateQty={updateQty}
-            onRemove={removeFromCart}
-            condition={paymentType}
-            onConditionChange={(v) => {
-              setPaymentType(v);
-              if (v === "contado") setAmountPaid(total);
-            }}
-            method={paymentMethod}
-            onMethodChange={setPaymentMethod}
-            subtotal={subtotal}
-            bcvRate={rate || 0}
-            cliente={selectedPartner}
-            onSubmit={handleCreateOrder}
-            submitting={saving}
-            amountPaid={amountPaid}
-            onAmountPaidChange={setAmountPaid}
-            // New Client Props
-            newClientName={newClientName}
-            setNewClientName={setNewClientName}
-            newClientRif={newClientRif}
-            setNewClientRif={setNewClientRif}
-            newClientPhone={newClientPhone}
-            setNewClientPhone={setNewClientPhone}
-            partners={partners}
-            onSelectPartner={setSelectedPartner}
-          />
+        {/* SIDEBAR DE PAGO (BUBBLE CARD STYLE) */}
+        <div className="flex-[3.5] flex flex-col overflow-hidden bg-[#F8FAFC] p-4 xl:p-6 border-l border-[#F1F5F9]">
+          <div className="flex-1 bg-white rounded-[40px] shadow-[0_12px_40px_rgba(0,0,0,0.03)] border border-[#EDF2F7] overflow-hidden flex flex-col">
+            <CarritoPanel
+              cart={cart}
+              onUpdateQty={updateQty}
+              onRemove={removeFromCart}
+              condition={paymentType}
+              onConditionChange={(v) => {
+                setPaymentType(v);
+                if (v === "contado") setAmountPaid(total);
+              }}
+              method={paymentMethod}
+              onMethodChange={setPaymentMethod}
+              subtotal={subtotal}
+              bcvRate={rate || 0}
+              cliente={selectedPartner}
+              onSubmit={handleCreateOrder}
+              submitting={saving}
+              amountPaid={amountPaid}
+              onAmountPaidChange={setAmountPaid}
+              // New Client Props
+              newClientName={newClientName}
+              setNewClientName={setNewClientName}
+              newClientRif={newClientRif}
+              setNewClientRif={setNewClientRif}
+              newClientPhone={newClientPhone}
+              setNewClientPhone={setNewClientPhone}
+              partners={partners}
+              onSelectPartner={setSelectedPartner}
+            />
+          </div>
         </div>
       </div>
     </div>
