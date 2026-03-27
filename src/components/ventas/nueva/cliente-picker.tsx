@@ -48,18 +48,18 @@ export function ClientePicker({
   return (
     <div
       ref={containerRef}
-      className="px-5 py-4 border-b border-white/5 flex-shrink-0 relative z-10"
+      className="px-5 py-4 border-b border-border flex-shrink-0 relative z-10"
     >
       {selected ? (
         /* ── CLIENTE SELECCIONADO ── */
         <div
           className="flex items-center gap-3 px-4 py-3 rounded-xl
-                                bg-[#18102A] border border-[rgba(224,64,251,0.20)]"
+                                bg-surface-card border border-border"
         >
           {/* Avatar */}
           <div
-            className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#E040FB]/20 to-[#7C4DFF]/20
-                                    flex items-center justify-center text-sm font-bold text-[#E040FB] flex-shrink-0"
+            className="w-9 h-9 rounded-lg bg-brand/10
+                                    flex items-center justify-center text-sm font-bold text-brand flex-shrink-0"
           >
             {selected.name[0].toUpperCase()}
           </div>
@@ -67,7 +67,7 @@ export function ClientePicker({
           {/* Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold text-white truncate">
+              <p className="text-sm font-semibold text-text-1 truncate">
                 {selected.name}
               </p>
               {(() => {
@@ -85,13 +85,13 @@ export function ClientePicker({
                 );
               })()}
             </div>
-            <p className="text-[11px] text-[#9585B8]">
+            <p className="text-[11px] text-text-3">
               {selected.rif}
               {selected.credit_limit_usd > 0 && (
                 <>
                   {" "}
                   · Límite{" "}
-                  <span className="font-mono text-[#9585B8]">
+                  <span className="font-mono text-text-3">
                     ${Number(selected.credit_limit_usd).toFixed(2)}
                   </span>
                 </>
@@ -102,8 +102,8 @@ export function ClientePicker({
           {/* Cambiar */}
           <button
             onClick={onClear}
-            className="p-1.5 rounded-lg hover:bg-white/[0.08] text-[#9585B8]
-                                       hover:text-white transition-colors flex-shrink-0"
+            className="p-1.5 rounded-lg hover:bg-surface-base text-text-3
+                                       hover:text-text-1 transition-colors flex-shrink-0"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -117,12 +117,11 @@ export function ClientePicker({
               setTimeout(() => inputRef.current?.focus(), 50);
             }}
             className="flex items-center gap-2.5 px-4 py-3 rounded-xl
-                                    bg-[#18102A] border border-white/[0.06] cursor-text
-                                    focus-within:border-[rgba(224,64,251,0.40)]
-                                    focus-within:shadow-[0_0_0_3px_rgba(224,64,251,0.08)]
+                                    bg-surface-input border border-border cursor-text
+                                    focus-within:border-brand/40
                                     transition-all duration-200"
           >
-            <Search className="w-4 h-4 text-[#3D2D5C] flex-shrink-0" />
+            <Search className="w-4 h-4 text-text-3 flex-shrink-0" />
             <input
               ref={inputRef}
               value={query}
@@ -132,13 +131,13 @@ export function ClientePicker({
               }}
               onFocus={() => setOpen(true)}
               placeholder="Buscar cliente por nombre o RIF..."
-              className="bg-transparent text-sm text-white placeholder-[#3D2D5C]
+              className="bg-transparent text-sm text-text-1 placeholder:text-text-3
                                        focus:outline-none flex-1"
             />
             {query && (
               <button
                 onClick={() => setQuery("")}
-                className="text-[#3D2D5C] hover:text-white transition-colors"
+                className="text-text-3 hover:text-text-1 transition-colors"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -149,8 +148,8 @@ export function ClientePicker({
           {open && filtered.length > 0 && (
             <div
               className="absolute left-5 right-5 top-full mt-1 z-50
-                                        bg-[#1C1228] border border-white/[0.08] rounded-xl
-                                        shadow-[0_16px_48px_rgba(0,0,0,0.6)] overflow-hidden"
+                                        bg-surface-elevated border border-border rounded-xl
+                                        shadow-brand/5 overflow-hidden"
             >
               {filtered.map((c) => {
                 const s = getSemaforo(c);
@@ -162,20 +161,20 @@ export function ClientePicker({
                       setOpen(false);
                       setQuery("");
                     }}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.04]
-                                                   cursor-pointer transition-colors border-b border-white/[0.04] last:border-0"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-surface-base
+                                                   cursor-pointer transition-colors border-b border-border last:border-0"
                   >
                     <div
-                      className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#E040FB]/15 to-[#7C4DFF]/15
-                                                        flex items-center justify-center text-xs font-bold text-[#E040FB] flex-shrink-0"
+                      className="w-8 h-8 rounded-lg bg-brand/10
+                                                        flex items-center justify-center text-xs font-bold text-brand flex-shrink-0"
                     >
                       {c.name[0].toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white truncate">
+                      <p className="text-sm font-medium text-text-1 truncate">
                         {c.name}
                       </p>
-                      <p className="text-[11px] text-[#9585B8]">{c.rif}</p>
+                      <p className="text-[11px] text-text-3">{c.rif}</p>
                     </div>
                     {s && (
                       <div

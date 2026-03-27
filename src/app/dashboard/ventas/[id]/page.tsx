@@ -183,7 +183,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
       {/* VOLVER */}
       <button
         onClick={() => router.back()}
-        className="flex items-center gap-2 text-text-3 hover:text-white transition-colors"
+        className="flex items-center gap-2 text-text-3 hover:text-text-1 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Volver a Ventas
       </button>
@@ -191,10 +191,10 @@ export default function OrderDetailsPage({ params }: { params: any }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <div className="lg:col-span-2 space-y-6">
           {/* HEADER */}
-          <Card className="p-6 bg-surface-card border-border-brand shadow-brand flex justify-between items-center">
+          <Card className="p-6 bg-surface-card border-border shadow-card flex justify-between items-center">
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-primary">
+                <h1 className="text-2xl font-primary text-text-1">
                   {order.order_number}
                 </h1>
                 <StatusBadge status={order.status} />
@@ -210,7 +210,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
               <p className="text-xs text-text-3 uppercase tracking-widest font-bold">
                 Vendedor
               </p>
-              <p className="font-semibold text-white">
+              <p className="font-semibold text-text-1">
                 {order.users?.full_name}
               </p>
             </div>
@@ -227,9 +227,9 @@ export default function OrderDetailsPage({ params }: { params: any }) {
                 showLabel
               />
             </div>
-            <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+            <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between p-4 bg-surface-base border border-border rounded-xl">
               <div>
-                <p className="font-bold text-white text-lg">
+                <p className="font-bold text-text-1 text-lg">
                   {order.partners?.name}
                 </p>
                 <p className="text-sm text-text-3 font-mono">
@@ -240,7 +240,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
                 <p className="text-xs text-text-3 uppercase font-bold mb-1">
                   Estatus Crediticio
                 </p>
-                <p className="text-white font-mono font-bold">
+                <p className="text-text-1 font-mono font-bold">
                   ${Number(order.partners?.current_balance).toFixed(2)} / $
                   {Number(order.partners?.credit_limit).toFixed(2)}
                 </p>
@@ -256,11 +256,11 @@ export default function OrderDetailsPage({ params }: { params: any }) {
 
           {/* PRODUCTOS */}
           <Card className="p-6 bg-surface-card border-border shadow-card overflow-hidden">
-            <h3 className="text-lg font-syne font-bold text-white mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-syne font-bold text-text-1 mb-4 flex items-center gap-2">
               <Package className="w-5 h-5 text-brand" /> Líneas de Pedido
             </h3>
             <table className="w-full text-sm">
-              <thead className="text-text-3 border-b border-white/5">
+              <thead className="text-text-3 border-b border-border">
                 <tr>
                   <th className="pb-3 text-left font-semibold">Producto</th>
                   <th className="pb-3 text-center font-semibold text-xs">
@@ -274,17 +274,17 @@ export default function OrderDetailsPage({ params }: { params: any }) {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {order.order_items?.map((item: any) => (
                   <tr key={item.id}>
-                    <td className="py-4 text-white font-medium">
+                    <td className="py-4 text-text-1 font-medium">
                       {item.products?.name}
                     </td>
                     <td className="py-4 text-center text-text-2">{item.qty}</td>
                     <td className="py-4 text-right text-text-2">
                       ${Number(item.price_usd).toFixed(2)}
                     </td>
-                    <td className="py-4 text-right text-white font-mono font-bold">
+                    <td className="py-4 text-right text-text-1 font-mono font-bold">
                       ${Number(item.subtotal).toFixed(2)}
                     </td>
                   </tr>
@@ -292,10 +292,10 @@ export default function OrderDetailsPage({ params }: { params: any }) {
               </tbody>
             </table>
 
-            <div className="mt-8 flex flex-col items-end gap-2 border-t border-white/5 pt-6">
+            <div className="mt-8 flex flex-col items-end gap-2 border-t border-border pt-6">
               <div className="flex justify-between w-full md:w-64 text-text-3 text-sm">
                 <span>Total Neto</span>
-                <span className="text-white font-bold">
+                <span className="text-text-1 font-bold">
                   ${Number(order.total_usd).toFixed(2)}
                 </span>
               </div>
@@ -303,7 +303,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
                 <span>TOTAL</span>
                 <span>${Number(order.total_usd).toFixed(2)}</span>
               </div>
-              <p className="currency-bs">
+              <p className="text-[11px] text-text-3 font-mono">
                 Factor BCV: Bs. {order.total_bs / order.total_usd} | Eq: Bs.{" "}
                 {Number(order.total_bs).toLocaleString()}
               </p>
@@ -319,7 +319,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
                 <CheckCircle2 className="w-5 h-5" /> Confirmar y Cerrar Venta
               </button>
             )}
-            <button className="px-8 py-4 bg-surface-card border border-border text-text-3 rounded-xl hover:text-white transition-all">
+            <button className="px-8 py-4 bg-surface-card border border-border text-text-3 rounded-xl hover:text-text-1 transition-all">
               <Link href={`/dashboard/ventas/${order.id}/nota-entrega`}>
                 Imprimir Comprobante
               </Link>
@@ -329,12 +329,12 @@ export default function OrderDetailsPage({ params }: { params: any }) {
 
         {/* RESUMEN DE PAGO (LATER) */}
         <div className="lg:col-span-1 space-y-6">
-          <Card className="p-6 bg-surface-card border-brand/20 shadow-brand border flex flex-col gap-4">
-            <h3 className="text-lg font-syne font-bold text-white">
+          <Card className="p-6 bg-surface-card border border-border shadow-card flex flex-col gap-4">
+            <h3 className="text-lg font-syne font-bold text-text-1">
               Resumen de Pago
             </h3>
             <div className="space-y-4">
-              <div className="flex justify-between text-sm py-2 border-b border-white/5">
+              <div className="flex justify-between text-sm py-2 border-b border-border">
                 <span className="text-text-3">Condición</span>
                 <span
                   className={`font-bold capitalize ${order.payment_type === "credito" ? "text-status-warning" : "text-status-ok"}`}
@@ -342,13 +342,13 @@ export default function OrderDetailsPage({ params }: { params: any }) {
                   {order.payment_type || "Pendiente"}
                 </span>
               </div>
-              <div className="flex justify-between text-sm py-2 border-b border-white/5">
+              <div className="flex justify-between text-sm py-2 border-b border-border">
                 <span className="text-text-3">Método Inicial</span>
-                <span className="text-white font-medium">
+                <span className="text-text-1 font-medium">
                   {order.payment_method || "-"}
                 </span>
               </div>
-              <div className="p-4 bg-surface-base rounded-xl space-y-2">
+              <div className="p-4 bg-surface-base rounded-xl space-y-2 border border-border">
                 <div className="flex justify-between text-xs text-text-3">
                   <span>Pagado ($)</span>
                   <span className="text-status-ok font-bold">
@@ -368,7 +368,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
           {/* HISTORIAL DE PAGOS */}
           {order.payment_type === "credito" && (
             <Card className="p-6 bg-surface-card border-border shadow-card flex flex-col gap-4">
-              <h3 className="text-lg font-syne font-bold text-white flex items-center gap-2">
+              <h3 className="text-lg font-syne font-bold text-text-1 flex items-center gap-2">
                 <CreditCard className="w-5 h-5 text-brand" /> Historial de
                 Cobros
               </h3>
@@ -393,7 +393,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
                       </div>
                       <div className="flex justify-between items-end">
                         <div>
-                          <p className="text-sm font-bold text-white">
+                          <p className="text-sm font-bold text-text-1">
                             {p.payment_method}
                           </p>
                           {p.reference && (
@@ -417,9 +417,9 @@ export default function OrderDetailsPage({ params }: { params: any }) {
 
       {/* DIALOGO DE CONFIRMACIÓN DE PAGO */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent className="bg-surface-base border-border sm:max-w-[450px]">
+        <DialogContent className="bg-surface-elevated border-border sm:max-w-[450px]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-syne text-white flex items-center gap-2">
+            <DialogTitle className="text-xl font-syne text-text-1 flex items-center gap-2">
               <DollarSign className="w-6 h-6 text-brand" /> Cierre de Venta
             </DialogTitle>
             <DialogDescription className="text-text-3">
@@ -458,10 +458,10 @@ export default function OrderDetailsPage({ params }: { params: any }) {
                 Método de Recibo
               </label>
               <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                <SelectTrigger className="w-full bg-surface-card border-border text-white h-12 rounded-xl focus:ring-brand/30">
+                <SelectTrigger className="w-full bg-surface-card border-border text-text-1 h-12 rounded-xl focus:ring-brand/30">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-surface-card border-border text-white">
+                <SelectContent className="bg-surface-elevated border-border text-text-1">
                   <SelectItem value="Efectivo">Efectivo ($/Bs)</SelectItem>
                   <SelectItem value="Pago Móvil">Pago Móvil</SelectItem>
                   <SelectItem value="Zelle">Zelle</SelectItem>
@@ -491,7 +491,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
                   type="number"
                   value={amountPaid}
                   onChange={(e) => setAmountPaid(Number(e.target.value))}
-                  className="pl-10 bg-surface-card border-border h-12 rounded-xl text-lg font-bold text-white focus:ring-brand"
+                  className="pl-10 bg-surface-card border-border h-12 rounded-xl text-lg font-bold text-text-1 focus:ring-brand"
                 />
               </div>
             </div>
@@ -511,7 +511,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
           <DialogFooter>
             <button
               onClick={() => setConfirmOpen(false)}
-              className="px-6 py-3 rounded-xl text-sm font-medium text-text-3 hover:text-white transition-colors"
+              className="px-6 py-3 rounded-xl text-sm font-medium text-text-3 hover:text-text-1 transition-colors"
             >
               Cancelar
             </button>

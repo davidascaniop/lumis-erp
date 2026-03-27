@@ -242,28 +242,28 @@ function NuevaVentaContent() {
 
   // ── RENDER ───────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-[calc(100vh-48px)] -m-6 bg-[#08050F]">
+    <div className="flex flex-col h-[calc(100vh-48px)] -m-6 bg-surface-base">
       {/* ── TOPBAR POS ── */}
       <div
         className="flex items-center gap-4 px-6 py-3
-                            border-b border-white/5 bg-[#08050F]/90 backdrop-blur-xl
+                            border-b border-border bg-surface-card/60 backdrop-blur-xl
                             flex-shrink-0 z-20"
       >
         <button
           onClick={() => router.back()}
-          className="p-2 rounded-xl hover:bg-white/[0.06] text-[#9585B8]
-                               hover:text-white transition-all"
+          className="p-2 rounded-xl hover:bg-surface-base text-text-3
+                               hover:text-text-1 transition-all"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
         <div>
-          <h1 className="text-xl font-primary leading-tight">
+          <h1 className="text-xl font-primary leading-tight text-text-1">
             Nueva Venta
           </h1>
           {rate !== null && rate > 0 && (
-            <p className="currency-bs">
+            <p className="text-[10px] text-text-3 font-medium">
               BCV:{" "}
-              <span className="text-white font-mono font-semibold">
+              <span className="text-text-1 font-mono font-semibold">
                 Bs.{Number(rate).toFixed(2)}/$
               </span>
             </p>
@@ -274,12 +274,12 @@ function NuevaVentaContent() {
         {cart.length > 0 && (
           <div
             className="ml-auto flex items-center gap-2 px-3 py-1.5 rounded-full
-                                    bg-[rgba(224,64,251,0.10)] border border-[rgba(224,64,251,0.20)]"
+                                    bg-brand/10 border border-brand/20"
           >
-            <span className="text-xs font-bold text-[#E040FB]">
+            <span className="text-xs font-bold text-brand">
               {cart.length} {cart.length === 1 ? "producto" : "productos"}
             </span>
-            <span className="text-xs font-mono font-bold text-white">
+            <span className="text-xs font-mono font-bold text-text-1">
               ${subtotal.toFixed(2)}
             </span>
           </div>
@@ -289,7 +289,7 @@ function NuevaVentaContent() {
       {/* ── CUERPO: 2 ZONAS ── */}
       <div className="flex flex-1 overflow-hidden">
         {/* ZONA A: CLIENTE + CATÁLOGO */}
-        <div className="flex-1 flex flex-col overflow-hidden border-r border-white/5">
+        <div className="flex-1 flex flex-col overflow-hidden border-r border-border">
           <ClientePicker
             clientes={partners}
             selected={selectedPartner}

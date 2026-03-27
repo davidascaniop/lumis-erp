@@ -76,10 +76,10 @@ export default function VentasPage() {
     <div className="space-y-6 max-w-7xl mx-auto animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-primary">
+          <h1 className="text-3xl font-primary text-text-1">
             Ventas y Pedidos
           </h1>
-          <p className="text-text-2 mt-1text-sm">
+          <p className="text-text-2 mt-1 text-sm">
             Registro centralizado de cotizaciones y despachos.
           </p>
         </div>
@@ -89,27 +89,27 @@ export default function VentasPage() {
             className="px-6 py-3 bg-brand-gradient text-white font-bold rounded-xl text-sm shadow-brand hover:opacity-90 transition-all active:scale-95 flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
-            Nuevo Pedido
+            Nueva Venta
           </Link>
         </div>
       </div>
 
-      <div className="glass rounded-2xl overflow-hidden shadow-card flex flex-col h-[70vh]">
-        <div className="p-4 border-b border-white/5 bg-surface-card/40 flex justify-between items-center">
+      <div className="bg-surface-card border border-border rounded-2xl overflow-hidden shadow-card flex flex-col h-[70vh]">
+        <div className="p-4 border-b border-border bg-surface-base/50 flex justify-between items-center">
           <div className="relative w-full sm:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
             <Input
               placeholder="Buscar por número o cliente..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 border-none bg-surface-input text-white placeholder:text-text-3"
+              className="pl-10 border-none bg-surface-input text-text-1 placeholder:text-text-3"
             />
           </div>
         </div>
 
         <div className="overflow-y-auto flex-1 no-scrollbar p-0">
           <table className="w-full text-sm text-left whitespace-nowrap">
-            <thead className="bg-surface-card/80 text-text-3 sticky top-0 z-10 backdrop-blur-md">
+            <thead className="bg-surface-base text-text-3 sticky top-0 z-10 backdrop-blur-md border-b border-border">
               <tr>
                 <th className="px-6 py-4 font-bold uppercase text-[10px] tracking-widest">
                   # Pedido
@@ -134,7 +134,7 @@ export default function VentasPage() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-border">
               {loading ? (
                 <tr>
                   <td colSpan={7} className="text-center py-20">
@@ -154,7 +154,7 @@ export default function VentasPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.03 }}
-                    className="hover:bg-surface-hover hover:border-brand/15 transition-colors group cursor-pointer"
+                    className="hover:bg-surface-hover/50 transition-colors group cursor-pointer"
                   >
                     <td className="px-6 py-4">
                       <Link
@@ -185,10 +185,10 @@ export default function VentasPage() {
                       })}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="font-bold text-white block">
+                      <span className="font-bold text-text-1 block">
                         {formatCurrency(o.total_usd)}
                       </span>
-                      <span className="currency-bs">
+                      <span className="text-[10px] text-text-3 block">
                         Bs. {formatCurrency(o.total_bs, "")}
                       </span>
                     </td>
@@ -198,8 +198,8 @@ export default function VentasPage() {
                       >
                         {formatCurrency(o.amount_due)}
                       </span>
-                      <span className="currency-bs">
-                        Abono: {formatCurrency(o.amount_paid)}
+                      <span className="text-[10px] text-text-3 block transition-colors">
+                        Abono {formatCurrency(o.amount_paid)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center">
@@ -209,7 +209,7 @@ export default function VentasPage() {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button
-                            className="p-2 hover:bg-white/5 rounded-xl transition-colors text-text-3 hover:text-white"
+                            className="p-2 hover:bg-surface-base rounded-xl transition-colors text-text-3 hover:text-text-1"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <MoreHorizontal className="w-5 h-5 mx-auto" />
@@ -217,15 +217,15 @@ export default function VentasPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                           align="end"
-                          className="bg-surface-card border-border w-56 text-sm shadow-brand p-1"
+                          className="bg-surface-elevated border border-border w-56 text-sm shadow-brand p-1"
                         >
                           <DropdownMenuItem
                             asChild
-                            className="hover:bg-brand/20 focus:bg-brand/20 cursor-pointer rounded-lg mb-1"
+                            className="hover:bg-brand/10 focus:bg-brand/10 cursor-pointer rounded-lg mb-1"
                           >
                             <Link
                               href={`/dashboard/ventas/${o.id}`}
-                              className="flex items-center gap-2 text-white w-full"
+                              className="flex items-center gap-2 text-text-1 w-full"
                             >
                               <FileText className="w-4 h-4 text-brand" /> Ver
                               Detalles de Venta
@@ -233,26 +233,26 @@ export default function VentasPage() {
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             asChild
-                            className="hover:bg-brand/20 focus:bg-brand/20 cursor-pointer rounded-lg mb-1"
+                            className="hover:bg-brand/10 focus:bg-brand/10 cursor-pointer rounded-lg mb-1"
                           >
                             <Link
                               href={`/dashboard/ventas/${o.id}`}
-                              className="flex items-center gap-2 text-white w-full"
+                              className="flex items-center gap-2 text-text-1 w-full"
                             >
-                              <FileClock className="w-4 h-4 text-text-3 group-hover:text-brand" />{" "}
-                              Historial de Compra
+                              <FileClock className="w-4 h-4 text-text-3" />{" "}
+                              Historial de Venta
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             asChild
-                            className="hover:bg-brand/20 focus:bg-brand/20 cursor-pointer rounded-lg"
+                            className="hover:bg-brand/10 focus:bg-brand/10 cursor-pointer rounded-lg"
                           >
                             <Link
                               href={`/dashboard/ventas/${o.id}/nota-entrega`}
-                              className="flex items-center gap-2 text-white w-full"
+                              className="flex items-center gap-2 text-text-1 w-full"
                             >
-                              <Printer className="w-4 h-4 text-text-3 group-hover:text-brand" />{" "}
-                              Descargar Nota de Entrega
+                              <Printer className="w-4 h-4 text-text-3" />{" "}
+                              Descargar Nota
                             </Link>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
