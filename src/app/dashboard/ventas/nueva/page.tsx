@@ -293,7 +293,7 @@ function NuevaVentaContent() {
 
         <div className="flex items-center gap-6 text-text-3">
           {rate !== null && rate > 0 && (
-            <div className="hidden md:block text-right">
+            <div className="text-right">
               <p className="text-[10px] uppercase font-bold tracking-tighter opacity-60">
                 Tasa BCV
               </p>
@@ -302,23 +302,6 @@ function NuevaVentaContent() {
               </p>
             </div>
           )}
-          <div className="flex items-center gap-4">
-            <button className="p-2 hover:bg-surface-base rounded-full transition-colors">
-              <span className="sr-only">Notificaciones</span>
-              <div className="w-5 h-5 flex items-center justify-center">🔔</div>
-            </button>
-            <button className="p-2 hover:bg-surface-base rounded-full transition-colors">
-              <span className="sr-only">Ayuda</span>
-              <div className="w-5 h-5 flex items-center justify-center">❓</div>
-            </button>
-            <button className="p-2 hover:bg-surface-base rounded-full transition-colors">
-              <span className="sr-only">Idioma</span>
-              <div className="w-5 h-5 flex items-center justify-center">🌐</div>
-            </button>
-            <div className="h-8 w-8 rounded-full bg-brand-gradient flex items-center justify-center text-white font-bold text-xs shadow-brand">
-              {user?.full_name?.substring(0, 1) || "L"}
-            </div>
-          </div>
         </div>
       </div>
 

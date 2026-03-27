@@ -187,49 +187,49 @@ export function CarritoPanel({
         </div>
 
         {/* ── CONDICIÓN ── */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           <p className="text-[10px] font-bold text-text-3 uppercase tracking-widest">
-            Condición
+            Condición del Pedido
           </p>
-          <div className="flex gap-4">
+          <div className="flex gap-6">
             <button
               onClick={() => onConditionChange("contado")}
-              className="flex items-center gap-3 group"
+              className="flex items-center gap-3 transition-opacity hover:opacity-80"
             >
               <div
-                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                className={`w-6 h-6 rounded-full border-[3px] flex items-center justify-center transition-all ${
                   condition === "contado"
-                    ? "border-brand bg-brand"
+                    ? "border-brand bg-brand shadow-lg shadow-brand/20"
                     : "border-[#EDF0F7]"
                 }`}
               >
                 {condition === "contado" && (
-                  <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-white animate-in zoom-in-50 duration-300" />
                 )}
               </div>
               <span
-                className={`text-sm font-bold ${condition === "contado" ? "text-text-1" : "text-text-3"}`}
+                className={`text-sm font-black tracking-tight ${condition === "contado" ? "text-text-1" : "text-text-3"}`}
               >
                 Contado
               </span>
             </button>
             <button
               onClick={() => onConditionChange("credito")}
-              className="flex items-center gap-3 group"
+              className="flex items-center gap-3 transition-opacity hover:opacity-80"
             >
               <div
-                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                className={`w-6 h-6 rounded-full border-[3px] flex items-center justify-center transition-all ${
                   condition === "credito"
-                    ? "border-brand bg-brand"
+                    ? "border-brand bg-brand shadow-lg shadow-brand/20"
                     : "border-[#EDF0F7]"
                 }`}
               >
                 {condition === "credito" && (
-                  <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-white animate-in zoom-in-50 duration-300" />
                 )}
               </div>
               <span
-                className={`text-sm font-bold ${condition === "credito" ? "text-text-1" : "text-text-3"}`}
+                className={`text-sm font-black tracking-tight ${condition === "credito" ? "text-text-1" : "text-text-3"}`}
               >
                 Crédito
               </span>
@@ -237,34 +237,91 @@ export function CarritoPanel({
           </div>
         </div>
 
+        {/* ── MÉTODOS DE PAGO / ABONO ── */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-bold text-text-3 uppercase tracking-widest">
+              {condition === "credito" ? "Abono Inicial" : "Método de Pago"}
+            </p>
+          </div>
+
+          {condition === "credito" && (
+             <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-text-3">$</span>
+                <input
+                  type="number"
+                  value={amountPaid}
+                  onChange={(e) => onAmountPaidChange(Number(e.target.value))}
+                  placeholder="Monto a abonar"
+                  className="w-full pl-8 pr-4 py-3 rounded-2xl bg-[#F8F9FE] border border-[#EDF0F7]
+                             text-sm text-text-1 font-black focus:outline-none focus:ring-4 focus:ring-brand/5 focus:border-brand/35 transition-all"
+                />
+             </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { id: "efectivo", label: "Efectivo", icon: "$" },
+              { id: "zelle", label: "Zelle", icon: "Z" },
+              { id: "transferencia", label: "Transferencia", icon: "T" },
+              { id: "pago_movil", label: "Pago Móvil", icon: "P" },
+            ].map((m) => (
+              <button
+                key={m.id}
+                onClick={() => onMethodChange(m.id)}
+                className={`
+                  flex items-center gap-3 p-3 rounded-2xl border transition-all text-left
+                  ${
+                    method === m.id
+                      ? "border-brand/40 bg-brand/5 ring-1 ring-brand/10 shadow-sm"
+                      : "border-border hover:bg-[#F8F9FE]"
+                  }
+                `}
+              >
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs
+                              ${method === m.id ? "bg-brand text-white" : "bg-[#F8F9FE] text-text-3 border border-border"}`}>
+                  {m.icon}
+                </div>
+                <span className={`text-[11px] font-black uppercase tracking-tighter ${method === m.id ? "text-brand" : "text-text-3"}`}>
+                  {m.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* ── LÍNEAS DEL CARRITO ── */}
-        <div className="flex-1 space-y-4">
+        <div className="flex-1 space-y-4 border-t border-dashed border-[#EDF0F7] pt-6 overflow-hidden">
           <p className="text-[10px] font-bold text-text-3 uppercase tracking-widest">
-            Ítems del Pedido
+            Detalle de Venta
           </p>
           {cart.length === 0 ? (
-            <div className="bg-[#F8F9FE] rounded-2xl p-6 border-2 border-dashed border-[#EDF0F7] text-center">
-              <ShoppingCart className="w-6 h-6 text-text-3 mx-auto mb-2 opacity-50" />
-              <p className="text-xs font-bold text-text-3">Carrito vacío</p>
+            <div className="py-6 text-center">
+              <p className="text-xs font-bold text-text-3 opacity-50">Esperando productos...</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4 overflow-y-auto max-h-[220px] no-scrollbar pr-1">
               {cart.map((item: any) => (
-                <div key={item.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-white border border-border flex items-center justify-center">
-                      <Package className="w-3 h-3 text-text-3" />
-                    </div>
-                    <span className="text-xs font-bold text-[#3F3F44] truncate max-w-[140px]">
+                <div key={item.id} className="group relative flex flex-col gap-1 pr-8">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-[#3F3F44] truncate">
                       {item.name}
                     </span>
-                    <span className="text-[10px] text-text-3 font-semibold">
-                      ({item.qty}x ${Number(item.price_usd).toFixed(2)})
+                    <span className="text-xs font-black text-text-1 font-mono">
+                      ${(item.price_usd * item.qty).toFixed(2)}
                     </span>
                   </div>
-                  <span className="text-xs font-black text-text-1 font-mono">
-                    ${(item.price_usd * item.qty).toFixed(2)}
-                  </span>
+                  <div className="flex items-center gap-2">
+                     <span className="text-[10px] text-text-3 font-black bg-[#F8F9FE] px-2 py-0.5 rounded-lg border border-border">
+                        {item.qty}x ${Number(item.price_usd).toFixed(2)}
+                     </span>
+                  </div>
+                  <button
+                    onClick={() => onRemove(item.id)}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1.5 hover:bg-status-danger/5 text-status-danger transition-all rounded-lg"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               ))}
             </div>
