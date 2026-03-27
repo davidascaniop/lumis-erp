@@ -95,10 +95,10 @@ export function LoginForm() {
       initial={{ opacity: 0, y: 20, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="glass p-8 rounded-2xl w-full shadow-card relative overflow-hidden"
+      className="bg-white/90 backdrop-blur-xl p-8 rounded-3xl w-full shadow-[0_20px_60px_rgba(0,0,0,0.05)] border border-white relative overflow-hidden"
     >
       {/* Gradient top accent */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#E040FB] to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand/10 via-brand to-brand/10" />
 
       <div className="space-y-6 relative z-10">
         <Form {...form}>
@@ -108,17 +108,17 @@ export function LoginForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[#B8A0D0]">
+                  <FormLabel className="text-[#1A1125] font-bold font-outfit text-sm">
                     Correo Electrónico
                   </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="usuario@empresa.com"
                       {...field}
-                      className="bg-[#0F0A12]/80 border-[#E040FB]/10 text-[#F5EEFF] placeholder:text-[#6B5280] focus-visible:ring-[#E040FB]/40 focus-visible:border-[#E040FB]/30 h-11"
+                      className="bg-[#F8FAFC] border-[#E2E8F0] text-[#1A1125] placeholder:text-[#94A3B8] focus-visible:ring-brand/20 focus-visible:border-brand h-12 rounded-xl transition-all font-outfit"
                     />
                   </FormControl>
-                  <FormMessage className="text-[#FF4757] text-xs" />
+                  <FormMessage className="text-danger text-xs font-bold" />
                 </FormItem>
               )}
             />
@@ -128,10 +128,10 @@ export function LoginForm() {
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-center justify-between">
-                    <FormLabel className="text-[#B8A0D0]">Contraseña</FormLabel>
+                    <FormLabel className="text-[#1A1125] font-bold font-outfit text-sm">Contraseña</FormLabel>
                     <Link
                       href="/forgot-password"
-                      className="text-xs text-[#E040FB] hover:text-[#F8C0FF] transition-colors"
+                      className="text-[11px] font-bold text-brand hover:underline transition-all font-outfit"
                     >
                       ¿Olvidaste tu contraseña?
                     </Link>
@@ -141,17 +141,17 @@ export function LoginForm() {
                       type="password"
                       placeholder="••••••••"
                       {...field}
-                      className="bg-[#0F0A12]/80 border-[#E040FB]/10 text-[#F5EEFF] placeholder:text-[#6B5280] focus-visible:ring-[#E040FB]/40 focus-visible:border-[#E040FB]/30 h-11"
+                      className="bg-[#F8FAFC] border-[#E2E8F0] text-[#1A1125] placeholder:text-[#94A3B8] focus-visible:ring-brand/20 focus-visible:border-brand h-12 rounded-xl transition-all font-outfit"
                     />
                   </FormControl>
-                  <FormMessage className="text-[#FF4757] text-xs" />
+                  <FormMessage className="text-danger text-xs font-bold" />
                 </FormItem>
               )}
             />
 
             <Button
               type="submit"
-              className="w-full h-11 bg-gradient-to-r from-[#E040FB] to-[#7C4DFF] hover:from-[#E040FB]/90 hover:to-[#7C4DFF]/90 text-white font-semibold shadow-glow transition-all cursor-pointer"
+              className="w-full h-12 bg-brand hover:opacity-90 text-white font-bold rounded-xl shadow-lg shadow-brand/20 transition-all active:scale-[0.98] font-outfit uppercase tracking-widest text-xs"
               disabled={isLoading}
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -162,10 +162,10 @@ export function LoginForm() {
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-[#E040FB]/10" />
+            <span className="w-full border-t border-[#EDF2F7]" />
           </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-[#201728] px-3 text-[#6B5280]">
+          <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-widest">
+            <span className="bg-white px-4 text-[#94A3B8]">
               O continuar con
             </span>
           </div>
@@ -176,9 +176,9 @@ export function LoginForm() {
           type="button"
           disabled={isLoading}
           onClick={onGoogleLogin}
-          className="w-full h-11 bg-transparent border-[#E040FB]/10 hover:bg-[#E040FB]/5 hover:border-[#E040FB]/20 text-[#F5EEFF] transition-all cursor-pointer"
+          className="w-full h-12 bg-white border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#1A1125] font-bold rounded-xl transition-all font-outfit shadow-sm"
         >
-          <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+          <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
             <path
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
               fill="#4285F4"
@@ -200,11 +200,11 @@ export function LoginForm() {
         </Button>
       </div>
 
-      <div className="mt-6 text-center text-sm">
-        <span className="text-[#6B5280]">¿Tu empresa no tiene cuenta?</span>{" "}
+      <div className="mt-8 text-center text-sm">
+        <span className="text-[#64748B] font-medium font-outfit tracking-tight">¿Tu empresa no tiene cuenta?</span>{" "}
         <Link
           href="/register"
-          className="text-[#E040FB] hover:text-[#F8C0FF] font-medium transition-colors"
+          className="text-brand hover:underline font-bold transition-all font-outfit"
         >
           Regístrate
         </Link>
