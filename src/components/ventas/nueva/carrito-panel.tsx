@@ -1,6 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
-import { Loader2, Trash2, X, User, CreditCard, ShoppingBag, FileText, Wallet } from "lucide-react";
+import { Loader2, Trash2, X, User, CreditCard, ShoppingBag, FileText, Wallet, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
 export function CarritoPanel({
@@ -51,6 +51,8 @@ export function CarritoPanel({
   onSelectPartner: (p: any | null) => void;
 }) {
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [rifPrefix, setRifPrefix] = useState("V");
+
   const total = subtotal;
   const totalBs = total * bcvRate;
 
@@ -135,13 +137,29 @@ export function CarritoPanel({
             )}
             
             <div className="grid grid-cols-2 gap-2">
-              <input
-                value={newClientRif}
-                onChange={(e) => setNewClientRif(e.target.value)}
-                placeholder="Cédula / RIF"
-                disabled={!!cliente}
-                className="w-full px-4 py-2.5 rounded-xl border border-[#E2E8F0] text-[13px] font-medium focus:outline-none focus:border-brand/40 transition-all font-outfit bg-[#F8FAFC] disabled:opacity-50"
-              />
+              <div className="flex bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl overflow-hidden focus-within:border-brand/40 transition-all">
+                <select 
+                  value={rifPrefix}
+                  onChange={(e) => setRifPrefix(e.target.value)}
+                  disabled={!!cliente}
+                  className="bg-transparent pl-3 pr-1 py-2.5 text-[13px] font-bold text-brand font-outfit outline-none cursor-pointer disabled:opacity-50 appearance-none"
+                >
+                  <option value="V">V</option>
+                  <option value="J">J</option>
+                  <option value="E">E</option>
+                </select>
+                <input
+                  value={newClientRif}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    // Limitar a números si es posible o mantener como está
+                    setNewClientRif(val);
+                  }}
+                  placeholder="Cédula / RIF"
+                  disabled={!!cliente}
+                  className="w-full px-2 py-2.5 bg-transparent text-[13px] font-medium outline-none font-outfit disabled:opacity-50"
+                />
+              </div>
               <input
                 value={newClientPhone}
                 onChange={(e) => setNewClientPhone(e.target.value)}

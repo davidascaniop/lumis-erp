@@ -311,8 +311,8 @@ function NuevaVentaContent() {
           <ProductoGrid productos={products} cart={cart} onAdd={addToCart} />
         </div>
 
-        {/* SIDEBAR DE PAGO (BUBBLE CARD STYLE) */}
-        <div className="flex-[3.5] flex flex-col overflow-hidden bg-[#F8FAFC] p-4 xl:p-6 border-l border-[#F1F5F9]">
+        {/* SIDEBAR DE PAGO (BUBBLE CARD STYLE - ENLARGED) */}
+        <div className="flex-[4.2] flex flex-col overflow-hidden bg-[#F8FAFC] p-4 xl:p-6 border-l border-[#F1F5F9]">
           <div className="flex-1 bg-white rounded-[40px] shadow-[0_12px_40px_rgba(0,0,0,0.03)] border border-[#EDF2F7] overflow-hidden flex flex-col">
             <CarritoPanel
               cart={cart}
