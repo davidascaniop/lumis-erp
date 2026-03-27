@@ -227,7 +227,7 @@ export default function VentasPage() {
                               href={`/dashboard/ventas/${o.id}`}
                               className="flex items-center gap-2 text-text-1 w-full"
                             >
-                              <FileText className="w-4 h-4 text-brand" /> Ver
+                              <FileText className="w-4 h-4 text-text-3" /> Ver
                               Detalles de Venta
                             </Link>
                           </DropdownMenuItem>
