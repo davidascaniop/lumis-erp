@@ -1,6 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import { Loader2, Receipt, Trash2, X } from "lucide-react";
+import { toast } from "sonner";
 
 export function CarritoPanel({
   cart,
@@ -53,13 +54,10 @@ export function CarritoPanel({
   const total = subtotal;
   const totalBs = total * bcvRate;
 
-  // Filtrar sugerencias de clientes
   const suggestions = useMemo(() => {
     if (!newClientName || newClientName.length < 2 || cliente) return [];
     return partners
-      .filter((p) =>
-        p.name.toLowerCase().includes(newClientName.toLowerCase()),
-      )
+      .filter((p) => p.name.toLowerCase().includes(newClientName.toLowerCase()))
       .slice(0, 5);
   }, [partners, newClientName, cliente]);
 
@@ -69,6 +67,7 @@ export function CarritoPanel({
     setNewClientRif(p.rif || "");
     setNewClientPhone(p.phone || "");
     setShowSuggestions(false);
+    toast.info("Cliente seleccionado");
   };
 
   const handleClearClient = () => {
@@ -79,18 +78,19 @@ export function CarritoPanel({
   };
 
   return (
-    <div className="w-[360px] flex-shrink-0 flex flex-col items-center py-4 px-2 overflow-y-auto no-scrollbar">
-      <div className="w-full bg-[#FAFAFC] shadow-sm rounded-[24px] border border-[#F1F5F9] flex flex-col overflow-hidden">
+    <div className="w-[380px] h-full flex flex-col p-4 flex-shrink-0 overflow-hidden">
+      <div className="flex-1 bg-white shadow-sm rounded-[32px] border border-[#F1F5F9] flex flex-col overflow-hidden">
         
-        {/* -- ENCABEZADO -- */}
-        <div className="px-6 py-5 border-b border-[#F1F5F9]">
+        {/* -- ENCABEZADO FIJO -- */}
+        <div className="px-6 py-5 border-b border-[#F1F5F9] flex-shrink-0">
           <h2 className="text-[17px] font-bold text-[#1E293B]">Resumen del Pedido</h2>
         </div>
 
-        <div className="flex-1 flex flex-col p-6 space-y-6">
+        {/* -- CUERPO CON SCROLL -- */}
+        <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-6">
           {/* -- CLIENTE -- */}
-          <div className="space-y-3">
-            <p className="text-[13px] font-medium text-[#64748B]">
+          <div className="space-y-4">
+            <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">
               {cliente ? "Cliente Seleccionado" : "Nuevo Cliente"}
             </p>
 
@@ -105,7 +105,7 @@ export function CarritoPanel({
                   }}
                   onFocus={() => setShowSuggestions(true)}
                   placeholder="Nombre y Apellido"
-                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#E2E8F0] text-[14px] text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#7C3AED] transition-colors"
+                  className="w-full px-4 py-3 rounded-xl bg-white border border-[#E2E8F0] text-[14px] text-[#1E293B] font-medium placeholder:text-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] transition-all"
                 />
                 {cliente && (
                   <button
@@ -116,17 +116,16 @@ export function CarritoPanel({
                   </button>
                 )}
 
-                {/* Sugerencias */}
                 {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-[#E2E8F0] shadow-lg z-50 overflow-hidden">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl border border-[#E2E8F0] shadow-xl z-[100] overflow-hidden">
                     {suggestions.map((p) => (
                       <button
                         key={p.id}
                         onClick={() => handleSelectSuggestion(p)}
                         className="w-full px-4 py-3 text-left hover:bg-[#F8FAFC] transition-colors border-b border-[#F1F5F9] last:border-0"
                       >
-                        <div className="text-[14px] font-medium text-[#1E293B]">{p.name}</div>
-                        <div className="text-[12px] text-[#64748B]">{p.rif || "Sin RIF"}</div>
+                        <div className="text-[14px] font-bold text-[#1E293B]">{p.name}</div>
+                        <div className="text-[11px] text-[#64748B]">{p.rif || "Sin RIF"}</div>
                       </button>
                     ))}
                   </div>
@@ -138,59 +137,66 @@ export function CarritoPanel({
                 onChange={(e) => setNewClientRif(e.target.value)}
                 placeholder="Cédula / RIF"
                 disabled={!!cliente}
-                className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#E2E8F0] text-[14px] text-[#1E293B] placeholder:text-[#94A3B8] disabled:bg-[#F8FAFC] focus:outline-none focus:border-[#7C3AED] transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-white border border-[#E2E8F0] text-[14px] font-medium text-[#1E293B] disabled:bg-[#F8FAFC] disabled:text-[#94A3B8] focus:outline-none focus:border-[#7C3AED] transition-all"
               />
               <input
                 value={newClientPhone}
                 onChange={(e) => setNewClientPhone(e.target.value)}
                 placeholder="Teléfono"
                 disabled={!!cliente}
-                className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#E2E8F0] text-[14px] text-[#1E293B] placeholder:text-[#94A3B8] disabled:bg-[#F8FAFC] focus:outline-none focus:border-[#7C3AED] transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-white border border-[#E2E8F0] text-[14px] font-medium text-[#1E293B] disabled:bg-[#F8FAFC] disabled:text-[#94A3B8] focus:outline-none focus:border-[#7C3AED] transition-all"
               />
             </div>
           </div>
 
-          <div className="h-px bg-[#F1F5F9] w-full" />
+          <div className="h-px bg-[#F1F5F9]" />
 
           {/* -- CONDICIÓN -- */}
-          <div className="flex items-center gap-6">
-            <button
-              onClick={() => onConditionChange("contado")}
-              className="flex items-center gap-3"
-            >
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${condition === "contado" ? "border-[#7C3AED]" : "border-[#CBD5E1]"}`}>
-                {condition === "contado" && <div className="w-2.5 h-2.5 rounded-full bg-[#7C3AED]" />}
-              </div>
-              <span className={`text-[15px] font-medium ${condition === "contado" ? "text-[#1E293B]" : "text-[#475569]"}`}>Contado</span>
-            </button>
+          <div className="space-y-4">
+            <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Condición</p>
+            <div className="flex gap-8">
+              <button
+                onClick={() => onConditionChange("contado")}
+                className="flex items-center gap-2.5"
+              >
+                <div className={`w-6 h-6 rounded-full border-[3px] flex items-center justify-center transition-all ${condition === "contado" ? "border-[#7C3AED] bg-[#7C3AED]" : "border-[#E2E8F0]"}`}>
+                  {condition === "contado" && <div className="w-2.5 h-2.5 rounded-full bg-white shadow-sm" />}
+                </div>
+                <span className={`text-[15px] font-bold ${condition === "contado" ? "text-[#1E293B]" : "text-[#64748B]"}`}>Contado</span>
+              </button>
 
-            <button
-              onClick={() => onConditionChange("credito")}
-              className="flex items-center gap-3"
-            >
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${condition === "credito" ? "border-[#7C3AED]" : "border-[#CBD5E1]"}`}>
-                {condition === "credito" && <div className="w-2.5 h-2.5 rounded-full bg-[#7C3AED]" />}
-              </div>
-              <span className={`text-[15px] font-medium ${condition === "credito" ? "text-[#1E293B]" : "text-[#475569]"}`}>Crédito</span>
-            </button>
+              <button
+                onClick={() => onConditionChange("credito")}
+                className="flex items-center gap-2.5"
+              >
+                <div className={`w-6 h-6 rounded-full border-[3px] flex items-center justify-center transition-all ${condition === "credito" ? "border-[#7C3AED] bg-[#7C3AED]" : "border-[#E2E8F0]"}`}>
+                  {condition === "credito" && <div className="w-2.5 h-2.5 rounded-full bg-white shadow-sm" />}
+                </div>
+                <span className={`text-[15px] font-bold ${condition === "credito" ? "text-[#1E293B]" : "text-[#64748B]"}`}>Crédito</span>
+              </button>
+            </div>
           </div>
 
-          {/* -- MÉTODO PAGO Y ABONO -- */}
-          <div className="space-y-3">
+          {/* -- MÉTODO PAGO / ABONO -- */}
+          <div className="space-y-4">
              {condition === "credito" && (
-                <div className="relative mt-2">
-                   <span className="absolute left-4 top-1/2 -translate-y-1/2 font-medium text-[#64748B]">$</span>
-                   <input
-                     type="number"
-                     value={amountPaid}
-                     onChange={(e) => onAmountPaidChange(Number(e.target.value))}
-                     placeholder="Abono Inicial"
-                     className="w-full pl-8 pr-4 py-2.5 rounded-xl bg-white border border-[#E2E8F0] text-[14px] font-medium focus:outline-none focus:border-[#7C3AED]"
-                   />
+                <div className="space-y-2">
+                  <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Monto Abonado</p>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-[#64748B] opacity-50">$</span>
+                    <input
+                      type="number"
+                      value={amountPaid}
+                      onChange={(e) => onAmountPaidChange(Number(e.target.value))}
+                      placeholder="Monto de entrega"
+                      className="w-full pl-8 pr-4 py-3 rounded-xl bg-white border border-[#E2E8F0] text-[15px] font-bold text-[#1E293B] focus:border-[#7C3AED] focus:outline-none"
+                    />
+                  </div>
                 </div>
              )}
 
-            <div className="grid grid-cols-2 gap-2 mt-2">
+            <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider mt-2">Método de Cobro</p>
+            <div className="grid grid-cols-2 gap-2">
               {[
                 { id: "efectivo", label: "Efectivo $" },
                 { id: "zelle", label: "Zelle" },
@@ -203,10 +209,10 @@ export function CarritoPanel({
                   key={m.id}
                   onClick={() => onMethodChange(m.id)}
                   className={`
-                    py-2 px-3 rounded-xl border text-[12px] font-medium transition-colors
+                    py-2.5 px-3 rounded-xl border text-[12px] font-bold transition-all
                     ${
                       method === m.id
-                        ? "bg-[#F3E8FF] border-[#7C3AED] text-[#7C3AED]"
+                        ? "bg-[#7C3AED] border-[#7C3AED] text-white shadow-sm shadow-[#7C3AED]/20"
                         : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC]"
                     }
                   `}
@@ -217,86 +223,89 @@ export function CarritoPanel({
             </div>
           </div>
 
-          <div className="h-px bg-[#F1F5F9] w-full" />
+          <div className="h-px bg-[#F1F5F9]" />
 
           {/* -- DETALLE DEL PEDIDO -- */}
-          <div className="space-y-3">
+          <div className="space-y-4">
+            <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Ítems ({cart.length})</p>
             {cart.length === 0 ? (
-               <p className="text-[14px] text-[#94A3B8] text-center my-4">No hay ítems</p>
+               <div className="py-8 text-center bg-[#F8FAFC] rounded-2xl border border-dashed border-[#E2E8F0]">
+                  <p className="text-[13px] font-bold text-[#94A3B8]">Sin productos seleccionados</p>
+               </div>
             ) : (
-                <div className="space-y-3 max-h-[160px] overflow-y-auto no-scrollbar pr-1">
+                <div className="space-y-4">
                   {cart.map((item: any) => (
-                    <div key={item.id} className="flex items-start justify-between group relative">
-                      <div className="flex items-start gap-2 max-w-[70%]">
-                        <Receipt className="w-4 h-4 text-[#64748B] mt-0.5 flex-shrink-0" />
-                        <span className="text-[14px] font-medium text-[#475569] leading-tight">
-                          {item.name} <span className="text-[13px] text-[#94A3B8]">({item.qty}x ${Number(item.price_usd).toFixed(2)})</span>
+                    <div key={item.id} className="flex items-start justify-between group relative pr-8">
+                      <div className="flex flex-col gap-0.5 max-w-[80%]">
+                        <span className="text-[14px] font-bold text-[#1E293B] leading-tight">
+                          {item.name}
                         </span>
+                        <div className="flex items-center gap-2">
+                           <span className="text-[12px] text-[#64748B] font-medium">Cant: {item.qty}</span>
+                           <span className="text-[12px] text-[#94A3B8] font-medium">x $ {Number(item.price_usd).toFixed(2)}</span>
+                        </div>
                       </div>
-                      <span className="text-[15px] font-bold text-[#1E293B]">
+                      <span className="text-[15px] font-black text-[#1E293B] font-mono whitespace-nowrap">
                         ${(item.price_usd * item.qty).toFixed(2)}
                       </span>
                       <button
                         onClick={() => onRemove(item.id)}
-                        className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 p-1 bg-red-50 text-red-500 rounded-md transition-opacity"
+                        className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   ))}
                 </div>
             )}
           </div>
+        </div>
 
-          <div className="h-px bg-[#F1F5F9] w-full" />
-
-          {/* -- TOTALES -- */}
-          <div className="flex flex-col pt-1">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[18px] font-bold text-[#1E293B]">Total:</span>
-              <span className="text-[28px] font-bold text-[#7C3AED] tracking-tight">
-                $ {total.toFixed(2)}
-              </span>
+        {/* -- TOTALES Y BOTONES FIJOS -- */}
+        <div className="px-6 py-6 bg-white border-t border-[#F1F5F9] flex-shrink-0 space-y-5">
+          <div className="flex items-end justify-between">
+            <div className="space-y-0.5">
+              <span className="text-[14px] font-bold text-[#64748B]">Total:</span>
+              <p className="text-[11px] font-bold text-[#94A3B8]">
+                 Bs. {totalBs.toLocaleString("es-VE", { maximumFractionDigits: 2 })}
+              </p>
             </div>
-            <div className="text-right">
-               <p className="text-[13px] font-medium text-[#64748B]">
-                 Bs. {totalBs.toLocaleString("es-VE", { maximumFractionDigits: 2 })} <span className="text-[#94A3B8]">(Tasa Bcv: {bcvRate.toFixed(2)})</span>
-               </p>
-            </div>
+            <span className="text-[32px] font-black text-[#7C3AED] leading-none tracking-tighter">
+              ${total.toFixed(2)}
+            </span>
           </div>
 
-          {/* -- BOTONES DE ACCIÓN -- */}
-          <div className="flex flex-col gap-3 pt-4">
+          <div className="flex flex-col gap-2.5">
             <button
               onClick={onSubmit}
               disabled={submitting || cart.length === 0 || (!cliente && (!newClientName || !newClientRif))}
               className={`
-                w-full py-3.5 rounded-full font-semibold text-[14px] transition-all
+                w-full py-4 rounded-xl font-black text-[14px] transition-all shadow-lg active:scale-[0.98]
                 ${
                   submitting || cart.length === 0 || (!cliente && (!newClientName || !newClientRif))
-                    ? "bg-[#E2E8F0] text-[#94A3B8] cursor-not-allowed"
-                    : "bg-[#7C3AED] text-white hover:bg-[#6D28D9] shadow-sm hover:shadow-md"
+                    ? "bg-[#F1F5F9] text-[#CBD5E1] border border-[#E2E8F0] shadow-none cursor-not-allowed"
+                    : "bg-[#7C3AED] text-white hover:bg-[#6D28D9] shadow-[#7C3AED]/20 border border-[#7C3AED]"
                 }
               `}
             >
               {submitting ? (
                 <div className="flex items-center justify-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" /> Procesando...
+                  <Loader2 className="w-4 h-4 animate-spin" /> PROCESANDO...
                 </div>
               ) : (
-                "FINALIZAR PEDIDO"
+                "FINALIZAR COMPRA"
               )}
             </button>
 
-            <button className="w-full py-3.5 rounded-full font-semibold text-[14px] text-[#64748B] bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors">
-              COTIZAR
-            </button>
-            
-            <button className="w-full py-3.5 rounded-full font-semibold text-[14px] text-[#64748B] bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors">
-              CANCELAR PEDIDO
-            </button>
+            <div className="grid grid-cols-2 gap-2.5">
+              <button className="py-3 rounded-lg font-bold text-[12px] text-[#475569] bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] transition-all tracking-wider">
+                COTIZAR
+              </button>
+              <button className="py-3 rounded-lg font-bold text-[12px] text-[#475569] bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] transition-all tracking-wider">
+                CANCELAR
+              </button>
+            </div>
           </div>
-
         </div>
       </div>
     </div>
