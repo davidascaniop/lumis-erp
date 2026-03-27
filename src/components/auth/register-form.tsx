@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Building2,
   User,
@@ -99,8 +99,10 @@ export function RegisterForm() {
       isValid = await form.trigger(["companyName", "rif"]);
     } else if (step === 2) {
       isValid = await form.trigger(["fullName", "email", "password"]);
+    } else {
+      isValid = true;
     }
-    if (isValid) setStep((s) => s + 1);
+    if (isValid && step < 3) setStep((s) => s + 1);
   };
 
   const prevStep = () => setStep((s) => s - 1);
@@ -109,7 +111,6 @@ export function RegisterForm() {
     setIsLoading(true);
 
     try {
-      // 1. Register Auth User
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -123,7 +124,6 @@ export function RegisterForm() {
         return;
       }
 
-      // 2. Insert Company
       const { data: companyData, error: companyError } = await supabase
         .from("companies")
         .insert({
@@ -143,7 +143,6 @@ export function RegisterForm() {
         return;
       }
 
-      // 3. Insert User Profile (Admin)
       const cData = companyData as any;
       const { error: userError } = await supabase.from("users").insert({
         auth_id: authData.user.id,
@@ -177,24 +176,24 @@ export function RegisterForm() {
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="glass p-10 rounded-2xl w-full text-center flex flex-col items-center shadow-glow"
+        className="bg-white/90 backdrop-blur-xl p-10 rounded-3xl w-full text-center flex flex-col items-center shadow-2xl border border-white"
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 200, damping: 20 }}
-          className="w-20 h-20 bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] rounded-full flex items-center justify-center mb-6 shadow-glow"
+          className="w-20 h-20 bg-brand rounded-full flex items-center justify-center mb-6 shadow-lg shadow-brand/30"
         >
           <CheckCircle2 className="w-10 h-10 text-white" />
         </motion.div>
-        <h2 className="text-2xl font-bold text-[#F5EEFF] mb-2">
+        <h2 className="text-2xl font-bold text-[#1A1125] font-outfit mb-2">
           ¡Compañía Creada!
         </h2>
-        <p className="text-[#B8A0D0]">
+        <p className="text-[#64748B] font-medium font-outfit">
           Bienvenido a LUMIS, {form.getValues().fullName}. Preparando tu
           entorno...
         </p>
-        <Loader2 className="w-6 h-6 animate-spin text-[#E040FB] mt-6" />
+        <Loader2 className="w-6 h-6 animate-spin text-brand mt-6" />
       </motion.div>
     );
   }
@@ -202,30 +201,29 @@ export function RegisterForm() {
   return (
     <div className="w-full">
       {/* Progress Bar */}
-      <div className="mb-8 relative">
+      <div className="mb-10 relative px-4">
         <div className="flex justify-between relative z-10">
           {steps.map((s) => {
             const Icon = s.icon;
             const isActive = step >= s.id;
+            const isProcessing = step === s.id;
             return (
               <div key={s.id} className="flex flex-col items-center gap-2">
                 <motion.div
                   animate={{
-                    scale: step === s.id ? 1.1 : 1,
-                    boxShadow:
-                      step === s.id ? "0 0 20px rgba(224,64,251,0.4)" : "none",
+                    scale: isProcessing ? 1.15 : 1,
                   }}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 shadow-sm border ${
                     isActive
-                      ? "bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] text-white"
-                      : "bg-[#201728] text-[#6B5280] border border-[#E040FB]/10"
+                      ? "bg-brand text-white border-brand shadow-brand/20"
+                      : "bg-[#F8FAFC] text-[#94A3B8] border-[#EDF2F7]"
                   }`}
                 >
                   <Icon className="w-5 h-5" />
                 </motion.div>
                 <span
-                  className={`text-xs font-medium ${
-                    isActive ? "text-[#E040FB]" : "text-[#6B5280]"
+                  className={`text-[11px] font-bold font-outfit uppercase tracking-wider transition-colors duration-300 ${
+                    isActive ? "text-brand" : "text-[#94A3B8]"
                   }`}
                 >
                   {s.title}
@@ -234,239 +232,254 @@ export function RegisterForm() {
             );
           })}
         </div>
-        <div className="absolute top-5 left-0 w-full h-[2px] bg-[#E040FB]/5 -z-0">
+        <div className="absolute top-6 left-10 right-10 h-[2px] bg-[#EDF2F7] -z-0">
           <motion.div
-            className="h-full bg-gradient-to-r from-[#E040FB] to-[#7C4DFF]"
+            className="h-full bg-brand"
             initial={{ width: "0%" }}
             animate={{
               width: `${((step - 1) / (steps.length - 1)) * 100}%`,
             }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
           />
         </div>
       </div>
 
-      <motion.div
-        key={step}
-        initial={{ opacity: 0, x: 30 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -30 }}
-        transition={{ duration: 0.35 }}
-        className="glass p-8 rounded-2xl w-full shadow-card relative overflow-hidden min-h-[420px]"
-      >
-        {/* Gradient top accent */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#E040FB] to-transparent" />
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={step}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="bg-white/90 backdrop-blur-xl p-8 rounded-[32px] w-full shadow-[0_20px_60px_rgba(0,0,0,0.05)] border border-white relative overflow-hidden min-h-[460px]"
+        >
+          {/* Top Gradient Bar */}
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand/10 via-brand to-brand/10" />
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6 h-full flex flex-col"
-          >
-            {/* STEP 1 */}
-            <div className={step === 1 ? "space-y-5 flex-1" : "hidden"}>
-              <h3 className="text-xl font-semibold mb-5 text-[#F5EEFF]">
-                Datos de la Empresa
-              </h3>
-              <FormField
-                control={form.control}
-                name="companyName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[#B8A0D0]">
-                      Nombre de la Empresa
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Ej: Distribuidora Los Andes C.A."
-                        {...field}
-                        className="bg-[#0F0A12]/80 border-[#E040FB]/10 text-[#F5EEFF] placeholder:text-[#6B5280] focus-visible:ring-[#E040FB]/40 h-11"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-[#FF4757] text-xs" />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="rif"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[#B8A0D0]">RIF</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="J-12345678-9"
-                        {...field}
-                        className="bg-[#0F0A12]/80 border-[#E040FB]/10 text-[#F5EEFF] placeholder:text-[#6B5280] focus-visible:ring-[#E040FB]/40 h-11 uppercase"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-[#FF4757] text-xs" />
-                  </FormItem>
-                )}
-              />
-            </div>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-6 h-full flex flex-col pt-2"
+            >
+              {/* STEP 1 */}
+              <div className={step === 1 ? "space-y-6 flex-1" : "hidden"}>
+                <div className="space-y-1">
+                  <h3 className="text-xl font-bold text-[#1A1125] font-outfit">
+                    Datos de la Empresa
+                  </h3>
+                  <p className="text-xs text-[#64748B] font-medium font-outfit">Cuéntanos un poco sobre tu negocio</p>
+                </div>
+                
+                <FormField
+                  control={form.control}
+                  name="companyName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#1A1125] font-bold font-outfit text-sm">
+                        Nombre de la Empresa
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ej: Distribuidora Los Andes C.A."
+                          {...field}
+                          className="bg-[#F8FAFC] border-[#E2E8F0] text-[#1A1125] placeholder:text-[#94A3B8] h-12 rounded-xl focus-visible:ring-brand/20 focus-visible:border-brand transition-all font-outfit"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-danger text-xs font-bold font-outfit" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="rif"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#1A1125] font-bold font-outfit text-sm">RIF</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="J-12345678-9"
+                          {...field}
+                          className="bg-[#F8FAFC] border-[#E2E8F0] text-[#1A1125] placeholder:text-[#94A3B8] h-12 rounded-xl focus-visible:ring-brand/20 focus-visible:border-brand transition-all font-outfit uppercase"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-danger text-xs font-bold font-outfit" />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-            {/* STEP 2 */}
-            <div className={step === 2 ? "space-y-5 flex-1" : "hidden"}>
-              <h3 className="text-xl font-semibold mb-5 text-[#F5EEFF]">
-                Cuenta del Administrador
-              </h3>
-              <FormField
-                control={form.control}
-                name="fullName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[#B8A0D0]">
-                      Nombre Completo
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Juan Pérez"
-                        {...field}
-                        className="bg-[#0F0A12]/80 border-[#E040FB]/10 text-[#F5EEFF] placeholder:text-[#6B5280] focus-visible:ring-[#E040FB]/40 h-11"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-[#FF4757] text-xs" />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[#B8A0D0]">
-                      Correo Electrónico
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="juan@empresa.com"
-                        {...field}
-                        className="bg-[#0F0A12]/80 border-[#E040FB]/10 text-[#F5EEFF] placeholder:text-[#6B5280] focus-visible:ring-[#E040FB]/40 h-11"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-[#FF4757] text-xs" />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[#B8A0D0]">Contraseña</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="••••••••"
-                        {...field}
-                        className="bg-[#0F0A12]/80 border-[#E040FB]/10 text-[#F5EEFF] placeholder:text-[#6B5280] focus-visible:ring-[#E040FB]/40 h-11"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-[#FF4757] text-xs" />
-                  </FormItem>
-                )}
-              />
-            </div>
+              {/* STEP 2 */}
+              <div className={step === 2 ? "space-y-6 flex-1" : "hidden"}>
+                <div className="space-y-1">
+                  <h3 className="text-xl font-bold text-[#1A1125] font-outfit">
+                    Cuenta del Administrador
+                  </h3>
+                  <p className="text-xs text-[#64748B] font-medium font-outfit">Crea las credenciales de acceso principal</p>
+                </div>
 
-            {/* STEP 3 */}
-            <div className={step === 3 ? "space-y-4 flex-1" : "hidden"}>
-              <h3 className="text-xl font-semibold mb-5 text-[#F5EEFF]">
-                Selecciona un Plan
-              </h3>
-              <div className="grid grid-cols-1 gap-3">
-                {plans.map((p) => {
-                  const isSelected = form.watch("plan") === p.id;
-                  return (
-                    <div
-                      key={p.id}
-                      onClick={() =>
-                        form.setValue(
-                          "plan",
-                          p.id as "basic" | "pro" | "enterprise",
-                        )
-                      }
-                      className={`p-4 rounded-xl border relative cursor-pointer transition-all duration-200 ${
-                        isSelected
-                          ? "border-[#E040FB]/50 bg-[#E040FB]/10 shadow-glow"
-                          : "border-[#E040FB]/8 bg-[#0F0A12]/60 hover:border-[#E040FB]/20 hover:bg-[#E040FB]/5"
-                      }`}
-                    >
-                      {"popular" in p && p.popular && (
-                        <div className="absolute -top-2.5 right-3 px-2.5 py-0.5 bg-gradient-to-r from-[#E040FB] to-[#7C4DFF] text-white text-[10px] font-bold rounded-full flex items-center gap-1">
-                          <Sparkles className="w-3 h-3" /> POPULAR
-                        </div>
-                      )}
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-semibold text-[#F5EEFF]">
-                            {p.name}
-                          </p>
-                          <p className="text-xs text-[#6B5280] mt-0.5">
-                            {p.desc}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-2xl font-bold text-[#E040FB]">
-                            {p.price}
-                          </span>
-                          <span className="text-xs text-[#6B5280]">
-                            {p.period}
-                          </span>
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#1A1125] font-bold font-outfit text-sm">
+                        Nombre Completo
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Juan Pérez"
+                          {...field}
+                          className="bg-[#F8FAFC] border-[#E2E8F0] text-[#1A1125] placeholder:text-[#94A3B8] h-12 rounded-xl focus-visible:ring-brand/20 focus-visible:border-brand transition-all font-outfit"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-danger text-xs font-bold font-outfit" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#1A1125] font-bold font-outfit text-sm">
+                        Correo Electrónico
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="juan@empresa.com"
+                          {...field}
+                          className="bg-[#F8FAFC] border-[#E2E8F0] text-[#1A1125] placeholder:text-[#94A3B8] h-12 rounded-xl focus-visible:ring-brand/20 focus-visible:border-brand transition-all font-outfit"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-danger text-xs font-bold font-outfit" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#1A1125] font-bold font-outfit text-sm">Contraseña</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="••••••••"
+                          {...field}
+                          className="bg-[#F8FAFC] border-[#E2E8F0] text-[#1A1125] placeholder:text-[#94A3B8] h-12 rounded-xl focus-visible:ring-brand/20 focus-visible:border-brand transition-all font-outfit"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-danger text-xs font-bold font-outfit" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* STEP 3 */}
+              <div className={step === 3 ? "space-y-6 flex-1" : "hidden"}>
+                <div className="space-y-1">
+                  <h3 className="text-xl font-bold text-[#1A1125] font-outfit">
+                    Selecciona un Plan
+                  </h3>
+                  <p className="text-xs text-[#64748B] font-medium font-outfit">Elige el plan que mejor se adapte a ti</p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 overflow-y-auto no-scrollbar max-h-[320px] pr-1">
+                  {plans.map((p) => {
+                    const isSelected = form.watch("plan") === p.id;
+                    return (
+                      <div
+                        key={p.id}
+                        onClick={() =>
+                          form.setValue(
+                            "plan",
+                            p.id as "basic" | "pro" | "enterprise",
+                          )
+                        }
+                        className={`p-5 rounded-2xl border transition-all duration-300 relative cursor-pointer active:scale-[0.98] ${
+                          isSelected
+                            ? "bg-brand/[0.04] border-brand border-2 shadow-sm"
+                            : "bg-[#F8FAFC] border-[#EDF2F7] hover:border-brand/30"
+                        }`}
+                      >
+                        {p.popular && (
+                          <div className="absolute -top-3 right-5 px-3 py-1 bg-brand text-white text-[10px] font-bold rounded-full flex items-center gap-1.5 shadow-lg shadow-brand/20">
+                            <Sparkles className="w-3 h-3" /> POPULAR
+                          </div>
+                        )}
+                        <div className="flex justify-between items-center">
+                          <div className="space-y-1">
+                            <p className={`font-bold font-outfit ${isSelected ? "text-brand" : "text-[#1A1125]"}`}>
+                              {p.name}
+                            </p>
+                            <p className="text-[11px] font-medium text-[#64748B] font-outfit leading-snug">
+                              {p.desc}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <div className="flex items-baseline gap-0.5 justify-end">
+                              <span className={`text-xl font-black font-outfit ${isSelected ? "text-brand" : "text-[#1A1125]"}`}>
+                                {p.price}
+                              </span>
+                              <span className="text-[10px] font-bold text-[#94A3B8] font-outfit uppercase tracking-tighter">
+                                {p.period}
+                              </span>
+                            </div>
+                            {isSelected && (
+                               <div className="w-4 h-4 rounded-full bg-brand flex items-center justify-center mt-2 ml-auto">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                               </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      {isSelected && (
-                        <motion.div
-                          layoutId="plan-indicator"
-                          className="absolute top-3 right-3 w-3 h-3 rounded-full bg-[#E040FB]"
-                        />
-                      )}
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
 
-            <div className="flex justify-between mt-auto pt-5 border-t border-[#E040FB]/8">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={prevStep}
-                disabled={step === 1 || isLoading}
-                className="text-[#6B5280] hover:text-[#F5EEFF] hover:bg-[#E040FB]/5 cursor-pointer"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" /> Atrás
-              </Button>
-
-              {step < 3 ? (
+              <div className="flex justify-between mt-auto pt-6 border-t border-[#EDF2F7]">
                 <Button
                   type="button"
-                  onClick={nextStep}
-                  className="bg-gradient-to-r from-[#E040FB] to-[#7C4DFF] hover:from-[#E040FB]/90 hover:to-[#7C4DFF]/90 text-white cursor-pointer"
+                  variant="ghost"
+                  onClick={prevStep}
+                  disabled={step === 1 || isLoading}
+                  className="text-[#64748B] hover:text-[#1A1125] hover:bg-[#F8FAFC] rounded-xl font-bold font-outfit text-xs active:scale-95"
                 >
-                  Siguiente <ArrowRight className="w-4 h-4 ml-2" />
+                  <ArrowLeft className="w-4 h-4 mr-2" /> Atrás
                 </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="bg-gradient-to-r from-[#E040FB] to-[#7C4DFF] hover:from-[#E040FB]/90 hover:to-[#7C4DFF]/90 text-white shadow-glow cursor-pointer"
-                >
-                  {isLoading && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Finalizar Registro
-                </Button>
-              )}
-            </div>
-          </form>
-        </Form>
-      </motion.div>
 
-      <div className="mt-6 text-center text-sm">
-        <span className="text-[#6B5280]">¿Ya tienes una cuenta?</span>{" "}
+                {step < 3 ? (
+                  <Button
+                    type="button"
+                    onClick={nextStep}
+                    className="bg-brand hover:opacity-90 text-white font-bold rounded-xl px-8 shadow-lg shadow-brand/20 h-12 transition-all active:scale-95 font-outfit uppercase tracking-widest text-xs"
+                  >
+                    Siguiente <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="bg-brand hover:opacity-90 text-white font-bold rounded-xl px-8 shadow-lg shadow-brand/20 h-12 transition-all active:scale-95 font-outfit uppercase tracking-widest text-xs"
+                  >
+                    {isLoading && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Finalizar Registro
+                  </Button>
+                )}
+              </div>
+            </form>
+          </Form>
+        </motion.div>
+      </AnimatePresence>
+
+      <div className="mt-8 text-center text-sm">
+        <span className="text-[#64748B] font-medium font-outfit">¿Ya tienes una cuenta?</span>{" "}
         <Link
           href="/login"
-          className="text-[#E040FB] hover:text-[#F8C0FF] font-medium transition-colors"
+          className="text-brand hover:underline font-bold transition-all font-outfit"
         >
           Inicia Sesión
         </Link>
