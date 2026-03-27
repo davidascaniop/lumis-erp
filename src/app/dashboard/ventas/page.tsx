@@ -102,14 +102,14 @@ export default function VentasPage() {
               placeholder="Buscar por número o cliente..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 border-none bg-surface-input text-text-1 placeholder:text-text-3"
+              className="pl-10 border border-border/40 bg-surface-input text-text-1 placeholder:text-text-3 focus:border-brand/40 focus:ring-4 focus:ring-brand/5 transition-all shadow-sm"
             />
           </div>
         </div>
 
         <div className="overflow-y-auto flex-1 no-scrollbar p-0">
           <table className="w-full text-sm text-left whitespace-nowrap">
-            <thead className="bg-surface-base text-text-3 sticky top-0 z-10 backdrop-blur-md border-b border-border">
+            <thead className="bg-surface-base/80 text-text-2 sticky top-0 z-10 backdrop-blur-lg border-b-2 border-border/50">
               <tr>
                 <th className="px-6 py-4 font-bold uppercase text-[10px] tracking-widest">
                   # Pedido
