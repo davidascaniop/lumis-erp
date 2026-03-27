@@ -22,13 +22,16 @@ import { createClient } from "@/lib/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ProductForm } from "@/components/products/product-form";
+import { BulkUploadModal } from "@/components/products/bulk-upload-modal";
 import { toast } from "sonner";
+import { FileSpreadsheet } from "lucide-react";
 
 export default function ProductosPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [openAdd, setOpenAdd] = useState(false);
+  const [openBulk, setOpenBulk] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const supabase = createClient();
 
@@ -92,6 +95,11 @@ export default function ProductosPage() {
           setSelectedProduct(null);
         }}
       />
+      <BulkUploadModal 
+        open={openBulk} 
+        setOpen={setOpenBulk} 
+        onSuccess={fetchProducts} 
+      />
 
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -103,16 +111,25 @@ export default function ProductosPage() {
             Gestiona tu catálogo, precios y existencias.
           </p>
         </div>
-        <button
-          onClick={() => {
-            setSelectedProduct(null);
-            setOpenAdd(true);
-          }}
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-brand-gradient text-white rounded-xl shadow-brand font-bold hover:opacity-90 transition-all active:scale-95"
-        >
-          <Plus className="w-5 h-5" />
-          Nuevo Producto
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setOpenBulk(true)}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-surface-card border border-border text-white rounded-xl shadow-sm font-bold hover:bg-white/5 transition-all active:scale-95"
+          >
+            <FileSpreadsheet className="w-5 h-5 text-[#E040FB]" />
+            Carga Masiva
+          </button>
+          <button
+            onClick={() => {
+              setSelectedProduct(null);
+              setOpenAdd(true);
+            }}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-brand-gradient text-white rounded-xl shadow-brand font-bold hover:opacity-90 transition-all active:scale-95"
+          >
+            <Plus className="w-5 h-5" />
+            Nuevo Producto
+          </button>
+        </div>
       </div>
 
       {/* QUICK STATS */}
