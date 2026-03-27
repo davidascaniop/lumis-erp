@@ -28,6 +28,7 @@ import {
   LayoutGrid, 
   Image as ImageIcon,
   CheckCircle2,
+  Zap,
   X
 } from "lucide-react";
 
