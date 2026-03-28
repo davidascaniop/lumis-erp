@@ -131,64 +131,41 @@ function ProductCard({
   const noStock = product.stock <= 0;
 
   return (
-    <div className={`bg-white rounded-[32px] p-5 border border-[#EDF2F7] shadow-card hover-card-effect group flex flex-col gap-5 ${noStock ? 'opacity-50' : ''}`}>
-       <div className="flex gap-5">
-          <div className="w-28 h-28 rounded-[24px] bg-[#F8FAFC] flex items-center justify-center overflow-hidden border border-[#F1F5F9] flex-shrink-0 group-hover:scale-105 transition-transform duration-500">
+    <div className={`bg-white rounded-2xl p-4 border border-[#EDF2F7] shadow-sm hover:shadow-md transition-all flex flex-col gap-4 ${noStock ? 'opacity-50' : ''}`}>
+       <div className="flex gap-4">
+          <div className="w-24 h-24 rounded-xl bg-[#F8FAFC] flex items-center justify-center overflow-hidden border border-[#F1F5F9] flex-shrink-0">
             {product.image_url ? (
-              <img src={product.image_url} alt={product.name} className="w-full h-full object-contain p-3" />
+              <img src={product.image_url} alt={product.name} className="w-full h-full object-contain p-2" />
             ) : (
-              <Package className="w-12 h-12 text-text-3 opacity-20" />
+              <Package className="w-10 h-10 text-text-3 opacity-20" />
             )}
           </div>
           
           <div className="flex-1 min-w-0 py-1">
-            <div className="inline-block px-2 py-0.5 rounded-md bg-brand/5 border border-brand/10 mb-2">
-              <p className="text-[9px] font-bold text-brand uppercase tracking-wider font-outfit">
-                {product.category || 'General'}
-              </p>
-            </div>
-            <h3 className="text-[17px] font-bold text-[#1A1125] font-outfit line-clamp-2 mb-1 leading-tight">{product.name}</h3>
-            <p className="text-2xl font-bold text-brand font-outfit mb-3">$ {Number(product.price_usd).toFixed(2)}</p>
-            <div className="flex flex-wrap gap-x-4 gap-y-1">
-               <div className="flex items-center gap-1">
-                 <span className="text-[10px] font-bold text-text-3 uppercase tracking-wide">SKU:</span>
-                 <span className="text-[10px] font-bold text-[#1A1125]">{product.sku || 'N/A'}</span>
-               </div>
-               <div className="flex items-center gap-1">
-                 <span className="text-[10px] font-bold text-text-3 uppercase tracking-wide">Stock:</span>
-                 <span className={`text-[10px] font-bold ${noStock ? 'text-status-danger' : 'text-status-ok'}`}>
-                   {product.stock} {product.unit || 'Und'}
-                 </span>
-               </div>
+            <h3 className="text-[15px] font-bold text-[#1A1125] font-outfit line-clamp-1 mb-1">{product.name}</h3>
+            <p className="text-xl font-bold text-brand font-outfit mb-2">$ {Number(product.price_usd).toFixed(2)}</p>
+            <div className="space-y-0.5">
+               <p className="text-[10px] font-bold text-text-3 uppercase font-outfit tracking-wide">SKU: {product.sku || 'N/A'}</p>
+               <p className="text-[10px] font-bold text-text-3 uppercase font-outfit tracking-wide">Existencia: <span className="text-text-1">{product.stock} {product.unit || 'Uni'}</span></p>
             </div>
           </div>
        </div>
 
-       <div className="flex items-center gap-4 mt-auto">
-          <div className="flex items-center bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] p-1 flex-1">
-            <button 
-              onClick={(e) => { e.stopPropagation(); setQty(Math.max(1, qty - 1)); }} 
-              className="w-10 h-10 flex items-center justify-center text-text-3 hover:text-brand transition-colors"
-            >
-              <Minus className="w-4 h-4"/>
-            </button>
-            <span className="flex-1 text-center text-base font-bold font-outfit text-[#1A1125]">{qty}</span>
-            <button 
-              onClick={(e) => { e.stopPropagation(); setQty(qty + 1); }} 
-              className="w-10 h-10 flex items-center justify-center text-text-3 hover:text-brand transition-colors"
-            >
-              <Plus className="w-4 h-4"/>
-            </button>
+       <div className="flex items-center gap-3 mt-auto">
+          <div className="flex items-center bg-[#F8FAFC] rounded-lg border border-[#E2E8F0] p-1 flex-1">
+            <button onClick={() => setQty(Math.max(1, qty - 1))} className="w-8 h-8 flex items-center justify-center text-text-3 hover:text-[#1A1125] transition-colors"><Minus className="w-3.5 h-3.5"/></button>
+            <span className="flex-1 text-center text-sm font-bold font-outfit text-[#1A1125]">{qty}</span>
+            <button onClick={() => setQty(qty + 1)} className="w-8 h-8 flex items-center justify-center text-text-3 hover:text-[#1A1125] transition-colors"><Plus className="w-3.5 h-3.5"/></button>
           </div>
           
           <button
             onClick={() => onAdd(qty)}
             disabled={noStock}
-            className={`h-12 px-8 rounded-2xl font-bold font-outfit text-xs uppercase tracking-widest transition-all ${
-              justAdded ? 'bg-status-ok text-white' : 'bg-brand text-white hover:shadow-brand active:scale-95 shadow-lg shadow-brand/10'
+            className={`h-10 px-6 rounded-lg font-bold font-outfit text-xs uppercase tracking-widest transition-all ${
+              justAdded ? 'bg-status-ok text-white' : 'bg-brand text-white hover:opacity-90 active:scale-95 shadow-lg shadow-brand/10'
             }`}
           >
-            {justAdded ? <div className="flex items-center gap-2"><Check className="w-4 h-4"/> LISTO</div> : "Añadir"}
+            {justAdded ? <div className="flex items-center gap-1"><Check className="w-4 h-4"/> OK</div> : "Agregar"}
           </button>
        </div>
     </div>
