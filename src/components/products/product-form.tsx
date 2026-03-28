@@ -214,34 +214,31 @@ export function ProductForm({
   }) => {
     const isOpen = activeSection === id;
     return (
-      <div className={`border rounded-[1.5rem] overflow-hidden transition-all duration-300 ${isOpen ? "border-brand shadow-sm" : "border-border hover:border-brand/40"}`}>
+      <div className={`border rounded-[1.5rem] overflow-hidden transition-all duration-300 ${isOpen ? "border-brand shadow-sm" : "border-border/40"}`}>
         <button
           type="button"
           onClick={() => setActiveSection(isOpen ? "" : id)}
           className={`w-full flex items-center justify-between p-5 text-left transition-colors ${isOpen ? "bg-white" : "bg-white hover:bg-slate-50"} ${error ? "border-l-[4px] border-l-red-500" : ""}`}
         >
           <div className="flex items-center gap-4">
-            <div className={`p-2 rounded-xl transition-colors ${isOpen ? "bg-brand/10 text-brand" : "bg-slate-100 text-slate-500"}`}>
-              <Icon className="w-5 h-5 font-black" />
+            <div className={`p-2 rounded-xl transition-colors ${isOpen ? "bg-brand/10 text-brand" : "bg-slate-100 text-slate-400"}`}>
+              <Icon className="w-5 h-5" />
             </div>
-            <div>
-              <h3 className={`text-sm font-montserrat font-black uppercase tracking-wider transition-colors ${isOpen ? "text-brand" : "text-slate-700"}`}>
-                {title}
-              </h3>
-              {error && <span className="text-[10px] text-red-500 font-bold uppercase tracking-widest mt-0.5">Falta información por completar</span>}
-            </div>
+            <h3 className={`text-sm font-montserrat font-black uppercase tracking-wider transition-colors ${isOpen ? "text-brand" : "text-slate-600"}`}>
+              {title}
+            </h3>
           </div>
-          <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isOpen ? "rotate-180 text-brand" : ""}`} />
+          <ChevronDown className={`w-5 h-5 text-slate-300 transition-transform duration-300 ${isOpen ? "rotate-180 text-brand" : ""}`} />
         </button>
-        <AnimatePresence>
+        <AnimatePresence initial={false}>
           {isOpen && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
             >
-              <div className="p-6 bg-[#F9FAFB] border-t border-border/50">
+              <div className="p-6 pt-2 bg-white border-t border-border/10">
                 {children}
               </div>
             </motion.div>
@@ -253,7 +250,7 @@ export function ProductForm({
 
   const FormField = ({ label, error, children, className = "" }: { label: string, error?: any, children: React.ReactNode, className?: string }) => (
     <div className={`space-y-1.5 ${className}`}>
-      <label className="text-[10px] font-montserrat font-black text-slate-500 uppercase tracking-widest px-1">
+      <label className="text-[10px] font-montserrat font-black text-slate-400 uppercase tracking-widest px-0.5">
         {label}
       </label>
       {children}
@@ -269,15 +266,15 @@ export function ProductForm({
           <div className="p-8 pb-6 border-b border-slate-100 relative bg-white">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-[1.5rem] bg-brand/5 border border-brand/10 flex items-center justify-center shadow-inner">
+                <div className="w-14 h-14 rounded-[1.5rem] bg-slate-50 border border-border/40 flex items-center justify-center shadow-sm">
                    <Package className="w-7 h-7 text-brand" />
                 </div>
                 <div>
-                  <DialogTitle className="text-2xl font-montserrat font-black text-slate-900 tracking-tight">
+                  <DialogTitle className="text-2xl font-montserrat font-black text-slate-900 tracking-tight leading-none">
                     {product?.id ? "Editar Producto" : "Nuevo Producto"}
                   </DialogTitle>
-                  <DialogDescription className="text-slate-400 text-[13px] font-medium mt-0.5">
-                    Configura SKU, precios multinivel e inventario de forma clara y sencilla.
+                  <DialogDescription className="text-slate-400 text-[13px] mt-1.5 font-medium">
+                    Gestión eficiente de inventario y precios multinivel.
                   </DialogDescription>
                 </div>
               </div>
@@ -292,12 +289,8 @@ export function ProductForm({
           </div>
 
           {/* Secciones Desplegables */}
-          <div className="flex-1 overflow-y-auto p-8 space-y-4 scrollbar-hide bg-slate-50/30">
-            <motion.div 
-               initial={{ opacity: 0, y: 10 }}
-               animate={{ opacity: 1, y: 0 }}
-               className="space-y-4"
-            >
+          <div className="flex-1 overflow-y-auto p-8 pt-6 space-y-4 scrollbar-hide bg-white">
+            <div className="space-y-4">
               {/* Sección 1: General */}
               <CollapsibleSection 
                 id="general" 
@@ -310,18 +303,15 @@ export function ProductForm({
                     <Input 
                       {...form.register("name")} 
                       placeholder="Ej. Harina Pan 1Kg"
-                      className="h-12 bg-white border-border/60 text-slate-900 placeholder:text-slate-300 text-base focus:ring-brand rounded-xl font-bold font-outfit shadow-sm" 
+                      className="h-12 bg-white border-border/40 text-slate-900 placeholder:text-slate-200 text-base focus:ring-brand rounded-xl font-bold font-outfit shadow-sm" 
                     />
                   </FormField>
                   <FormField label="SKU / Código Barra" error={form.formState.errors.sku} className="col-span-12 md:col-span-4">
-                    <div className="relative">
-                      <Barcode className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
-                      <Input 
-                        {...form.register("sku")} 
-                        placeholder="PROD-001"
-                        className="h-12 pl-10 bg-white border-border/60 text-slate-900 placeholder:text-slate-300 rounded-xl uppercase font-mono shadow-sm" 
-                      />
-                    </div>
+                    <Input 
+                      {...form.register("sku")} 
+                      placeholder="PROD-001"
+                      className="h-12 bg-white border-border/40 text-slate-900 placeholder:text-slate-200 rounded-xl uppercase font-mono shadow-sm px-4" 
+                    />
                   </FormField>
                 </div>
               </CollapsibleSection>
@@ -331,7 +321,7 @@ export function ProductForm({
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                   <FormField label="Tipo de Unidad">
                     <Select value={form.watch("unit")} onValueChange={(v) => form.setValue("unit", v)}>
-                      <SelectTrigger className="h-12 bg-white border-border/60 text-slate-900 rounded-xl shadow-sm font-bold">
+                      <SelectTrigger className="h-12 bg-white border-border/40 text-slate-900 rounded-xl shadow-sm font-bold">
                         <SelectValue placeholder="Seleccionar" />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-slate-200">
@@ -343,20 +333,20 @@ export function ProductForm({
                     </Select>
                   </FormField>
                   <FormField label="Categoría">
-                    <Input {...form.register("category")} placeholder="Víveres" className="h-12 bg-white border-border/60 text-slate-900 rounded-xl shadow-sm font-bold" />
+                    <Input {...form.register("category")} placeholder="Víveres" className="h-12 bg-white border-border/40 text-slate-900 rounded-xl font-bold shadow-sm" />
                   </FormField>
                   <FormField label="Marca">
-                    <Input {...form.register("brand")} placeholder="Polar" className="h-12 bg-white border-border/60 text-slate-900 rounded-xl shadow-sm font-bold" />
+                    <Input {...form.register("brand")} placeholder="Polar" className="h-12 bg-white border-border/40 text-slate-900 rounded-xl font-bold shadow-sm" />
                   </FormField>
                   <FormField label="Departamento">
-                    <Input {...form.register("department")} placeholder="Alimentos" className="h-12 bg-white border-border/60 text-slate-900 rounded-xl shadow-sm font-bold" />
+                    <Input {...form.register("department")} placeholder="Alimentos" className="h-12 bg-white border-border/40 text-slate-900 rounded-xl font-bold shadow-sm" />
                   </FormField>
                   <FormField label="Cód. Proveedor">
-                    <Input {...form.register("supplier_code")} placeholder="SUP-123" className="h-12 bg-white border-border/60 text-slate-900 rounded-xl shadow-sm font-bold" />
+                    <Input {...form.register("supplier_code")} placeholder="SUP-123" className="h-12 bg-white border-border/40 text-slate-900 rounded-xl font-bold shadow-sm" />
                   </FormField>
                   <FormField label="Depósito / Sucursal">
                     <Select value={form.watch("warehouse_id")} onValueChange={(v) => form.setValue("warehouse_id", v)}>
-                      <SelectTrigger className="h-12 bg-brand/5 border-brand/20 text-brand rounded-xl shadow-sm font-black uppercase text-[10px]">
+                      <SelectTrigger className="h-12 bg-white border-border/40 text-slate-700 rounded-xl shadow-sm font-black uppercase text-[10px]">
                         <SelectValue placeholder="Seleccionar" />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-slate-200">
@@ -367,130 +357,105 @@ export function ProductForm({
                     </Select>
                   </FormField>
                   <FormField label="Existencia Inicial" className="col-span-full">
-                    <div className="relative">
-                       <Layers className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#00D4AA]" />
-                       <Input {...form.register("stock")} type="number" className="h-14 pl-12 bg-[#00D4AA]/5 border-[#00D4AA]/20 text-slate-900 font-black text-lg rounded-2xl shadow-sm" />
-                    </div>
+                    <Input {...form.register("stock")} type="number" className="h-14 bg-brand/5 border-brand/20 text-brand font-black text-xl rounded-2xl shadow-sm text-center" />
                   </FormField>
                 </div>
               </CollapsibleSection>
 
-              {/* Sección 3: Precios y Ganancias - CALCULADORA */}
+              {/* Sección 3: Precios y Ganancias */}
               <CollapsibleSection id="precios" title="Estructura de Precios y Ganancias" icon={DollarSign}>
                 <div className="space-y-6">
-                  {/* Fila superior de calculadora */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-white p-6 rounded-3xl border border-border/40 shadow-sm">
-                    <FormField label="Costo Unitario ($/Und)">
-                      <div className="relative">
-                        <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <Input 
-                          {...form.register("cost_usd")} 
-                          type="number" 
-                          step="0.01" 
-                          className="h-12 pl-9 bg-slate-50 border-slate-200 text-slate-900 font-bold rounded-xl" 
-                        />
-                      </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <FormField label="Costo Unitario ($)">
+                      <Input 
+                        {...form.register("cost_usd")} 
+                        type="number" 
+                        step="0.01" 
+                        className="h-12 bg-white border-border/40 text-slate-900 font-bold rounded-xl" 
+                      />
                     </FormField>
-                    <FormField label="Cantidad Base">
-                       <Input value={stock_qty} disabled className="h-12 bg-slate-50/50 border-border/30 text-slate-400 font-bold rounded-xl" />
+                    <FormField label="Cantidad">
+                       <Input value={stock_qty} disabled className="h-12 bg-slate-50 border-border/30 text-slate-400 font-bold rounded-xl cursor-not-allowed" />
                     </FormField>
                     <FormField label="Costo Total">
-                       <div className="h-12 bg-slate-100/50 border border-slate-200 rounded-xl flex items-center px-4 font-mono font-black text-slate-500">
+                       <div className="h-12 bg-slate-50 border border-border/30 rounded-xl flex items-center px-4 font-mono font-black text-slate-400">
                          {formatCurrency(totalCost)}
                        </div>
                     </FormField>
                   </div>
 
-                  {/* Fila de precio de venta y % */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-6 bg-brand/5 rounded-3xl border border-brand/10">
-                    <FormField label="Precio de Venta Sugerido">
-                      <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-brand font-black text-xl">$</span>
-                        <Input 
-                          {...form.register("price_usd")} 
-                          type="number" 
-                          step="0.01" 
-                          className="h-14 pl-10 bg-white border-brand/20 text-text-1 text-2xl font-black rounded-2xl shadow-sm focus:ring-brand" 
-                        />
-                      </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 ring-1 ring-brand/10 p-6 rounded-3xl bg-slate-50/50">
+                    <FormField label="Precio de Venta ($)">
+                      <Input 
+                        {...form.register("price_usd")} 
+                        type="number" 
+                        step="0.01" 
+                        className="h-14 bg-white border-brand/20 text-text-1 text-2xl font-black rounded-2xl shadow-sm focus:ring-brand" 
+                      />
                     </FormField>
-                    <FormField label="Margen de Ganancia (%)">
-                       <div className="relative">
-                         <TrendingUp className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ok" />
-                         <div className="h-14 pl-12 bg-white border border-border/60 rounded-2xl flex items-center text-ok font-black text-xl shadow-inner">
-                           {profitMarginPercent.toFixed(2)} %
-                         </div>
+                    <FormField label="Ganancia (%)">
+                       <div className="h-14 bg-white border border-border/40 rounded-2xl flex items-center justify-center text-ok font-black text-2xl shadow-sm">
+                         {profitMarginPercent.toFixed(1)}%
                        </div>
                     </FormField>
                   </div>
 
-                  <div className="flex justify-center">
-                    <div className={`px-6 py-2 rounded-full text-[13px] font-black uppercase tracking-widest ${profit > 0 ? "bg-ok/10 text-ok border border-ok/20" : "bg-danger/10 text-danger border border-danger/20"}`}>
-                       Utilidad estimada: {formatCurrency(profit)} /Und.
-                    </div>
+                  <div className="text-center">
+                    <span className={`text-[12px] font-black uppercase tracking-widest ${profit > 0 ? "text-ok" : "text-danger"}`}>
+                       Utilidad: {formatCurrency(profit)} por unidad
+                    </span>
                   </div>
 
-                  {/* Precios multinivel adicionales */}
-                  <div className="pt-6 border-t border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <FormField label="P2: Mayorista">
-                      <Input {...form.register("price_usd_2")} type="number" step="0.01" className="h-11 bg-white border-slate-200 text-slate-900 font-bold rounded-xl shadow-sm" />
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-border/10">
+                    <FormField label="Mayorista">
+                      <Input {...form.register("price_usd_2")} type="number" step="0.01" className="h-11 bg-white border-border/40 text-slate-700 font-bold rounded-xl" />
                     </FormField>
-                    <FormField label="P3: Distribuidor">
-                      <Input {...form.register("price_usd_3")} type="number" step="0.01" className="h-11 bg-white border-slate-200 text-slate-900 font-bold rounded-xl shadow-sm" />
+                    <FormField label="Distrib.">
+                      <Input {...form.register("price_usd_3")} type="number" step="0.01" className="h-11 bg-white border-border/40 text-slate-700 font-bold rounded-xl" />
                     </FormField>
-                    <FormField label="P4: Oferta">
-                      <div className="relative">
-                        <Zap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
-                        <Input {...form.register("price_usd_4")} type="number" step="0.01" className="h-11 pl-10 bg-white border-slate-200 text-slate-900 font-bold rounded-xl shadow-sm" />
-                      </div>
+                    <FormField label="Oferta">
+                      <Input {...form.register("price_usd_4")} type="number" step="0.01" className="h-11 bg-white border-border/40 text-slate-700 font-bold rounded-xl" />
                     </FormField>
-                    <FormField label="P5: VIP">
-                      <div className="relative">
-                        <CheckCircle2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#00D4AA]" />
-                        <Input {...form.register("price_usd_5")} type="number" step="0.01" className="h-11 pl-10 bg-white border-slate-200 text-slate-900 font-bold rounded-xl shadow-sm" />
-                      </div>
+                    <FormField label="VIP">
+                      <Input {...form.register("price_usd_5")} type="number" step="0.01" className="h-11 bg-white border-border/40 text-slate-700 font-bold rounded-xl" />
                     </FormField>
                   </div>
                 </div>
               </CollapsibleSection>
 
               {/* Sección 4: Avanzados */}
-              <CollapsibleSection id="avanzados" title="Campos Avanzados" icon={ImageIcon}>
+              <CollapsibleSection id="avanzados" title="Imagen y Descripción" icon={ImageIcon}>
                 <div className="space-y-6">
-                   <FormField label="Imagen del Producto (URL)">
-                      <div className="relative">
-                        <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <Input {...form.register("image_url")} placeholder="https://ejemplo.com/imagen.png" className="h-12 pl-10 bg-white border-border/60 text-slate-900 rounded-xl" />
-                      </div>
+                   <FormField label="URL de Imagen">
+                      <Input {...form.register("image_url")} placeholder="https://..." className="h-12 bg-white border-border/40 text-slate-900 rounded-xl" />
                    </FormField>
-                   <FormField label="Descripción Detallada">
+                   <FormField label="Descripción">
                       <textarea 
                         {...form.register("description")} 
-                        className="w-full bg-white border border-border/60 rounded-2xl p-4 text-slate-900 text-[13px] font-outfit min-h-[120px] focus:ring-brand outline-none transition-all placeholder:text-slate-300"
-                        placeholder="Define características adicionales, empaque, ingredientes o modo de uso comercial..."
+                        className="w-full bg-white border border-border/40 rounded-2xl p-4 text-slate-900 text-[13px] font-outfit min-h-[100px] focus:ring-1 focus:ring-brand outline-none"
+                        placeholder="..."
                       />
                    </FormField>
                 </div>
               </CollapsibleSection>
-            </motion.div>
+            </div>
           </div>
 
-          {/* Footer Premium */}
+          {/* Footer */}
           <div className="p-8 bg-white border-t border-slate-100 flex justify-end gap-3 rounded-b-[2.5rem]">
              <button 
                type="button" 
                onClick={() => setOpen(false)}
-               className="px-8 py-3 rounded-2xl text-[12px] font-montserrat font-black uppercase tracking-widest text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-all active:scale-95"
+               className="px-8 py-3 rounded-2xl text-[12px] font-montserrat font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-all"
              >
                Cancelar
              </button>
              <button 
                type="submit" 
                disabled={loading}
-               className="px-10 py-3 rounded-2xl bg-brand text-white text-[12px] font-montserrat font-black uppercase tracking-[0.15em] shadow-brand-lg hover:shadow-brand-hover hover:scale-[1.03] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center gap-3"
+               className="px-10 py-3 rounded-2xl bg-brand text-white text-[12px] font-montserrat font-black uppercase tracking-widest shadow-brand-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center gap-3"
              >
-               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-               {loading ? "Sincronizando..." : product?.id ? "Actualizar Inventario" : "Crear Producto"}
+               {loading ? "Sincronizando..." : product?.id ? "Actualizar" : "Crear Producto"}
              </button>
           </div>
         </form>
