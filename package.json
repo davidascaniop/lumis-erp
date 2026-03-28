@@ -8,6 +8,15 @@
     "start": "next start",
     "lint": "eslint"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "npm": {
+    "overrides": {
+      "react": "19.2.3",
+      "react-dom": "19.2.3"
+    }
+  },
   "dependencies": {
     "@hello-pangea/dnd": "^16.6.0",
     "@hookform/resolvers": "^5.2.2",
