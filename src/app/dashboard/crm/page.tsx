@@ -143,9 +143,9 @@ export default function CRMPage() {
         ))}
       </div>
 
-      <div className="flex-1 flex overflow-hidden -mx-6">
+      <div className="flex-1 flex overflow-hidden">
         {/* Kanban Board Area */}
-        <div className={`flex-1 transition-all overflow-x-auto px-6 ${selectedOp ? "opacity-30 md:opacity-100" : ""}`}>
+        <div className={`flex-1 transition-all overflow-x-auto ${selectedOp ? "opacity-30 md:opacity-100" : ""}`}>
           <KanbanBoard 
             oportunidades={filteredOps} 
             onUpdateEtapa={handleUpdateEtapa}
@@ -153,9 +153,9 @@ export default function CRMPage() {
           />
         </div>
         
-        {/* Right Panel (True Side Sheet) */}
+        {/* Right Panel (True Universal Side Sheet) */}
         {selectedOp && (
-          <div className="w-[450px] flex-shrink-0 animate-in slide-in-from-right-10 border-l border-border bg-surface-base/80 backdrop-blur-xl z-50 shadow-2xl overflow-hidden">
+          <div className="fixed right-0 top-0 h-full w-full sm:w-[500px] animate-in slide-in-from-right-10 bg-surface-base/95 backdrop-blur-2xl z-[100] shadow-2xl border-l border-border/50 overflow-hidden">
             <ClientePanel 
               oportunidad={selectedOp} 
               onClose={() => setSelectedOp(null)}
