@@ -355,7 +355,7 @@ function CobranzaContent() {
       </div>
 
       {/* TABLA DINAMICA */}
-      <div className="bg-surface-card border border-border rounded-2xl overflow-hidden shadow-card hover-card-effect transition-all flex flex-col h-[65vh]">
+      <div className="bg-surface-card border border-border rounded-2xl overflow-hidden shadow-card transition-all flex flex-col h-[65vh]">
         <div className="p-4 border-b border-white/5 bg-surface-card/40 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="relative w-full sm:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
@@ -374,7 +374,7 @@ function CobranzaContent() {
               <SelectTrigger className="w-full sm:w-56 bg-surface-card border-border/40 h-11 font-bold text-text-2">
                 <SelectValue placeholder="Ordenar por..." />
               </SelectTrigger>
-              <SelectContent className="bg-surface-card border-border text-white">
+              <SelectContent className="bg-surface-card border-border text-black">
                 <SelectItem value="date-desc">Más reciente (Fecha)</SelectItem>
                 <SelectItem value="value-desc">Deuda más alta</SelectItem>
               </SelectContent>
@@ -547,7 +547,7 @@ function CobranzaContent() {
                 <SelectTrigger className="bg-surface-input border-none h-12">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-surface-card border-border text-white">
+                <SelectContent className="bg-surface-card border-border text-black">
                   <SelectItem value="Efectivo">Efectivo ($/Bs)</SelectItem>
                   <SelectItem value="Zelle">Zelle</SelectItem>
                   <SelectItem value="Pago Móvil">Pago Móvil</SelectItem>
