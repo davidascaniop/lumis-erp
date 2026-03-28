@@ -114,7 +114,7 @@ export default function ProductosPage() {
         <div className="flex gap-3">
           <button
             onClick={() => setOpenBulk(true)}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-surface-card border border-border text-white rounded-xl shadow-sm font-bold hover:bg-white/5 transition-all active:scale-95"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-surface-card border border-border text-black rounded-xl shadow-sm font-bold hover:bg-black/5 transition-all active:scale-95"
           >
             <FileSpreadsheet className="w-5 h-5 text-[#E040FB]" />
             Carga Masiva
@@ -142,7 +142,7 @@ export default function ProductosPage() {
             <p className="text-xs text-text-3 font-bold uppercase tracking-wider">
               Total Items
             </p>
-            <p className="text-2xl font-primary text-white">{stats.total}</p>
+            <p className="text-2xl font-primary text-black">{stats.total}</p>
           </div>
         </Card>
         <Card className="p-4 bg-surface-card border-border flex items-center gap-4">
@@ -153,7 +153,7 @@ export default function ProductosPage() {
             <p className="text-xs text-text-3 font-bold uppercase tracking-wider">
               Stock Crítico
             </p>
-            <p className="text-2xl font-primary text-white">{stats.lowStock}</p>
+            <p className="text-2xl font-primary text-black">{stats.lowStock}</p>
           </div>
         </Card>
         <Card className="p-4 bg-surface-card border-border flex items-center gap-4">
@@ -164,7 +164,7 @@ export default function ProductosPage() {
             <p className="text-xs text-text-3 font-bold uppercase tracking-wider">
               Valor Estimado
             </p>
-            <p className="text-2xl font-primary text-white">
+            <p className="text-2xl font-primary text-black">
               ${stats.inventoryValue.toLocaleString()}
             </p>
           </div>
