@@ -79,21 +79,23 @@ export function ClientePanel({ oportunidad, onClose, onUpdate }: ClientePanelPro
   const scoreColor = score < 40 ? "bg-status-danger" : score < 70 ? "bg-status-warning" : "bg-status-ok";
 
   return (
-    <div className="h-full flex flex-col bg-surface-card w-full">
-      <div className="flex items-center justify-between p-6 border-b border-border">
-        <h2 className="text-xl font-display font-bold text-text-1 uppercase tracking-wider">Detalle del Lead</h2>
-        <button onClick={onClose} className="p-2 bg-surface-base rounded-full hover:bg-surface-hover/10 text-text-3 transition-colors">
-          <X className="w-5 h-5" />
+    <div className="h-full flex flex-col w-full bg-surface-base">
+      <div className="flex items-center justify-between p-8 pb-4 relative z-10">
+        <h2 className="text-[13px] font-display font-black text-text-1 uppercase tracking-[0.2em] opacity-80">Detalle del Lead</h2>
+        <button onClick={onClose} className="p-2.5 bg-surface-card shadow-sm border border-border/50 rounded-full hover:bg-surface-hover/10 text-text-2 hover:text-text-1 transition-all hover:scale-105 active:scale-95">
+          <X className="w-4 h-4" />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-6">
+      <div className="flex-1 overflow-y-auto no-scrollbar px-8 pb-8 space-y-6 pt-2">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-2xl font-display font-bold text-text-1 mb-1">{oportunidad.partners?.name || "Sin cliente"}</h3>
-            <div className="flex items-center gap-3 text-sm text-text-3">
+            <h3 className="text-3xl font-display font-black text-text-1 mb-3 tracking-tight">{oportunidad.partners?.name || "Sin cliente"}</h3>
+            <div className="flex items-center gap-3">
               {oportunidad.partners?.phone && (
-                <span className="flex items-center gap-1 font-mono bg-surface-base px-2 py-0.5 rounded-md"><Phone className="w-3 h-3" /> {oportunidad.partners.phone}</span>
+                <span className="flex items-center gap-1.5 font-mono bg-surface-card border border-border/80 px-3 py-1.5 rounded-lg text-xs font-semibold text-text-2 shadow-sm">
+                  <Phone className="w-3.5 h-3.5" /> {oportunidad.partners.phone}
+                </span>
               )}
             </div>
           </div>
@@ -108,53 +110,56 @@ export function ClientePanel({ oportunidad, onClose, onUpdate }: ClientePanelPro
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl border border-border bg-surface-base">
-            <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest mb-1 block">Temperatura (Score)</span>
-            <div className="flex items-center gap-3">
-              <span className={`text-2xl font-bold font-syne ${scoreColor.replace("bg-", "text-")}`}>{score}</span>
-              <div className="flex-1 h-2 bg-surface-hover/10 rounded-full overflow-hidden">
+          <div className="p-5 rounded-3xl border border-border/60 bg-surface-card shadow-sm hover:border-brand/30 transition-all">
+            <span className="text-[10px] font-black font-display text-text-3 uppercase tracking-widest mb-2 block">Temperatura (Score)</span>
+            <div className="flex flex-col gap-2 mt-4">
+              <span className={`text-4xl font-black font-display ${scoreColor.replace("bg-", "text-")} tracking-tighter`}>{score}°</span>
+              <div className="w-full h-1.5 bg-surface-hover/10 rounded-full overflow-hidden mt-1">
                 <div className={`h-full ${scoreColor} rounded-full transition-all`} style={{ width: `${score}%` }} />
               </div>
             </div>
           </div>
 
-          <div className="p-4 rounded-xl border border-border bg-surface-base">
-             <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest mb-1 block">Calificación</span>
-             <div className="flex items-center gap-1 mt-1">
+          <div className="p-5 rounded-3xl border border-border/60 bg-surface-card shadow-sm hover:border-brand/30 transition-all">
+             <span className="text-[10px] font-black font-display text-text-3 uppercase tracking-widest mb-2 block">Calificación</span>
+             <div className="flex items-center gap-1 mt-6">
                {[1, 2, 3, 4, 5].map((s) => (
-                 <button key={s} onClick={() => handleUpdateCalificacion(s)} className="p-1 hover:scale-110 hover:bg-surface-hover/10 rounded-md transition-all">
-                   <Star className={`w-5 h-5 ${s <= (oportunidad.calificacion || 0) ? "text-status-warning fill-status-warning drop-shadow-[0_0_8px_rgba(255,184,0,0.5)]" : "text-border"}`} />
+                 <button key={s} onClick={() => handleUpdateCalificacion(s)} className="p-1 hover:scale-110 hover:bg-surface-hover/10 rounded-xl transition-all">
+                   <Star className={`w-6 h-6 ${s <= (oportunidad.calificacion || 0) ? "text-status-warning fill-status-warning drop-shadow-[0_0_8px_rgba(255,184,0,0.5)]" : "text-border"}`} />
                  </button>
                ))}
              </div>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl border border-border bg-surface-base flex justify-between items-center">
-          <div>
-             <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest block">Monto y Etapa</span>
-             <span className="text-lg font-bold text-brand font-syne">{formatCurrency(oportunidad.monto_estimado)}</span>
+        <div className="p-6 rounded-3xl border border-brand/20 bg-brand/5 flex justify-between items-center relative overflow-hidden shadow-sm">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-brand/10 blur-3xl rounded-full -mr-10 -mt-10 pointer-events-none"></div>
+          <div className="relative z-10">
+             <span className="text-[10px] font-black font-display text-brand uppercase tracking-widest block mb-1">Monto y Etapa</span>
+             <span className="text-3xl font-black text-brand font-display tracking-tight">{formatCurrency(oportunidad.monto_estimado)}</span>
           </div>
-          <div className="text-right">
-             <span className="text-[11px] font-bold text-text-3 font-mono uppercase bg-surface-elevated px-2 py-1 rounded-md">{oportunidad.etapa.replace('_', ' ')}</span>
+          <div className="text-right relative z-10">
+             <span className="text-[10px] font-black font-display text-text-2 bg-surface-card px-3 py-2 rounded-xl uppercase tracking-widest shadow-sm border border-border/50">{oportunidad.etapa.replace('_', ' ')}</span>
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between border-b border-border pb-2">
-            <h4 className="text-sm font-bold text-text-1 uppercase tracking-widest flex items-center gap-2"><MessageSquare className="w-4 h-4 text-brand" /> Timeline de Interacciones</h4>
-            <button onClick={() => setAddingNote(!addingNote)} className="text-xs font-bold font-outfit text-brand hover:opacity-80 flex items-center gap-1 bg-brand/10 px-2 py-1 rounded-md">
+        <div className="space-y-6 pt-2">
+          <div className="flex items-center justify-between border-b border-border/50 pb-4">
+            <h4 className="text-[13px] font-display font-black text-text-1 uppercase tracking-widest flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-brand" /> Timeline de Interacciones
+            </h4>
+            <button onClick={() => setAddingNote(!addingNote)} className="text-[10px] uppercase tracking-widest font-black font-display text-text-1 hover:text-white flex items-center gap-1.5 bg-brand/10 hover:bg-brand text-brand hover:text-white px-3 py-1.5 rounded-xl transition-all shadow-sm">
               <Plus className="w-3 h-3" /> Añadir
             </button>
           </div>
 
           {addingNote && (
-            <div className="p-4 rounded-xl border border-brand bg-brand/5 animate-in slide-in-from-top-2">
+            <div className="p-4 rounded-2xl border border-brand bg-brand/5 shadow-brand-lg animate-in slide-in-from-top-4">
               <div className="flex gap-2 mb-3">
                 <select 
                   value={notaOpcion} 
                   onChange={e => setNotaOpcion(e.target.value)}
-                  className="bg-surface-base border border-border text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:border-brand"
+                  className="bg-surface-card border border-border/50 font-outfit font-bold uppercase tracking-wider text-[11px] rounded-xl px-3 py-2 focus:outline-none focus:border-brand shadow-sm text-text-1"
                 >
                   <option value="nota">📝 Nota interna</option>
                   <option value="llamada">📞 Llamada</option>
@@ -166,11 +171,11 @@ export function ClientePanel({ oportunidad, onClose, onUpdate }: ClientePanelPro
                 value={nuevaNota}
                 onChange={e => setNuevaNota(e.target.value)}
                 placeholder="Escribe el detalle de la interacción..."
-                className="w-full bg-surface-base border border-border rounded-lg p-3 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand resize-none min-h-[80px]"
+                className="w-full bg-surface-card border border-border/50 rounded-xl p-4 text-sm font-outfit focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand resize-none min-h-[100px] shadow-inner text-text-1"
               />
-              <div className="flex justify-end gap-2 mt-3">
-                <button onClick={() => setAddingNote(false)} className="px-3 py-1.5 text-xs text-text-3 hover:bg-surface-base rounded-lg font-semibold">Cancelar</button>
-                <button onClick={handleSaveNota} className="px-3 py-1.5 text-xs bg-brand text-white rounded-lg font-semibold shadow-brand-lg">Guardar</button>
+              <div className="flex justify-end gap-2 mt-4">
+                <button onClick={() => setAddingNote(false)} className="px-5 py-2 text-[11px] uppercase tracking-wider font-black font-display text-text-3 hover:text-text-1 hover:bg-surface-hover/10 rounded-xl transition-all">Cancelar</button>
+                <button onClick={handleSaveNota} className="px-5 py-2 text-[11px] uppercase tracking-wider font-black font-display bg-brand text-white rounded-xl shadow-brand-lg hover:opacity-90 transition-all">Guardar</button>
               </div>
             </div>
           )}
@@ -183,23 +188,23 @@ export function ClientePanel({ oportunidad, onClose, onUpdate }: ClientePanelPro
               <p className="text-xs text-text-3 uppercase tracking-widest font-bold">Sin interacciones previas</p>
             </div>
           ) : (
-            <div className="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent pt-4">
+            <div className="space-y-5 relative before:absolute before:inset-0 before:ml-[26px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent pt-4">
               {interacciones.map(i => (
-                <div key={i.id} className="relative flex items-start gap-4 z-10">
-                  <div className="w-10 h-10 rounded-xl bg-surface-base border-2 border-border flex items-center justify-center flex-shrink-0 z-20 shadow-sm mt-1">
-                    {i.tipo === 'whatsapp' ? <MessageSquare className="w-4 h-4 text-[#25D366]" /> :
-                     i.tipo === 'llamada' ? <Phone className="w-4 h-4 text-brand" /> :
-                     i.tipo === 'correo' ? <Mail className="w-4 h-4 text-[#EA4335]" /> :
-                     i.tipo === 'reunion' ? <Calendar className="w-4 h-4 text-status-warning" /> :
-                     <MessageSquare className="w-4 h-4 text-text-3" />}
+                <div key={i.id} className="relative flex items-start gap-5 z-10 group">
+                  <div className="w-12 h-12 rounded-2xl bg-surface-card border-2 border-border/50 flex items-center justify-center flex-shrink-0 z-20 shadow-sm mt-1 transition-transform group-hover:scale-110 group-hover:border-brand/40">
+                    {i.tipo === 'whatsapp' ? <MessageSquare className="w-5 h-5 text-[#25D366]" /> :
+                     i.tipo === 'llamada' ? <Phone className="w-5 h-5 text-brand" /> :
+                     i.tipo === 'correo' ? <Mail className="w-5 h-5 text-[#EA4335]" /> :
+                     i.tipo === 'reunion' ? <Calendar className="w-5 h-5 text-status-warning" /> :
+                     <MessageSquare className="w-5 h-5 text-text-3" />}
                   </div>
-                  <div className="flex-1 bg-surface-base border border-border p-3.5 rounded-xl rounded-tl-sm shadow-sm">
-                    <div className="flex justify-between items-start mb-1.5">
-                      <span className="text-[10px] uppercase font-bold text-text-3 tracking-widest bg-surface-hover/10 px-1.5 py-0.5 rounded">{i.tipo}</span>
-                      <span className="text-[10px] text-text-3 font-mono">{format(new Date(i.created_at), 'dd MMM HH:mm')}</span>
+                  <div className="flex-1 bg-surface-card border border-border/50 p-5 rounded-3xl rounded-tl-sm shadow-sm hover:border-border transition-colors group-hover:shadow-md">
+                    <div className="flex justify-between items-start mb-3">
+                      <span className="text-[9px] font-display uppercase font-black text-text-1 tracking-widest bg-surface-base border border-border/50 px-2.5 py-1 rounded-md">{i.tipo}</span>
+                      <span className="text-[10px] text-text-3 font-mono font-semibold">{format(new Date(i.created_at), 'dd MMM HH:mm')}</span>
                     </div>
-                    <p className="text-sm text-text-1">{i.contenido}</p>
-                    {i.agente?.full_name && <p className="text-[10px] text-text-3 mt-2 text-right opacity-60 font-semibold">— {i.agente.full_name}</p>}
+                    <p className="text-[13px] text-text-1 font-outfit leading-relaxed">{i.contenido}</p>
+                    {i.agente?.full_name && <p className="text-[9px] font-display uppercase font-black text-text-3 mt-4 text-right opacity-60">— {i.agente.full_name}</p>}
                   </div>
                 </div>
               ))}
