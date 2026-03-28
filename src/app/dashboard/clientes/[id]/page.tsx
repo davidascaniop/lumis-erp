@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Semaforo } from "@/components/ui/semaforo";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { ArrowLeft, Edit2, Loader2, SendHorizonal } from "lucide-react";
+import { ArrowLeft, Edit2, Loader2, SendHorizonal, Briefcase, Flame } from "lucide-react";
 import { ClientForm } from "@/components/clients/client-form";
 import { formatCurrency } from "@/lib/utils";
 import { generatePortalToken } from "@/lib/actions/portal";
@@ -24,6 +24,8 @@ export default function ClientDetailsPage({ params }: { params: any }) {
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
   const [sendingPortal, setSendingPortal] = useState(false);
+  const [activeTab, setActiveTab] = useState("general");
+  const [oportunidades, setOportunidades] = useState<any[]>([]);
   const supabase = createClient();
 
   const handleSendPortal = async () => {
@@ -72,7 +74,7 @@ export default function ClientDetailsPage({ params }: { params: any }) {
     setClientData(rawClient);
 
     // Buscar historial
-    const [ordersRes, recesRes] = await Promise.all([
+    const [ordersRes, recesRes, opsRes] = await Promise.all([
       supabase
         .from("orders")
         .select("total_usd", { count: "exact" })
@@ -82,6 +84,11 @@ export default function ClientDetailsPage({ params }: { params: any }) {
         .select("*")
         .eq("partner_id", id)
         .neq("status", "paid"),
+      supabase
+        .from("crm_oportunidades")
+        .select("*")
+        .eq("cliente_id", id)
+        .order("created_at", { ascending: false })
     ]);
 
     setOrderCount(ordersRes.count || 0);
@@ -98,6 +105,7 @@ export default function ClientDetailsPage({ params }: { params: any }) {
       ) || 0;
     setTotalDebt(currentDebt);
     setReceivables(recesRes.data || []);
+    setOportunidades(opsRes.data || []);
     setLoading(false);
   };
 
@@ -240,8 +248,32 @@ export default function ClientDetailsPage({ params }: { params: any }) {
         </Card>
       </div>
 
-      {/* 3. PESTAÑAS Y CONTENIDO */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="flex border-b border-white/10 gap-6 mt-4">
+        <button
+          onClick={() => setActiveTab("general")}
+          className={`pb-3 font-semibold uppercase tracking-widest text-sm transition-all border-b-2 ${
+            activeTab === "general"
+              ? "border-brand text-brand"
+              : "border-transparent text-text-3 hover:text-text-2"
+          }`}
+        >
+          Información General
+        </button>
+        <button
+          onClick={() => setActiveTab("crm")}
+          className={`pb-3 font-semibold uppercase tracking-widest text-sm transition-all border-b-2 flex items-center gap-2 ${
+            activeTab === "crm"
+              ? "border-brand text-brand"
+              : "border-transparent text-text-3 hover:text-text-2"
+          }`}
+        >
+          <Briefcase className="w-4 h-4" /> CRM
+        </button>
+      </div>
+
+      {/* 3. CONTENIDO DE PESTAÑAS */}
+      {activeTab === "general" && (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in slide-in-from-bottom-2">
         <div className="lg:col-span-2">
           <Card className="p-6 bg-surface-card border-border shadow-card h-full">
             <h3 className="text-xl font-primary mb-4">
@@ -321,6 +353,56 @@ export default function ClientDetailsPage({ params }: { params: any }) {
           </Card>
         </div>
       </div>
+      )}
+
+      {activeTab === "crm" && (
+        <div className="animate-in slide-in-from-bottom-2 space-y-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-primary">Oportunidades Abiertas</h3>
+            <button 
+              onClick={() => router.push("/dashboard/crm")}
+              className="text-brand text-sm font-semibold hover:underline"
+            >
+              Ir al Kanban →
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {oportunidades.length === 0 ? (
+              <div className="col-span-full p-8 text-center bg-surface-card border border-border border-dashed rounded-xl text-text-3">
+                No hay oportunidades registradas para este cliente.
+              </div>
+            ) : (
+              oportunidades.map(op => {
+                const scoreColor = op.score < 40 ? "text-status-danger" : op.score < 70 ? "text-status-warning" : "text-status-ok";
+                return (
+                  <Card key={op.id} className="p-5 bg-surface-card border-border hover:border-brand/40 transition-colors cursor-pointer" onClick={() => router.push("/dashboard/crm")}>
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-[10px] uppercase font-bold text-text-3 tracking-widest bg-surface-hover/10 px-2 py-1 rounded-md">
+                        {op.etapa.replace('_', ' ')}
+                      </span>
+                      <span className={`flex items-center gap-1 font-bold text-xs ${scoreColor}`}>
+                        <Flame className="w-3 h-3" /> {op.score}
+                      </span>
+                    </div>
+                    <h4 className="text-text-1 font-bold text-sm mb-3 min-h-[40px]">{op.titulo}</h4>
+                    <div className="flex items-end justify-between border-t border-border pt-3 mt-auto">
+                      <div>
+                        <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest block">Monto</span>
+                        <span className="font-syne font-bold text-lg text-brand">{formatCurrency(op.monto_estimado)}</span>
+                      </div>
+                      <div className="bg-surface-elevated text-text-3 px-2 py-0.5 rounded text-[10px] font-mono">
+                        {format(new Date(op.created_at), "dd MMM")}
+                      </div>
+                    </div>
+                  </Card>
+                )
+              })
+            )}
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -21,6 +21,8 @@ import {
   DollarSign,
   AlertTriangle,
   CheckCircle2,
+  Briefcase,
+  Lock,
 } from "lucide-react";
 import { cn, formatNumber } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -92,6 +94,14 @@ const navItems = [
     description: "Fichas 360° y contactos",
   },
   {
+    href: "/dashboard/crm",
+    label: "CRM Fase 1",
+    icon: Briefcase,
+    section: "MÓDULOS",
+    description: "Pipeline y oportunidades",
+    requiredPlan: ["pro", "enterprise"],
+  },
+  {
     href: "/dashboard/cobranza",
     label: "Cobranza",
     icon: CreditCard,
@@ -143,6 +153,25 @@ export function Sidebar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [hasCRM, setHasCRM] = useState(true);
+
+  useEffect(() => {
+    async function checkPlan() {
+      if (user?.company_id) {
+        const { data: org } = await supabase
+          .from("companies")
+          .select("plan_type")
+          .eq("id", user.company_id)
+          .single();
+        if (org?.plan_type === "pro" || org?.plan_type === "enterprise") {
+          setHasCRM(true);
+        } else {
+          setHasCRM(false);
+        }
+      }
+    }
+    checkPlan();
+  }, [user]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -310,16 +339,20 @@ export function Sidebar() {
         {moduleItems.map((item) => {
           const active =
             pathname.startsWith(item.href) && pathname !== "/dashboard";
+          
+          const isCRMLocked = item.href === "/dashboard/crm" && !hasCRM;
+          const href = isCRMLocked ? "/dashboard/upgrade" : item.href;
 
           return (
             <Link
               key={item.href}
-              href={item.href}
+              href={href}
               className={cn(
                 "relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 mb-0.5 group",
                 active
                   ? "bg-brand/10 border border-brand/20 font-semibold"
                   : "hover:bg-surface-hover/10 border border-transparent",
+                  isCRMLocked ? "opacity-70" : ""
               )}
             >
               {active && (
@@ -334,6 +367,7 @@ export function Sidebar() {
                   active
                     ? "text-brand"
                     : "text-text-2 group-hover:text-text-1",
+                  isCRMLocked ? "text-status-warning" : ""
                 )}
               />
               <div className="flex-1 min-w-0">
@@ -348,14 +382,18 @@ export function Sidebar() {
                   {item.label}
                 </span>
               </div>
-              <ChevronRight
-                className={cn(
-                  "w-3.5 h-3.5 flex-shrink-0 transition-all duration-150",
-                  active
-                    ? "text-brand"
-                    : "text-text-3 group-hover:text-text-2 group-hover:translate-x-0.5",
-                )}
-              />
+              {isCRMLocked ? (
+                <Lock className="w-3.5 h-3.5 text-text-3" />
+              ) : (
+                <ChevronRight
+                  className={cn(
+                    "w-3.5 h-3.5 flex-shrink-0 transition-all duration-150",
+                    active
+                      ? "text-brand"
+                      : "text-text-3 group-hover:text-text-2 group-hover:translate-x-0.5",
+                  )}
+                />
+              )}
             </Link>
           );
         })}
