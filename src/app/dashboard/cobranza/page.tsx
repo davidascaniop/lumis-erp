@@ -67,6 +67,7 @@ function CobranzaContent() {
   const [filterType, setFilterType] = useState<"all" | "overdue">(
     initialFilter || "all",
   );
+  const [sortBy, setSortBy] = useState<"date-desc" | "value-desc">("date-desc");
 
   useEffect(() => {
     if (initialFilter) setFilterType(initialFilter);
@@ -267,12 +268,21 @@ function CobranzaContent() {
   const baseFiltered =
     filterType === "overdue" ? overdueReceivables : receivables;
 
-  const filtered = baseFiltered.filter(
-    (r) =>
-      r.invoice_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.partners?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.partners?.rif?.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filtered = baseFiltered
+    .filter(
+      (r) =>
+        r.invoice_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.partners?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.partners?.rif?.toLowerCase().includes(searchQuery.toLowerCase()),
+    )
+    .sort((a, b) => {
+      if (sortBy === "date-desc") {
+        return (
+          new Date(b.due_date).getTime() - new Date(a.due_date).getTime()
+        );
+      }
+      return Number(b.balance_usd) - Number(a.balance_usd);
+    });
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto animate-fade-in pb-20">
@@ -314,7 +324,7 @@ function CobranzaContent() {
             <p className="text-sm text-status-danger font-medium">
               Cartera Vencida
             </p>
-            <p className="text-2xl font-syne font-bold text-text-1 tracking-tight">
+            <p className="text-2xl font-primary text-text-1">
               {loading ? "-" : formatCurrency(totalOverdue)}
             </p>
           </div>
@@ -328,9 +338,9 @@ function CobranzaContent() {
             </div>
             <div>
               <p className="text-sm font-medium opacity-90">
-                Verifs. Pendientes
+                Verificación pendiente
               </p>
-              <p className="text-3xl font-syne font-extrabold">
+              <p className="text-3xl font-primary">
                 {pendingVerifications.length}
               </p>
             </div>
@@ -355,6 +365,20 @@ function CobranzaContent() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 border border-border/40 bg-surface-input text-text-1 placeholder:text-text-3 h-11 focus:border-brand/40 focus:ring-4 focus:ring-brand/5 transition-all shadow-sm"
             />
+          </div>
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <Select
+              value={sortBy}
+              onValueChange={(val: any) => setSortBy(val)}
+            >
+              <SelectTrigger className="w-full sm:w-56 bg-surface-card border-border/40 h-11 font-bold text-text-2">
+                <SelectValue placeholder="Ordenar por..." />
+              </SelectTrigger>
+              <SelectContent className="bg-surface-card border-border text-white">
+                <SelectItem value="date-desc">Más reciente (Fecha)</SelectItem>
+                <SelectItem value="value-desc">Deuda más alta</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
