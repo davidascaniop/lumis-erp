@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { motion } from "framer-motion";
 import { Search, Loader2 } from "lucide-react";
 import { Semaforo } from "@/components/ui/semaforo";
 import { Input } from "@/components/ui/input";
@@ -45,7 +44,6 @@ export default function ClientesPage() {
       .eq("company_id", userData.company_id)
       .order("name", { ascending: true });
 
-    // Calcular deuda total localmente para mayor precisión
     const partnersWithBalance = (data || []).map((p: any) => ({
       ...p,
       total_debt:
@@ -70,7 +68,7 @@ export default function ClientesPage() {
   );
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto min-h-[80vh] flex flex-col animate-fade-in pb-8">
+    <div className="space-y-6 max-w-7xl mx-auto min-h-[80vh] flex flex-col pb-8">
       <ClientForm
         open={formOpen}
         setOpen={setFormOpen}
@@ -82,7 +80,7 @@ export default function ClientesPage() {
           <h1 className="text-3xl font-primary">
             Directorio de Clientes
           </h1>
-          <p className="text-text-2 mt-1text-sm">
+          <p className="text-text-2 mt-1 text-sm">
             Fichas 360° de comercios y distribuidores.
           </p>
         </div>
@@ -96,7 +94,7 @@ export default function ClientesPage() {
         </div>
       </div>
 
-      <div className="bg-surface-card border border-border rounded-2xl overflow-hidden shadow-card hover-card-effect transition-all flex flex-col flex-1 min-h-[500px]">
+      <div className="bg-surface-card border border-border rounded-2xl overflow-hidden shadow-card transition-all flex flex-col flex-1 min-h-[500px]">
         <div className="p-4 border-b border-white/5 bg-surface-card/40 flex justify-between items-center">
           <div className="relative w-full sm:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
@@ -144,12 +142,9 @@ export default function ClientesPage() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((p, idx) => (
-                  <motion.tr
+                filtered.map((p) => (
+                  <tr
                     key={p.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.03 }}
                     className="hover:bg-surface-hover hover:border-brand/15 transition-colors group cursor-pointer"
                   >
                     <td className="px-6 py-4">
@@ -213,7 +208,7 @@ export default function ClientesPage() {
                         </Link>
                       </div>
                     </td>
-                  </motion.tr>
+                  </tr>
                 ))
               )}
             </tbody>
