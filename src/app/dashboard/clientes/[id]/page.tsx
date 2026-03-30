@@ -85,8 +85,7 @@ export default function ClientDetailsPage({ params }: { params: any }) {
       supabase
         .from("receivables")
         .select("*")
-        .eq("partner_id", id)
-        .neq("status", "paid"),
+        .eq("partner_id", id),
       supabase
         .from("crm_oportunidades")
         .select("*")
@@ -97,7 +96,6 @@ export default function ClientDetailsPage({ params }: { params: any }) {
         .select("*")
         .eq("partner_id", id)
         .order("created_at", { ascending: false })
-        .limit(10)
     ]);
 
     setOrderCount(ordersRes.count || 0);
@@ -324,7 +322,7 @@ export default function ClientDetailsPage({ params }: { params: any }) {
                 Historial de Pedidos
               </h3>
               <span className="text-[10px] font-bold text-text-3 bg-surface-base px-2 py-1 rounded">
-                Mostrando últimos {orders.length}
+                Total registros: {orders.length}
               </span>
             </div>
 
@@ -347,63 +345,88 @@ export default function ClientDetailsPage({ params }: { params: any }) {
                       </td>
                     </tr>
                   ) : (
-                    orders.map((order) => (
-                      <tr key={order.id} className="hover:bg-white/[0.02] transition-colors group">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <p className="text-xs font-bold text-text-1">{format(new Date(order.created_at), "dd/MM/yy")}</p>
-                          <p className="text-[10px] text-text-3">{format(new Date(order.created_at), "HH:mm")}</p>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-xs font-mono font-bold text-brand bg-brand/5 px-2 py-1 rounded border border-brand/10">
-                            #{order.order_number}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap font-syne font-bold text-sm text-text-1">
-                          {formatCurrency(order.total_usd)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <span className={cn(
-                            "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border",
-                            order.status === 'delivered' ? "bg-status-ok/10 text-status-ok border-status-ok/20" :
-                            order.status === 'confirmed' ? "bg-status-warning/10 text-status-warning border-status-warning/20" :
-                            "bg-white/5 text-text-3 border-white/10"
-                          )}>
-                            {order.status === 'delivered' ? "🟢 Pagado" : 
-                             order.status === 'confirmed' ? "🟡 Pendiente" : 
-                             "⚪ Borrador"}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button 
-                              onClick={() => router.push(`/dashboard/ventas/${order.id}/nota-entrega`)}
-                              className="p-2 rounded-lg bg-surface-base border border-border text-text-3 hover:text-brand hover:border-brand/40 transition-all shadow-sm"
-                              title="Ver Detalle"
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                            </button>
-                            <button 
-                              className="p-2 rounded-lg bg-surface-base border border-border text-text-3 hover:text-text-1 hover:border-text-1 transition-all shadow-sm"
-                              title="Descargar PDF"
-                            >
-                              <FileText className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+                    orders.map((order) => {
+                      const receivable = receivables.find(r => r.order_id === order.id);
+                      
+                      let statusLabel = "⚪ Borrador";
+                      let statusClass = "bg-white/5 text-text-3 border-white/10";
+                      
+                      if (receivable) {
+                        switch(receivable.status) {
+                          case 'paid':
+                            statusLabel = "🟢 Pagado";
+                            statusClass = "bg-status-ok/10 text-status-ok border-status-ok/20";
+                            break;
+                          case 'partial':
+                            statusLabel = "🟡 Abonado";
+                            statusClass = "bg-status-warning/10 text-status-warning border-status-warning/20";
+                            break;
+                          case 'overdue':
+                            statusLabel = "🔴 Vencido";
+                            statusClass = "bg-status-danger/10 text-status-danger border-status-danger/20";
+                            break;
+                          default:
+                            statusLabel = "🔴 Pendiente";
+                            statusClass = "bg-status-danger/10 text-status-danger border-status-danger/20";
+                        }
+                      } else if (order.status === 'cancelled') {
+                        statusLabel = "⚪ Anulado";
+                      } else if (order.status === 'confirmed' || order.status === 'delivered') {
+                        statusLabel = "🟡 Pendiente";
+                        statusClass = "bg-status-danger/10 text-status-danger border-status-danger/20";
+                      }
+
+                      return (
+                        <tr key={order.id} className="hover:bg-white/[0.02] transition-all group">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <p className="text-xs font-bold text-text-1">{format(new Date(order.created_at), "dd/MM/yy")}</p>
+                            <p className="text-[10px] text-text-3 tracking-tight">{format(new Date(order.created_at), "HH:mm")}</p>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="text-xs font-mono font-bold text-brand bg-brand/5 px-2 py-1 rounded border border-brand/10 group-hover:bg-brand/10 transition-colors">
+                              #{order.order_number}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap font-syne font-bold text-sm text-text-1">
+                            {formatCurrency(order.total_usd)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <span className={cn(
+                              "inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+                              statusClass
+                            )}>
+                              {statusLabel}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <button 
+                                onClick={() => router.push(`/dashboard/ventas/${order.id}/nota-entrega`)}
+                                className="p-2 rounded-lg bg-surface-base border border-border text-text-3 hover:text-brand hover:border-brand/40 transition-all shadow-sm"
+                                title="Ver Detalle"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                              <button 
+                                className="p-2 rounded-lg bg-surface-base border border-border text-text-3 hover:text-text-1 hover:border-text-1 transition-all shadow-sm"
+                                title="Descargar PDF"
+                              >
+                                <FileText className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })
                   )}
                 </tbody>
               </table>
             </div>
             
             <div className="p-4 bg-surface-base/30 border-t border-border flex justify-center">
-              <button 
-                onClick={() => router.push(`/dashboard/ventas?search=${clientData.rif}`)}
-                className="text-[10px] font-bold text-brand uppercase tracking-widest hover:underline"
-              >
-                Ver historial completo →
-              </button>
+              <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest italic grayscale opacity-50">
+                Límite de registros alcanzado • Lumis ERP
+              </span>
             </div>
           </Card>
           
