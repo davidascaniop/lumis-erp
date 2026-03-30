@@ -7,12 +7,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { MovementHistoryTable } from "@/components/inventory/movement-history-table";
 import { StockAdjustmentForm } from "@/components/inventory/stock-adjustment-form";
+import { BulkStockUploadModal } from "@/components/inventory/bulk-stock-upload-modal";
 import {
   Plus,
   ArrowRightLeft,
   ArrowUpRight,
   ArrowDownRight,
   X,
+  FileSpreadsheet,
 } from "lucide-react";
 
 export default function InventarioPage() {
@@ -21,6 +23,7 @@ export default function InventarioPage() {
 
   const [refreshKey, setRefreshKey] = useState(0);
   const [openAdd, setOpenAdd] = useState(false);
+  const [openBulk, setOpenBulk] = useState(false);
   const [stats, setStats] = useState({
     totalMovements: 0,
     entriesThisMonth: 0,
@@ -78,6 +81,13 @@ export default function InventarioPage() {
           </p>
         </div>
         <div className="flex gap-3">
+          <button
+            onClick={() => setOpenBulk(true)}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-slate-800 border bg-surface-card border-border rounded-xl font-bold hover:bg-slate-50 transition-all active:scale-95"
+          >
+            <FileSpreadsheet className="w-5 h-5 text-brand" />
+            Carga Masiva
+          </button>
           <button
             onClick={() => setOpenAdd(true)}
             className="flex items-center justify-center gap-2 px-6 py-3 bg-brand-gradient text-white rounded-xl shadow-brand font-bold hover:opacity-90 transition-all active:scale-95"
@@ -177,6 +187,12 @@ export default function InventarioPage() {
           </div>
         )}
       </AnimatePresence>
+
+      <BulkStockUploadModal 
+        open={openBulk} 
+        setOpen={setOpenBulk} 
+        onSuccess={triggerRefresh} 
+      />
     </div>
   );
 }
