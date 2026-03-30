@@ -65,7 +65,7 @@ const NAV_SECTIONS: NavSection[] = [
   },
   {
     id: "productos",
-    label: "Productos & Inventario",
+    label: "Inventario",
     icon: Package,
     children: [
       { href: "/dashboard/productos", label: "Lista de Productos", icon: Package },
@@ -76,7 +76,7 @@ const NAV_SECTIONS: NavSection[] = [
   },
   {
     id: "finanzas",
-    label: "Finanzas / Cobranza",
+    label: "Finanzas",
     icon: DollarSign,
     children: [
       { href: "/dashboard/cobranza", label: "Cuentas por Cobrar", icon: CreditCard },
@@ -85,23 +85,23 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    id: "reportes",
-    label: "Reportes & Analítica",
-    icon: BarChart3,
-    children: [
-      { href: "/dashboard/reportes", label: "Ventas Mensuales", icon: BarChart3 },
-      { href: "/dashboard/reportes/productos", label: "Rendimiento de Productos", icon: TrendingUp },
-      { href: "/dashboard/reportes/financiero", label: "Resumen Financiero", icon: PieChart },
-    ],
-  },
-  {
     id: "operaciones",
-    label: "Operaciones / Logística",
+    label: "Logística",
     icon: Truck,
     children: [
       { href: "/dashboard/compras/despachos", label: "Despachos y Envíos", icon: Truck },
       { href: "/dashboard/compras/proveedores", label: "Proveedores", icon: ClipboardList },
       { href: "/dashboard/compras", label: "Órdenes de Compra", icon: Wallet },
+    ],
+  },
+  {
+    id: "reportes",
+    label: "Reportes",
+    icon: BarChart3,
+    children: [
+      { href: "/dashboard/reportes", label: "Ventas Mensuales", icon: BarChart3 },
+      { href: "/dashboard/reportes/productos", label: "Rendimiento de Productos", icon: TrendingUp },
+      { href: "/dashboard/reportes/financiero", label: "Resumen Financiero", icon: PieChart },
     ],
   },
 ];
