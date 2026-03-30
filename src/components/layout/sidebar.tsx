@@ -310,7 +310,14 @@ export function Sidebar() {
                       {section.children.map((child) => {
                         const isCRMLocked = child.requiredPlan && !hasCRM;
                         const childHref = isCRMLocked ? "/dashboard/upgrade" : child.href;
-                        const isChildActive = pathname === child.href || (child.href !== "/dashboard/ventas" && pathname.startsWith(child.href) && child.href.length > "/dashboard".length);
+                        const isChildActive = pathname === child.href || (
+                          pathname.startsWith(child.href + "/") && 
+                          !section.children.some(other => 
+                            other.href !== child.href && 
+                            other.href.length > child.href.length && 
+                            pathname.startsWith(other.href)
+                          )
+                        );
 
                         return (
                           <Link
