@@ -85,7 +85,7 @@ export default function SeguimientoPage() {
             .eq("company_id", user.company_id)
             .limit(20);
           
-          setData(partners.map(p => ({ ...p, partners: p })) || []);
+          setData(partners?.map(p => ({ ...p, partners: p })) || []);
         }
       } catch (error) {
         console.error("Error fetching followup data:", error);
