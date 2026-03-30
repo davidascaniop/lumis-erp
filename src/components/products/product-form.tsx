@@ -142,6 +142,7 @@ const productSchema = z.object({
   unit: z.string().default("Unidad"),
   warehouse_id: z.string().optional(),
   image_url: z.string().optional(),
+  attributes: z.any().optional(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -162,6 +163,8 @@ export function ProductForm({
   const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("general");
   const [warehouses, setWarehouses] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [attributes, setAttributes] = useState<any[]>([]);
   const supabase = createClient();
 
   const form = useForm<ProductFormValues>({
@@ -194,28 +197,31 @@ export function ProductForm({
   const margin_4 = cost_usd > 0 ? (profit_4 / cost_usd) * 100 : 0;
 
   useEffect(() => {
-    async function fetchWarehouses() {
+    async function fetchData() {
       if (!user?.company_id) return;
-      const { data } = await supabase
-        .from("warehouses")
-        .select("*")
-        .eq("company_id", user.company_id)
-        .eq("is_active", true);
-      setWarehouses(data || []);
+      const [whRes, catRes, attrRes] = await Promise.all([
+        supabase.from("warehouses").select("*").eq("company_id", user.company_id).eq("is_active", true),
+        supabase.from("product_categories").select("id, name").eq("company_id", user.company_id).order("name"),
+        supabase.from("product_attributes").select("*").eq("company_id", user.company_id).order("name")
+      ]);
+      setWarehouses(whRes.data || []);
+      
+      if (!catRes.error) setCategories(catRes.data || []);
+      if (!attrRes.error) setAttributes(attrRes.data || []);
     }
-    fetchWarehouses();
+    fetchData();
   }, [user?.company_id]);
 
   useEffect(() => {
     if (product) {
-      form.reset({ ...product, warehouse_id: "", image_url: product.image_url || "" });
+      form.reset({ ...product, warehouse_id: "", image_url: product.image_url || "", attributes: product.attributes || {} });
     } else {
       form.reset({
         name: "", sku: "", category: "", brand: "", department: "",
         description: "", supplier_code: "",
         cost_usd: 0, price_usd: 0,
         price_usd_2: 0, price_usd_3: 0, price_usd_4: 0,
-        stock: 0, unit: "Unidad", warehouse_id: "", image_url: "",
+        stock: 0, unit: "Unidad", warehouse_id: "", image_url: "", attributes: {}
       });
     }
     setActiveSection("general");
@@ -346,7 +352,21 @@ export function ProductForm({
                     </Select>
                   </Field>
                   <Field label="Categoría">
-                    <Input {...form.register("category")} placeholder="Víveres" className={INPUT_CLS} />
+                    <Select
+                      value={form.watch("category")}
+                      onValueChange={(v) => form.setValue("category", v)}
+                    >
+                      <SelectTrigger className={SELECT_CLS}>
+                        <SelectValue placeholder="Seleccionar" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-slate-200 rounded-xl">
+                        {categories.map((c) => (
+                          <SelectItem key={c.id} value={c.name}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </Field>
                   <Field label="Marca">
                     <Input {...form.register("brand")} placeholder="Polar" className={INPUT_CLS} />
@@ -522,6 +542,36 @@ export function ProductForm({
                   />
                 </Field>
               </div>
+
+              {attributes.length > 0 && (
+                 <div className="mt-6 border-t border-slate-100 pt-5">
+                   <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4 font-montserrat">
+                     Atributos del Producto
+                   </p>
+                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                     {attributes.map(attr => (
+                       <Field key={attr.id} label={attr.name}>
+                          <Select 
+                             value={form.watch(`attributes.${attr.name}`)}
+                             onValueChange={(v) => {
+                                const current = form.watch("attributes") || {};
+                                form.setValue("attributes", { ...current, [attr.name]: v });
+                             }}
+                          >
+                             <SelectTrigger className={SELECT_CLS}>
+                               <SelectValue placeholder={`Elegir ${attr.name}`} />
+                             </SelectTrigger>
+                             <SelectContent className="bg-white border-slate-200">
+                               {(attr.values || []).map((val: string) => (
+                                  <SelectItem key={val} value={val}>{val}</SelectItem>
+                               ))}
+                             </SelectContent>
+                          </Select>
+                       </Field>
+                     ))}
+                   </div>
+                 </div>
+              )}
             </AccordionSection>
           </div>
 
