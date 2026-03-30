@@ -117,7 +117,9 @@ export function useChats(companyId: string | undefined) {
       )
       .subscribe();
 
-    return () => supabase.removeChannel(chatChannel);
+    return () => {
+      supabase.removeChannel(chatChannel);
+    };
   }, [companyId, fetchChats]);
 
   // Assign a chat to current user
