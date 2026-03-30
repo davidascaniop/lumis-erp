@@ -62,6 +62,7 @@ function SettingsContent() {
   const [company, setCompany] = useState<{
     id: string;
     name: string;
+    name_comercial: string;
     rif: string;
     plan_type: string;
   } | null>(null);
@@ -106,7 +107,7 @@ function SettingsContent() {
           if (uData.company_id) {
             const { data: companyData } = await supabase
               .from("companies")
-              .select("id, name, rif, plan_type")
+              .select("id, name, name_comercial, rif, plan_type")
               .eq("id", uData.company_id)
               .single();
 
@@ -127,12 +128,26 @@ function SettingsContent() {
     loadProfile();
   }, [supabase]);
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      // 1. Update Company if changed
+      if (company && profile?.company_id) {
+        await supabase
+          .from("companies")
+          .update({ 
+            name: company.name,
+            name_comercial: company.name_comercial 
+          })
+          .eq("id", profile.company_id);
+      }
+
+      toast.success("Perfil y Empresa actualizados correctamente");
+    } catch (err) {
+      toast.error("Error al guardar cambios");
+    } finally {
       setIsLoading(false);
-      toast.success("Perfil y Empresa actualizados");
-    }, 1500);
+    }
   };
 
   const handleSaveVariables = async () => {
@@ -338,15 +353,30 @@ function SettingsContent() {
                   </div>
                   <div className="space-y-2">
                     <Label className="text-[#B8A0D0]">
-                      Nombre de la Empresa
+                      Nombre de la Empresa (Legal)
                     </Label>
                     <Input
-                      defaultValue={company?.name || ""}
+                      value={company?.name || ""}
+                      onChange={(e) => setCompany(prev => prev ? ({ ...prev, name: e.target.value }) : null)}
                       placeholder={
                         isFetching ? "Cargando..." : "LUMIS Technologies"
                       }
                       className="bg-[#0F0A12] border-[#E040FB]/10 text-[#F5EEFF] focus-visible:ring-[#E040FB]/50"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[#E040FB] font-bold">
+                      Nombre Comercial (Marca Blanca WhatsApp)
+                    </Label>
+                    <Input
+                      value={company?.name_comercial || ""}
+                      onChange={(e) => setCompany(prev => prev ? ({ ...prev, name_comercial: e.target.value }) : null)}
+                      placeholder="Ej. Mi Tienda Express"
+                      className="bg-[#0F0A12] border-[#E040FB]/30 text-white focus-visible:ring-[#E040FB] border-2 shadow-[0_0_10px_rgba(224,64,251,0.1)]"
+                    />
+                    <p className="text-[10px] text-[#B8A0D0] italic">
+                      Este nombre se usará en todos los mensajes de seguimiento automáticos.
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <Label className="text-[#B8A0D0]">Rol Administrativo</Label>
