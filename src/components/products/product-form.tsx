@@ -11,27 +11,13 @@ import { formatCurrency } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useUser } from "@/hooks/use-user";
 import { 
-  Package, 
-  DollarSign, 
-  Layers, 
-  Info, 
-  Barcode, 
-  LayoutGrid, 
-  Image as ImageIcon,
-  CheckCircle2,
-  Zap,
   X,
   ChevronDown,
-  TrendingDown,
-  TrendingUp,
-  Wallet,
   Loader2
 } from "lucide-react";
 
@@ -202,33 +188,26 @@ export function ProductForm({
   const CollapsibleSection = ({ 
     id, 
     title, 
-    icon: Icon, 
     children, 
     error = false 
   }: { 
     id: string, 
     title: string, 
-    icon: any, 
     children: React.ReactNode, 
     error?: boolean 
   }) => {
     const isOpen = activeSection === id;
     return (
-      <div className={`border rounded-[1.5rem] overflow-hidden transition-all duration-300 ${isOpen ? "border-brand shadow-sm" : "border-border/40"}`}>
+      <div className={`border-b transition-all duration-300 ${error ? "border-l-2 border-l-red-500 pl-3" : "border-slate-100"}`}>
         <button
           type="button"
           onClick={() => setActiveSection(isOpen ? "" : id)}
-          className={`w-full flex items-center justify-between p-5 text-left transition-colors ${isOpen ? "bg-white" : "bg-white hover:bg-slate-50"} ${error ? "border-l-[4px] border-l-red-500" : ""}`}
+          className="w-full flex items-center justify-between py-6 text-left group"
         >
-          <div className="flex items-center gap-4">
-            <div className={`p-2 rounded-xl transition-colors ${isOpen ? "bg-brand/10 text-brand" : "bg-slate-100 text-slate-400"}`}>
-              <Icon className="w-5 h-5" />
-            </div>
-            <h3 className={`text-sm font-montserrat font-black uppercase tracking-wider transition-colors ${isOpen ? "text-brand" : "text-slate-600"}`}>
-              {title}
-            </h3>
-          </div>
-          <ChevronDown className={`w-5 h-5 text-slate-300 transition-transform duration-300 ${isOpen ? "rotate-180 text-brand" : ""}`} />
+          <h3 className={`text-[11px] font-sans font-semibold uppercase tracking-[0.15em] transition-colors ${isOpen ? "text-slate-900" : "text-slate-400 group-hover:text-slate-800"}`}>
+            {title}
+          </h3>
+          <ChevronDown className={`w-4 h-4 text-slate-300 transition-transform duration-300 ${isOpen ? "rotate-180 text-slate-900" : ""}`} />
         </button>
         <AnimatePresence initial={false}>
           {isOpen && (
@@ -238,7 +217,7 @@ export function ProductForm({
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
             >
-              <div className="p-6 pt-2 bg-white border-t border-border/10">
+              <div className="pb-8 pt-1 bg-white">
                 {children}
               </div>
             </motion.div>
@@ -249,8 +228,8 @@ export function ProductForm({
   };
 
   const FormField = ({ label, error, children, className = "" }: { label: string, error?: any, children: React.ReactNode, className?: string }) => (
-    <div className={`space-y-1.5 ${className}`}>
-      <label className="text-[10px] font-montserrat font-black text-slate-400 uppercase tracking-widest px-0.5">
+    <div className={`space-y-1 ${className}`}>
+      <label className="text-[10px] font-sans font-semibold text-slate-500 uppercase tracking-widest px-0.5">
         {label}
       </label>
       {children}
@@ -260,180 +239,170 @@ export function ProductForm({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[750px] p-0 bg-white border-slate-200 overflow-hidden shadow-2xl rounded-[2.5rem]">
+      <DialogContent className="sm:max-w-[800px] p-0 bg-white border-slate-200 overflow-hidden shadow-2xl rounded-sm">
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full max-h-[90vh]">
           {/* Header Minimalista */}
-          <div className="p-8 pb-6 border-b border-slate-100 relative bg-white">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-[1.5rem] bg-slate-50 border border-border/40 flex items-center justify-center shadow-sm">
-                   <Package className="w-7 h-7 text-brand" />
-                </div>
-                <div>
-                  <DialogTitle className="text-2xl font-montserrat font-black text-slate-900 tracking-tight leading-none">
-                    {product?.id ? "Editar Producto" : "Nuevo Producto"}
-                  </DialogTitle>
-                  <DialogDescription className="text-slate-400 text-[13px] mt-1.5 font-medium">
-                    Gestión eficiente de inventario y precios multinivel.
-                  </DialogDescription>
-                </div>
+          <div className="px-8 py-7 border-b border-slate-100 relative bg-white">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[10px] font-sans font-semibold uppercase tracking-widest text-slate-400 mb-2">Gestión de Inventario</p>
+                <DialogTitle className="text-2xl font-serif text-slate-900 tracking-tight leading-none">
+                  {product?.id ? "Editar Producto" : "Nuevo Producto"}
+                </DialogTitle>
               </div>
               <button 
                 type="button" 
                 onClick={() => setOpen(false)}
-                className="p-3 text-slate-300 hover:text-slate-600 hover:bg-slate-50 rounded-2xl transition-all"
+                className="p-2 text-slate-400 hover:text-slate-900 transition-colors"
+                aria-label="Cerrar modal"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 pointer-events-none" />
               </button>
             </div>
           </div>
 
           {/* Secciones Desplegables */}
-          <div className="flex-1 overflow-y-auto p-8 pt-6 space-y-4 scrollbar-hide bg-white">
-            <div className="space-y-4">
+          <div className="flex-1 overflow-y-auto px-8 py-2 bg-white">
+            <div>
               {/* Sección 1: General */}
               <CollapsibleSection 
                 id="general" 
                 title="Información General" 
-                icon={Info}
                 error={!!form.formState.errors.name || !!form.formState.errors.sku}
               >
                 <div className="grid grid-cols-12 gap-5">
-                  <FormField label="Nombre Comercial" error={form.formState.errors.name} className="col-span-12 md:col-span-8">
+                  <FormField label="Nombre Comercial" error={form.formState.errors.name} className="col-span-12 md:col-span-9">
                     <Input 
                       {...form.register("name")} 
                       placeholder="Ej. Harina Pan 1Kg"
-                      className="h-12 bg-white border-border/40 text-slate-900 placeholder:text-slate-200 text-base focus:ring-brand rounded-xl font-bold font-outfit shadow-sm" 
+                      className="h-12 bg-white border-slate-200 text-slate-900 placeholder:text-slate-300 text-sm focus:ring-0 focus:border-slate-400 rounded-sm shadow-none" 
                     />
                   </FormField>
-                  <FormField label="SKU / Código Barra" error={form.formState.errors.sku} className="col-span-12 md:col-span-4">
+                  <FormField label="SKU / Cód." error={form.formState.errors.sku} className="col-span-12 md:col-span-3">
                     <Input 
                       {...form.register("sku")} 
                       placeholder="PROD-001"
-                      className="h-12 bg-white border-border/40 text-slate-900 placeholder:text-slate-200 rounded-xl uppercase font-mono shadow-sm px-4" 
+                      className="h-12 bg-white border-slate-200 text-slate-900 placeholder:text-slate-300 rounded-sm uppercase font-mono shadow-none px-4 text-sm focus:ring-0 focus:border-slate-400" 
                     />
                   </FormField>
                 </div>
               </CollapsibleSection>
 
               {/* Sección 2: Clasificación */}
-              <CollapsibleSection id="clasificacion" title="Clasificación y Logística" icon={LayoutGrid}>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  <FormField label="Tipo de Unidad">
+              <CollapsibleSection id="clasificacion" title="Clasificación y Logística">
+                <div className="grid grid-cols-12 gap-5">
+                  <FormField label="Tipo de Unidad" className="col-span-12 md:col-span-3">
                     <Select value={form.watch("unit")} onValueChange={(v) => form.setValue("unit", v)}>
-                      <SelectTrigger className="h-12 bg-white border-border/40 text-slate-900 rounded-xl shadow-sm font-bold">
+                      <SelectTrigger className="h-12 bg-white border-slate-200 text-slate-900 rounded-sm shadow-none font-medium text-sm focus:ring-0">
                         <SelectValue placeholder="Seleccionar" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white border-slate-200">
-                        <SelectItem value="Unidad">📦 Unidad</SelectItem>
-                        <SelectItem value="Caja">📦 Caja</SelectItem>
-                        <SelectItem value="Paleta">🚚 Paleta</SelectItem>
-                        <SelectItem value="Bulto">📦 Bulto</SelectItem>
+                      <SelectContent className="bg-white border-slate-200 rounded-sm">
+                        <SelectItem value="Unidad" className="text-sm">Unidad</SelectItem>
+                        <SelectItem value="Caja" className="text-sm">Caja</SelectItem>
+                        <SelectItem value="Paleta" className="text-sm">Paleta</SelectItem>
+                        <SelectItem value="Bulto" className="text-sm">Bulto</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormField>
-                  <FormField label="Categoría">
-                    <Input {...form.register("category")} placeholder="Víveres" className="h-12 bg-white border-border/40 text-slate-900 rounded-xl font-bold shadow-sm" />
+                  <FormField label="Categoría" className="col-span-12 md:col-span-5">
+                    <Input {...form.register("category")} placeholder="Víveres" className="h-12 bg-white border-slate-200 text-slate-900 rounded-sm font-medium text-sm shadow-none focus:ring-0" />
                   </FormField>
-                  <FormField label="Marca">
-                    <Input {...form.register("brand")} placeholder="Polar" className="h-12 bg-white border-border/40 text-slate-900 rounded-xl font-bold shadow-sm" />
+                  <FormField label="Marca" className="col-span-12 md:col-span-4">
+                    <Input {...form.register("brand")} placeholder="Polar" className="h-12 bg-white border-slate-200 text-slate-900 rounded-sm font-medium text-sm shadow-none focus:ring-0" />
                   </FormField>
-                  <FormField label="Departamento">
-                    <Input {...form.register("department")} placeholder="Alimentos" className="h-12 bg-white border-border/40 text-slate-900 rounded-xl font-bold shadow-sm" />
+                  <FormField label="Departamento" className="col-span-12 md:col-span-4">
+                    <Input {...form.register("department")} placeholder="Alimentos" className="h-12 bg-white border-slate-200 text-slate-900 rounded-sm font-medium text-sm shadow-none focus:ring-0" />
                   </FormField>
-                  <FormField label="Cód. Proveedor">
-                    <Input {...form.register("supplier_code")} placeholder="SUP-123" className="h-12 bg-white border-border/40 text-slate-900 rounded-xl font-bold shadow-sm" />
+                  <FormField label="Cód. Proveedor" className="col-span-12 md:col-span-4">
+                    <Input {...form.register("supplier_code")} placeholder="SUP-123" className="h-12 bg-white border-slate-200 text-slate-900 rounded-sm font-medium text-sm shadow-none uppercase focus:ring-0" />
                   </FormField>
-                  <FormField label="Depósito / Sucursal">
+                  <FormField label="Depósito / Sucursal" className="col-span-12 md:col-span-4">
                     <Select value={form.watch("warehouse_id")} onValueChange={(v) => form.setValue("warehouse_id", v)}>
-                      <SelectTrigger className="h-12 bg-white border-border/40 text-slate-700 rounded-xl shadow-sm font-black uppercase text-[10px]">
+                      <SelectTrigger className="h-12 bg-white border-slate-200 text-slate-900 rounded-sm shadow-none font-medium text-sm focus:ring-0">
                         <SelectValue placeholder="Seleccionar" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white border-slate-200">
+                      <SelectContent className="bg-white border-slate-200 rounded-sm">
                         {warehouses.map(w => (
-                          <SelectItem key={w.id} value={w.id}>🏪 {w.name}</SelectItem>
+                          <SelectItem key={w.id} value={w.id} className="text-sm">{w.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </FormField>
-                  <FormField label="Existencia Inicial" className="col-span-full">
-                    <Input {...form.register("stock")} type="number" className="h-14 bg-brand/5 border-brand/20 text-brand font-black text-xl rounded-2xl shadow-sm text-center" />
+                  <FormField label="Existencia Inicial" className="col-span-12 md:col-span-12 border-t border-slate-100 pt-5 mt-2">
+                    <Input {...form.register("stock")} type="number" className="h-12 bg-white border-slate-200 text-slate-900 font-mono font-medium text-base rounded-sm shadow-none px-4 focus:ring-0" />
                   </FormField>
                 </div>
               </CollapsibleSection>
 
               {/* Sección 3: Precios y Ganancias */}
-              <CollapsibleSection id="precios" title="Estructura de Precios y Ganancias" icon={DollarSign}>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <FormField label="Costo Unitario ($)">
+              <CollapsibleSection id="precios" title="Estructura de Precios y Ganancias">
+                <div className="space-y-8">
+                  <div className="grid grid-cols-12 gap-5">
+                    <FormField label="Costo Unitario ($)" className="col-span-12 md:col-span-5">
                       <Input 
                         {...form.register("cost_usd")} 
                         type="number" 
                         step="0.01" 
-                        className="h-12 bg-white border-border/40 text-slate-900 font-bold rounded-xl" 
+                        className="h-12 bg-white border-slate-200 text-slate-900 font-mono text-base rounded-sm shadow-none px-4 focus:ring-0" 
                       />
                     </FormField>
-                    <FormField label="Cantidad">
-                       <Input value={stock_qty} disabled className="h-12 bg-slate-50 border-border/30 text-slate-400 font-bold rounded-xl cursor-not-allowed" />
-                    </FormField>
-                    <FormField label="Costo Total">
-                       <div className="h-12 bg-slate-50 border border-border/30 rounded-xl flex items-center px-4 font-mono font-black text-slate-400">
-                         {formatCurrency(totalCost)}
-                       </div>
-                    </FormField>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 ring-1 ring-brand/10 p-6 rounded-3xl bg-slate-50/50">
-                    <FormField label="Precio de Venta ($)">
+                    <FormField label="Precio de Venta ($)" className="col-span-12 md:col-span-7">
                       <Input 
                         {...form.register("price_usd")} 
                         type="number" 
                         step="0.01" 
-                        className="h-14 bg-white border-brand/20 text-text-1 text-2xl font-black rounded-2xl shadow-sm focus:ring-brand" 
+                        className="h-12 bg-white border-slate-200 text-slate-900 font-mono text-base rounded-sm shadow-none px-4 focus:ring-0" 
                       />
                     </FormField>
-                    <FormField label="Ganancia (%)">
-                       <div className="h-14 bg-white border border-border/40 rounded-2xl flex items-center justify-center text-ok font-black text-2xl shadow-sm">
-                         {profitMarginPercent.toFixed(1)}%
+                  </div>
+
+                  <div className="grid grid-cols-12 gap-5 border-t border-slate-100 pt-6">
+                    <div className="col-span-12 md:col-span-6 flex flex-col justify-center">
+                       <span className="text-[10px] font-sans font-semibold text-slate-400 uppercase tracking-widest mb-1">Costo Total Inventario</span>
+                       <span className="font-mono text-lg text-slate-600 tracking-tight">{formatCurrency(totalCost)}</span>
+                    </div>
+                    <div className="col-span-12 md:col-span-6 flex items-center justify-between">
+                       <div className="flex flex-col">
+                         <span className="text-[10px] font-sans font-semibold text-slate-400 uppercase tracking-widest mb-1">Margen de Ganancia</span>
+                         <span className="font-mono text-lg text-slate-600 tracking-tight">{profitMarginPercent.toFixed(1)}%</span>
                        </div>
-                    </FormField>
+                       <div className="flex flex-col text-right">
+                         <span className="text-[10px] font-sans font-semibold text-slate-400 uppercase tracking-widest mb-1">Utilidad Neta</span>
+                         <span className={`font-mono text-lg tracking-tight ${profit > 0 ? "text-slate-900" : "text-red-500"}`}>
+                           {formatCurrency(profit)}
+                         </span>
+                       </div>
+                    </div>
                   </div>
 
-                  <div className="text-center">
-                    <span className={`text-[12px] font-black uppercase tracking-widest ${profit > 0 ? "text-ok" : "text-danger"}`}>
-                       Utilidad: {formatCurrency(profit)} por unidad
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-border/10">
-                    <FormField label="Mayorista">
-                      <Input {...form.register("price_usd_2")} type="number" step="0.01" className="h-11 bg-white border-border/40 text-slate-700 font-bold rounded-xl" />
+                  <div className="grid grid-cols-12 gap-4 pt-6 md:pt-8 border-t border-slate-100">
+                    <FormField label="Mayorista" className="col-span-6 md:col-span-3">
+                      <Input {...form.register("price_usd_2")} type="number" step="0.01" className="h-10 bg-white border-slate-200 text-slate-600 font-mono text-sm rounded-sm focus:ring-0" />
                     </FormField>
-                    <FormField label="Distrib.">
-                      <Input {...form.register("price_usd_3")} type="number" step="0.01" className="h-11 bg-white border-border/40 text-slate-700 font-bold rounded-xl" />
+                    <FormField label="Distribuidor" className="col-span-6 md:col-span-3">
+                      <Input {...form.register("price_usd_3")} type="number" step="0.01" className="h-10 bg-white border-slate-200 text-slate-600 font-mono text-sm rounded-sm focus:ring-0" />
                     </FormField>
-                    <FormField label="Oferta">
-                      <Input {...form.register("price_usd_4")} type="number" step="0.01" className="h-11 bg-white border-border/40 text-slate-700 font-bold rounded-xl" />
+                    <FormField label="Oferta" className="col-span-6 md:col-span-3">
+                      <Input {...form.register("price_usd_4")} type="number" step="0.01" className="h-10 bg-white border-slate-200 text-slate-600 font-mono text-sm rounded-sm focus:ring-0" />
                     </FormField>
-                    <FormField label="VIP">
-                      <Input {...form.register("price_usd_5")} type="number" step="0.01" className="h-11 bg-white border-border/40 text-slate-700 font-bold rounded-xl" />
+                    <FormField label="VIP" className="col-span-6 md:col-span-3">
+                      <Input {...form.register("price_usd_5")} type="number" step="0.01" className="h-10 bg-white border-slate-200 text-slate-900 font-mono font-medium text-sm rounded-sm focus:ring-0 shadow-none" />
                     </FormField>
                   </div>
                 </div>
               </CollapsibleSection>
 
               {/* Sección 4: Avanzados */}
-              <CollapsibleSection id="avanzados" title="Imagen y Descripción" icon={ImageIcon}>
+              <CollapsibleSection id="avanzados" title="Imagen y Descripción">
                 <div className="space-y-6">
                    <FormField label="URL de Imagen">
-                      <Input {...form.register("image_url")} placeholder="https://..." className="h-12 bg-white border-border/40 text-slate-900 rounded-xl" />
+                      <Input {...form.register("image_url")} placeholder="https://..." className="h-12 bg-white border-slate-200 text-slate-900 font-mono text-sm rounded-sm shadow-none focus:ring-0" />
                    </FormField>
                    <FormField label="Descripción">
                       <textarea 
                         {...form.register("description")} 
-                        className="w-full bg-white border border-border/40 rounded-2xl p-4 text-slate-900 text-[13px] font-outfit min-h-[100px] focus:ring-1 focus:ring-brand outline-none"
-                        placeholder="..."
+                        className="w-full bg-white border border-slate-200 rounded-sm p-4 text-slate-900 text-sm min-h-[100px] outline-none focus:border-slate-400 focus:ring-0 resize-none font-sans"
+                        placeholder="Escriba aquí los detalles..."
                       />
                    </FormField>
                 </div>
@@ -442,20 +411,21 @@ export function ProductForm({
           </div>
 
           {/* Footer */}
-          <div className="p-8 bg-white border-t border-slate-100 flex justify-end gap-3 rounded-b-[2.5rem]">
+          <div className="px-8 py-5 bg-white border-t border-slate-100 flex items-center justify-end gap-6">
              <button 
                type="button" 
                onClick={() => setOpen(false)}
-               className="px-8 py-3 rounded-2xl text-[12px] font-montserrat font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-all"
+               className="text-[11px] font-sans font-semibold uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors"
              >
                Cancelar
              </button>
              <button 
                type="submit" 
                disabled={loading}
-               className="px-10 py-3 rounded-2xl bg-brand text-white text-[12px] font-montserrat font-black uppercase tracking-widest shadow-brand-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center gap-3"
+               className="px-6 py-2.5 bg-brand text-white text-[11px] font-sans font-semibold uppercase tracking-widest rounded-sm hover:bg-brand/90 transition-all disabled:opacity-50 flex items-center gap-2"
              >
-               {loading ? "Sincronizando..." : product?.id ? "Actualizar" : "Crear Producto"}
+               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+               {loading ? "Guardando..." : product?.id ? "Actualizar" : "Crear Producto"}
              </button>
           </div>
         </form>
