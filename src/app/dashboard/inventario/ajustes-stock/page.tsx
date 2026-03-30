@@ -216,9 +216,9 @@ export default function AjustesStockPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={\`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border \${getTypeStyle(
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border ${getTypeStyle(
                           adjustment.type
-                        )}\`}
+                        )}`}
                       >
                         {getTypeIcon(adjustment.type)}
                         {adjustment.type}
