@@ -101,10 +101,10 @@ export default function QuoteDetailPage({ params }: { params: any }) {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h2 className="text-xs font-bold text-text-2 font-outfit uppercase tracking-[0.2em]">
+            <h2 className="text-[10px] font-bold text-text-1 font-outfit uppercase tracking-[0.25em] opacity-70">
               Detalle de Cotización
             </h2>
-            <p className="text-text-1 font-primary font-bold text-2xl leading-tight">{quote.quote_number}</p>
+            <p className="text-text-1 font-primary text-3xl leading-tight">{quote.quote_number}</p>
           </div>
         </div>
         <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${color}`}>
@@ -117,17 +117,17 @@ export default function QuoteDetailPage({ params }: { params: any }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Client */}
         <Card className="p-5 bg-surface-card border-border shadow-card space-y-1">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-2 font-outfit flex items-center gap-1.5">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-text-1 font-outfit flex items-center gap-1.5 opacity-60">
             <User className="w-3 h-3" /> Cliente
           </p>
           <p className="text-text-1 font-bold text-lg font-primary">{partner?.name ?? "—"}</p>
-          <p className="text-xs text-text-1 font-mono">{partner?.rif ?? ""}</p>
-          {partner?.city && <p className="text-xs text-text-2 font-outfit">{partner.city}</p>}
+          <p className="text-xs text-text-1 font-mono font-medium">{partner?.rif ?? ""}</p>
+          {partner?.city && <p className="text-xs text-text-1 font-outfit opacity-80">{partner.city}</p>}
         </Card>
 
         {/* Seller */}
         <Card className="p-5 bg-surface-card border-border shadow-card space-y-1">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-2 font-outfit flex items-center gap-1.5">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-text-1 font-outfit flex items-center gap-1.5 opacity-60">
             <User className="w-3 h-3" /> Vendedor
           </p>
           <p className="text-text-1 font-bold text-lg font-primary">{seller?.full_name ?? "—"}</p>
@@ -135,16 +135,16 @@ export default function QuoteDetailPage({ params }: { params: any }) {
 
         {/* Dates */}
         <Card className="p-5 bg-surface-card border-border shadow-card space-y-1">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-2 font-outfit flex items-center gap-1.5">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-text-1 font-outfit flex items-center gap-1.5 opacity-60">
             <Calendar className="w-3 h-3" /> Fechas
           </p>
-          <p className="text-xs text-text-2 font-outfit">
+          <p className="text-xs text-text-1 font-outfit">
             Creado:{" "}
             <span className="text-text-1 font-bold">
               {format(new Date(quote.created_at), "dd MMM yyyy", { locale: es })}
             </span>
           </p>
-          <p className="text-xs text-text-2 font-outfit">
+          <p className="text-xs text-text-1 font-outfit">
             Vence:{" "}
             <span className="text-text-1 font-bold">
               {format(new Date(quote.expires_at), "dd MMM yyyy", { locale: es })}
@@ -162,7 +162,7 @@ export default function QuoteDetailPage({ params }: { params: any }) {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-surface-base/60 text-text-2 text-[10px] font-outfit uppercase tracking-widest">
+            <thead className="bg-surface-base/60 text-text-1 text-[10px] font-bold font-outfit uppercase tracking-widest">
               <tr>
                 <th className="px-5 py-3 text-left font-bold">Producto</th>
                 <th className="px-5 py-3 text-left font-bold">SKU</th>
@@ -184,7 +184,7 @@ export default function QuoteDetailPage({ params }: { params: any }) {
                     <td className="px-5 py-3 text-text-1 font-bold font-primary">
                       {item.product_name ?? item.products?.name ?? "—"}
                     </td>
-                    <td className="px-5 py-3 text-text-2 font-mono text-xs">
+                    <td className="px-5 py-3 text-text-1 font-medium font-outfit text-[11px] opacity-60">
                       {item.product_sku ?? item.products?.sku ?? "—"}
                     </td>
                     <td className="px-5 py-3 text-right text-text-1 font-bold">{item.qty}</td>
@@ -200,9 +200,9 @@ export default function QuoteDetailPage({ params }: { params: any }) {
         {/* Totals footer */}
         <div className="p-5 border-t border-border/60 bg-surface-base/30 flex justify-end">
           <div className="space-y-1 text-right">
-            <p className="text-xs text-text-2 font-bold font-outfit uppercase tracking-tighter">Total USD</p>
-            <p className="text-4xl font-bold text-text-1 font-primary tracking-tight">{formatCurrency(quote.total_usd)}</p>
-            <p className="text-sm text-text-2 font-mono font-bold">Bs. {formatCurrency(quote.total_bs, "")}</p>
+            <p className="text-[10px] font-bold text-text-1 font-outfit uppercase tracking-wider opacity-60">Total USD</p>
+            <p className="text-5xl font-bold text-text-1 font-primary tracking-tighter mb-1">{formatCurrency(quote.total_usd)}</p>
+            <p className="text-sm text-text-1 font-montserrat font-bold opacity-50">Bs. {formatCurrency(quote.total_bs, "")}</p>
           </div>
         </div>
       </Card>
@@ -210,7 +210,7 @@ export default function QuoteDetailPage({ params }: { params: any }) {
       {/* Notes */}
       {quote.notes && (
         <Card className="p-5 bg-surface-card border-border shadow-card">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-2 font-outfit mb-2">Observaciones</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-text-1 font-outfit mb-2 opacity-60">Observaciones</p>
           <p className="text-text-1 text-sm leading-relaxed font-outfit">{quote.notes}</p>
         </Card>
       )}
