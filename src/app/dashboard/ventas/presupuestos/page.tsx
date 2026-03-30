@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
-import { Search, Loader2, Plus, FileText, CheckCircle, Clock, XCircle, Send } from "lucide-react";
+import { Search, Loader2, Plus, FileText, CheckCircle, Clock, XCircle, Send, HelpCircle } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
+import { ConfirmationModal } from "@/components/ui/confirmation-modal";
+import { toast } from "sonner";
 
 type Quote = {
   id: string;
@@ -19,6 +21,9 @@ type Quote = {
   created_at: string;
   expires_at: string;
   partners: { name: string; rif: string } | null;
+  partner_id?: string;
+  company_id?: string;
+  notes?: string;
 };
 
 const STATUS_CONFIG = {
@@ -35,6 +40,10 @@ export default function PresupuestosPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const [convertingId, setConvertingId] = useState<string | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, quote: Quote | null}>({
+    isOpen: false,
+    quote: null
+  });
 
   async function fetchQuotes() {
     setLoading(true);
@@ -63,9 +72,11 @@ export default function PresupuestosPage() {
   }, []);
 
   const handleConvertToSale = async (quote: Quote) => {
-    if (!confirm("¿Estás seguro de convertir este presupuesto en una venta real? Esto generará un pedido y descontará el stock.")) return;
-    
+    setConfirmModal({ isOpen: false, quote: null });
     setConvertingId(quote.id);
+    
+    const toastId = toast.loading("Convirtiendo presupuesto...");
+    
     try {
       // 1. Obtener detalles completos del presupuesto
       const { data: fullQuote, error: qError } = await supabase
@@ -96,15 +107,15 @@ export default function PresupuestosPage() {
           order_number: orderNumber,
           partner_id: fullQuote.partner_id,
           company_id: fullQuote.company_id,
-          user_id: user.id, // Campo obligatorio
+          user_id: user.id,
           status: "pending",
           total_usd: fullQuote.total_usd,
           total_bs: fullQuote.total_bs,
           subtotal_usd: fullQuote.total_usd,
           tax_usd: 0,
-          currency: "USD", // Campo obligatorio
-          payment_type: "contado", // Por defecto al convertir
-          payment_method: "Efectivo", // Por defecto
+          currency: "USD",
+          payment_type: "contado",
+          payment_method: "Efectivo",
           amount_paid: 0,
           amount_due: fullQuote.total_usd,
           exchange_rate: fullQuote.total_bs / fullQuote.total_usd,
@@ -117,7 +128,6 @@ export default function PresupuestosPage() {
 
       // 4. Crear los items del pedido y actualizar stock
       for (const item of items) {
-        // Crear item de pedido
         await supabase.from("order_items").insert({
           order_id: newOrder.id,
           product_id: item.product_id,
@@ -126,7 +136,6 @@ export default function PresupuestosPage() {
           subtotal: item.subtotal
         });
 
-        // Descontar stock (operación atómica si es posible, aquí simplificada)
         const { data: product } = await supabase.from("products").select("stock").eq("id", item.product_id).single();
         if (product) {
           await supabase.from("products").update({ stock: product.stock - item.qty }).eq("id", item.product_id);
@@ -142,11 +151,11 @@ export default function PresupuestosPage() {
         })
         .eq("id", quote.id);
 
-      alert("¡Presupuesto convertido a venta exitosamente!");
-      fetchQuotes(); // Recargar lista
+      toast.success("¡Presupuesto convertido a venta con éxito!", { id: toastId });
+      fetchQuotes();
     } catch (error: any) {
       console.error("Error converting quote:", error);
-      alert("Error al convertir: " + error.message);
+      toast.error("Error al convertir: " + error.message, { id: toastId });
     } finally {
       setConvertingId(null);
     }
@@ -281,7 +290,7 @@ export default function PresupuestosPage() {
                           </Link>
                           {q.status === "open" && (
                             <button
-                              onClick={() => handleConvertToSale(q)}
+                              onClick={() => setConfirmModal({ isOpen: true, quote: q })}
                               disabled={convertingId !== null}
                               className="p-1.5 rounded-lg hover:bg-status-ok/10 text-text-3 hover:text-status-ok transition-colors disabled:opacity-50"
                               title="Convertir en venta"
@@ -312,6 +321,18 @@ export default function PresupuestosPage() {
           </table>
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, quote: null })}
+        onConfirm={() => confirmModal.quote && handleConvertToSale(confirmModal.quote)}
+        title="¿Convertir en Venta?"
+        description={`Estás a punto de convertir el presupuesto ${confirmModal.quote?.quote_number} en una venta real. Se generará un pedido y se descontará el stock de los productos.`}
+        confirmText="Sí, convertir ahora"
+        cancelText="Volver profesional"
+        variant="brand"
+        loading={convertingId !== null}
+      />
     </div>
 
   );
