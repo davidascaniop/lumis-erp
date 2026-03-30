@@ -51,21 +51,21 @@ export function ConfirmationModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[400px] border-[#E040FB]/20 bg-[#1A1220]/95 backdrop-blur-2xl p-0 overflow-hidden rounded-3xl">
+      <DialogContent className="sm:max-w-[400px] border-[#E040FB]/20 bg-white/95 backdrop-blur-2xl p-0 overflow-hidden rounded-3xl shadow-2xl">
         <div className="p-8 flex flex-col items-center text-center">
           <motion.div 
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="mb-4 p-4 rounded-full bg-[#E040FB]/10 border border-[#E040FB]/20"
+            className="mb-4 p-4 rounded-full bg-[#E040FB]/10 border border-[#E040FB]/10"
           >
             {iconMap[variant]}
           </motion.div>
           
           <DialogHeader className="p-0 space-y-2">
-            <DialogTitle className="text-2xl font-bold text-[#F5EEFF] font-primary">
+            <DialogTitle className="text-2xl font-bold text-slate-900 font-primary">
               {title}
             </DialogTitle>
-            <DialogDescription className="text-[#B8A0D0] text-sm leading-relaxed px-2">
+            <DialogDescription className="text-slate-500 text-sm leading-relaxed px-2">
               {description}
             </DialogDescription>
           </DialogHeader>
@@ -75,7 +75,7 @@ export function ConfirmationModal({
               variant="outline"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 h-12 rounded-2xl border-white/10 bg-white/5 text-[#F5EEFF] hover:bg-white/10 hover:text-white"
+              className="flex-1 h-12 rounded-2xl border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800"
             >
               {cancelText}
             </Button>
@@ -85,7 +85,7 @@ export function ConfirmationModal({
               className={`flex-1 h-12 rounded-2xl font-bold transition-all active:scale-95 ${buttonVariants[variant]}`}
             >
               {loading ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-white">
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
