@@ -3,71 +3,26 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  X,
-  Bell,
-  ChevronRight,
-  Plus,
-  LogOut,
-  Settings,
-  BarChart3,
-  Package,
-  CreditCard,
-  ShoppingCart,
-  Users,
-  LayoutDashboard,
-  Truck,
-  Warehouse,
-  Sparkles,
-  DollarSign,
-  AlertTriangle,
-  CheckCircle2,
-  Briefcase,
-  Lock,
+  X, Bell, ChevronRight, Plus, LogOut, Settings, BarChart3, Package,
+  CreditCard, ShoppingCart, Users, LayoutDashboard, Truck, Sparkles,
+  DollarSign, AlertTriangle, CheckCircle2, Briefcase, Lock, Wallet,
+  FileText, FileClock, TrendingUp, PieChart, Store, ClipboardList,
+  Tags, Layers, Receipt, ArrowDownCircle, Gauge,
 } from "lucide-react";
 import { cn, formatNumber } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
 import { useBCV } from "@/hooks/use-bcv";
+import { motion, AnimatePresence } from "framer-motion";
+import { ThemeToggle } from "./ThemeToggle";
 
 /* ─── Notificaciones mock ─── */
 const MOCK_NOTIFICATIONS = [
-  {
-    id: "1",
-    type: "payment" as const,
-    read: false,
-    title: "Pago pendiente de verificar",
-    description: "Distribuidora Alpha registró un pago de $250.00",
-    time: "Hace 15 min",
-    href: "/dashboard/cobranza",
-  },
-  {
-    id: "2",
-    type: "order" as const,
-    read: false,
-    title: "Nuevo pedido recibido",
-    description: "Pedido #2491 creado por Vendedor 1",
-    time: "Hace 1 hora",
-    href: "/dashboard/ventas",
-  },
-  {
-    id: "3",
-    type: "alert" as const,
-    read: false,
-    title: "Crédito vencido",
-    description: "Cliente Megamart tiene $480 vencidos (+30 días)",
-    time: "Hace 2 horas",
-    href: "/dashboard/cobranza",
-  },
-  {
-    id: "4",
-    type: "success" as const,
-    read: true,
-    title: "Pago verificado",
-    description: "Se verificó el pago de $120.00 de Bodega Central",
-    time: "Ayer",
-    href: "/dashboard/cobranza",
-  },
+  { id: "1", type: "payment" as const, read: false, title: "Pago pendiente de verificar", description: "Distribuidora Alpha registró un pago de $250.00", time: "Hace 15 min", href: "/dashboard/cobranza" },
+  { id: "2", type: "order" as const, read: false, title: "Nuevo pedido recibido", description: "Pedido #2491 creado por Vendedor 1", time: "Hace 1 hora", href: "/dashboard/ventas" },
+  { id: "3", type: "alert" as const, read: false, title: "Crédito vencido", description: "Cliente Megamart tiene $480 vencidos (+30 días)", time: "Hace 2 horas", href: "/dashboard/cobranza" },
+  { id: "4", type: "success" as const, read: true, title: "Pago verificado", description: "Se verificó el pago de $120.00 de Bodega Central", time: "Ayer", href: "/dashboard/cobranza" },
 ];
 
 const NOTIFICATION_ICONS = {
@@ -77,72 +32,83 @@ const NOTIFICATION_ICONS = {
   success: { icon: CheckCircle2, color: "#00E5CC", bg: "rgba(0,229,204,0.10)" },
 };
 
-const navItems = [
-  { href: "/dashboard", label: "Home", icon: LayoutDashboard, section: "HOME" },
+/* ─── Estructura del Menú Acordeón ─── */
+type NavChild = { href: string; label: string; icon: any; requiredPlan?: string[] };
+type NavSection = {
+  id: string;
+  label: string;
+  icon: any;
+  children: NavChild[];
+  requiredPlan?: string[];
+};
+
+const NAV_SECTIONS: NavSection[] = [
   {
-    href: "/dashboard/ventas",
+    id: "ventas",
     label: "Ventas",
     icon: ShoppingCart,
-    section: "MÓDULOS",
-    description: "Pedidos y facturación",
+    children: [
+      { href: "/dashboard/ventas/nueva", label: "Punto de Venta (POS)", icon: Store },
+      { href: "/dashboard/ventas/presupuestos", label: "Presupuestos", icon: FileText },
+      { href: "/dashboard/ventas", label: "Historial de Ventas", icon: FileClock },
+    ],
   },
   {
-    href: "/dashboard/clientes",
-    label: "Clientes",
+    id: "clientes",
+    label: "Clientes & CRM",
     icon: Users,
-    section: "MÓDULOS",
-    description: "Fichas 360° y contactos",
+    children: [
+      { href: "/dashboard/clientes", label: "Directorio de Clientes", icon: Users },
+      { href: "/dashboard/crm", label: "CRM Fase 1", icon: Briefcase, requiredPlan: ["pro", "enterprise"] },
+      { href: "/dashboard/crm/prospectos", label: "Seguimiento", icon: TrendingUp, requiredPlan: ["pro", "enterprise"] },
+    ],
   },
   {
-    href: "/dashboard/crm",
-    label: "CRM Fase 1",
-    icon: Briefcase,
-    section: "MÓDULOS",
-    description: "Pipeline y oportunidades",
-    requiredPlan: ["pro", "enterprise"],
-  },
-  {
-    href: "/dashboard/cobranza",
-    label: "Cobranza",
-    icon: CreditCard,
-    section: "MÓDULOS",
-    description: "CxC y pagos pendientes",
-  },
-  {
-    href: "/dashboard/productos",
-    label: "Productos",
+    id: "productos",
+    label: "Productos & Inventario",
     icon: Package,
-    section: "MÓDULOS",
-    description: "Inventario y catálogo",
+    children: [
+      { href: "/dashboard/productos", label: "Lista de Productos", icon: Package },
+      { href: "/dashboard/productos/stock", label: "Ajustes de Stock", icon: Gauge },
+      { href: "/dashboard/productos/categorias", label: "Categorías y Atributos", icon: Tags },
+      { href: "/dashboard/productos/kits", label: "Kits & Ensambles ✨", icon: Layers },
+    ],
   },
   {
-    href: "/dashboard/reportes",
-    label: "Reportes",
+    id: "finanzas",
+    label: "Finanzas / Cobranza",
+    icon: DollarSign,
+    children: [
+      { href: "/dashboard/cobranza", label: "Cuentas por Cobrar", icon: CreditCard },
+      { href: "/dashboard/compras/gastos", label: "Gastos / CxP", icon: Receipt },
+      { href: "/dashboard/finanzas/flujo", label: "Flujo de Caja", icon: ArrowDownCircle },
+    ],
+  },
+  {
+    id: "reportes",
+    label: "Reportes & Analítica",
     icon: BarChart3,
-    section: "MÓDULOS",
-    description: "Métricas y análisis",
+    children: [
+      { href: "/dashboard/reportes", label: "Ventas Mensuales", icon: BarChart3 },
+      { href: "/dashboard/reportes/productos", label: "Rendimiento de Productos", icon: TrendingUp },
+      { href: "/dashboard/reportes/financiero", label: "Resumen Financiero", icon: PieChart },
+    ],
   },
   {
-    href: "/dashboard/compras",
-    label: "Logística",
+    id: "operaciones",
+    label: "Operaciones / Logística",
     icon: Truck,
-    section: "MÓDULOS",
-    description: "Compras y proveedores",
-  },
-  {
-    href: "/dashboard/semillas",
-    label: "Semilla Diaria",
-    icon: Sparkles,
-    section: "MÓDULOS",
-    description: "Devocionales y negocios",
+    children: [
+      { href: "/dashboard/compras/despachos", label: "Despachos y Envíos", icon: Truck },
+      { href: "/dashboard/compras/proveedores", label: "Proveedores", icon: ClipboardList },
+      { href: "/dashboard/compras", label: "Órdenes de Compra", icon: Wallet },
+    ],
   },
 ];
 
 const configItems = [
   { href: "/dashboard/settings", label: "Configuración", icon: Settings },
 ];
-
-import { ThemeToggle } from "./ThemeToggle";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -155,6 +121,24 @@ export function Sidebar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [hasCRM, setHasCRM] = useState(true);
 
+  // Detectar sección activa para auto-expandir
+  const getInitialOpenSections = () => {
+    const open = new Set<string>();
+    for (const section of NAV_SECTIONS) {
+      if (section.children.some((c) => pathname.startsWith(c.href) && c.href !== "/dashboard")) {
+        open.add(section.id);
+      }
+    }
+    return open;
+  };
+
+  const [openSections, setOpenSections] = useState<Set<string>>(getInitialOpenSections);
+
+  useEffect(() => {
+    setOpenSections(getInitialOpenSections());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
   useEffect(() => {
     async function checkPlan() {
       if (user?.company_id) {
@@ -163,11 +147,7 @@ export function Sidebar() {
           .select("plan_type")
           .eq("id", user.company_id)
           .single();
-        if (org?.plan_type === "pro" || org?.plan_type === "enterprise") {
-          setHasCRM(true);
-        } else {
-          setHasCRM(false);
-        }
+        setHasCRM(org?.plan_type === "pro" || org?.plan_type === "enterprise");
       }
     }
     checkPlan();
@@ -181,13 +161,9 @@ export function Sidebar() {
     router.refresh();
   };
 
-  // Cerrar dropdown al hacer clic fuera
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowNotifications(false);
       }
     }
@@ -195,88 +171,58 @@ export function Sidebar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  function markAllRead() {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  }
+  function markAllRead() { setNotifications((prev) => prev.map((n) => ({ ...n, read: true }))); }
+  function markAsRead(id: string) { setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n))); }
 
-  function markAsRead(id: string) {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    );
-  }
+  const toggleSection = (id: string) => {
+    setOpenSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const initials = user?.full_name
-    ? user.full_name
-        .split(" ")
-        .map((n: string) => n[0])
-        .join("")
-        .substring(0, 2)
-        .toUpperCase()
+    ? user.full_name.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase()
     : "U";
-
-  const homeItems = navItems.filter((i) => i.section === "HOME");
-  const moduleItems = navItems.filter((i) => i.section === "MÓDULOS");
 
   return (
     <aside className="w-[240px] flex-shrink-0 flex flex-col border-r border-border bg-background transition-colors duration-300">
-      {/* Logo + BCV widget */}
+      {/* Logo + BCV */}
       <div className="px-5 py-5 border-b border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div
-              className="relative w-9 h-9 rounded-xl flex items-center justify-center
-                                      bg-gradient-to-br from-[#E040FB] to-[#7C4DFF]
-                                      shadow-[0_0_20px_rgba(224,64,251,0.40)]"
-            >
-              <span className="font-display font-bold text-white text-lg leading-none">
-                L
-              </span>
+            <div className="relative w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] shadow-[0_0_20px_rgba(224,64,251,0.40)]">
+              <span className="font-display font-bold text-white text-lg leading-none">L</span>
               <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent" />
             </div>
             <div>
-              <span className="font-display font-bold text-[17px] text-text-1 tracking-tight">
-                LUMIS
-              </span>
-              <p className="text-[10px] text-text-3 font-medium tracking-widest uppercase leading-none mt-0.5">
-                ERP · CRM
-              </p>
+              <span className="font-display font-bold text-[17px] text-text-1 tracking-tight">LUMIS</span>
+              <p className="text-[10px] text-text-3 font-medium tracking-widest uppercase leading-none mt-0.5">ERP · CRM</p>
             </div>
           </div>
           <ThemeToggle />
         </div>
-
-        {/* BCV Widget — integrado debajo del logo */}
-        <div
-          className="flex items-center gap-1.5 mt-3 px-2.5 py-1.5 rounded-lg
-                                bg-surface-hover/10 border border-border"
-        >
+        <div className="flex items-center gap-1.5 mt-3 px-2.5 py-1.5 rounded-lg bg-surface-hover/10 border border-border">
           <div className="relative w-1.5 h-1.5">
             <div className="absolute inset-0 rounded-full bg-[#00E5CC]" />
             <div className="absolute inset-0 rounded-full bg-[#00E5CC] animate-ping opacity-40" />
           </div>
-          <span className="currency-bs !text-text-1/80">
-            BCV:{" "}
-            <span className="text-text-1">Bs.{formatNumber(rate)}/$</span>
-          </span>
+          <span className="currency-bs !text-text-1/80">BCV: <span className="text-text-1">Bs.{formatNumber(rate)}/$</span></span>
         </div>
       </div>
 
-      {/* CTA — Nuevo Pedido */}
+      {/* CTA */}
       <div className="px-4 pt-4 pb-2">
         <Link
           href="/dashboard/ventas/nueva"
           className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl
-                               bg-gradient-to-r from-[#E040FB] to-[#7C4DFF] text-white
-                               text-sm font-semibold
-                               shadow-[0_6px_20px_rgba(224,64,251,0.25)]
-                               hover:shadow-[0_10px_28px_rgba(224,64,251,0.35)]
-                               hover:opacity-95 active:scale-[0.98]
-                               transition-all duration-150 group"
+                     bg-gradient-to-r from-[#E040FB] to-[#7C4DFF] text-white text-sm font-semibold
+                     shadow-[0_6px_20px_rgba(224,64,251,0.25)] hover:shadow-[0_10px_28px_rgba(224,64,251,0.35)]
+                     hover:opacity-95 active:scale-[0.98] transition-all duration-150 group"
         >
-          <Plus
-            className="w-4 h-4 group-hover:rotate-90 transition-transform duration-200"
-            strokeWidth={2.5}
-          />
+          <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-200" strokeWidth={2.5} />
           Nueva venta
         </Link>
       </div>
@@ -284,130 +230,120 @@ export function Sidebar() {
       {/* Navegación */}
       <nav className="flex-1 overflow-y-auto no-scrollbar px-3 pt-2 pb-3">
         {/* HOME */}
-        <p className="px-3 pt-3 pb-1.5 text-[10px] font-semibold text-text-3 uppercase tracking-[0.12em]">
-          Home
-        </p>
-        {homeItems.map((item) => {
-          const active =
-            item.href === "/dashboard"
-              ? pathname === "/dashboard"
-              : pathname.startsWith(item.href) && pathname !== "/dashboard";
+        <p className="px-3 pt-3 pb-1.5 text-[10px] font-semibold text-text-3 uppercase tracking-[0.12em]">Home</p>
+        <Link
+          href="/dashboard"
+          className={cn(
+            "relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 mb-0.5",
+            pathname === "/dashboard"
+              ? "bg-brand/10 border border-brand/20 font-semibold"
+              : "hover:bg-surface-hover/10 border border-transparent group",
+          )}
+        >
+          {pathname === "/dashboard" && (
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-gradient-to-b from-[#E040FB] to-[#7C4DFF] rounded-full" />
+          )}
+          <LayoutDashboard className={cn("w-4 h-4 flex-shrink-0", pathname === "/dashboard" ? "text-brand" : "text-text-2 group-hover:text-text-1")} />
+          <span className={cn("flex-1", pathname === "/dashboard" ? "text-brand" : "text-text-2 group-hover:text-text-1")}>Dashboard</span>
+        </Link>
+
+        {/* MÓDULOS — Acordeón */}
+        <p className="px-3 pt-5 pb-1.5 text-[10px] font-semibold text-text-3 uppercase tracking-[0.12em]">Módulos</p>
+
+        {NAV_SECTIONS.map((section) => {
+          const isOpen = openSections.has(section.id);
+          const isSectionActive = section.children.some((c) => pathname.startsWith(c.href) && c.href !== "/dashboard/ventas" || pathname === c.href);
+          // Special case for ventas: check exact match for historial
+          const isActiveSectionVentas = section.id === "ventas" && (
+            pathname.startsWith("/dashboard/ventas/nueva") ||
+            pathname.startsWith("/dashboard/ventas/presupuestos") ||
+            pathname === "/dashboard/ventas"
+          );
+          const isActive = section.id === "ventas" ? isActiveSectionVentas : isSectionActive;
 
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 mb-0.5",
-                active
-                  ? "bg-brand/10 border border-brand/20 font-semibold"
-                  : "hover:bg-surface-hover/10 border border-transparent group",
-              )}
-            >
-              {active && (
-                <div
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5
-                                                bg-gradient-to-b from-[#E040FB] to-[#7C4DFF] rounded-full"
-                />
-              )}
-              <item.icon
+            <div key={section.id} className="mb-0.5">
+              {/* Header de sección */}
+              <button
+                onClick={() => toggleSection(section.id)}
                 className={cn(
-                  "w-4 h-4 flex-shrink-0 transition-colors",
-                  active
-                    ? "text-brand"
-                    : "text-text-2 group-hover:text-text-1",
-                )}
-              />
-              <span
-                className={cn(
-                  "flex-1 transition-colors",
-                  active
-                    ? "text-brand"
-                    : "text-text-2 group-hover:text-text-1",
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group",
+                  isActive
+                    ? "bg-brand/10 border border-brand/20 font-semibold"
+                    : "hover:bg-surface-hover/10 border border-transparent",
                 )}
               >
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
-
-        {/* MÓDULOS */}
-        <p className="px-3 pt-5 pb-1.5 text-[10px] font-semibold text-text-3 uppercase tracking-[0.12em]">
-          Módulos
-        </p>
-        {moduleItems.map((item) => {
-          const active =
-            pathname.startsWith(item.href) && pathname !== "/dashboard";
-          
-          const isCRMLocked = item.href === "/dashboard/crm" && !hasCRM;
-          const href = isCRMLocked ? "/dashboard/upgrade" : item.href;
-
-          return (
-            <Link
-              key={item.href}
-              href={href}
-              className={cn(
-                "relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 mb-0.5 group",
-                active
-                  ? "bg-brand/10 border border-brand/20 font-semibold"
-                  : "hover:bg-surface-hover/10 border border-transparent",
-                  isCRMLocked ? "opacity-70" : ""
-              )}
-            >
-              {active && (
-                <div
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5
-                                                bg-gradient-to-b from-[#E040FB] to-[#7C4DFF] rounded-full"
-                />
-              )}
-              <item.icon
-                className={cn(
-                  "w-4 h-4 flex-shrink-0 transition-colors",
-                  active
-                    ? "text-brand"
-                    : "text-text-2 group-hover:text-text-1",
-                  isCRMLocked ? "text-status-warning" : ""
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-gradient-to-b from-[#E040FB] to-[#7C4DFF] rounded-full" />
                 )}
-              />
-              <div className="flex-1 min-w-0">
-                <span
+                <section.icon
                   className={cn(
-                    "block transition-colors",
-                    active
-                      ? "text-brand"
-                      : "text-text-2 group-hover:text-text-1",
+                    "w-4 h-4 flex-shrink-0 transition-colors",
+                    isActive ? "text-brand" : "text-text-2 group-hover:text-text-1",
                   )}
-                >
-                  {item.label}
+                />
+                <span className={cn("flex-1 text-left transition-colors", isActive ? "text-brand" : "text-text-2 group-hover:text-text-1")}>
+                  {section.label}
                 </span>
-              </div>
-              {isCRMLocked ? (
-                <Lock className="w-3.5 h-3.5 text-text-3" />
-              ) : (
                 <ChevronRight
                   className={cn(
-                    "w-3.5 h-3.5 flex-shrink-0 transition-all duration-150",
-                    active
-                      ? "text-brand"
-                      : "text-text-3 group-hover:text-text-2 group-hover:translate-x-0.5",
+                    "w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200",
+                    isOpen ? "rotate-90" : "",
+                    isActive ? "text-brand" : "text-text-3 group-hover:text-text-2",
                   )}
                 />
-              )}
-            </Link>
+              </button>
+
+              {/* Hijos animados */}
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    key="children"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.22, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <div className="pl-3 pt-0.5 pb-1 space-y-0.5 border-l border-border/60 ml-5 mt-1">
+                      {section.children.map((child) => {
+                        const isCRMLocked = child.requiredPlan && !hasCRM;
+                        const childHref = isCRMLocked ? "/dashboard/upgrade" : child.href;
+                        const isChildActive = pathname === child.href || (child.href !== "/dashboard/ventas" && pathname.startsWith(child.href) && child.href.length > "/dashboard".length);
+
+                        return (
+                          <Link
+                            key={child.href}
+                            href={childHref}
+                            className={cn(
+                              "flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] transition-all duration-150 group/child",
+                              isChildActive
+                                ? "bg-brand/10 text-brand font-semibold"
+                                : "text-text-3 hover:text-text-1 hover:bg-surface-hover/10",
+                              isCRMLocked ? "opacity-60" : "",
+                            )}
+                          >
+                            <child.icon className={cn("w-3.5 h-3.5 flex-shrink-0", isChildActive ? "text-brand" : "text-text-3 group-hover/child:text-text-2")} />
+                            <span className="flex-1 leading-tight">{child.label}</span>
+                            {isCRMLocked && <Lock className="w-3 h-3 text-text-3" />}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           );
         })}
 
         {/* CONFIGURACIÓN */}
-        <p className="px-3 pt-5 pb-1.5 text-[10px] font-semibold text-text-3 uppercase tracking-[0.12em]">
-          Configuración
-        </p>
+        <p className="px-3 pt-5 pb-1.5 text-[10px] font-semibold text-text-3 uppercase tracking-[0.12em]">Configuración</p>
         {configItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm
-                                   text-text-2 hover:bg-surface-hover/10 hover:text-text-1 transition-all group mb-0.5"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-text-2 hover:bg-surface-hover/10 hover:text-text-1 transition-all group mb-0.5"
           >
             <item.icon className="w-4 h-4 group-hover:text-text-1 transition-colors" />
             <span className="flex-1">{item.label}</span>
@@ -417,92 +353,54 @@ export function Sidebar() {
 
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm
-                               text-danger/70 hover:bg-danger/10 hover:text-danger transition-all"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-danger/70 hover:bg-danger/10 hover:text-danger transition-all"
         >
           <LogOut className="w-4 h-4" /> Cerrar Sesión
         </button>
       </nav>
 
-      {/* Footer: Notificación + Usuario */}
+      {/* Footer: Notificaciones + Usuario */}
       <div className="p-3 border-t border-border space-y-2">
-        {/* Campana de Notificaciones */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setShowNotifications(!showNotifications)}
             className={cn(
               "w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-150",
-              showNotifications
-                ? "bg-surface-hover/20 text-text-1"
-                : "text-text-2 hover:bg-surface-hover/10 hover:text-text-1",
+              showNotifications ? "bg-surface-hover/20 text-text-1" : "text-text-2 hover:bg-surface-hover/10 hover:text-text-1",
             )}
           >
             <div className="relative">
               <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
-                <span
-                  className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full
-                                                 bg-danger border-2 border-background
-                                                 flex items-center justify-center text-[7px] font-bold text-white"
-                >
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-danger border-2 border-background flex items-center justify-center text-[7px] font-bold text-white">
                   {unreadCount}
                 </span>
               )}
             </div>
             <span className="flex-1 text-left">Notificaciones</span>
             {unreadCount > 0 && (
-              <span
-                className="text-[9px] font-bold px-1.5 py-0.5 rounded-full
-                                             bg-brand/15 text-brand"
-              >
-                {unreadCount}
-              </span>
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-brand/15 text-brand">{unreadCount}</span>
             )}
           </button>
 
-          {/* Dropdown — se abre hacia la derecha */}
           {showNotifications && (
-            <div
-              className="absolute left-full bottom-0 ml-2 w-80 z-50
-                                        bg-surface-elevated border border-border rounded-2xl
-                                        shadow-elevated overflow-hidden
-                                        animate-fade-up"
-            >
-              {/* Header */}
+            <div className="absolute left-full bottom-0 ml-2 w-80 z-50 bg-surface-elevated border border-border rounded-2xl shadow-elevated overflow-hidden animate-fade-up">
               <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-semibold text-text-1">
-                    Notificaciones
-                  </h3>
-                  {unreadCount > 0 && (
-                    <span
-                      className="text-[9px] font-bold px-1.5 py-0.5 rounded-full
-                                                         bg-brand/15 text-brand"
-                    >
-                      {unreadCount} nueva{unreadCount > 1 ? "s" : ""}
-                    </span>
-                  )}
+                  <h3 className="text-sm font-semibold text-text-1">Notificaciones</h3>
+                  {unreadCount > 0 && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-brand/15 text-brand">{unreadCount} nueva{unreadCount > 1 ? "s" : ""}</span>}
                 </div>
                 <div className="flex items-center gap-1">
                   {unreadCount > 0 && (
-                    <button
-                      onClick={markAllRead}
-                      className="text-[10px] font-semibold text-brand hover:text-text-1
-                                                       transition-colors px-2 py-1 rounded-md hover:bg-surface-hover/10"
-                    >
+                    <button onClick={markAllRead} className="text-[10px] font-semibold text-brand hover:text-text-1 transition-colors px-2 py-1 rounded-md hover:bg-surface-hover/10">
                       Marcar todas
                     </button>
                   )}
-                  <button
-                    onClick={() => setShowNotifications(false)}
-                    className="p-1 rounded-md hover:bg-surface-hover/10 transition-colors"
-                  >
+                  <button onClick={() => setShowNotifications(false)} className="p-1 rounded-md hover:bg-surface-hover/10 transition-colors">
                     <X className="w-3.5 h-3.5 text-text-3" />
                   </button>
                 </div>
               </div>
-
-              {/* Lista */}
               <div className="max-h-80 overflow-y-auto no-scrollbar">
                 {notifications.length === 0 ? (
                   <div className="py-10 text-center">
@@ -511,69 +409,29 @@ export function Sidebar() {
                   </div>
                 ) : (
                   notifications.map((n) => {
-                    const {
-                      icon: Icon,
-                      color,
-                      bg,
-                    } = NOTIFICATION_ICONS[n.type];
+                    const { icon: Icon, color, bg } = NOTIFICATION_ICONS[n.type];
                     return (
-                      <Link
-                        key={n.id}
-                        href={n.href}
-                        onClick={() => {
-                          markAsRead(n.id);
-                          setShowNotifications(false);
-                        }}
-                        className={cn(
-                          "flex items-start gap-3 px-4 py-3 border-b border-border/10 last:border-0 transition-colors",
-                          n.read
-                            ? "hover:bg-surface-hover/5 opacity-60"
-                            : "bg-surface-hover/5 hover:bg-surface-hover/10",
-                        )}
+                      <Link key={n.id} href={n.href} onClick={() => { markAsRead(n.id); setShowNotifications(false); }}
+                        className={cn("flex items-start gap-3 px-4 py-3 border-b border-border/10 last:border-0 transition-colors", n.read ? "hover:bg-surface-hover/5 opacity-60" : "bg-surface-hover/5 hover:bg-surface-hover/10")}
                       >
-                        <div
-                          className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-                          style={{ background: bg }}
-                        >
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: bg }}>
                           <Icon className="w-3.5 h-3.5" style={{ color }} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
-                            <p
-                              className={cn(
-                                "text-xs leading-tight",
-                                n.read
-                                  ? "text-text-2"
-                                  : "text-text-1 font-medium",
-                              )}
-                            >
-                              {n.title}
-                            </p>
-                            {!n.read && (
-                              <span className="w-1.5 h-1.5 rounded-full bg-brand flex-shrink-0 mt-1" />
-                            )}
+                            <p className={cn("text-xs leading-tight", n.read ? "text-text-2" : "text-text-1 font-medium")}>{n.title}</p>
+                            {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-brand flex-shrink-0 mt-1" />}
                           </div>
-                          <p className="text-[10px] text-text-3 mt-0.5 truncate">
-                            {n.description}
-                          </p>
-                          <p className="text-[9px] text-text-3 mt-1">
-                            {n.time}
-                          </p>
+                          <p className="text-[10px] text-text-3 mt-0.5 truncate">{n.description}</p>
+                          <p className="text-[9px] text-text-3 mt-1">{n.time}</p>
                         </div>
                       </Link>
                     );
                   })
                 )}
               </div>
-
-              {/* Footer */}
               <div className="px-4 py-2.5 border-t border-border bg-surface-hover/5">
-                <Link
-                  href="/dashboard/settings"
-                  onClick={() => setShowNotifications(false)}
-                  className="text-[10px] font-semibold text-brand hover:text-text-1
-                                               transition-colors block text-center"
-                >
+                <Link href="/dashboard/settings" onClick={() => setShowNotifications(false)} className="text-[10px] font-semibold text-brand hover:text-text-1 transition-colors block text-center">
                   Ver historial completo
                 </Link>
               </div>
@@ -581,27 +439,13 @@ export function Sidebar() {
           )}
         </div>
 
-        {/* Usuario activo */}
-        <Link
-          href="/dashboard/settings"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl
-                               bg-brand/5 border border-brand/10
-                               hover:bg-brand/10 transition-colors"
-        >
-          <div
-            className="w-9 h-9 rounded-full bg-gradient-to-br from-[#E040FB] to-[#7C4DFF]
-                                    flex items-center justify-center text-xs font-bold text-white flex-shrink-0
-                                    shadow-[0_0_12px_rgba(224,64,251,0.25)]"
-          >
+        <Link href="/dashboard/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-brand/5 border border-brand/10 hover:bg-brand/10 transition-colors">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] flex items-center justify-center text-xs font-bold text-white flex-shrink-0 shadow-[0_0_12px_rgba(224,64,251,0.25)]">
             {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-text-1 truncate uppercase">
-              {user?.full_name ?? "Usuario"}
-            </p>
-            <p className="text-[10px] text-text-3 capitalize">
-              {user?.role ?? "admin"}
-            </p>
+            <p className="text-xs font-semibold text-text-1 truncate uppercase">{user?.full_name ?? "Usuario"}</p>
+            <p className="text-[10px] text-text-3 capitalize">{user?.role ?? "admin"}</p>
           </div>
         </Link>
       </div>

@@ -1,0 +1,218 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { motion } from "framer-motion";
+import { Search, Loader2, Plus, FileText, CheckCircle, Clock, XCircle, Send } from "lucide-react";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
+import { formatCurrency } from "@/lib/utils";
+
+type Quote = {
+  id: string;
+  quote_number: string;
+  status: "open" | "expired" | "converted";
+  total_usd: number;
+  total_bs: number;
+  created_at: string;
+  expires_at: string;
+  partners: { name: string; rif: string } | null;
+};
+
+const STATUS_CONFIG = {
+  open: { label: "Vigente", icon: Clock, color: "text-status-ok bg-status-ok/10 border-status-ok/20" },
+  expired: { label: "Vencida", icon: XCircle, color: "text-status-danger bg-status-danger/10 border-status-danger/20" },
+  converted: { label: "Convertida", icon: CheckCircle, color: "text-brand bg-brand/10 border-brand/20" },
+};
+
+export default function PresupuestosPage() {
+  const supabase = createClient();
+  const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  useEffect(() => {
+    async function fetchQuotes() {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: userData } = await supabase
+        .from("users")
+        .select("company_id")
+        .eq("auth_id", user.id)
+        .single();
+      if (!userData) return;
+
+      const { data } = await supabase
+        .from("quotes")
+        .select("*, partners(name, rif)")
+        .eq("company_id", (userData as any).company_id)
+        .order("created_at", { ascending: false });
+
+      setQuotes((data as Quote[]) || []);
+      setLoading(false);
+    }
+    fetchQuotes();
+  }, []);
+
+  const filtered = quotes.filter((q) => {
+    const matchSearch =
+      q.quote_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      q.partners?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchStatus = statusFilter === "all" || q.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
+
+  return (
+    <div className="space-y-6 max-w-7xl mx-auto min-h-[80vh] flex flex-col animate-fade-in pb-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-primary text-text-1">Presupuestos & Cotizaciones</h1>
+          <p className="text-text-2 mt-1 text-sm">Genera presupuestos profesionales y conviértelos en ventas en un clic.</p>
+        </div>
+        <Link
+          href="/dashboard/ventas/presupuestos/nuevo"
+          className="px-6 py-3 bg-brand-gradient text-white font-bold rounded-xl text-sm shadow-brand hover:opacity-90 transition-all active:scale-95 flex items-center gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          Nuevo Presupuesto
+        </Link>
+      </div>
+
+      {/* Tabla */}
+      <div className="bg-surface-card border border-border rounded-2xl overflow-hidden shadow-card flex flex-col flex-1 min-h-[500px]">
+        {/* Barra de filtros */}
+        <div className="p-4 border-b border-border bg-surface-base/50 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
+            <Input
+              placeholder="Buscar por número o cliente..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 border border-border/40 bg-surface-input text-text-1 placeholder:text-text-3 focus:border-brand/40 focus:ring-4 focus:ring-brand/5 transition-all shadow-sm"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            {(["all", "open", "converted", "expired"] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+                  statusFilter === s
+                    ? "bg-brand text-white border-brand shadow-sm"
+                    : "text-text-2 border-border hover:border-brand/30 hover:bg-brand/5"
+                }`}
+              >
+                {s === "all" ? "Todos" : STATUS_CONFIG[s].label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Tabla de datos */}
+        <div className="overflow-y-auto flex-1 no-scrollbar p-0">
+          <table className="w-full text-sm text-left whitespace-nowrap">
+            <thead className="bg-surface-base/80 text-text-2 sticky top-0 z-10 backdrop-blur-lg border-b-2 border-border/50">
+              <tr>
+                <th className="px-6 py-4 font-bold uppercase text-[10px] tracking-widest"># Cotización</th>
+                <th className="px-6 py-4 font-bold uppercase text-[10px] tracking-widest">Cliente</th>
+                <th className="px-6 py-4 font-bold uppercase text-[10px] tracking-widest">Fecha Creación</th>
+                <th className="px-6 py-4 font-bold uppercase text-[10px] tracking-widest">Vence</th>
+                <th className="px-6 py-4 font-bold uppercase text-[10px] tracking-widest text-right">Total</th>
+                <th className="px-6 py-4 font-bold uppercase text-[10px] tracking-widest text-center">Estado</th>
+                <th className="px-6 py-4 font-bold uppercase text-[10px] tracking-widest text-center">Acción</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {loading ? (
+                <tr><td colSpan={7} className="text-center py-20"><Loader2 className="w-8 h-8 text-brand animate-spin mx-auto" /></td></tr>
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-24">
+                    <FileText className="w-12 h-12 text-text-3 mx-auto mb-3 opacity-40" />
+                    <p className="text-text-2 font-medium">No hay presupuestos con esos filtros.</p>
+                    <Link href="/dashboard/ventas/presupuestos/nuevo" className="mt-3 inline-flex items-center gap-1.5 text-brand text-sm font-semibold hover:underline">
+                      <Plus className="w-4 h-4" /> Crear primer presupuesto
+                    </Link>
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((q, idx) => {
+                  const { label, icon: Icon, color } = STATUS_CONFIG[q.status];
+                  return (
+                    <motion.tr
+                      key={q.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.04 }}
+                      className="hover:bg-surface-hover/50 transition-colors group cursor-pointer"
+                    >
+                      <td className="px-6 py-4">
+                        <Link href={`/dashboard/ventas/presupuestos/${q.id}`} className="font-mono font-bold text-brand hover:underline">
+                          {q.quote_number}
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="font-semibold text-text-1">{q.partners?.name ?? "—"}</p>
+                        <p className="text-xs text-text-3">{q.partners?.rif ?? ""}</p>
+                      </td>
+                      <td className="px-6 py-4 text-text-2">
+                        {format(new Date(q.created_at), "dd MMM yyyy", { locale: es })}
+                      </td>
+                      <td className="px-6 py-4 text-text-2">
+                        {format(new Date(q.expires_at), "dd MMM yyyy", { locale: es })}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="font-bold text-text-1 block">{formatCurrency(q.total_usd)}</span>
+                        <span className="text-[10px] text-text-3 block font-semibold">Bs. {formatCurrency(q.total_bs, "")}</span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border ${color}`}>
+                          <Icon className="w-3 h-3" />{label}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <Link
+                            href={`/dashboard/ventas/presupuestos/${q.id}`}
+                            className="p-1.5 rounded-lg hover:bg-brand/10 text-text-3 hover:text-brand transition-colors"
+                            title="Ver detalles"
+                          >
+                            <FileText className="w-4 h-4" />
+                          </Link>
+                          {q.status === "open" && (
+                            <Link
+                              href={`/dashboard/ventas/presupuestos/${q.id}/convertir`}
+                              className="p-1.5 rounded-lg hover:bg-status-ok/10 text-text-3 hover:text-status-ok transition-colors"
+                              title="Convertir en venta"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                            </Link>
+                          )}
+                          <a
+                            href={`https://wa.me/?text=Hola, adjunto su presupuesto ${q.quote_number} por ${formatCurrency(q.total_usd)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 rounded-lg hover:bg-green-500/10 text-text-3 hover:text-green-500 transition-colors"
+                            title="Enviar por WhatsApp"
+                          >
+                            <Send className="w-4 h-4" />
+                          </a>
+                        </div>
+                      </td>
+                    </motion.tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
