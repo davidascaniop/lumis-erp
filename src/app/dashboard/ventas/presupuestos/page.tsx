@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
-import { Search, Loader2, Plus, FileText, CheckCircle, Clock, XCircle, Send, HelpCircle } from "lucide-react";
+import { Search, Loader2, Plus, FileText, CheckCircle, Clock, XCircle, Send } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/utils";
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 import { toast } from "sonner";
@@ -34,6 +35,7 @@ const STATUS_CONFIG = {
 
 export default function PresupuestosPage() {
   const supabase = createClient();
+  const router = useRouter();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -251,12 +253,13 @@ export default function PresupuestosPage() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.02 }}
-                      className="hover:bg-surface-hover/50 transition-colors group"
+                      onClick={() => router.push(`/dashboard/ventas/presupuestos/${q.id}`)}
+                      className="hover:bg-surface-hover/50 transition-colors group cursor-pointer"
                     >
                       <td className="px-6 py-4">
-                        <Link href={`/dashboard/ventas/presupuestos/${q.id}/pdf`} target="_blank" className="font-mono font-bold text-brand hover:underline">
+                        <span className="font-mono font-bold text-brand">
                           {q.quote_number}
-                        </Link>
+                        </span>
                       </td>
                       <td className="px-6 py-4">
                         <p className="font-semibold text-text-1">{q.partners?.name ?? "—"}</p>
@@ -277,11 +280,12 @@ export default function PresupuestosPage() {
                           <Icon className="w-3 h-3" />{label}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-center">
+                      <td className="px-6 py-4 text-center" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-center gap-1">
                           <Link
                             href={`/dashboard/ventas/presupuestos/${q.id}/pdf`}
                             target="_blank"
+                            onClick={(e) => e.stopPropagation()}
                             className="p-1.5 rounded-lg hover:bg-brand/10 text-text-3 hover:text-brand transition-colors"
                             title="Ver PDF"
                           >
@@ -289,7 +293,7 @@ export default function PresupuestosPage() {
                           </Link>
                           {q.status === "open" && (
                             <button
-                              onClick={() => setConfirmModal({ isOpen: true, quote: q })}
+                              onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, quote: q }); }}
                               disabled={convertingId !== null}
                               className="p-1.5 rounded-lg hover:bg-status-ok/10 text-text-3 hover:text-status-ok transition-colors disabled:opacity-50"
                               title="Convertir en venta"
@@ -305,6 +309,7 @@ export default function PresupuestosPage() {
                             href={`https://wa.me/?text=Hola, adjunto su presupuesto ${q.quote_number} por ${formatCurrency(q.total_usd)}. Puedes verlo aquí: ${window.location.origin}/dashboard/ventas/presupuestos/${q.id}/pdf`}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
                             className="p-1.5 rounded-lg hover:bg-green-500/10 text-text-3 hover:text-green-500 transition-colors"
                             title="Enviar por WhatsApp"
                           >
