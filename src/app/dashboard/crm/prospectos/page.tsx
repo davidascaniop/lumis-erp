@@ -98,53 +98,6 @@ export default function SeguimientoPage() {
     fetchData();
   }, [filter, user?.company_id]);
 
-  const generateDemoData = async () => {
-    if (!user?.company_id) return;
-    setLoading(true);
-    
-    try {
-      // 1. Get some partners
-      const { data: partners } = await supabase
-        .from("partners")
-        .select("id, name")
-        .eq("company_id", user.company_id)
-        .limit(3);
-      
-      if (!partners || partners.length === 0) {
-        toast.error("Debes tener al menos un cliente creado para generar data demo");
-        return;
-      }
-
-      // 2. Insert mock quotes
-      const mockQuotes = partners.map((p, i) => ({
-        company_id: user.company_id,
-        partner_id: p.id,
-        total_usd: 120 * (i + 1),
-        status: "pending",
-        created_at: new Date(Date.now() - i * 86400000).toISOString(),
-      }));
-
-      // 3. Insert mock receivables
-      const mockReceivables = partners.map((p, i) => ({
-        company_id: user.company_id,
-        partner_id: p.id,
-        balance_usd: 450 * (i + 1),
-        due_date: new Date(Date.now() - (i + 1) * 86400000).toISOString(),
-      }));
-
-      await supabase.from("quotes").insert(mockQuotes);
-      await supabase.from("receivables").insert(mockReceivables);
-
-      toast.success("✨ ¡Data mágica generada!");
-      window.location.reload();
-    } catch (err) {
-      console.error("Error generating demo data:", err);
-      toast.error("Error al generar data demo");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const totals = {
     ventas: data.reduce((acc, curr) => acc + (curr.total_usd || 0), 0),
     cobranza: data.reduce((acc, curr) => acc + (curr.balance_usd || 0), 0),
@@ -196,16 +149,6 @@ export default function SeguimientoPage() {
             Branding Activo: <span className="text-brand font-bold bg-brand/10 px-2 py-0.5 rounded-full">{businessName}</span>
           </p>
         </div>
-        
-        {data.length === 0 && !loading && (
-          <button
-            onClick={generateDemoData}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-brand to-brand-light text-white text-xs font-bold shadow-lg hover:scale-105 active:scale-95 transition-all"
-          >
-            <Sparkles className="w-4 h-4" />
-            Generar Data Demo
-          </button>
-        )}
       </div>
 
       {/* KPI Stats */}
