@@ -41,8 +41,8 @@ const productSchema = z.object({
 
 type ProductFormValues = z.infer<typeof productSchema>;
 
-const INPUT_CLS = "h-11 bg-white border-slate-200 text-slate-900 placeholder:text-slate-300 text-sm rounded-sm shadow-none focus:ring-0 focus:border-slate-400 font-sans";
-const LABEL_CLS = "block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1";
+const INPUT_CLS = "h-11 bg-white border-slate-200 text-slate-900 placeholder:text-slate-300 text-sm rounded-xl shadow-none focus:ring-0 focus:border-slate-400 font-montserrat";
+const LABEL_CLS = "block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1 font-montserrat";
 
 export function ProductForm({
   open,
@@ -157,7 +157,7 @@ export function ProductForm({
           onClick={() => toggle(id)}
           className="w-full flex items-center justify-between py-5 text-left group"
         >
-          <span className={`text-[11px] font-semibold uppercase tracking-[0.15em] transition-colors ${open ? "text-slate-900" : "text-slate-400 group-hover:text-slate-700"}`}>
+          <span className={`text-[11px] font-semibold uppercase tracking-[0.15em] transition-colors font-montserrat ${open ? "text-slate-900" : "text-slate-400 group-hover:text-slate-700"}`}>
             {title}
           </span>
           <ChevronDown className={`w-4 h-4 text-slate-300 transition-transform duration-300 ${open ? "rotate-180 text-slate-700" : ""}`} />
@@ -187,7 +187,7 @@ export function ProductForm({
 
   const Metric = ({ label, value, danger = false }: { label: string; value: string; danger?: boolean }) => (
     <div className="flex flex-col gap-1">
-      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">{label}</span>
+      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest font-montserrat">{label}</span>
       <span className={`font-mono text-xl font-semibold tracking-tight ${danger ? "text-red-500" : "text-slate-800"}`}>{value}</span>
     </div>
   );
@@ -200,14 +200,12 @@ export function ProductForm({
           {/* Header */}
           <div className="px-8 py-6 border-b border-slate-100 flex items-start justify-between shrink-0">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1.5">Gestión de Inventario</p>
-              <DialogTitle className="text-2xl text-slate-900 tracking-tight leading-none font-serif">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1.5 font-montserrat">Gestión de Inventario</p>
+              <DialogTitle className="text-2xl text-slate-900 tracking-tight leading-none font-montserrat font-bold">
                 {product?.id ? "Editar Producto" : "Nuevo Producto"}
               </DialogTitle>
             </div>
-            <button type="button" onClick={() => setOpen(false)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" aria-label="Cerrar">
-              <X className="w-5 h-5" />
-            </button>
+            {/* El DialogContent proporciona la X de cierre automáticamente */}
           </div>
 
           {/* Secciones con scroll */}
@@ -237,7 +235,7 @@ export function ProductForm({
                       <SelectTrigger className={INPUT_CLS}>
                         <SelectValue placeholder="Seleccionar" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white border-slate-200 rounded-sm">
+                      <SelectContent className="bg-white border-slate-200 rounded-xl">
                         <SelectItem value="Unidad">Unidad</SelectItem>
                         <SelectItem value="Caja">Caja</SelectItem>
                         <SelectItem value="Kg">Kg</SelectItem>
@@ -264,7 +262,7 @@ export function ProductForm({
                       <SelectTrigger className={INPUT_CLS}>
                         <SelectValue placeholder="Seleccionar" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white border-slate-200 rounded-sm">
+                      <SelectContent className="bg-white border-slate-200 rounded-xl">
                         {warehouses.map((w) => (
                           <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
                         ))}
@@ -304,7 +302,7 @@ export function ProductForm({
 
                 {/* Fila 3: Precios especiales */}
                 <div className="border-t border-slate-100 pt-5">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-4">Precios Especiales</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-4 font-montserrat">Precios Especiales</p>
                   <div className="grid grid-cols-3 gap-4">
                     <Field label="Precio al Mayor">
                       <Input {...form.register("price_usd_2")} type="number" step="0.01" min={0} className={`${INPUT_CLS} font-mono`} />
@@ -331,7 +329,7 @@ export function ProductForm({
                     {...form.register("description")}
                     placeholder="Escriba aquí los detalles del producto..."
                     rows={4}
-                    className="w-full bg-white border border-slate-200 rounded-sm px-4 py-3 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-slate-400 resize-none font-sans"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-slate-400 resize-none font-montserrat"
                   />
                 </Field>
               </div>
@@ -344,14 +342,14 @@ export function ProductForm({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors"
+              className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors font-montserrat"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 bg-brand text-white text-[11px] font-semibold uppercase tracking-widest rounded-sm hover:bg-brand/90 transition-all disabled:opacity-50 flex items-center gap-2"
+              className="px-8 py-2.5 bg-brand text-white text-[11px] font-semibold uppercase tracking-widest rounded-full hover:bg-brand/90 transition-all disabled:opacity-50 flex items-center gap-2 font-montserrat shadow-lg shadow-brand/20 active:scale-[0.98]"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading ? "Guardando..." : product?.id ? "Actualizar" : "Crear Producto"}
