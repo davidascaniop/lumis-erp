@@ -194,7 +194,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
           <Card className="p-6 bg-surface-card border-border shadow-card flex justify-between items-center">
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-syne text-text-1 tracking-tight">
+                <h1 className="text-3xl font-black font-montserrat text-text-1 tracking-tighter">
                   {order.order_number}
                 </h1>
                 <StatusBadge status={order.status} />
@@ -210,7 +210,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
               <p className="text-[10px] text-text-1 uppercase tracking-[0.2em] font-bold font-outfit opacity-50">
                 Vendedor
               </p>
-              <p className="font-bold text-text-1 font-primary">
+              <p className="font-bold text-text-1 font-montserrat">
                 {order.users?.full_name}
               </p>
             </div>
@@ -256,7 +256,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
 
           {/* PRODUCTOS */}
           <Card className="p-6 bg-surface-card border-border shadow-card overflow-hidden">
-            <h3 className="text-lg font-syne font-bold text-text-1 mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-montserrat font-bold text-text-1 mb-4 flex items-center gap-2">
               <Package className="w-5 h-5 text-brand" /> Líneas de Pedido
             </h3>
             <table className="w-full text-sm">
@@ -293,7 +293,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
                   ${Number(order.total_usd).toFixed(2)}
                 </span>
               </div>
-              <div className="flex justify-between w-full md:w-72 text-xl font-syne text-brand bg-brand/5 p-4 rounded-xl border border-brand/20 shadow-glow-sm">
+              <div className="flex justify-between w-full md:w-72 text-xl font-montserrat font-black text-brand bg-brand/5 p-4 rounded-xl border border-brand/20 shadow-glow-sm">
                 <span className="opacity-80">TOTAL</span>
                 <span className="font-black">${Number(order.total_usd).toFixed(2)}</span>
               </div>
@@ -324,7 +324,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
         {/* RESUMEN DE PAGO (LATER) */}
         <div className="lg:col-span-1 space-y-6">
           <Card className="p-6 bg-surface-card border border-border shadow-card flex flex-col gap-4">
-            <h3 className="text-lg font-syne font-bold text-text-1">
+            <h3 className="text-lg font-montserrat font-bold text-text-1">
               Resumen de Pago
             </h3>
             <div className="space-y-4">
@@ -362,7 +362,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
           {/* HISTORIAL DE PAGOS */}
           {order.payment_type === "credito" && (
             <Card className="p-6 bg-surface-card border-border shadow-card flex flex-col gap-4">
-              <h3 className="text-lg font-syne font-bold text-text-1 flex items-center gap-2">
+              <h3 className="text-lg font-montserrat font-bold text-text-1 flex items-center gap-2">
                 <CreditCard className="w-5 h-5 text-brand" /> Historial de
                 Cobros
               </h3>
@@ -413,7 +413,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="bg-surface-elevated border-border sm:max-w-[450px]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-syne text-text-1 flex items-center gap-2">
+            <DialogTitle className="text-xl font-montserrat font-black text-text-1 flex items-center gap-2">
               <DollarSign className="w-6 h-6 text-brand" /> Cierre de Venta
             </DialogTitle>
             <DialogDescription className="text-text-3">
