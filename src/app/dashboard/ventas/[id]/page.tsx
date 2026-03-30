@@ -194,12 +194,12 @@ export default function OrderDetailsPage({ params }: { params: any }) {
           <Card className="p-6 bg-surface-card border-border shadow-card flex justify-between items-center">
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-primary text-text-1">
+                <h1 className="text-3xl font-syne text-text-1 tracking-tight">
                   {order.order_number}
                 </h1>
                 <StatusBadge status={order.status} />
               </div>
-              <p className="text-sm text-text-3 mt-1">
+              <p className="text-xs text-text-1 font-medium font-outfit mt-1 opacity-60">
                 Emitido:{" "}
                 {format(new Date(order.created_at), "dd MMM yyyy, p", {
                   locale: es,
@@ -207,10 +207,10 @@ export default function OrderDetailsPage({ params }: { params: any }) {
               </p>
             </div>
             <div className="text-right">
-              <p className="text-xs text-text-3 uppercase tracking-widest font-bold">
+              <p className="text-[10px] text-text-1 uppercase tracking-[0.2em] font-bold font-outfit opacity-50">
                 Vendedor
               </p>
-              <p className="font-semibold text-text-1">
+              <p className="font-bold text-text-1 font-primary">
                 {order.users?.full_name}
               </p>
             </div>
@@ -219,7 +219,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
           {/* CLIENTE */}
           <Card className="p-6 bg-surface-card border-border shadow-card">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-primary flex items-center gap-2">
+              <h2 className="text-lg font-bold font-outfit text-text-1 flex items-center gap-2">
                 <User className="w-5 h-5 text-brand" /> Información del Cliente
               </h2>
               <Semaforo
@@ -229,22 +229,22 @@ export default function OrderDetailsPage({ params }: { params: any }) {
             </div>
             <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between p-4 bg-surface-base border border-border rounded-xl">
               <div>
-                <p className="font-bold text-text-1 text-lg">
+                <p className="font-bold text-text-1 text-xl font-primary">
                   {order.partners?.name}
                 </p>
-                <p className="text-sm text-text-3 font-mono">
+                <p className="text-xs text-text-1 font-mono opacity-50">
                   {order.partners?.rif}
                 </p>
               </div>
               <div className="md:text-right">
-                <p className="text-xs text-text-3 uppercase font-bold mb-1">
+                <p className="text-[10px] text-text-1 uppercase font-bold font-outfit opacity-50 tracking-[0.15em] mb-1">
                   Estatus Crediticio
                 </p>
-                <p className="text-text-1 font-mono font-bold">
+                <p className="text-text-1 font-mono font-bold financial text-base">
                   ${Number(order.partners?.current_balance).toFixed(2)} / $
                   {Number(order.partners?.credit_limit).toFixed(2)}
                 </p>
-                <div className="w-32 h-1 bg-surface-base rounded-full mt-2 ml-auto overflow-hidden">
+                <div className="w-32 h-1 bg-surface-card rounded-full mt-2 ml-auto overflow-hidden border border-border">
                   <div
                     className="bg-brand h-full transition-all"
                     style={{ width: `${progress}%` }}
@@ -260,18 +260,12 @@ export default function OrderDetailsPage({ params }: { params: any }) {
               <Package className="w-5 h-5 text-brand" /> Líneas de Pedido
             </h3>
             <table className="w-full text-sm">
-              <thead className="text-text-3 border-b border-border">
+              <thead className="text-text-1 font-bold font-outfit uppercase tracking-[0.1em] border-b border-border text-[10px] opacity-60">
                 <tr>
-                  <th className="pb-3 text-left font-semibold">Producto</th>
-                  <th className="pb-3 text-center font-semibold text-xs">
-                    CANT
-                  </th>
-                  <th className="pb-3 text-right font-semibold text-xs">
-                    P. UNIT ($)
-                  </th>
-                  <th className="pb-3 text-right font-semibold text-xs text-brand">
-                    SUBTOTAL
-                  </th>
+                  <th className="pb-3 text-left">Producto</th>
+                  <th className="pb-3 text-center">CANT</th>
+                  <th className="pb-3 text-right">P. UNIT ($)</th>
+                  <th className="pb-3 text-right text-brand">SUBTOTAL</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -293,18 +287,18 @@ export default function OrderDetailsPage({ params }: { params: any }) {
             </table>
 
             <div className="mt-8 flex flex-col items-end gap-2 border-t border-border pt-6">
-              <div className="flex justify-between w-full md:w-64 text-text-3 text-sm">
+              <div className="flex justify-between w-full md:w-64 text-text-1 font-medium font-outfit text-sm opacity-60">
                 <span>Total Neto</span>
-                <span className="text-text-1 font-bold">
+                <span className="text-text-1 font-bold font-primary text-base">
                   ${Number(order.total_usd).toFixed(2)}
                 </span>
               </div>
-              <div className="flex justify-between w-full md:w-64 text-lg font-syne font-black text-brand bg-brand/5 p-3 rounded-xl border border-brand/20">
-                <span>TOTAL</span>
-                <span>${Number(order.total_usd).toFixed(2)}</span>
+              <div className="flex justify-between w-full md:w-72 text-xl font-syne text-brand bg-brand/5 p-4 rounded-xl border border-brand/20 shadow-glow-sm">
+                <span className="opacity-80">TOTAL</span>
+                <span className="font-black">${Number(order.total_usd).toFixed(2)}</span>
               </div>
-              <p className="text-[11px] text-text-3 font-mono font-semibold">
-                Factor BCV: Bs. {order.total_bs / order.total_usd} | Eq: Bs.{" "}
+              <p className="text-[10px] text-text-1 font-montserrat font-bold opacity-40">
+                Factor BCV: Bs. {(order.total_bs / order.total_usd).toFixed(2)} | Eq: Bs.{" "}
                 {Number(order.total_bs).toLocaleString()}
               </p>
             </div>
@@ -335,29 +329,29 @@ export default function OrderDetailsPage({ params }: { params: any }) {
             </h3>
             <div className="space-y-4">
               <div className="flex justify-between text-sm py-2 border-b border-border">
-                <span className="text-text-3">Condición</span>
+                <span className="text-text-1 font-outfit font-bold uppercase text-[10px] tracking-widest opacity-50">Condición</span>
                 <span
-                  className={`font-bold capitalize ${order.payment_type === "credito" ? "text-status-warning" : "text-status-ok"}`}
+                  className={`font-bold font-outfit capitalize ${order.payment_type === "credito" ? "text-status-warning" : "text-status-ok"}`}
                 >
                   {order.payment_type || "Pendiente"}
                 </span>
               </div>
               <div className="flex justify-between text-sm py-2 border-b border-border">
-                <span className="text-text-3">Método Inicial</span>
-                <span className="text-text-1 font-medium">
+                <span className="text-text-1 font-outfit font-bold uppercase text-[10px] tracking-widest opacity-50">Método Inicial</span>
+                <span className="text-text-1 font-bold font-outfit">
                   {order.payment_method || "-"}
                 </span>
               </div>
               <div className="p-4 bg-surface-base rounded-xl space-y-2 border border-border">
-                <div className="flex justify-between text-xs text-text-3 font-semibold">
-                  <span>Pagado ($)</span>
-                  <span className="text-status-ok font-bold">
+                <div className="flex justify-between text-xs text-text-1 font-bold font-outfit opacity-60">
+                   <span>Pagado ($)</span>
+                  <span className="text-status-ok font-bold financial">
                     ${Number(order.amount_paid || 0).toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between text-xs text-text-3 font-semibold">
+                <div className="flex justify-between text-xs text-text-1 font-bold font-outfit opacity-60">
                   <span>Deuda Restante ($)</span>
-                  <span className="text-status-danger font-bold">
+                  <span className="text-status-danger font-bold financial">
                     ${Number(order.amount_due || 0).toFixed(2)}
                   </span>
                 </div>

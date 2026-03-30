@@ -201,7 +201,7 @@
   .font-tertiary  { font-family: var(--font-sans); font-weight: 300; color: var(--text-3); }
 
   .font-display { font-family: var(--font-outfit); font-weight: 900; }
-  .font-syne    { font-family: var(--font-outfit); font-weight: 900; }
+  .font-syne    { font-family: var(--font-syne); font-weight: 900; }
   .font-mono    { font-family: 'JetBrains Mono', monospace; }
   .font-outfit  { font-family: var(--font-outfit), sans-serif; }
   .font-zilla   { font-family: var(--font-zilla), serif; }

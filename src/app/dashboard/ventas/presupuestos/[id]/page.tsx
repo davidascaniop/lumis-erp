@@ -101,10 +101,10 @@ export default function QuoteDetailPage({ params }: { params: any }) {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h2 className="text-[10px] font-bold text-text-1 font-outfit uppercase tracking-[0.25em] opacity-70">
+            <h2 className="text-[10px] font-bold text-text-1 font-outfit uppercase tracking-[0.25em] opacity-50">
               Detalle de Cotización
             </h2>
-            <p className="text-text-1 font-primary text-3xl leading-tight">{quote.quote_number}</p>
+            <p className="text-text-1 font-syne text-3xl tracking-tight">{quote.quote_number}</p>
           </div>
         </div>
         <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${color}`}>
@@ -200,9 +200,9 @@ export default function QuoteDetailPage({ params }: { params: any }) {
         {/* Totals footer */}
         <div className="p-5 border-t border-border/60 bg-surface-base/30 flex justify-end">
           <div className="space-y-1 text-right">
-            <p className="text-[10px] font-bold text-text-1 font-outfit uppercase tracking-wider opacity-60">Total USD</p>
-            <p className="text-5xl font-bold text-text-1 font-primary tracking-tighter mb-1">{formatCurrency(quote.total_usd)}</p>
-            <p className="text-sm text-text-1 font-montserrat font-bold opacity-50">Bs. {formatCurrency(quote.total_bs, "")}</p>
+            <p className="text-[10px] font-bold text-text-1 font-outfit uppercase tracking-wider opacity-50">Total USD</p>
+            <p className="text-5xl font-black text-text-1 font-syne tracking-tighter mb-1">{formatCurrency(quote.total_usd)}</p>
+            <p className="text-sm text-text-1 font-montserrat font-bold opacity-40">Bs. {formatCurrency(quote.total_bs, "")}</p>
           </div>
         </div>
       </Card>
