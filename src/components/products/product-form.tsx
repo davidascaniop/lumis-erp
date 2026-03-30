@@ -177,9 +177,21 @@ export function ProductForm({
 
   const cost_usd  = Number(form.watch("cost_usd"))  || 0;
   const price_usd = Number(form.watch("price_usd")) || 0;
+  const price_usd_2 = Number(form.watch("price_usd_2")) || 0;
+  const price_usd_3 = Number(form.watch("price_usd_3")) || 0;
+  const price_usd_4 = Number(form.watch("price_usd_4")) || 0;
 
   const profit          = price_usd - cost_usd;
   const profitMarginPct = cost_usd > 0 ? (profit / cost_usd) * 100 : 0;
+
+  const profit_2 = price_usd_2 - cost_usd;
+  const margin_2 = cost_usd > 0 ? (profit_2 / cost_usd) * 100 : 0;
+
+  const profit_3 = price_usd_3 - cost_usd;
+  const margin_3 = cost_usd > 0 ? (profit_3 / cost_usd) * 100 : 0;
+
+  const profit_4 = price_usd_4 - cost_usd;
+  const margin_4 = cost_usd > 0 ? (profit_4 / cost_usd) * 100 : 0;
 
   useEffect(() => {
     async function fetchWarehouses() {
@@ -436,33 +448,51 @@ export function ProductForm({
                     Precios Especiales
                   </p>
                   <div className="grid grid-cols-3 gap-4">
-                    <Field label="Precio al Mayor">
-                      <Input
-                        {...form.register("price_usd_2")}
-                        type="number"
-                        step="0.01"
-                        min={0}
-                        className={`${INPUT_CLS} font-mono`}
-                      />
-                    </Field>
-                    <Field label="Precio Mínimo">
-                      <Input
-                        {...form.register("price_usd_3")}
-                        type="number"
-                        step="0.01"
-                        min={0}
-                        className={`${INPUT_CLS} font-mono`}
-                      />
-                    </Field>
-                    <Field label="Precio Oferta">
-                      <Input
-                        {...form.register("price_usd_4")}
-                        type="number"
-                        step="0.01"
-                        min={0}
-                        className={`${INPUT_CLS} font-mono`}
-                      />
-                    </Field>
+                    <div className="flex flex-col gap-2">
+                      <Field label="Precio al Mayor">
+                        <Input
+                          {...form.register("price_usd_2")}
+                          type="number"
+                          step="0.01"
+                          min={0}
+                          className={`${INPUT_CLS} font-mono`}
+                        />
+                      </Field>
+                      <div className="flex items-center justify-between text-[10px] px-1 font-montserrat">
+                        <span className="text-slate-400">Mg: <span className={margin_2 < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{margin_2.toFixed(1)}%</span></span>
+                        <span className="text-slate-400">Ut: <span className={profit_2 < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{formatCurrency(profit_2)}</span></span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Field label="Precio Mínimo">
+                        <Input
+                          {...form.register("price_usd_3")}
+                          type="number"
+                          step="0.01"
+                          min={0}
+                          className={`${INPUT_CLS} font-mono`}
+                        />
+                      </Field>
+                      <div className="flex items-center justify-between text-[10px] px-1 font-montserrat">
+                        <span className="text-slate-400">Mg: <span className={margin_3 < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{margin_3.toFixed(1)}%</span></span>
+                        <span className="text-slate-400">Ut: <span className={profit_3 < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{formatCurrency(profit_3)}</span></span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Field label="Precio Oferta">
+                        <Input
+                          {...form.register("price_usd_4")}
+                          type="number"
+                          step="0.01"
+                          min={0}
+                          className={`${INPUT_CLS} font-mono`}
+                        />
+                      </Field>
+                      <div className="flex items-center justify-between text-[10px] px-1 font-montserrat">
+                        <span className="text-slate-400">Mg: <span className={margin_4 < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{margin_4.toFixed(1)}%</span></span>
+                        <span className="text-slate-400">Ut: <span className={profit_4 < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{formatCurrency(profit_4)}</span></span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
