@@ -3,26 +3,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/tabs";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { MovementHistoryTable } from "@/components/inventory/movement-history-table";
 import { StockAdjustmentForm } from "@/components/inventory/stock-adjustment-form";
-import { StockTransferForm } from "@/components/inventory/stock-transfer-form";
-import { BulkStockForm } from "@/components/inventory/bulk-stock-form";
 import {
-  ClipboardList,
-  ArrowUpDown,
+  Plus,
   ArrowRightLeft,
-  FileSpreadsheet,
-  Package,
-  AlertCircle,
-  TrendingUp,
-  Warehouse,
+  ArrowUpRight,
+  ArrowDownRight,
+  X,
 } from "lucide-react";
 
 export default function InventarioPage() {
@@ -30,11 +20,11 @@ export default function InventarioPage() {
   const supabase = createClient();
 
   const [refreshKey, setRefreshKey] = useState(0);
+  const [openAdd, setOpenAdd] = useState(false);
   const [stats, setStats] = useState({
     totalMovements: 0,
     entriesThisMonth: 0,
     exitsThisMonth: 0,
-    transfersThisMonth: 0,
   });
 
   const triggerRefresh = () => setRefreshKey((k) => k + 1);
@@ -47,7 +37,7 @@ export default function InventarioPage() {
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
 
-    const [totalRes, entriesRes, exitsRes, transfersRes] = await Promise.all([
+    const [totalRes, entriesRes, exitsRes] = await Promise.all([
       supabase
         .from("stock_movements")
         .select("id", { count: "exact", head: true })
@@ -64,19 +54,12 @@ export default function InventarioPage() {
         .eq("company_id", user.company_id)
         .eq("type", "OUT")
         .gte("created_at", startOfMonth.toISOString()),
-      supabase
-        .from("stock_movements")
-        .select("id", { count: "exact", head: true })
-        .eq("company_id", user.company_id)
-        .eq("type", "TRANSFER")
-        .gte("created_at", startOfMonth.toISOString()),
     ]);
 
     setStats({
       totalMovements: totalRes.count ?? 0,
       entriesThisMonth: entriesRes.count ?? 0,
       exitsThisMonth: exitsRes.count ?? 0,
-      transfersThisMonth: transfersRes.count ?? 0,
     });
   }, [user?.company_id]);
 
@@ -84,173 +67,116 @@ export default function InventarioPage() {
     fetchStats();
   }, [fetchStats, refreshKey]);
 
-  // ─── KPI Cards ──────────────────────────────────────────────────────────────
-
-  const kpis = [
-    {
-      label: "Total Movimientos",
-      value: stats.totalMovements,
-      icon: ClipboardList,
-      iconBg: "bg-brand/10",
-      iconColor: "text-brand",
-    },
-    {
-      label: "Entradas este Mes",
-      value: stats.entriesThisMonth,
-      icon: TrendingUp,
-      iconBg: "bg-status-ok/10",
-      iconColor: "text-status-ok",
-    },
-    {
-      label: "Salidas este Mes",
-      value: stats.exitsThisMonth,
-      icon: AlertCircle,
-      iconBg: "bg-status-danger/10",
-      iconColor: "text-status-danger",
-    },
-    {
-      label: "Transferencias este Mes",
-      value: stats.transfersThisMonth,
-      icon: ArrowRightLeft,
-      iconBg: "bg-status-info/10",
-      iconColor: "text-status-info",
-    },
-  ];
-
   return (
     <div className="space-y-8 animate-fade-in">
       {/* HEADER */}
-      <div>
-        <h1 className="text-3xl font-primary">Ajustes de Stock</h1>
-        <p className="text-text-3 font-medium">
-          Controla cada entrada, salida y transferencia de tu inventario.
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-primary text-black dark:text-white">Ajustes de Stock</h1>
+          <p className="text-text-3 font-medium">
+            Registra entradas, salidas y correcciones de inventario
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setOpenAdd(true)}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-brand-gradient text-white rounded-xl shadow-brand font-bold hover:opacity-90 transition-all active:scale-95"
+          >
+            <Plus className="w-5 h-5" />
+            Nuevo Ajuste
+          </button>
+        </div>
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {kpis.map((kpi) => (
-          <Card
-            key={kpi.label}
-            className="p-4 bg-surface-card border-border flex items-center gap-4 hover:border-brand/20 transition-colors"
-          >
-            <div className={`w-12 h-12 rounded-xl ${kpi.iconBg} flex items-center justify-center ${kpi.iconColor}`}>
-              <kpi.icon className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-xs text-text-3 font-bold uppercase tracking-wider font-montserrat">
-                {kpi.label}
-              </p>
-              <p className="text-2xl font-primary">{kpi.value}</p>
-            </div>
-          </Card>
-        ))}
+      {/* QUICK STATS */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="p-4 bg-surface-card border-border flex items-center gap-4 hover:border-brand/30 transition-colors cursor-default">
+          <div className="w-12 h-12 rounded-xl bg-brand/10 flex items-center justify-center text-brand">
+            <ArrowRightLeft className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-xs text-text-3 font-bold uppercase tracking-wider">
+              Total Movimientos
+            </p>
+            <p className="text-2xl font-primary text-black dark:text-white">{stats.totalMovements}</p>
+          </div>
+        </Card>
+        <Card className="p-4 bg-surface-card border-border flex items-center gap-4 hover:border-status-ok/30 transition-colors cursor-default">
+          <div className="w-12 h-12 rounded-xl bg-status-ok/10 flex items-center justify-center text-status-ok">
+            <ArrowUpRight className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-xs text-text-3 font-bold uppercase tracking-wider">
+              Entradas del Mes
+            </p>
+            <p className="text-2xl font-primary text-black dark:text-white">{stats.entriesThisMonth}</p>
+          </div>
+        </Card>
+        <Card className="p-4 bg-surface-card border-border flex items-center gap-4 hover:border-status-danger/30 transition-colors cursor-default">
+          <div className="w-12 h-12 rounded-xl bg-status-danger/10 flex items-center justify-center text-status-danger">
+            <ArrowDownRight className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-xs text-text-3 font-bold uppercase tracking-wider">
+              Salidas del Mes
+            </p>
+            <p className="text-2xl font-primary text-black dark:text-white">{stats.exitsThisMonth}</p>
+          </div>
+        </Card>
       </div>
 
-      {/* TABS PRINCIPALES */}
-      <Tabs defaultValue="historial" className="w-full">
-        <TabsList className="bg-surface-card border border-border rounded-xl p-1 h-auto gap-1 w-full sm:w-auto">
-          <TabsTrigger
-            value="historial"
-            className="data-[state=active]:bg-brand-gradient data-[state=active]:text-white data-[state=active]:shadow-brand rounded-lg px-4 py-2.5 text-xs font-bold uppercase tracking-wider font-montserrat transition-all gap-2"
-          >
-            <ClipboardList className="w-4 h-4" />
-            Historial
-          </TabsTrigger>
-          <TabsTrigger
-            value="ajuste"
-            className="data-[state=active]:bg-brand-gradient data-[state=active]:text-white data-[state=active]:shadow-brand rounded-lg px-4 py-2.5 text-xs font-bold uppercase tracking-wider font-montserrat transition-all gap-2"
-          >
-            <ArrowUpDown className="w-4 h-4" />
-            Ajuste Manual
-          </TabsTrigger>
-          <TabsTrigger
-            value="transferencia"
-            className="data-[state=active]:bg-brand-gradient data-[state=active]:text-white data-[state=active]:shadow-brand rounded-lg px-4 py-2.5 text-xs font-bold uppercase tracking-wider font-montserrat transition-all gap-2"
-          >
-            <ArrowRightLeft className="w-4 h-4" />
-            Transferencia
-          </TabsTrigger>
-          <TabsTrigger
-            value="masiva"
-            className="data-[state=active]:bg-brand-gradient data-[state=active]:text-white data-[state=active]:shadow-brand rounded-lg px-4 py-2.5 text-xs font-bold uppercase tracking-wider font-montserrat transition-all gap-2"
-          >
-            <FileSpreadsheet className="w-4 h-4" />
-            Carga Masiva
-          </TabsTrigger>
-        </TabsList>
+      {/* TABLE */}
+      <div className="mt-8">
+        <MovementHistoryTable refreshKey={refreshKey} />
+      </div>
 
-        {/* Tab: Historial */}
-        <TabsContent value="historial" className="mt-6">
-          <MovementHistoryTable refreshKey={refreshKey} />
-        </TabsContent>
-
-        {/* Tab: Ajuste Manual */}
-        <TabsContent value="ajuste" className="mt-6">
-          <div className="max-w-xl mx-auto">
-            <Card className="p-8 bg-surface-card border-border rounded-2xl">
-              <div className="flex items-center gap-3 mb-6 pb-5 border-b border-border">
-                <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center text-brand">
-                  <ArrowUpDown className="w-5 h-5" />
-                </div>
+      {/* Modal / Drawer para Nuevo Ajuste */}
+      <AnimatePresence>
+        {openAdd && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setOpenAdd(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-lg bg-surface-card border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            >
+              {/* Modal Header */}
+              <div className="p-6 border-b border-border flex items-center justify-between shrink-0 bg-surface-base/30">
                 <div>
-                  <h2 className="text-lg font-bold text-text-1 font-montserrat">
-                    Ajuste Manual
+                  <h2 className="text-xl font-primary text-black dark:text-white">
+                    Nuevo Ajuste
                   </h2>
-                  <p className="text-xs text-text-3">
-                    Suma o resta unidades a un producto con motivo obligatorio.
-                  </p>
+                  <p className="text-xs text-text-3 mt-1">Suma o resta unidades a un producto con motivo obligatorio.</p>
                 </div>
+                <button 
+                  onClick={() => setOpenAdd(false)}
+                  className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors text-text-3 hover:text-black dark:hover:text-white"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <StockAdjustmentForm onSuccess={triggerRefresh} />
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Tab: Transferencia */}
-        <TabsContent value="transferencia" className="mt-6">
-          <div className="max-w-xl mx-auto">
-            <Card className="p-8 bg-surface-card border-border rounded-2xl">
-              <div className="flex items-center gap-3 mb-6 pb-5 border-b border-border">
-                <div className="w-10 h-10 rounded-xl bg-status-info/10 flex items-center justify-center text-status-info">
-                  <ArrowRightLeft className="w-5 h-5" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-text-1 font-montserrat">
-                    Transferencia entre Depósitos
-                  </h2>
-                  <p className="text-xs text-text-3">
-                    Mueve mercancía de un almacén a otro sin afectar el stock global.
-                  </p>
-                </div>
+              
+              {/* Modal Body */}
+              <div className="p-6 overflow-y-auto">
+                <StockAdjustmentForm 
+                  onSuccess={() => {
+                    setOpenAdd(false);
+                    triggerRefresh();
+                  }}
+                />
               </div>
-              <StockTransferForm onSuccess={triggerRefresh} />
-            </Card>
+            </motion.div>
           </div>
-        </TabsContent>
-
-        {/* Tab: Carga Masiva */}
-        <TabsContent value="masiva" className="mt-6">
-          <div className="max-w-2xl mx-auto">
-            <Card className="p-8 bg-surface-card border-border rounded-2xl">
-              <div className="flex items-center gap-3 mb-6 pb-5 border-b border-border">
-                <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center text-brand">
-                  <FileSpreadsheet className="w-5 h-5" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-text-1 font-montserrat">
-                    Carga Masiva de Stock
-                  </h2>
-                  <p className="text-xs text-text-3">
-                    Actualiza el stock de cientos de productos con un solo CSV.
-                  </p>
-                </div>
-              </div>
-              <BulkStockForm onSuccess={triggerRefresh} />
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
