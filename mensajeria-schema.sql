@@ -107,3 +107,7 @@ CREATE POLICY "quick_replies_own" ON crm_quick_replies FOR ALL
 -- REALTIME (habilitar en Supabase Dashboard > Database > Replication)
 -- Asegúrate de añadir crm_chats y crm_messages a la lista de tablas con Realtime habilitado
 -- ============================================================
+
+-- 1.5. Marca Blanca (Asegurar nombre comercial en empresas)
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS name_comercial TEXT;
+UPDATE companies SET name_comercial = name WHERE name_comercial IS NULL;
