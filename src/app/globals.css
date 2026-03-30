@@ -47,7 +47,7 @@
 
 @layer base {
   .font-primary {
-    font-family: var(--font-montserrat);
+    font-family: var(--font-outfit);
     font-weight: 900;
     color: var(--text-1);
     text-shadow: 0 0 30px var(--brand-glow);
@@ -55,14 +55,14 @@
   }
   
   .font-secondary {
-    font-family: var(--font-montserrat);
-    font-weight: 300;
+    font-family: var(--font-sans);
+    font-weight: 400;
     color: var(--text-2);
   }
   
   .font-tertiary {
-    font-family: var(--font-montserrat);
-    font-weight: 200;
+    font-family: var(--font-sans);
+    font-weight: 300;
     color: var(--text-3);
   }
 }
@@ -190,18 +190,18 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-montserrat), sans-serif;
+    font-family: var(--font-sans), sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  .font-primary   { font-family: var(--font-montserrat); font-weight: 900; color: var(--text-1); }
-  .font-secondary { font-family: var(--font-montserrat); font-weight: 300; color: var(--text-2); }
-  .font-tertiary  { font-family: var(--font-montserrat); font-weight: 200; color: var(--text-3); }
+  .font-primary   { font-family: var(--font-outfit); font-weight: 900; color: var(--text-1); }
+  .font-secondary { font-family: var(--font-sans); font-weight: 400; color: var(--text-2); }
+  .font-tertiary  { font-family: var(--font-sans); font-weight: 300; color: var(--text-3); }
 
-  .font-display { font-family: var(--font-montserrat); font-weight: 900; }
-  .font-syne    { font-family: var(--font-montserrat); font-weight: 900; }
+  .font-display { font-family: var(--font-outfit); font-weight: 900; }
+  .font-syne    { font-family: var(--font-outfit); font-weight: 900; }
   .font-mono    { font-family: 'JetBrains Mono', monospace; }
   .font-outfit  { font-family: var(--font-outfit), sans-serif; }
   .font-zilla   { font-family: var(--font-zilla), serif; }

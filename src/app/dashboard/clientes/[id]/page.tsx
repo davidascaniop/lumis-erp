@@ -220,25 +220,25 @@ export default function ClientDetailsPage({ params }: { params: any }) {
       {/* 2. LAS CIFRAS DE ORO */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 stagger">
         <Card className="p-6 bg-surface-card border-border shadow-card hover:border-status-danger/20 transition-all border-l-4 border-l-status-danger group">
-          <p className="text-[10px] text-text-3 font-bold uppercase tracking-[0.2em] mb-2 group-hover:text-status-danger transition-colors">Deuda Pendiente</p>
+          <p className="text-[10px] text-text-1 font-bold font-outfit uppercase tracking-[0.2em] mb-2 transition-colors">Deuda Pendiente</p>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-syne font-bold text-status-danger">
+            <span className="text-3xl font-bold text-status-danger">
               {formatCurrency(totalDebt)}
             </span>
           </div>
         </Card>
         
         <Card className="p-6 bg-surface-card border-border shadow-card hover:border-blue-500/20 transition-all border-l-4 border-l-blue-500 group">
-          <p className="text-[10px] text-text-3 font-bold uppercase tracking-[0.2em] mb-2 group-hover:text-blue-400 transition-colors">Saldo a Favor</p>
-          <p className="text-3xl font-syne font-bold text-blue-500">
+          <p className="text-[10px] text-text-1 font-bold font-outfit uppercase tracking-[0.2em] mb-2 transition-colors">Saldo a Favor</p>
+          <p className="text-3xl font-bold text-blue-500">
             {formatCurrency(clientData.current_balance < 0 ? Math.abs(clientData.current_balance) : 0)}
           </p>
         </Card>
 
         <Card className="p-6 bg-surface-card border-border shadow-card hover:border-brand/20 transition-all border-l-4 border-l-brand group">
-          <p className="text-[10px] text-text-3 font-bold uppercase tracking-[0.2em] mb-2 group-hover:text-brand transition-colors">Total Comprado</p>
+          <p className="text-[10px] text-text-1 font-bold font-outfit uppercase tracking-[0.2em] mb-2 transition-colors">Total Comprado</p>
           <div className="flex items-center justify-between">
-            <p className="text-3xl font-syne font-bold text-text-1">
+            <p className="text-3xl font-bold text-text-1">
               {formatCurrency(totalVentas)}
             </p>
             {totalVentas > 1000 && (
@@ -256,7 +256,7 @@ export default function ClientDetailsPage({ params }: { params: any }) {
         {/* LADO IZQUIERDO: INFORMACIÓN DE CONTACTO */}
         <div className="lg:col-span-4 space-y-6">
           <Card className="p-6 bg-surface-card border-border shadow-card">
-            <h3 className="text-sm font-bold text-text-1 uppercase tracking-widest mb-6 border-b border-border pb-3 flex items-center gap-2">
+            <h3 className="text-sm font-bold text-text-1 font-outfit uppercase tracking-widest mb-6 border-b border-border pb-3 flex items-center gap-2">
               <UserIcon className="w-4 h-4 text-brand" />
               Información de Enlace
             </h3>
@@ -317,7 +317,7 @@ export default function ClientDetailsPage({ params }: { params: any }) {
         <div className="lg:col-span-8">
           <Card className="bg-surface-card border-border shadow-card overflow-hidden">
             <div className="p-6 border-b border-border flex items-center justify-between bg-surface-base/30">
-              <h3 className="text-sm font-bold text-text-1 uppercase tracking-widest flex items-center gap-2">
+              <h3 className="text-sm font-bold text-text-1 font-outfit uppercase tracking-widest flex items-center gap-2">
                 <ShoppingBag className="w-4 h-4 text-brand" />
                 Historial de Pedidos
               </h3>

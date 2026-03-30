@@ -40,7 +40,7 @@ export default function PresupuestosPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const [convertingId, setConvertingId] = useState<string | null>(null);
-  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, quote: Quote | null}>({
+  const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean, quote: Quote | null }>({
     isOpen: false,
     quote: null
   });
@@ -74,9 +74,9 @@ export default function PresupuestosPage() {
   const handleConvertToSale = async (quote: Quote) => {
     setConfirmModal({ isOpen: false, quote: null });
     setConvertingId(quote.id);
-    
+
     const toastId = toast.loading("Convirtiendo presupuesto...");
-    
+
     try {
       // 1. Obtener detalles completos del presupuesto
       const { data: fullQuote, error: qError } = await supabase
@@ -84,7 +84,7 @@ export default function PresupuestosPage() {
         .select("*")
         .eq("id", quote.id)
         .single();
-      
+
       if (qError) throw qError;
 
       // 2. Obtener items del presupuesto
@@ -97,7 +97,7 @@ export default function PresupuestosPage() {
 
       // 3. Crear el Pedido (Order)
       const orderNumber = `PED-${Date.now().toString().slice(-6)}`;
-      
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuario no autenticado");
 
@@ -145,9 +145,9 @@ export default function PresupuestosPage() {
       // 5. Marcar presupuesto como convertido
       await supabase
         .from("quotes")
-        .update({ 
+        .update({
           status: "converted",
-          converted_order_id: newOrder.id 
+          converted_order_id: newOrder.id
         })
         .eq("id", quote.id);
 
@@ -204,11 +204,10 @@ export default function PresupuestosPage() {
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
-                  statusFilter === s
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${statusFilter === s
                     ? "bg-brand text-white border-brand shadow-sm"
                     : "text-text-2 border-border hover:border-brand/30 hover:bg-brand/5"
-                }`}
+                  }`}
               >
                 {s === "all" ? "Todos" : STATUS_CONFIG[s].label}
               </button>
