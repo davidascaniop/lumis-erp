@@ -64,28 +64,32 @@ export default function SeguimientoPage() {
           
           setData(quotes || []);
         } else if (filter === "cobranza") {
-          // Fetch overdue receivables
+          // Fetch overdue receivables — only real open/overdue records
           const { data: receivables } = await supabase
             .from("receivables")
             .select(`
               id, 
               balance_usd, 
               due_date, 
+              status,
               partners:partner_id (id, name, phone, whatsapp)
             `)
             .eq("company_id", user.company_id)
             .gt("balance_usd", 0)
-            .lt("due_date", new Date().toISOString())
-            .limit(20);
+            .in("status", ["open", "overdue", "partial"])
+            .limit(50);
           
           setData(receivables || []);
         } else {
-          // Fetch customers with no recent orders
+          // Fidelización: only real partners who have placed orders before
           const { data: partners } = await supabase
             .from("partners")
-            .select("id, name, phone, whatsapp")
+            .select("id, name, phone, whatsapp, last_order_at")
             .eq("company_id", user.company_id)
-            .limit(20);
+            .eq("status", "active")
+            .not("last_order_at", "is", null)
+            .order("last_order_at", { ascending: true })
+            .limit(50);
           
           setData(partners?.map(p => ({ ...p, partners: p })) || []);
         }
