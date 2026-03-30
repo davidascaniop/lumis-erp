@@ -96,15 +96,15 @@ export default function QuoteDetailPage({ params }: { params: any }) {
         <div className="flex items-center gap-4">
           <button
             onClick={() => router.back()}
-            className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-text-3 hover:text-white hover:bg-white/10 transition-all active:scale-95"
+            className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-text-1 hover:text-white hover:bg-white/10 transition-all active:scale-95"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h2 className="text-xs font-bold text-text-3 uppercase tracking-[0.2em]">
+            <h2 className="text-xs font-bold text-text-2 font-outfit uppercase tracking-[0.2em]">
               Detalle de Cotización
             </h2>
-            <p className="text-text-1 font-mono font-bold text-lg leading-tight">{quote.quote_number}</p>
+            <p className="text-text-1 font-primary font-bold text-2xl leading-tight">{quote.quote_number}</p>
           </div>
         </div>
         <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${color}`}>
@@ -117,36 +117,36 @@ export default function QuoteDetailPage({ params }: { params: any }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Client */}
         <Card className="p-5 bg-surface-card border-border shadow-card space-y-1">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-3 flex items-center gap-1.5">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-text-2 font-outfit flex items-center gap-1.5">
             <User className="w-3 h-3" /> Cliente
           </p>
-          <p className="text-text-1 font-semibold">{partner?.name ?? "—"}</p>
-          <p className="text-xs text-text-3 font-mono">{partner?.rif ?? ""}</p>
-          {partner?.city && <p className="text-xs text-text-3">{partner.city}</p>}
+          <p className="text-text-1 font-bold text-lg font-primary">{partner?.name ?? "—"}</p>
+          <p className="text-xs text-text-1 font-mono">{partner?.rif ?? ""}</p>
+          {partner?.city && <p className="text-xs text-text-2 font-outfit">{partner.city}</p>}
         </Card>
 
         {/* Seller */}
         <Card className="p-5 bg-surface-card border-border shadow-card space-y-1">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-3 flex items-center gap-1.5">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-text-2 font-outfit flex items-center gap-1.5">
             <User className="w-3 h-3" /> Vendedor
           </p>
-          <p className="text-text-1 font-semibold">{seller?.full_name ?? "—"}</p>
+          <p className="text-text-1 font-bold text-lg font-primary">{seller?.full_name ?? "—"}</p>
         </Card>
 
         {/* Dates */}
         <Card className="p-5 bg-surface-card border-border shadow-card space-y-1">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-3 flex items-center gap-1.5">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-text-2 font-outfit flex items-center gap-1.5">
             <Calendar className="w-3 h-3" /> Fechas
           </p>
-          <p className="text-xs text-text-2">
+          <p className="text-xs text-text-2 font-outfit">
             Creado:{" "}
-            <span className="text-text-1 font-semibold">
+            <span className="text-text-1 font-bold">
               {format(new Date(quote.created_at), "dd MMM yyyy", { locale: es })}
             </span>
           </p>
-          <p className="text-xs text-text-2">
+          <p className="text-xs text-text-2 font-outfit">
             Vence:{" "}
-            <span className="text-text-1 font-semibold">
+            <span className="text-text-1 font-bold">
               {format(new Date(quote.expires_at), "dd MMM yyyy", { locale: es })}
             </span>
           </p>
@@ -157,12 +157,12 @@ export default function QuoteDetailPage({ params }: { params: any }) {
       <Card className="bg-surface-card border-border shadow-card overflow-hidden">
         <div className="p-5 border-b border-border flex items-center gap-2">
           <Package className="w-4 h-4 text-brand" />
-          <h3 className="font-semibold text-text-1 text-sm">Productos Cotizados</h3>
-          <span className="ml-auto text-xs text-text-3 font-mono">{items.length} ítem(s)</span>
+          <h3 className="font-bold text-text-1 text-sm font-primary">Productos Cotizados</h3>
+          <span className="ml-auto text-xs text-text-1 font-mono bg-brand/5 px-2 py-0.5 rounded-md">{items.length} ítem(s)</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-surface-base/60 text-text-3 text-[10px] uppercase tracking-widest">
+            <thead className="bg-surface-base/60 text-text-2 text-[10px] font-outfit uppercase tracking-widest">
               <tr>
                 <th className="px-5 py-3 text-left font-bold">Producto</th>
                 <th className="px-5 py-3 text-left font-bold">SKU</th>
@@ -174,22 +174,22 @@ export default function QuoteDetailPage({ params }: { params: any }) {
             <tbody className="divide-y divide-border">
               {items.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-10 text-text-3">
+                  <td colSpan={5} className="text-center py-10 text-text-2 font-outfit">
                     Sin productos registrados.
                   </td>
                 </tr>
               ) : (
                 items.map((item) => (
                   <tr key={item.id} className="hover:bg-surface-hover/40 transition-colors">
-                    <td className="px-5 py-3 text-text-1 font-medium">
+                    <td className="px-5 py-3 text-text-1 font-bold font-primary">
                       {item.product_name ?? item.products?.name ?? "—"}
                     </td>
-                    <td className="px-5 py-3 text-text-3 font-mono text-xs">
+                    <td className="px-5 py-3 text-text-2 font-mono text-xs">
                       {item.product_sku ?? item.products?.sku ?? "—"}
                     </td>
-                    <td className="px-5 py-3 text-right text-text-1">{item.qty}</td>
-                    <td className="px-5 py-3 text-right text-text-2">{formatCurrency(item.price_usd)}</td>
-                    <td className="px-5 py-3 text-right font-bold text-text-1">{formatCurrency(item.subtotal)}</td>
+                    <td className="px-5 py-3 text-right text-text-1 font-bold">{item.qty}</td>
+                    <td className="px-5 py-3 text-right text-text-1 font-outfit">{formatCurrency(item.price_usd)}</td>
+                    <td className="px-5 py-3 text-right font-bold text-text-1 font-primary text-base">{formatCurrency(item.subtotal)}</td>
                   </tr>
                 ))
               )}
@@ -200,9 +200,9 @@ export default function QuoteDetailPage({ params }: { params: any }) {
         {/* Totals footer */}
         <div className="p-5 border-t border-border/60 bg-surface-base/30 flex justify-end">
           <div className="space-y-1 text-right">
-            <p className="text-xs text-text-3">Total USD</p>
-            <p className="text-2xl font-bold text-text-1">{formatCurrency(quote.total_usd)}</p>
-            <p className="text-xs text-text-3 font-mono">Bs. {formatCurrency(quote.total_bs, "")}</p>
+            <p className="text-xs text-text-2 font-bold font-outfit uppercase tracking-tighter">Total USD</p>
+            <p className="text-4xl font-bold text-text-1 font-primary tracking-tight">{formatCurrency(quote.total_usd)}</p>
+            <p className="text-sm text-text-2 font-mono font-bold">Bs. {formatCurrency(quote.total_bs, "")}</p>
           </div>
         </div>
       </Card>
@@ -210,8 +210,8 @@ export default function QuoteDetailPage({ params }: { params: any }) {
       {/* Notes */}
       {quote.notes && (
         <Card className="p-5 bg-surface-card border-border shadow-card">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-3 mb-2">Observaciones</p>
-          <p className="text-text-2 text-sm leading-relaxed">{quote.notes}</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-text-2 font-outfit mb-2">Observaciones</p>
+          <p className="text-text-1 text-sm leading-relaxed font-outfit">{quote.notes}</p>
         </Card>
       )}
 
