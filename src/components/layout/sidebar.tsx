@@ -318,12 +318,12 @@ export function Sidebar() {
                             className={cn(
                               "flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] transition-all duration-150 group/child",
                               isChildActive
-                                ? "bg-brand/10 text-brand font-semibold"
-                                : "text-text-3 hover:text-text-1 hover:bg-surface-hover/10",
+                                ? "text-text-1 font-bold"
+                                : "text-text-3 hover:text-text-1 hover:bg-surface-hover/5",
                               isCRMLocked ? "opacity-60" : "",
                             )}
                           >
-                            <child.icon className={cn("w-3.5 h-3.5 flex-shrink-0", isChildActive ? "text-brand" : "text-text-3 group-hover/child:text-text-2")} />
+                            <child.icon className={cn("w-3.5 h-3.5 flex-shrink-0", isChildActive ? "text-text-1" : "text-text-3 group-hover/child:text-text-2")} />
                             <span className="flex-1 leading-tight">{child.label}</span>
                             {isCRMLocked && <Lock className="w-3 h-3 text-text-3" />}
                           </Link>
