@@ -59,8 +59,8 @@ export default function SeguimientoPage() {
               partners:partner_id (id, name, phone, whatsapp)
             `)
             .eq("company_id", user.company_id)
-            .eq("status", "pending")
-            .limit(20);
+            .eq("status", "open")
+            .limit(50);
           
           setData(quotes || []);
         } else if (filter === "cobranza") {
