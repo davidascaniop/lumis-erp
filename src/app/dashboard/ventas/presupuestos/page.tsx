@@ -34,30 +34,123 @@ export default function PresupuestosPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
+  const [convertingId, setConvertingId] = useState<string | null>(null);
+
+  async function fetchQuotes() {
+    setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: userData } = await supabase
+      .from("users")
+      .select("company_id")
+      .eq("auth_id", user.id)
+      .single();
+    if (!userData) return;
+
+    const { data } = await supabase
+      .from("quotes")
+      .select("*, partners(name, rif)")
+      .eq("company_id", (userData as any).company_id)
+      .order("created_at", { ascending: false });
+
+    setQuotes((data as Quote[]) || []);
+    setLoading(false);
+  }
+
   useEffect(() => {
-    async function fetchQuotes() {
-      setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: userData } = await supabase
-        .from("users")
-        .select("company_id")
-        .eq("auth_id", user.id)
-        .single();
-      if (!userData) return;
-
-      const { data } = await supabase
-        .from("quotes")
-        .select("*, partners(name, rif)")
-        .eq("company_id", (userData as any).company_id)
-        .order("created_at", { ascending: false });
-
-      setQuotes((data as Quote[]) || []);
-      setLoading(false);
-    }
     fetchQuotes();
   }, []);
+
+  const handleConvertToSale = async (quote: Quote) => {
+    if (!confirm("¿Estás seguro de convertir este presupuesto en una venta real? Esto generará un pedido y descontará el stock.")) return;
+    
+    setConvertingId(quote.id);
+    try {
+      // 1. Obtener detalles completos del presupuesto
+      const { data: fullQuote, error: qError } = await supabase
+        .from("quotes")
+        .select("*")
+        .eq("id", quote.id)
+        .single();
+      
+      if (qError) throw qError;
+
+      // 2. Obtener items del presupuesto
+      const { data: items, error: iError } = await supabase
+        .from("quote_items")
+        .select("*")
+        .eq("quote_id", quote.id);
+
+      if (iError) throw iError;
+
+      // 3. Crear el Pedido (Order)
+      const orderNumber = `PED-${Date.now().toString().slice(-6)}`;
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuario no autenticado");
+
+      const { data: newOrder, error: oError } = await supabase
+        .from("orders")
+        .insert({
+          order_number: orderNumber,
+          partner_id: fullQuote.partner_id,
+          company_id: fullQuote.company_id,
+          user_id: user.id, // Campo obligatorio
+          status: "pending",
+          total_usd: fullQuote.total_usd,
+          total_bs: fullQuote.total_bs,
+          subtotal_usd: fullQuote.total_usd,
+          tax_usd: 0,
+          currency: "USD", // Campo obligatorio
+          payment_type: "contado", // Por defecto al convertir
+          payment_method: "Efectivo", // Por defecto
+          amount_paid: 0,
+          amount_due: fullQuote.total_usd,
+          exchange_rate: fullQuote.total_bs / fullQuote.total_usd,
+          notes: `Convertido del presupuesto ${fullQuote.quote_number}. ${fullQuote.notes || ""}`
+        })
+        .select()
+        .single();
+
+      if (oError) throw oError;
+
+      // 4. Crear los items del pedido y actualizar stock
+      for (const item of items) {
+        // Crear item de pedido
+        await supabase.from("order_items").insert({
+          order_id: newOrder.id,
+          product_id: item.product_id,
+          qty: item.qty,
+          price_usd: item.price_usd,
+          subtotal: item.subtotal
+        });
+
+        // Descontar stock (operación atómica si es posible, aquí simplificada)
+        const { data: product } = await supabase.from("products").select("stock").eq("id", item.product_id).single();
+        if (product) {
+          await supabase.from("products").update({ stock: product.stock - item.qty }).eq("id", item.product_id);
+        }
+      }
+
+      // 5. Marcar presupuesto como convertido
+      await supabase
+        .from("quotes")
+        .update({ 
+          status: "converted",
+          converted_order_id: newOrder.id 
+        })
+        .eq("id", quote.id);
+
+      alert("¡Presupuesto convertido a venta exitosamente!");
+      fetchQuotes(); // Recargar lista
+    } catch (error: any) {
+      console.error("Error converting quote:", error);
+      alert("Error al convertir: " + error.message);
+    } finally {
+      setConvertingId(null);
+    }
+  };
 
   const filtered = quotes.filter((q) => {
     const matchSearch =
@@ -149,11 +242,11 @@ export default function PresupuestosPage() {
                       key={q.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.04 }}
-                      className="hover:bg-surface-hover/50 transition-colors group cursor-pointer"
+                      transition={{ delay: idx * 0.02 }}
+                      className="hover:bg-surface-hover/50 transition-colors group"
                     >
                       <td className="px-6 py-4">
-                        <Link href={`/dashboard/ventas/presupuestos/${q.id}`} className="font-mono font-bold text-brand hover:underline">
+                        <Link href={`/dashboard/ventas/presupuestos/${q.id}/pdf`} target="_blank" className="font-mono font-bold text-brand hover:underline">
                           {q.quote_number}
                         </Link>
                       </td>
@@ -179,23 +272,29 @@ export default function PresupuestosPage() {
                       <td className="px-6 py-4 text-center">
                         <div className="flex items-center justify-center gap-1">
                           <Link
-                            href={`/dashboard/ventas/presupuestos/${q.id}`}
+                            href={`/dashboard/ventas/presupuestos/${q.id}/pdf`}
+                            target="_blank"
                             className="p-1.5 rounded-lg hover:bg-brand/10 text-text-3 hover:text-brand transition-colors"
-                            title="Ver detalles"
+                            title="Ver PDF"
                           >
                             <FileText className="w-4 h-4" />
                           </Link>
                           {q.status === "open" && (
-                            <Link
-                              href={`/dashboard/ventas/presupuestos/${q.id}/convertir`}
-                              className="p-1.5 rounded-lg hover:bg-status-ok/10 text-text-3 hover:text-status-ok transition-colors"
+                            <button
+                              onClick={() => handleConvertToSale(q)}
+                              disabled={convertingId !== null}
+                              className="p-1.5 rounded-lg hover:bg-status-ok/10 text-text-3 hover:text-status-ok transition-colors disabled:opacity-50"
                               title="Convertir en venta"
                             >
-                              <CheckCircle className="w-4 h-4" />
-                            </Link>
+                              {convertingId === q.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <CheckCircle className="w-4 h-4" />
+                              )}
+                            </button>
                           )}
                           <a
-                            href={`https://wa.me/?text=Hola, adjunto su presupuesto ${q.quote_number} por ${formatCurrency(q.total_usd)}`}
+                            href={`https://wa.me/?text=Hola, adjunto su presupuesto ${q.quote_number} por ${formatCurrency(q.total_usd)}. Puedes verlo aquí: ${window.location.origin}/dashboard/ventas/presupuestos/${q.id}/pdf`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-1.5 rounded-lg hover:bg-green-500/10 text-text-3 hover:text-green-500 transition-colors"
@@ -214,5 +313,6 @@ export default function PresupuestosPage() {
         </div>
       </div>
     </div>
+
   );
 }
