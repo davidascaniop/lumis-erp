@@ -72,7 +72,7 @@ const NAV_SECTIONS: NavSection[] = [
       { href: "/dashboard/productos", label: "Lista de Productos", icon: Package },
       { href: "/dashboard/inventario", label: "Ajustes de Stock", icon: Gauge },
       { href: "/dashboard/productos/categorias", label: "Categorías y Atributos", icon: Tags },
-      { href: "/dashboard/productos/kits", label: "Kits & Ensambles ✨", icon: Layers },
+      { href: "/dashboard/productos/kits", label: "Kits & Ensambles", icon: Layers },
     ],
   },
   {
