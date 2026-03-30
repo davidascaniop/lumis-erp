@@ -196,7 +196,7 @@ export default function ClientesPage() {
                       <div className="flex items-center justify-center gap-2">
                         <Link
                           href={`/dashboard/clientes/${p.id}`}
-                          className="px-4 py-2 bg-white/5 text-text-3 rounded-lg hover:bg-white/10 hover:text-white transition-colors text-xs font-semibold"
+                          className="px-4 py-2 bg-surface-base border border-border text-text-2 rounded-lg hover:bg-surface-base hover:text-text-1 hover:border-text-1 transition-all text-xs font-bold"
                         >
                           Ver Ficha
                         </Link>
