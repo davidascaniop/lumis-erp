@@ -94,7 +94,7 @@ export async function createStockAdjustment(
     await supabase.rpc("increment_product_stock", {
       p_product_id: payload.product_id,
       p_delta: delta,
-    }).then(() => null).catch(() => null); // Silencioso si RPC no existe
+    }); // Silencioso si RPC no existe
 
     // 4. Registrar movimiento
     const { error: movError } = await supabase.from("stock_movements").insert({
