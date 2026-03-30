@@ -7,7 +7,7 @@ import {
   CreditCard, ShoppingCart, Users, LayoutDashboard, Truck, Sparkles,
   DollarSign, AlertTriangle, CheckCircle2, Briefcase, Lock, Wallet,
   FileText, FileClock, TrendingUp, PieChart, Store, ClipboardList,
-  Tags, Layers, Receipt, ArrowDownCircle, Gauge,
+  Tags, Layers, Receipt, ArrowDownCircle, Gauge, MessageSquare,
 } from "lucide-react";
 import { cn, formatNumber } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -59,7 +59,8 @@ const NAV_SECTIONS: NavSection[] = [
     icon: Users,
     children: [
       { href: "/dashboard/clientes", label: "Directorio de Clientes", icon: Users },
-      { href: "/dashboard/crm", label: "CRM Fase 1", icon: Briefcase, requiredPlan: ["pro", "enterprise"] },
+      { href: "/dashboard/crm", label: "CRM Oportunidades", icon: Briefcase, requiredPlan: ["pro", "enterprise"] },
+      { href: "/dashboard/crm/mensajeria", label: "Centro de Mensajería", icon: MessageSquare, requiredPlan: ["pro", "enterprise"] },
       { href: "/dashboard/crm/prospectos", label: "Seguimiento", icon: TrendingUp, requiredPlan: ["pro", "enterprise"] },
     ],
   },
