@@ -21,7 +21,6 @@ import { toast } from "sonner";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/lib/utils";
 import {
   Dialog,
@@ -110,8 +109,7 @@ function GastosContent() {
           .from("expenses")
           .select("*, partners(name, rif)")
           .eq("company_id", userData.company_id)
-          .order("due_date", { ascending: true })
-          .catch(() => ({ data: [] })), // Graceful catch if table is missing
+          .order("due_date", { ascending: true }),
         supabase
           .from("partners")
           .select("id, name, rif, type")
@@ -591,12 +589,12 @@ function GastosContent() {
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Notas / Concepto</label>
-              <Textarea
+              <textarea
                 rows={2}
                 placeholder="Concepto del gasto..."
                 value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                className="bg-surface-input border-none resize-none"
+                onChange={(e: any) => setFormData({ ...formData, notes: e.target.value })}
+                className="bg-surface-input border-none resize-none w-full rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-brand/5 outline-none transition-all"
               />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
