@@ -500,9 +500,9 @@ function GastosContent() {
 
       {/* DIALOGO: REGISTRAR GASTO */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="bg-surface-base border-border text-white sm:max-w-2xl">
+        <DialogContent className="bg-surface-base border-border text-text-1 sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="font-syne text-xl">Registrar Nuevo Gasto</DialogTitle>
+            <DialogTitle className="font-syne text-xl text-text-1">Registrar Nuevo Gasto</DialogTitle>
             <DialogDescription className="text-text-3 text-xs">
               El gasto se guardará como pendiente hasta que registres su pago.
             </DialogDescription>
@@ -543,7 +543,7 @@ function GastosContent() {
                 placeholder="Ej: F-1029"
                 value={formData.reference}
                 onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
-                className="bg-surface-input border-none h-12"
+                className="bg-surface-input border border-border/40 h-12 text-text-1 focus:border-brand/40 focus:ring-4 focus:ring-brand/5 transition-all outline-none"
               />
             </div>
             <div className="space-y-1.5">
@@ -553,13 +553,13 @@ function GastosContent() {
                 placeholder="0.00"
                 value={formData.amount_usd}
                 onChange={(e) => setFormData({ ...formData, amount_usd: e.target.value })}
-                className="bg-surface-input border-none h-12 font-mono text-lg"
+                className="bg-surface-input border border-border/40 h-12 font-mono text-lg text-text-1 focus:border-brand/40 focus:ring-4 focus:ring-brand/5 transition-all outline-none"
               />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Método de Pago (Ref)</label>
               <Select value={formData.payment_method} onValueChange={(val) => setFormData((p) => ({ ...p, payment_method: val }))}>
-                <SelectTrigger className="bg-surface-input border-none h-12">
+                <SelectTrigger className="bg-surface-input border border-border/40 h-12 text-text-1 focus:border-brand/40 bg-transparent">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-surface-card border-border text-black">
@@ -575,7 +575,7 @@ function GastosContent() {
                 type="date"
                 value={formData.issue_date}
                 onChange={(e) => setFormData({ ...formData, issue_date: e.target.value })}
-                className="bg-surface-input border-none h-12 text-black dark:text-white"
+                className="bg-surface-input border border-border/40 h-12 text-text-1 focus:border-brand/40 focus:ring-4 focus:ring-brand/5 transition-all outline-none"
               />
             </div>
             <div className="space-y-1.5">
@@ -584,7 +584,7 @@ function GastosContent() {
                 type="date"
                 value={formData.due_date}
                 onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                className="bg-surface-input border-none h-12 text-black dark:text-white"
+                className="bg-surface-input border border-border/40 h-12 text-text-1 focus:border-brand/40 focus:ring-4 focus:ring-brand/5 transition-all outline-none"
               />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
@@ -594,14 +594,14 @@ function GastosContent() {
                 placeholder="Concepto del gasto..."
                 value={formData.notes}
                 onChange={(e: any) => setFormData({ ...formData, notes: e.target.value })}
-                className="bg-surface-input border-none resize-none w-full rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-brand/5 outline-none transition-all"
+                className="bg-surface-input border border-border/40 resize-none w-full rounded-xl px-4 py-3 text-sm text-text-1 focus:ring-4 focus:border-brand/40 focus:ring-brand/5 outline-none transition-all"
               />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Comprobante (Opcional)</label>
               <Input
                 type="file"
-                className="bg-surface-input border-none h-12 text-sm text-text-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand/10 file:text-brand hover:file:bg-brand/20 transition-all cursor-pointer"
+                className="bg-surface-input border border-border/40 h-12 text-sm text-text-1 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand/10 file:text-brand hover:file:bg-brand/20 transition-all cursor-pointer focus:border-brand/40 focus:ring-4 focus:ring-brand/5 outline-none"
               />
             </div>
           </div>
@@ -625,9 +625,9 @@ function GastosContent() {
 
       {/* DIALOGO: REGISTRAR PAGO */}
       <Dialog open={payOpen} onOpenChange={setPayOpen}>
-        <DialogContent className="bg-surface-base border-border text-white">
+        <DialogContent className="bg-surface-base border-border text-text-1">
           <DialogHeader>
-            <DialogTitle className="font-syne text-xl">Registrar Pago a Proveedor</DialogTitle>
+            <DialogTitle className="font-syne text-xl text-text-1">Registrar Pago a Proveedor</DialogTitle>
             <DialogDescription className="text-text-3 text-xs">
               Proveedor: {selectedExpense?.partners?.name} | Saldo Pendiente: <span className="text-brand font-bold">{formatCurrency(selectedExpense?.balance_usd)}</span>
             </DialogDescription>
@@ -639,13 +639,13 @@ function GastosContent() {
                 type="number"
                 value={paymentAmount}
                 onChange={(e) => setPaymentAmount(e.target.value)}
-                className="bg-surface-input border-none text-xl font-bold font-mono h-12"
+                className="bg-surface-input border border-border/40 text-xl text-text-1 font-bold font-mono h-12 focus:border-brand/40 focus:ring-4 focus:ring-brand/5 transition-all outline-none"
               />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Método de Pago</label>
               <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                <SelectTrigger className="bg-surface-input border-none h-12">
+                <SelectTrigger className="bg-surface-input border border-border/40 h-12 text-text-1 focus:border-brand/40 bg-transparent">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-surface-card border-border text-black">
@@ -662,14 +662,14 @@ function GastosContent() {
                 type="date"
                 value={paymentDate}
                 onChange={(e) => setPaymentDate(e.target.value)}
-                className="bg-surface-input border-none h-12 text-black dark:text-white"
+                className="bg-surface-input border border-border/40 h-12 text-text-1 focus:border-brand/40 focus:ring-4 focus:ring-brand/5 transition-all outline-none"
               />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Comprobante de Pago</label>
                <Input
                 type="file"
-                className="bg-surface-input border-none h-12 text-sm text-text-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand/10 file:text-brand hover:file:bg-brand/20 transition-all cursor-pointer"
+                className="bg-surface-input border border-border/40 h-12 text-sm text-text-1 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand/10 file:text-brand hover:file:bg-brand/20 transition-all cursor-pointer focus:border-brand/40 focus:ring-4 focus:ring-brand/5 outline-none"
               />
             </div>
           </div>
@@ -697,9 +697,9 @@ function GastosContent() {
 
       {/* DIALOGO: VER DETALLES */}
       <Dialog open={viewOpen} onOpenChange={setViewOpen}>
-        <DialogContent className="bg-surface-base border-border text-white">
+        <DialogContent className="bg-surface-base border-border text-text-1">
           <DialogHeader>
-            <DialogTitle className="font-syne text-xl">Detalle del Gasto</DialogTitle>
+            <DialogTitle className="font-syne text-xl text-text-1">Detalle del Gasto</DialogTitle>
           </DialogHeader>
           {selectedExpense && (
             <div className="space-y-4 py-4 text-sm">
