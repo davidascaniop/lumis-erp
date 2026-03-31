@@ -17,6 +17,7 @@ import {
 import { format, differenceInDays, startOfMonth, startOfWeek, endOfMonth, endOfWeek, isWithinInterval, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { toast } from "sonner";
+import Papa from "papaparse";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/utils";
@@ -265,6 +266,35 @@ function FlujoContent() {
     }
   };
 
+  const handleExport = () => {
+    if (filteredMovements.length === 0) {
+      toast.error("No hay datos para exportar en el período seleccionado.");
+      return;
+    }
+
+    const exportData = filteredMovements.map(m => ({
+      Fecha: format(new Date(m.date), "dd/MM/yyyy HH:mm"),
+      Descripción: m.description,
+      Tipo: m.type,
+      Categoría: m.category,
+      Monto: m.amount_usd,
+      Saldo_Acumulado: m.balance,
+      Origen: m.source
+    }));
+
+    const csv = Papa.unparse(exportData);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `flujo_caja_${format(new Date(), "yyyy-MM-dd")}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Archivo CSV generado correctamente.");
+  };
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto animate-fade-in pb-20">
       {/* HEADER */}
@@ -277,7 +307,7 @@ function FlujoContent() {
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
           <button
-            onClick={() => { /* Implementar CSV export */ toast.info("Exportación pronto habilitada"); }}
+            onClick={handleExport}
             className="flex items-center gap-2 px-5 py-2.5 bg-surface-card border border-border/40 text-text-1 rounded-xl font-bold shadow-sm hover:bg-surface-hover/10 transition-all w-full sm:w-auto justify-center"
           >
             <Download className="w-4 h-4" />
