@@ -868,7 +868,7 @@ export default function DespachosPage() {
       <Dialog open={newOpen} onOpenChange={setNewOpen}>
         <DialogContent className="bg-surface-base border-border text-text-1 sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-montserrat font-extrabold text-xl text-text-1 flex items-center gap-2">
+            <DialogTitle className="font-montserrat font-bold text-xl text-text-1 flex items-center gap-2">
               <Plus className="w-5 h-5 text-brand" />
               Nuevo Despacho
             </DialogTitle>
@@ -887,7 +887,7 @@ export default function DespachosPage() {
                 value={form.order_id}
                 onValueChange={handleOrderSelect}
               >
-                <SelectTrigger className="bg-surface-input border-border/40 h-11 text-text-1">
+                <SelectTrigger className="w-full bg-surface-input border-border/40 h-11 text-text-1 font-montserrat">
                   <SelectValue placeholder="Buscar pedido confirmado..." />
                 </SelectTrigger>
                 <SelectContent className="bg-surface-elevated border-border">
@@ -987,14 +987,14 @@ export default function DespachosPage() {
           <DialogFooter className="gap-2">
             <button
               onClick={() => setNewOpen(false)}
-              className="px-5 py-2 text-text-3 font-bold text-sm hover:text-text-1 transition-colors"
+              className="px-5 py-2 text-text-3 font-montserrat font-bold text-sm hover:text-text-1 transition-colors"
             >
               Cancelar
             </button>
             <button
               disabled={saving || !form.order_id}
               onClick={handleCreateDispatch}
-              className="px-8 py-3 bg-brand-gradient text-white rounded-xl font-black shadow-brand hover:opacity-90 disabled:opacity-50 flex items-center gap-2 transition-all"
+              className="px-8 py-3 bg-brand-gradient text-white rounded-xl font-montserrat font-bold shadow-brand hover:opacity-90 disabled:opacity-50 flex items-center gap-2 transition-all"
             >
               {saving ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
