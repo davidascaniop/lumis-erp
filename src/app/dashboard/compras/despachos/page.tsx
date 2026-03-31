@@ -176,6 +176,7 @@ export default function DespachosPage() {
   // New dispatch form
   const [form, setForm] = useState({
     order_id: "",
+    partner_id: "",
     partner_name: "",
     delivery_address: "",
     carrier: "",
@@ -296,9 +297,9 @@ export default function DespachosPage() {
   };
 
   const handleOpenNew = async () => {
-    await loadAvailableOrders();
     setForm({
       order_id: "",
+      partner_id: "",
       partner_name: "",
       delivery_address: "",
       carrier: "",
@@ -306,18 +307,21 @@ export default function DespachosPage() {
       notes: "",
     });
     setNewOpen(true);
+    await loadAvailableOrders();
   };
 
   // ── On Order Select ────────────────────────────────────────────────────────
   const handleOrderSelect = (orderId: string) => {
     const order = availableOrders.find((o) => o.id === orderId);
-    if (!order) return;
-    setForm((prev) => ({
-      ...prev,
-      order_id: orderId,
-      partner_name: (order.partners as any)?.name || "",
-      delivery_address: (order.partners as any)?.address || "",
-    }));
+    if (order) {
+      setForm((prev) => ({
+        ...prev,
+        order_id: orderId,
+        partner_id: order.partner_id,
+        partner_name: order.partners?.name || "",
+        delivery_address: order.partners?.address || "",
+      }));
+    }
   };
 
   // ── Create Dispatch ────────────────────────────────────────────────────────
@@ -887,14 +891,14 @@ export default function DespachosPage() {
                 value={form.order_id}
                 onValueChange={handleOrderSelect}
               >
-                <SelectTrigger className="w-full bg-surface-input border-border/40 h-11 text-text-1 font-montserrat">
+                <SelectTrigger className="w-full bg-surface-input border-border/40 h-11 text-text-1 font-montserrat flex items-center justify-between">
                   <SelectValue placeholder="Buscar pedido confirmado..." />
                 </SelectTrigger>
-                <SelectContent className="bg-surface-elevated border-border">
+                <SelectContent className="bg-surface-elevated border-border z-[9999] min-w-[var(--radix-select-trigger-width)]" position="popper" sideOffset={5}>
                   {availableOrders.length === 0 ? (
-                    <div className="py-4 px-3 text-center text-xs text-text-3">
+                    <SelectItem value="none" disabled className="py-4 justify-center text-xs text-text-3">
                       No hay pedidos confirmados disponibles
-                    </div>
+                    </SelectItem>
                   ) : (
                     availableOrders.map((order) => (
                       <SelectItem key={order.id} value={order.id}>
