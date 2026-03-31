@@ -91,7 +91,7 @@ function FlujoContent() {
     category: "Ajuste manual",
     amount_usd: "",
     date: format(new Date(), "yyyy-MM-dd"),
-    reference: "",
+    description: "",
     notes: "",
   });
 
@@ -405,7 +405,7 @@ function FlujoContent() {
                   <YAxis tickFormatter={(val) => `$${val}`} tick={{ fill: "var(--text-3)", fontSize: 12 }} axisLine={false} tickLine={false} />
                   <Tooltip
                     contentStyle={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border)", borderRadius: "12px", color: "var(--text-1)" }}
-                    formatter={(value: number) => [formatCurrency(value), ""]} 
+                    formatter={(value: any) => [formatCurrency(Number(value || 0)), ""]} 
                   />
                   <Legend wrapperStyle={{ paddingTop: "10px" }} />
                   <Bar dataKey="Entradas" fill="var(--ok)" radius={[4, 4, 0, 0]} barSize={24} />
