@@ -220,10 +220,10 @@ function SettingsContent() {
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
-        <h1 className="text-3xl font-heading font-bold text-[#F5EEFF] mb-2">
+        <h1 className="text-3xl font-heading font-bold text-text-1 mb-2">
           Configuración
         </h1>
-        <p className="text-[#B8A0D0]">
+        <p className="text-text-2">
           Administra tu perfil, la imagen de tu empresa y preferencias del
           sistema.
         </p>
@@ -620,7 +620,7 @@ function SettingsContent() {
                         type="number"
                         value={bcvRate}
                         onChange={(e) => setBcvRate(e.target.value)}
-                        className="bg-surface-input border border-border/40 text-2xl font-bold font-mono text-text-1 focus-visible:ring-brand/50 h-14 rounded-xl"
+                        className="bg-surface-input border border-border/60 text-2xl font-bold font-mono text-text-1 focus-visible:ring-brand/50 h-14 rounded-xl shadow-inner"
                       />
                       <Button
                         onClick={handleSaveVariables}
@@ -658,7 +658,7 @@ function SettingsContent() {
                   <Input
                     defaultValue="16"
                     disabled
-                    className="bg-surface-input border border-border/40 text-text-1 opacity-50 font-bold font-mono rounded-xl h-11"
+                    className="bg-surface-input border border-border/60 text-text-1 opacity-60 font-bold font-mono rounded-xl h-11 shadow-inner"
                   />
                   <p className="text-[10px] text-text-3 font-semibold">
                     Configuración avanzada bloqueada en plan actual.
