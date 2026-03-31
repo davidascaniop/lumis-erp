@@ -139,7 +139,7 @@ export function CarritoPanel({
             )}
 
             {showSuggestions && !cliente && newClientName.length >= 2 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-[#E2E8F0] shadow-xl z-[100] overflow-hidden">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-[#E2E8F0] shadow-md z-[100] overflow-hidden">
                 {suggestions.map((p) => (
                   <button
                     key={p.id}

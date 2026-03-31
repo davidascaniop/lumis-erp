@@ -40,6 +40,53 @@ function NuevoPresupuestoContent() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [notes, setNotes] = useState("");
 
+  const [showQuickModal, setShowQuickModal] = useState(false);
+  const [isSavingQuick, setIsSavingQuick] = useState(false);
+  const [newClientName, setNewClientName] = useState("");
+  const [newClientRif, setNewClientRif] = useState("");
+  const [rifPrefix, setRifPrefix] = useState("V");
+  const [newClientPhone, setNewClientPhone] = useState("");
+
+  const submitQuickClient = async () => {
+    if (!newClientName || !newClientRif) return toast.error("Nombre y RIF son obligatorios");
+    if (!user?.company_id) return;
+    setIsSavingQuick(true);
+    const rifCompleto = newClientRif.includes("-") || newClientRif.startsWith("V") || newClientRif.startsWith("J") || newClientRif.startsWith("E") 
+      ? newClientRif 
+      : `${rifPrefix}-${newClientRif}`;
+    
+    try {
+      const { data: newP, error: pErr } = await supabase
+        .from("partners")
+        .insert({
+          company_id: user.company_id,
+          name: newClientName,
+          rif: rifCompleto,
+          phone: newClientPhone,
+          status: "active",
+          credit_status: "green",
+          current_balance: 0,
+        } as any)
+        .select()
+        .single();
+
+      if (pErr) throw pErr;
+      
+      setPartners(prev => [...prev, newP]);
+      setSelectedPartner(newP);
+      setPartnerQuery(newClientName);
+      setNewClientName("");
+      setNewClientRif("");
+      setNewClientPhone("");
+      toast.success("Cliente creado con éxito");
+      setShowQuickModal(false);
+    } catch (err: any) {
+      toast.error("Error al crear cliente rápido", { description: err.message });
+    } finally {
+      setIsSavingQuick(false);
+    }
+  };
+
   useEffect(() => {
     async function load() {
       setLoading(true);
@@ -244,18 +291,29 @@ function NuevoPresupuestoContent() {
                     placeholder="Buscar cliente..."
                     className="w-full pl-10 pr-4 py-3 bg-surface-base rounded-xl border border-border text-sm focus:outline-none focus:border-brand/40 transition-all"
                   />
-                  {showPartnerDropdown && partnerSuggestions.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-surface-elevated rounded-xl border border-border shadow-elevated z-[100] overflow-hidden">
+                  {showPartnerDropdown && partnerQuery.length >= 2 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-[#E2E8F0] shadow-md z-[100] overflow-hidden">
                       {partnerSuggestions.map((p) => (
                         <button
                           key={p.id}
                           onClick={() => { setSelectedPartner(p); setPartnerQuery(p.name); setShowPartnerDropdown(false); }}
-                          className="w-full px-4 py-3 text-left hover:bg-brand/5 border-b border-border/40 last:border-0 transition-colors"
+                          className="w-full px-4 py-2.5 text-left hover:bg-brand/5 border-b border-[#F1F5F9] last:border-0 transition-colors"
                         >
-                          <p className="text-[13px] font-bold text-text-1">{p.name}</p>
-                          <p className="text-[10px] text-text-3">{p.rif || "Sin RIF"}</p>
+                          <p className="text-[12px] font-bold text-text-1 font-outfit">{p.name}</p>
+                          <p className="text-[9px] text-text-3 font-outfit uppercase">{p.rif || "Sin RIF"}</p>
                         </button>
                       ))}
+                      {!partnerSuggestions.some(p => p.name.toLowerCase() === partnerQuery.toLowerCase()) && (
+                        <button
+                          onClick={() => { setShowPartnerDropdown(false); setNewClientName(partnerQuery); setShowQuickModal(true); }}
+                          className="w-full px-4 py-3 text-left hover:bg-brand/5 border-t border-[#F1F5F9] flex items-center gap-2 group transition-colors"
+                        >
+                          <div className="w-5 h-5 rounded flex items-center justify-center bg-brand/10 text-brand group-hover:bg-brand group-hover:text-white transition-colors">
+                            <Plus className="w-3.5 h-3.5" />
+                          </div>
+                          <span className="text-[12px] font-bold text-brand font-outfit">+ Crear cliente rápido</span>
+                        </button>
+                      )}
                     </div>
                   )}
                 </>
@@ -360,6 +418,76 @@ function NuevoPresupuestoContent() {
           </div>
         </div>
       </div>
+
+      {/* ── MODAL CLIENTE RÁPIDO ── */}
+      {showQuickModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="px-5 py-4 border-b border-[#F1F5F9] flex items-center justify-between">
+              <h3 className="text-sm font-bold font-outfit text-[#1A1125]">Crear Cliente Rápido</h3>
+              <button onClick={() => setShowQuickModal(false)} className="text-text-3 hover:text-danger transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-text-3 uppercase tracking-widest font-outfit">Nombre Completo *</label>
+                <input
+                  value={newClientName}
+                  onChange={(e) => setNewClientName(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl border border-[#E2E8F0] text-[13px] font-medium focus:outline-none focus:border-brand/40 font-outfit bg-[#F8FAFC]"
+                  placeholder="Ej. Juan Pérez"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-text-3 uppercase tracking-widest font-outfit">Cédula / RIF *</label>
+                <div className="flex bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl overflow-hidden focus-within:border-brand/40">
+                  <select 
+                    value={rifPrefix}
+                    onChange={(e) => setRifPrefix(e.target.value)}
+                    className="bg-transparent pl-3 pr-1 py-2.5 text-[13px] font-bold text-brand font-outfit outline-none cursor-pointer appearance-none"
+                  >
+                    <option value="V">V</option>
+                    <option value="J">J</option>
+                    <option value="E">E</option>
+                  </select>
+                  <input
+                    value={newClientRif}
+                    onChange={(e) => setNewClientRif(e.target.value)}
+                    className="w-full px-2 py-2.5 bg-transparent text-[13px] font-medium outline-none font-outfit"
+                    placeholder="12345678"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-text-3 uppercase tracking-widest font-outfit">Teléfono (Opcional)</label>
+                <input
+                  value={newClientPhone}
+                  onChange={(e) => setNewClientPhone(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl border border-[#E2E8F0] text-[13px] font-medium focus:outline-none focus:border-brand/40 font-outfit bg-[#F8FAFC]"
+                  placeholder="0414-0000000"
+                />
+              </div>
+            </div>
+            <div className="p-5 border-t border-[#F1F5F9] bg-[#F8FAFC] flex items-center justify-end gap-3">
+              <button 
+                onClick={() => setShowQuickModal(false)}
+                className="px-4 py-2 rounded-lg text-xs font-bold text-text-3 hover:bg-[#E2E8F0] transition-colors font-outfit uppercase"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={submitQuickClient}
+                disabled={isSavingQuick || !newClientName || !newClientRif}
+                className="px-4 py-2 rounded-lg bg-brand text-white text-xs font-bold font-outfit uppercase disabled:opacity-50 transition-colors shadow-md flex items-center gap-2"
+              >
+                {isSavingQuick && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                Guardar Cliente
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
