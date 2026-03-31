@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 const BADGE_CONFIG: Record<string, { label: string; cls: string }> = {
-  // Pedidos
+  // Pedidos / Órdenes
   draft: { label: "Borrador", cls: "bg-surface-base text-text-3 border-border" },
   confirmed: {
     label: "Confirmado",
@@ -9,7 +9,7 @@ const BADGE_CONFIG: Record<string, { label: string; cls: string }> = {
   },
   dispatched: {
     label: "Despachado",
-    cls: "bg-status-warn/10 text-status-warn border-status-warn/20",
+    cls: "bg-status-info/10 text-status-info border-status-info/20",
   },
   delivered: {
     label: "Entregado",
@@ -51,6 +51,23 @@ const BADGE_CONFIG: Record<string, { label: string; cls: string }> = {
   },
   rejected: {
     label: "Rechazado",
+    cls: "bg-status-danger/10 text-status-danger border-status-danger/20",
+  },
+  // Despachos
+  pending_dispatch: {
+    label: "Pendiente",
+    cls: "bg-surface-base text-text-3 border-border",
+  },
+  preparing: {
+    label: "Preparando",
+    cls: "bg-status-warn/10 text-status-warn border-status-warn/20",
+  },
+  in_transit: {
+    label: "En Tránsito",
+    cls: "bg-[#7C4DFF]/10 text-[#7C4DFF] border-[#7C4DFF]/20",
+  },
+  returned: {
+    label: "Devuelto",
     cls: "bg-status-danger/10 text-status-danger border-status-danger/20",
   },
 };
