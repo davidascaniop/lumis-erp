@@ -269,7 +269,7 @@ export default function ReporteVentasPage() {
                   cursor={{ fill: 'var(--bg-elevated)', opacity: 0.4 }}
                   contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)', borderRadius: '8px', color: 'var(--text-1)' }}
                   itemStyle={{ color: 'var(--text-1)' }}
-                  formatter={(val: number) => [`$${val.toFixed(2)}`, "Ventas"]}
+                  formatter={(val: any) => [`$${Number(val).toFixed(2)}`, "Ventas"]}
                 />
                 <Bar dataKey="current" fill="var(--brand)" radius={[4, 4, 0, 0]} maxBarSize={40} />
                 {/* <Line type="monotone" dataKey="prev" stroke="var(--text-3)" strokeWidth={2} strokeDasharray="5 5" dot={false} /> */}
@@ -333,7 +333,7 @@ export default function ReporteVentasPage() {
                 <RechartsTooltip 
                   cursor={{ fill: 'var(--bg-elevated)', opacity: 0.4 }}
                   contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)', borderRadius: '8px' }}
-                  formatter={(val: number, name: string) => [name === 'total' ? `$${val.toFixed(2)}` : val, name === 'total' ? 'Ingresos' : 'Unidades']}
+                  formatter={(val: any, name: any) => [name === 'total' ? `$${Number(val).toFixed(2)}` : val, name === 'total' ? 'Ingresos' : 'Unidades']}
                 />
                 <Bar dataKey="total" fill="var(--brand)" radius={[0, 4, 4, 0]} barSize={20} />
               </BarChart>
