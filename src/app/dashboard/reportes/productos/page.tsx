@@ -379,9 +379,9 @@ export default function ProductosReportePage() {
             </ResponsiveContainer>
           </div>
           <div className="flex items-center justify-center gap-4 mt-2 text-[10px] text-text-3">
-            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#00E5CC]" />Alto (>40%)</div>
+            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#00E5CC]" />Alto (&gt;40%)</div>
             <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#FFB800]" />Medio (20-40%)</div>
-            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#FF2D55]" />Bajo (<20%)</div>
+            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#FF2D55]" />Bajo (&lt;20%)</div>
           </div>
         </Card>
 
