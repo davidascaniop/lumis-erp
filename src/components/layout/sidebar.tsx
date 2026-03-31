@@ -122,12 +122,25 @@ export function Sidebar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [hasCRM, setHasCRM] = useState(true);
 
+  // Find the most specific active child globally:
+  const allChildren = NAV_SECTIONS.flatMap(s => s.children);
+  const activeChild = allChildren.reduce((best, child) => {
+    if (pathname === child.href || pathname.startsWith(child.href + "/")) {
+      if (!best || child.href.length > best.href.length) {
+        return child;
+      }
+    }
+    return best;
+  }, null as typeof allChildren[0] | null);
+
   // Detectar sección activa para auto-expandir
   const getInitialOpenSections = () => {
     const open = new Set<string>();
-    for (const section of NAV_SECTIONS) {
-      if (section.children.some((c) => pathname.startsWith(c.href) && c.href !== "/dashboard")) {
-        open.add(section.id);
+    if (activeChild) {
+      for (const section of NAV_SECTIONS) {
+        if (section.children.some((c) => c.href === activeChild.href)) {
+          open.add(section.id);
+        }
       }
     }
     return open;
@@ -253,14 +266,7 @@ export function Sidebar() {
 
         {NAV_SECTIONS.map((section) => {
           const isOpen = openSections.has(section.id);
-          const isSectionActive = section.children.some((c) => pathname.startsWith(c.href) && c.href !== "/dashboard/ventas" || pathname === c.href);
-          // Special case for ventas: check exact match for historial
-          const isActiveSectionVentas = section.id === "ventas" && (
-            pathname.startsWith("/dashboard/ventas/nueva") ||
-            pathname.startsWith("/dashboard/ventas/presupuestos") ||
-            pathname === "/dashboard/ventas"
-          );
-          const isActive = section.id === "ventas" ? isActiveSectionVentas : isSectionActive;
+          const isActive = activeChild ? section.children.some(c => c.href === activeChild.href) : false;
 
           return (
             <div key={section.id} className="mb-0.5">
@@ -310,14 +316,7 @@ export function Sidebar() {
                       {section.children.map((child) => {
                         const isCRMLocked = child.requiredPlan && !hasCRM;
                         const childHref = isCRMLocked ? "/dashboard/upgrade" : child.href;
-                        const isChildActive = pathname === child.href || (
-                          pathname.startsWith(child.href + "/") && 
-                          !section.children.some(other => 
-                            other.href !== child.href && 
-                            other.href.length > child.href.length && 
-                            pathname.startsWith(other.href)
-                          )
-                        );
+                        const isChildActive = activeChild?.href === child.href;
 
                         return (
                           <Link
