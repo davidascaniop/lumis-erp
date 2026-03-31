@@ -9,14 +9,6 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check, X, Eye, Loader2, Download, AlertCircle } from "lucide-react";
@@ -151,114 +143,120 @@ export default function SuperadminSubscriptionsPage() {
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <Table>
-              <TableHeader className="bg-surface-hover/20">
-                <TableRow className="border-border">
-                  <TableHead className="font-bold text-text-1 whitespace-nowrap">Fecha</TableHead>
-                  <TableHead className="font-bold text-text-1">Empresa</TableHead>
-                  <TableHead className="font-bold text-text-1">Plan</TableHead>
-                  <TableHead className="font-bold text-text-1">Método</TableHead>
-                  <TableHead className="font-bold text-text-1">Referencias</TableHead>
-                  <TableHead className="font-bold text-text-1">Comprobante</TableHead>
-                  <TableHead className="font-bold text-text-1">Estado</TableHead>
-                  <TableHead className="font-bold text-text-1 text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <table className="w-full border-collapse">
+              <thead className="bg-surface-base border-b border-border/50">
+                <tr>
+                  <th className="px-5 py-4 text-left font-bold text-text-1 whitespace-nowrap text-xs uppercase tracking-wider">Fecha</th>
+                  <th className="px-5 py-4 text-left font-bold text-text-1 text-xs uppercase tracking-wider">Empresa</th>
+                  <th className="px-5 py-4 text-left font-bold text-text-1 text-xs uppercase tracking-wider">Plan</th>
+                  <th className="px-5 py-4 text-left font-bold text-text-1 text-xs uppercase tracking-wider">Método</th>
+                  <th className="px-5 py-4 text-left font-bold text-text-1 text-xs uppercase tracking-wider">Referencias</th>
+                  <th className="px-5 py-4 text-left font-bold text-text-1 text-xs uppercase tracking-wider">Comprobante</th>
+                  <th className="px-5 py-4 text-left font-bold text-text-1 text-xs uppercase tracking-wider">Estado</th>
+                  <th className="px-5 py-4 text-right font-bold text-text-1 text-xs uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/40">
                 {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-10 text-text-3">
-                      <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-                      Cargando pagos...
-                    </TableCell>
-                  </TableRow>
+                  <tr>
+                    <td colSpan={8} className="px-5 py-16 text-center text-text-3 italic font-medium">
+                      <div className="flex flex-col items-center gap-3">
+                        <Loader2 className="w-8 h-8 animate-spin text-brand" />
+                        <p>Cargando registros de pago...</p>
+                      </div>
+                    </td>
+                  </tr>
                 ) : payments.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-10 text-text-3 font-medium">
-                      No hay pagos registrados.
-                    </TableCell>
-                  </TableRow>
+                  <tr>
+                    <td colSpan={8} className="px-5 py-16 text-center text-text-3 font-medium">
+                      No hay pagos registrados en el sistema.
+                    </td>
+                  </tr>
                 ) : (
                   payments.map((payment) => (
-                    <TableRow key={payment.id} className="border-border hover:bg-surface-hover/10 transition-colors">
-                      <TableCell className="text-xs text-text-2 font-medium whitespace-nowrap">
+                    <tr key={payment.id} className="hover:bg-surface-hover/30 transition-colors group">
+                      <td className="px-5 py-4 text-xs text-text-2 font-medium whitespace-nowrap">
                         {format(new Date(payment.created_at), "dd MMM yyyy, p", { locale: es })}
-                      </TableCell>
-                      <TableCell className="font-bold text-text-1">
+                      </td>
+                      <td className="px-5 py-4 font-bold text-text-1 text-sm">
                         {payment.companies?.name || "Empresa eliminada"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="bg-brand/10 text-brand border-brand/20 uppercase font-bold text-[10px]">
+                      </td>
+                      <td className="px-5 py-4">
+                        <Badge variant="outline" className="bg-brand/5 text-brand border-brand/20 uppercase font-black text-[9px] tracking-widest px-2">
                           {payment.plan_type}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="bg-surface-base text-text-1 border-border uppercase font-bold text-[10px]">
+                      </td>
+                      <td className="px-5 py-4">
+                        <Badge variant="outline" className="bg-surface-base text-text-2 border-border/60 uppercase font-bold text-[9px] tracking-wide px-2">
                           {payment.method === "pago_movil" ? "Pago Móvil" : payment.method}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="px-5 py-4 text-sm">
                         {renderRefData(payment)}
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="px-5 py-4">
                         {payment.receipt_url ? (
                           <a 
                             href={payment.receipt_url} 
                             target="_blank" 
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand/5 border border-brand/20 text-brand hover:bg-brand/10 transition-colors text-xs font-bold"
+                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brand/10 border border-brand/20 text-brand hover:bg-brand/20 transition-all text-xs font-bold shadow-sm"
                           >
-                            <Eye className="w-3.5 h-3.5" /> Ver PDF/Img
+                            <Eye className="w-4 h-4" /> Comprobante
                           </a>
                         ) : (
-                          <span className="text-xs text-text-3">Sin archivo</span>
+                          <span className="text-xs text-text-3 flex items-center gap-1">
+                            <X className="w-3 h-3" /> Sin archivo
+                          </span>
                         )}
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="px-5 py-4">
                         {payment.status === "pending" && (
-                          <Badge variant="outline" className="bg-status-warn/10 text-status-warn border-status-warn/20 uppercase font-bold text-[10px]">
+                          <Badge variant="outline" className="bg-status-warn/10 text-status-warn border-status-warn/20 uppercase font-bold text-[10px] px-2 py-0.5">
                             Pendiente
                           </Badge>
                         )}
                         {payment.status === "approved" && (
-                          <Badge variant="outline" className="bg-status-ok/10 text-status-ok border-status-ok/20 uppercase font-bold text-[10px]">
+                          <Badge variant="outline" className="bg-status-ok/10 text-status-ok border-status-ok/20 uppercase font-bold text-[10px] px-2 py-0.5">
                             Aprobado
                           </Badge>
                         )}
                         {payment.status === "rejected" && (
-                          <Badge variant="outline" className="bg-status-danger/10 text-status-danger border-status-danger/20 uppercase font-bold text-[10px]">
+                          <Badge variant="outline" className="bg-status-danger/10 text-status-danger border-status-danger/20 uppercase font-bold text-[10px] px-2 py-0.5">
                             Rechazado
                           </Badge>
                         )}
-                      </TableCell>
-                      <TableCell className="text-right">
+                      </td>
+                      <td className="px-5 py-4 text-right">
                         {payment.status === "pending" && (
-                          <div className="flex justify-end gap-2">
+                          <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Button 
                               size="sm" 
                               variant="outline" 
-                              className="h-8 w-8 p-0 border-status-danger text-status-danger hover:bg-status-danger hover:text-white"
+                              className="h-9 w-9 p-0 border-status-danger/30 text-status-danger hover:bg-status-danger hover:text-white rounded-lg transition-all"
                               onClick={() => handleAction(payment.id, payment.company_id, "rejected")}
                               disabled={processingId === payment.id}
+                              title="Rechazar Pago"
                             >
                               {processingId === payment.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
                             </Button>
                             <Button 
                               size="sm" 
-                              className="h-8 w-8 p-0 bg-status-ok hover:bg-status-ok/90 text-white shadow-sm"
+                              className="h-9 w-9 p-0 bg-status-ok hover:bg-status-ok/90 text-white shadow-lg shadow-status-ok/20 rounded-lg transition-all"
                               onClick={() => handleAction(payment.id, payment.company_id, "approved")}
                               disabled={processingId === payment.id}
+                              title="Aprobar Pago e Iniciar Empresa"
                             >
                               {processingId === payment.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                             </Button>
                           </div>
                         )}
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   ))
                 )}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
         </CardContent>
       </Card>
