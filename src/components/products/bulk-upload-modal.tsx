@@ -55,8 +55,8 @@ export function BulkUploadModal({
   // Template to download
   const downloadTemplate = () => {
     const csvContent = "data:text/csv;charset=utf-8," + 
-      "name,sku,category,brand,department,supplier_code,price_usd,price_usd_2,price_usd_3,price_usd_4,price_usd_5,stock,unit,description,image_url\n" +
-      "Producto Ejemplo,PROD-001,General,MarcaX,DeptoY,SUP-1,10.00,9.00,8.00,7.00,6.00,100,Unidad,Delicioso,https://...";
+      "name,sku,category,brand,department,supplier_code,cost_usd,price_usd,price_usd_2,price_usd_3,price_usd_4,stock,unit,description,image_url\n" +
+      "Producto Ejemplo,PROD-001,General,MarcaX,DeptoY,SUP-1,7.50,10.00,9.00,8.00,7.00,100,Unidad,Delicioso,https://...";
     
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -95,11 +95,11 @@ export function BulkUploadModal({
             brand: row.brand || null,
             department: row.department || null,
             supplier_code: row.supplier_code || null,
+            cost_usd: Number(row.cost_usd) || 0,
             price_usd: Number(row.price_usd) || 0,
             price_usd_2: Number(row.price_usd_2) || 0,
             price_usd_3: Number(row.price_usd_3) || 0,
             price_usd_4: Number(row.price_usd_4) || 0,
-            price_usd_5: Number(row.price_usd_5) || 0,
             stock: Number(row.stock) || 0,
             unit: row.unit || "Unidad",
             description: row.description || null,
