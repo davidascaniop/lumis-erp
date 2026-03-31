@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createDailySeed } from "@/lib/actions/seeds";
 import { toast } from "sonner";
-import { ArrowLeft, Save, Send, Loader2, Sparkles, Smartphone, PlayCircle } from "lucide-react";
+import { ArrowLeft, Save, Send, Loader2, Sparkles, Smartphone, PlayCircle, Heart } from "lucide-react";
 
 export default function NuevaSemillaPage() {
   const router = useRouter();
