@@ -3,15 +3,20 @@ import {
   Building2,
   Users,
   TrendingUp,
-  TrendingDown,
   DollarSign,
   AlertTriangle,
-  Sparkles,
   Activity,
+  CheckCircle2,
+  Clock,
+  FileText,
+  XCircle,
 } from "lucide-react";
 import { SaasLineChart } from "@/components/superadmin/saas-line-chart";
 import { PlanDonutChart } from "@/components/superadmin/plan-donut-chart";
 import { RecentCompanies } from "@/components/superadmin/recent-companies";
+import Link from "next/link";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
 
 export default async function SuperAdminHome() {
   const supabase = await createClient();
@@ -25,76 +30,71 @@ export default async function SuperAdminHome() {
     { count: totalUsers },
     { data: planDistribution },
     { data: newCompaniesThisMonth },
-    { data: recentCompanies },
     { data: mrrData },
     { data: overdueCompanies },
     { data: monthlyGrowth },
+    { data: recentPayments },
+    { data: latestCompanies },
   ] = await Promise.all([
     supabase.from("companies").select("*", { count: "exact", head: true }),
-    supabase
-      .from("companies")
-      .select("*", { count: "exact", head: true })
-      .eq("plan_status", "active"),
-    supabase
-      .from("companies")
-      .select("*", { count: "exact", head: true })
-      .eq("plan_status", "suspended"),
-    supabase
-      .from("companies")
-      .select("*", { count: "exact", head: true })
-      .eq("plan_status", "trial"),
+    supabase.from("companies").select("*", { count: "exact", head: true }).eq("subscription_status", "active"), // Changed from plan_status
+    supabase.from("companies").select("*", { count: "exact", head: true }).eq("subscription_status", "suspended"),
+    supabase.from("companies").select("*", { count: "exact", head: true }).eq("subscription_status", "trial"), // Or 'pending_verification'
     supabase.from("users").select("*", { count: "exact", head: true }),
-    supabase.from("companies").select("plan").eq("plan_status", "active"),
-    supabase
-      .from("companies")
-      .select("id")
-      .gte(
-        "created_at",
-        new Date(
-          new Date().getFullYear(),
-          new Date().getMonth(),
-          1,
-        ).toISOString(),
-      ),
-    supabase
-      .from("companies")
-      .select("id, name, plan, plan_status, created_at, owner_email")
-      .order("created_at", { ascending: false })
-      .limit(5),
-    supabase
-      .from("subscription_payments")
-      .select("amount_usd")
-      .eq("status", "paid")
-      .gte(
-        "period_start",
-        new Date(
-          new Date().getFullYear(),
-          new Date().getMonth(),
-          1,
-        ).toISOString(),
-      ),
-    supabase
-      .from("companies")
-      .select("id, name, owner_email")
-      .eq("plan_status", "overdue"),
-    supabase
-      .from("companies")
-      .select("created_at")
-      .order("created_at", { ascending: true }),
+    supabase.from("companies").select("plan_type").in("subscription_status", ["active", "trial", "pending_verification"]),
+    supabase.from("companies").select("id").gte("created_at", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
+    supabase.from("subscription_payments").select("method").eq("status", "approved"),
+    supabase.from("companies").select("id, name, subscription_status").eq("subscription_status", "suspended"), // Assuming suspended means overdue
+    supabase.from("companies").select("created_at").order("created_at", { ascending: true }),
+    supabase.from("subscription_payments").select("*, companies(name)").order("created_at", { ascending: false }).limit(5),
+    supabase.from("companies").select("id, name, created_at").order("created_at", { ascending: false }).limit(5),
   ]);
 
-  // Calcular MRR
-  const PLAN_PRICES = { emprendedor: 25, crecimiento: 55, corporativo: 120 };
+  // Construir feed de actividades
+  const activities: any[] = [];
+  
+  if (recentPayments) {
+    recentPayments.forEach((p) => {
+      activities.push({
+        id: `pay-${p.id}`,
+        type: p.status === 'pending' ? 'payment_uploaded' : (p.status === 'approved' ? 'payment_approved' : 'payment_rejected'),
+        company: p.companies?.name || 'Empresa Desconocida',
+        date: new Date(p.created_at),
+        message: p.status === 'pending' ? 'subió comprobante de pago' : (p.status === 'approved' ? 'pago aprobado' : 'pago rechazado'),
+        icon: p.status === 'pending' ? FileText : (p.status === 'approved' ? CheckCircle2 : XCircle),
+        color: p.status === 'pending' ? 'text-status-warn bg-status-warn/10' : (p.status === 'approved' ? 'text-status-ok bg-status-ok/10' : 'text-status-danger bg-status-danger/10')
+      });
+    });
+  }
+
+  if (latestCompanies) {
+    latestCompanies.forEach((c) => {
+      activities.push({
+        id: `comp-${c.id}`,
+        type: 'new_registration',
+        company: c.name,
+        date: new Date(c.created_at),
+        message: 'Nuevo registro en plataforma',
+        icon: Building2,
+        color: 'text-brand bg-brand/10'
+      });
+    });
+  }
+
+  // Sort activities by date descending and take top 6
+  const sortedActivities = activities.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 6);
+
+  // Calcular MRR - Usando plan_type en lugar de plan
+  const PLAN_PRICES = { basic: 19.99, pro: 79.99, enterprise: 119.99 };
   const mrr = (planDistribution ?? []).reduce((sum, c) => {
-    return (
-      sum + ((PLAN_PRICES as any)[c.plan as keyof typeof PLAN_PRICES] ?? 0)
-    );
+    return sum + ((PLAN_PRICES as any)[c.plan_type as keyof typeof PLAN_PRICES] ?? 0);
   }, 0);
   const arr = mrr * 12;
 
   // Calcular distribución por plan
   const planCounts = (planDistribution ?? []).reduce((acc: any, c) => {
-    acc[c.plan] = (acc[c.plan] ?? 0) + 1;
+    const key = c.plan_type || 'basic';
+    acc[key] = (acc[key] ?? 0) + 1;
     return acc;
   }, {});
 
@@ -102,246 +102,215 @@ export default async function SuperAdminHome() {
   const growthChart = buildMonthlyGrowth(monthlyGrowth ?? []);
 
   return (
-    <div className="space-y-6 page-enter">
+    <div className="space-y-6 page-enter pb-10">
       {/* HEADER */}
       <div>
-        <h1 className="font-primary text-2xl">
+        <h1 className="font-heading text-3xl font-bold text-text-1">
           Command Center
         </h1>
-        <p className="text-sm text-[#9585B8] mt-0.5">
-          Vista global del SaaS —{" "}
-          {new Date().toLocaleDateString("es-VE", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
+        <p className="text-sm font-medium text-text-2 mt-1">
+          Panel Maestro de Administración
         </p>
       </div>
 
-      {/* ALERTA MOROSAS */}
-      {(overdueCompanies?.length ?? 0) > 0 && (
-        <div
-          className="flex items-center gap-4 p-4 rounded-2xl
-                        bg-[rgba(255,45,85,0.06)] border border-[rgba(255,45,85,0.20)]"
-        >
-          <AlertTriangle className="w-5 h-5 text-[#FF2D55] flex-shrink-0" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-white">
-              {overdueCompanies?.length} empresa(s) con pago vencido
-            </p>
-            <p className="text-xs text-[#9585B8]">
-              Requieren atención inmediata
-            </p>
-          </div>
-          <a
-            href="/superadmin/suscripciones"
-            className="px-4 py-2 rounded-xl text-xs font-bold text-[#FF2D55]
-                        bg-[rgba(255,45,85,0.10)] hover:bg-[rgba(255,45,85,0.18)] transition-colors"
-          >
-            Ver morosas →
-          </a>
-        </div>
-      )}
-
-      {/* KPIs — FILA 1: Financieros */}
-      <div>
-        <p className="text-[10px] font-semibold text-[#3D2D5C] uppercase tracking-widest mb-3">
-          Métricas Financieras
-        </p>
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-          {/* MRR */}
-          <div
-            className="bg-[#18102A] border border-white/6 rounded-2xl p-5
-                          hover:border-[rgba(224,64,251,0.20)] transition-all group"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-2.5 rounded-xl bg-[rgba(0,229,204,0.10)]">
-                <DollarSign className="w-4 h-4 text-[#00E5CC]" />
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        
+        {/* COLUMNA PRINCIPAL (2/3) */}
+        <div className="xl:col-span-2 space-y-6">
+          
+          {/* FILA 1: FINANZAS DESTACADAS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* MRR */}
+            <div className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
+              <div className="flex items-start justify-between mb-4 relative z-10">
+                <div className="p-3 rounded-2xl bg-brand/10 border border-brand/20">
+                  <DollarSign className="w-5 h-5 text-brand" />
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest bg-surface-base px-2 py-1 rounded-md border border-border shadow-sm">
+                    MRR Actual
+                  </span>
+                </div>
               </div>
-              <span className="text-[10px] font-semibold text-[#9585B8]">
-                este mes
-              </span>
-            </div>
-            <div className="font-mono text-3xl font-bold text-white tracking-tight mb-1">
-              ${mrr.toLocaleString()}
-            </div>
-            <p className="text-xs text-[#9585B8]">MRR</p>
-          </div>
-
-          {/* ARR */}
-          <div
-            className="bg-[#18102A] border border-white/6 rounded-2xl p-5
-                          hover:border-[rgba(124,77,255,0.20)] transition-all"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-2.5 rounded-xl bg-[rgba(124,77,255,0.10)]">
-                <TrendingUp className="w-4 h-4 text-[#7C4DFF]" />
-              </div>
-              <span className="text-[10px] font-semibold text-[#9585B8]">
-                proyectado
-              </span>
-            </div>
-            <div className="font-mono text-3xl font-bold text-white tracking-tight mb-1">
-              ${arr.toLocaleString()}
-            </div>
-            <p className="text-xs text-[#9585B8]">ARR</p>
-          </div>
-
-          {/* Empresas activas */}
-          <div
-            className="bg-[#18102A] border border-white/6 rounded-2xl p-5
-                          hover:border-[rgba(224,64,251,0.20)] transition-all"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-2.5 rounded-xl bg-[rgba(224,64,251,0.10)]">
-                <Building2 className="w-4 h-4 text-[#E040FB]" />
-              </div>
-              <span className="text-[10px] font-semibold text-[#00E5CC]">
-                +{newCompaniesThisMonth?.length ?? 0} este mes
-              </span>
-            </div>
-            <div className="font-mono text-3xl font-bold text-white tracking-tight mb-1">
-              {activeCompanies}
-            </div>
-            <p className="text-xs text-[#9585B8]">Empresas activas</p>
-          </div>
-
-          {/* Usuarios totales */}
-          <div
-            className="bg-[#18102A] border border-white/6 rounded-2xl p-5
-                          hover:border-[rgba(79,195,247,0.20)] transition-all"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-2.5 rounded-xl bg-[rgba(79,195,247,0.10)]">
-                <Users className="w-4 h-4 text-[#4FC3F7]" />
+              <div className="relative z-10">
+                <h3 className="text-sm font-bold text-text-2 mb-1">Monthly Recurring Revenue</h3>
+                <div className="font-heading text-4xl font-black text-text-1 tracking-tight">
+                  ${mrr.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
               </div>
             </div>
-            <div className="font-mono text-3xl font-bold text-white tracking-tight mb-1">
-              {totalUsers}
-            </div>
-            <p className="text-xs text-[#9585B8]">Usuarios totales</p>
-          </div>
-        </div>
-      </div>
 
-      {/* KPIs — FILA 2: Estados */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-        {[
-          {
-            label: "Total empresas",
-            value: totalCompanies ?? 0,
-            color: "#E040FB",
-            bg: "rgba(224,64,251,0.08)",
-          },
-          {
-            label: "En trial",
-            value: trialCompanies ?? 0,
-            color: "#FFB800",
-            bg: "rgba(255,184,0,0.08)",
-          },
-          {
-            label: "Suspendidas",
-            value: suspendedCompanies ?? 0,
-            color: "#FF2D55",
-            bg: "rgba(255,45,85,0.08)",
-          },
-          {
-            label: "Con pago vencido",
-            value: overdueCompanies?.length ?? 0,
-            color: "#FF2D55",
-            bg: "rgba(255,45,85,0.08)",
-          },
-        ].map(({ label, value, color, bg }) => (
-          <div
-            key={label}
-            className="bg-[#18102A] border border-white/6 rounded-2xl p-4
-                                     hover:border-white/12 transition-all"
-          >
-            <div
-              className="font-mono text-2xl font-bold mb-1"
-              style={{ color }}
-            >
-              {value}
+            {/* ARR */}
+            <div className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-[#00E5CC]/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
+              <div className="flex items-start justify-between mb-4 relative z-10">
+                <div className="p-3 rounded-2xl bg-[#00E5CC]/10 border border-[#00E5CC]/20">
+                  <TrendingUp className="w-5 h-5 text-[#00AF9C]" />
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest bg-surface-base px-2 py-1 rounded-md border border-border shadow-sm">
+                    ARR Proyectado
+                  </span>
+                </div>
+              </div>
+              <div className="relative z-10">
+                <h3 className="text-sm font-bold text-text-2 mb-1">Annual Recurring Revenue</h3>
+                <div className="font-heading text-4xl font-black text-text-1 tracking-tight">
+                  ${arr.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+              </div>
             </div>
-            <p className="text-xs text-[#9585B8]">{label}</p>
-            <div className="mt-3 h-1 bg-white/5 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-700"
-                style={{
-                  width: `${Math.min((value / (totalCompanies || 1)) * 100, 100)}%`,
-                  background: color,
-                }}
+          </div>
+
+          {/* FILA 2: OPERACIONES (Compactas) */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+             {/* Empresas Activas */}
+             <div className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-brand/30 transition-all group">
+                <div className="flex justify-between items-start mb-2">
+                   <div className="p-2 bg-brand/10 rounded-lg text-brand">
+                     <Building2 className="w-4 h-4" />
+                   </div>
+                   <span className="text-[10px] font-bold text-status-ok bg-status-ok/10 px-1.5 py-0.5 rounded border border-status-ok/20">
+                     +{newCompaniesThisMonth?.length ?? 0} este mes
+                   </span>
+                </div>
+                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1">Empresas Activas</h4>
+                <p className="text-2xl font-heading font-black text-text-1">{activeCompanies || 0}</p>
+             </div>
+
+             {/* Usuarios */}
+             <div className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-brand/30 transition-all group">
+                <div className="flex justify-between items-start mb-2">
+                   <div className="p-2 bg-[#4FC3F7]/10 rounded-lg text-[#0288D1]">
+                     <Users className="w-4 h-4" />
+                   </div>
+                </div>
+                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1">Usuarios Totales</h4>
+                <p className="text-2xl font-heading font-black text-text-1">{totalUsers || 0}</p>
+             </div>
+
+             {/* Trial */}
+             <div className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-brand/30 transition-all group">
+                <div className="flex justify-between items-start mb-2">
+                   <div className="p-2 bg-status-warn/10 rounded-lg text-status-warn">
+                     <Clock className="w-4 h-4" />
+                   </div>
+                </div>
+                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1">Cuentas en Trial</h4>
+                <p className="text-2xl font-heading font-black text-text-1">{trialCompanies || 0}</p>
+             </div>
+
+             {/* Pagos Vencidos */}
+             <div className="bg-[#FFF0F2] border border-[#FFCCD5] rounded-2xl p-4 shadow-sm hover:border-status-danger transition-all group relative overflow-hidden">
+                <div className="absolute inset-0 bg-status-danger/5" />
+                <div className="flex justify-between items-start mb-2 relative z-10">
+                   <div className="p-2 bg-status-danger/20 rounded-lg text-status-danger shadow-sm">
+                     <AlertTriangle className="w-4 h-4" />
+                   </div>
+                   {(overdueCompanies?.length ?? 0) > 0 && (
+                     <span className="flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-danger opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-status-danger"></span>
+                     </span>
+                   )}
+                </div>
+                <h4 className="text-[11px] font-bold text-status-danger uppercase tracking-wider mb-1 relative z-10">Pagos Vencidos</h4>
+                <p className="text-2xl font-heading font-black text-status-danger relative z-10">{overdueCompanies?.length ?? 0}</p>
+             </div>
+          </div>
+
+          {/* FILA 3: GRÁFICOS */}
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] gap-4">
+            {/* Crecimiento */}
+            <div className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-lg font-heading font-bold text-text-1">
+                    Crecimiento de Empresas
+                  </h2>
+                  <p className="text-xs font-semibold text-text-3 mt-1 uppercase tracking-wider">
+                    Histórico de registros mensuales
+                  </p>
+                </div>
+              </div>
+              <SaasLineChart data={growthChart} />
+            </div>
+
+            {/* Donuts */}
+            <div className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm">
+              <h2 className="text-lg font-heading font-bold text-text-1 mb-1">Distribución Tarifaria</h2>
+              <p className="text-xs font-semibold text-text-3 uppercase tracking-wider mb-6">Empresas por Plan</p>
+              
+              <PlanDonutChart
+                data={[
+                  { name: "Starter", value: planCounts.basic ?? 0, color: "#4FC3F7" },
+                  { name: "Pro", value: planCounts.pro ?? 0, color: "#E040FB" },
+                  { name: "Enterprise", value: planCounts.enterprise ?? 0, color: "#7C4DFF" },
+                ].filter(d => d.value > 0)}
               />
             </div>
           </div>
-        ))}
-      </div>
+        </div>
 
-      {/* GRÁFICOS */}
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-4">
-        {/* Crecimiento mensual de empresas */}
-        <div className="bg-[#18102A] border border-white/6 rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-xl font-primary">
-                Crecimiento de Empresas
-              </h1>
-              <p className="text-xs text-[#9585B8] mt-0.5">
-                Nuevas empresas por mes
-              </p>
-            </div>
+        {/* COLUMNA LATERAL (1/3) - ACTION CENTER */}
+        <div className="space-y-6">
+          <div className="bg-surface-card border border-border rounded-3xl p-5 shadow-sm h-full flex flex-col">
+             <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-lg font-heading font-bold text-text-1 flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-brand" />
+                    Action Center
+                  </h2>
+                  <p className="text-xs font-semibold text-text-3 mt-1 uppercase tracking-wider">
+                    Actividad y Pendientes
+                  </p>
+                </div>
+             </div>
+
+             <div className="flex-1 space-y-4">
+                {sortedActivities.length === 0 ? (
+                  <div className="text-center py-10 bg-surface-base rounded-2xl border border-dashed border-border">
+                    <p className="text-sm font-medium text-text-3">No hay actividad reciente.</p>
+                  </div>
+                ) : (
+                  sortedActivities.map((act) => {
+                    const Icon = act.icon;
+                    return (
+                      <div key={act.id} className="group relative pl-4 border-l-2 border-border/50 hover:border-brand transition-colors pb-4 last:pb-0">
+                         <div className={`absolute -left-[11px] top-0 w-5 h-5 rounded-full flex items-center justify-center border-2 border-white ${act.color}`}>
+                           <Icon className="w-2.5 h-2.5" />
+                         </div>
+                         <div className="-mt-1">
+                           <p className="text-[10px] font-bold text-text-3 uppercase tracking-wider">
+                              {formatDistanceToNow(act.date, { addSuffix: true, locale: es })}
+                           </p>
+                           <p className="text-sm font-bold text-text-1 mt-0.5">
+                              {act.message}
+                           </p>
+                           <p className="text-xs font-medium text-text-2 mt-0.5">
+                              <span className="font-semibold text-brand">{act.company}</span>
+                           </p>
+                         </div>
+                         
+                         {act.type === 'payment_uploaded' && (
+                           <Link href="/superadmin/suscripciones" className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-brand bg-brand/10 hover:bg-brand/20 px-2 py-1 rounded-md transition-colors">
+                             Validar Pago →
+                           </Link>
+                         )}
+                      </div>
+                    )
+                  })
+                )}
+             </div>
+
+             <div className="mt-6 pt-5 border-t border-border">
+                <Link href="/superadmin/empresas" className="w-full flex items-center justify-center gap-2 py-2.5 font-bold text-xs uppercase tracking-wider text-text-2 bg-surface-base hover:bg-surface-hover hover:text-text-1 rounded-xl border border-border transition-colors">
+                  Ver todas las empresas
+                </Link>
+             </div>
           </div>
-          <SaasLineChart data={growthChart} />
         </div>
-
-        {/* Distribución por plan */}
-        <div className="bg-[#18102A] border border-white/6 rounded-2xl p-6">
-          <h2 className="text-lg font-primary mb-1">
-            Por Plan
-          </h2>
-          <p className="text-xs text-[#9585B8] mb-4">Distribución actual</p>
-          <PlanDonutChart
-            data={[
-              {
-                name: "Emprendedor",
-                value: planCounts.emprendedor ?? 0,
-                color: "#4FC3F7",
-              },
-              {
-                name: "Crecimiento",
-                value: planCounts.crecimiento ?? 0,
-                color: "#E040FB",
-              },
-              {
-                name: "Corporativo",
-                value: planCounts.corporativo ?? 0,
-                color: "#7C4DFF",
-              },
-              {
-                name: "Enterprise",
-                value: planCounts.enterprise ?? 0,
-                color: "#FFB800",
-              },
-            ].filter(Boolean)}
-          />
-        </div>
-      </div>
-
-      {/* ÚLTIMAS EMPRESAS REGISTRADAS */}
-      <div className="bg-[#18102A] border border-white/6 rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-primary">
-            Últimas Empresas
-          </h2>
-          <a
-            href="/superadmin/empresas"
-            className="text-[11px] font-semibold text-[#E040FB] hover:opacity-80 transition-opacity"
-          >
-            Ver todas →
-          </a>
-        </div>
-        <RecentCompanies companies={recentCompanies ?? []} />
       </div>
     </div>
   );

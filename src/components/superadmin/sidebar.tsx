@@ -27,8 +27,29 @@ const NAV = [
   { label: "Config", href: "/superadmin/config", icon: Settings },
 ];
 
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+
 export function SuperAdminSidebar() {
   const path = usePathname();
+  const [pendingCount, setPendingCount] = useState(0);
+
+  useEffect(() => {
+    const fetchPending = async () => {
+      const supabase = createClient();
+      const { count } = await supabase
+        .from("subscription_payments")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending");
+      
+      setPendingCount(count || 0);
+    };
+
+    fetchPending();
+
+    // Optional: Set up real-time subscription here if desired, 
+    // but a simple fetch on mount is fine for now.
+  }, []);
 
   return (
     <aside
@@ -54,7 +75,6 @@ export function SuperAdminSidebar() {
         </div>
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 py-4 px-2 space-y-0.5">
         {NAV.map(({ label, href, icon: Icon }) => {
           const isActive =
@@ -94,12 +114,18 @@ export function SuperAdminSidebar() {
                   isActive
                     ? "text-[#E040FB] font-semibold"
                     : "text-text-2 group-hover:text-text-1"
-                } transition-colors`}
+                } transition-colors flex-1`}
               >
                 {label}
               </span>
 
-              {!isActive && (
+              {href === "/superadmin/suscripciones" && pendingCount > 0 && (
+                <div className="w-5 h-5 rounded-full bg-status-danger text-white text-[10px] font-bold flex items-center justify-center -mr-1 shadow-sm leading-none animate-pulse">
+                  {pendingCount}
+                </div>
+              )}
+
+              {href !== "/superadmin/suscripciones" && !isActive && (
                 <ChevronRight
                   className="w-3 h-3 text-text-3 ml-auto
                                          opacity-0 group-hover:opacity-100 transition-opacity"
