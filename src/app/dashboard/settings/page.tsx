@@ -415,10 +415,10 @@ function SettingsContent() {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-bold text-[#F5EEFF]">
+                  <h2 className="text-xl font-bold text-text-1">
                     Equipo de Trabajo
                   </h2>
-                  <p className="text-[#B8A0D0] text-sm">
+                  <p className="text-text-2 text-sm">
                     Administra los accesos y roles de tu personal.
                   </p>
                 </div>
@@ -427,18 +427,18 @@ function SettingsContent() {
                   onOpenChange={setShowInviteModal}
                 >
                   <DialogTrigger asChild>
-                    <Button className="bg-[#00D4AA] hover:bg-[#00B48A] text-[#0F0A12] font-semibold">
+                    <Button className="bg-brand-gradient hover:opacity-90 text-white font-bold shadow-brand rounded-xl">
                       <Plus className="w-4 h-4 mr-2" />
                       Invitar Usuario
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="bg-[#1A1220] border border-[#E040FB]/20 text-[#F5EEFF]">
+                  <DialogContent className="bg-surface-base border-border text-text-1 rounded-2xl">
                     <DialogHeader>
-                      <DialogTitle>Invitar al equipo</DialogTitle>
+                      <DialogTitle className="text-xl font-montserrat font-bold text-text-1">Invitar al equipo</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 pt-4">
                       <div className="space-y-2">
-                        <Label>Nombre del empleado</Label>
+                        <Label className="text-xs font-bold font-montserrat text-text-1">Nombre del empleado</Label>
                         <Input
                           value={inviteData.name}
                           onChange={(e) =>
@@ -448,11 +448,11 @@ function SettingsContent() {
                             })
                           }
                           placeholder="Ej. Ana Pérez"
-                          className="bg-[#0F0A12] border-[#E040FB]/20 text-[#F5EEFF]"
+                          className="bg-surface-input border border-border/40 text-text-1 rounded-xl h-11"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Correo Electrónico</Label>
+                        <Label className="text-xs font-bold font-montserrat text-text-1">Correo Electrónico</Label>
                         <Input
                           value={inviteData.email}
                           onChange={(e) =>
@@ -463,42 +463,42 @@ function SettingsContent() {
                           }
                           type="email"
                           placeholder="ana@empresa.com"
-                          className="bg-[#0F0A12] border-[#E040FB]/20 text-[#F5EEFF]"
+                          className="bg-surface-input border border-border/40 text-text-1 rounded-xl h-11"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Rol en el Sistema</Label>
+                        <Label className="text-xs font-bold font-montserrat text-text-1">Rol en el Sistema</Label>
                         <Select
                           value={inviteData.role}
                           onValueChange={(val) =>
                             setInviteData({ ...inviteData, role: val })
                           }
                         >
-                          <SelectTrigger className="w-full h-10 px-3 py-2 rounded-md bg-[#0F0A12] border border-[#E040FB]/20 text-[#F5EEFF] outline-none">
+                          <SelectTrigger className="w-full h-11 px-3 py-2 rounded-xl bg-surface-input border border-border/40 text-text-1 outline-none">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-[#1A1220]/95 backdrop-blur-xl border-[#E040FB]/20 text-[#F5EEFF]">
+                          <SelectContent className="bg-surface-elevated border-border text-text-1 z-[9999]" position="popper">
                             <SelectItem
                               value="vendedor"
-                              className="focus:bg-[#E040FB]/10 focus:text-white cursor-pointer"
+                              className="focus:bg-surface-hover focus:text-text-1 cursor-pointer"
                             >
                               Representante de Ventas
                             </SelectItem>
                             <SelectItem
                               value="cobranza"
-                              className="focus:bg-[#E040FB]/10 focus:text-white cursor-pointer"
+                              className="focus:bg-surface-hover focus:text-text-1 cursor-pointer"
                             >
                               Analista de Cobranza (CxC)
                             </SelectItem>
                             <SelectItem
                               value="admin"
-                              className="focus:bg-[#E040FB]/10 focus:text-white cursor-pointer"
+                              className="focus:bg-surface-hover focus:text-text-1 cursor-pointer"
                             >
                               Administrador General
                             </SelectItem>
                           </SelectContent>
                         </Select>
-                        <p className="text-xs text-[#B8A0D0] mt-1">
+                        <p className="text-[10px] text-text-3 mt-1">
                           {inviteData.role === "admin" &&
                             "Control total sobre configuración y roles."}
                           {inviteData.role === "vendedor" &&
@@ -508,7 +508,7 @@ function SettingsContent() {
                         </p>
                       </div>
                       <Button
-                        className="w-full bg-[#E040FB] hover:bg-[#C511E0]"
+                        className="w-full bg-brand-gradient hover:opacity-90 text-white font-bold shadow-brand rounded-xl h-11"
                         onClick={handleInviteUser}
                         disabled={isLoading}
                       >
@@ -524,53 +524,53 @@ function SettingsContent() {
                 </Dialog>
               </div>
 
-              <div className="bg-[#1A1220]/50 backdrop-blur-xl border border-[#E040FB]/10 rounded-2xl overflow-hidden">
-                <div className="divide-y divide-[#E040FB]/10">
+              <div className="bg-surface-card border border-border/50 shadow-card rounded-2xl overflow-hidden">
+                <div className="divide-y divide-border">
                   {isFetching ? (
-                    <div className="p-8 text-center text-[#B8A0D0]">
+                    <div className="p-8 text-center text-text-3 font-medium">
                       Cargando usuarios...
                     </div>
                   ) : teamMembers.length === 0 ? (
-                    <div className="p-8 text-center text-[#B8A0D0]">
+                    <div className="p-8 text-center text-text-3 font-medium">
                       Solo tú estás en el equipo. ¡Agrega a un colega!
                     </div>
                   ) : (
                     teamMembers.map((member) => (
                       <div
                         key={member.id}
-                        className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#E040FB]/5 transition-colors"
+                        className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-base hover:bg-surface-hover/30 transition-colors"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full bg-[#7C4DFF]/20 flex items-center justify-center text-[#F5EEFF] font-bold border border-[#7C4DFF]/30">
+                          <div className="w-12 h-12 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-lg border border-brand/20">
                             {member.full_name?.charAt(0).toUpperCase() || "U"}
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <p className="font-semibold text-[#F5EEFF]">
+                              <p className="font-bold font-montserrat text-text-1">
                                 {member.full_name}
                               </p>
                               {member.isPending && (
                                 <Badge
                                   variant="outline"
-                                  className="text-[10px] bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
+                                  className="text-[10px] bg-status-warn/10 text-status-warn border-status-warn/20 font-bold"
                                 >
-                                  Pendiente de ingreso
+                                  Pendiente
                                 </Badge>
                               )}
                             </div>
-                            <p className="text-sm text-[#B8A0D0]">
+                            <p className="text-xs text-text-2 font-medium">
                               {member.email}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-4">
-                          <Badge className="bg-[#0F0A12] text-[#00D4AA] border-[#00D4AA]/20 uppercase">
+                          <Badge className="bg-brand/10 text-brand border border-brand/20 uppercase font-bold tracking-widest text-[10px] hover:bg-brand/20 transition-colors">
                             {member.role || "USUARIO"}
                           </Badge>
                           {(member.role === "vendedor" || member.role === "admin") && (
                             <button
                               onClick={() => { setSelectedMember(member); setShowCommissionModal(true); }}
-                              className="text-[#E040FB] hover:bg-[#E040FB]/10 p-2 rounded-lg transition-colors"
+                              className="text-brand hover:bg-brand/10 p-2 rounded-lg transition-colors border border-transparent hover:border-brand/20"
                               title="Configurar Comisiones"
                             >
                               <Percent className="w-4 h-4" />
@@ -579,7 +579,7 @@ function SettingsContent() {
                           {profile?.email !== member.email && (
                             <button
                               onClick={() => handleRemoveUser(member.email)}
-                              className="text-[#FF4757] hover:bg-[#FF4757]/10 p-2 rounded-lg transition-colors"
+                              className="text-status-danger hover:bg-status-danger/10 p-2 rounded-lg transition-colors border border-transparent hover:border-status-danger/20"
                               title="Eliminar usuario"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -601,18 +601,18 @@ function SettingsContent() {
               animate={{ opacity: 1, x: 0 }}
               className="space-y-6"
             >
-              <div className="bg-[#1A1220]/50 backdrop-blur-xl border border-[#E040FB]/10 rounded-2xl p-6">
-                <h2 className="text-xl font-bold text-[#F5EEFF] mb-2">
+              <div className="bg-surface-card border border-border/50 shadow-card rounded-2xl p-6">
+                <h2 className="text-xl font-bold font-montserrat text-text-1 mb-2">
                   Tasa de Cambio BCV
                 </h2>
-                <p className="text-[#B8A0D0] text-sm mb-6">
+                <p className="text-text-2 text-sm mb-6">
                   Configura la tasa de cambio oficial. Esto afectará los
                   cálculos de facturación y cobranzas en todo el sistema.
                 </p>
 
                 <div className="max-w-md space-y-4">
                   <div className="space-y-2">
-                    <Label className="text-[#B8A0D0]">
+                    <Label className="text-xs font-bold font-montserrat text-text-1">
                       Tasa Actual (Bs/USD)
                     </Label>
                     <div className="flex gap-4">
@@ -620,12 +620,12 @@ function SettingsContent() {
                         type="number"
                         value={bcvRate}
                         onChange={(e) => setBcvRate(e.target.value)}
-                        className="bg-[#0F0A12] border-[#E040FB]/30 text-2xl font-bold text-[#F5EEFF] focus-visible:ring-[#E040FB] h-14"
+                        className="bg-surface-input border border-border/40 text-2xl font-bold font-mono text-text-1 focus-visible:ring-brand/50 h-14 rounded-xl"
                       />
                       <Button
                         onClick={handleSaveVariables}
                         disabled={isLoading}
-                        className="bg-[#00D4AA] hover:bg-[#00B48A] text-[#0F0A12] h-14 px-6 font-bold shadow-[0_0_15px_rgba(0,212,170,0.3)]"
+                        className="bg-brand-gradient hover:opacity-90 text-white h-14 px-6 font-bold font-montserrat shadow-brand rounded-xl"
                       >
                         {isLoading ? (
                           <Loader2 className="w-5 h-5 animate-spin" />
@@ -635,8 +635,8 @@ function SettingsContent() {
                       </Button>
                     </div>
                   </div>
-                  <div className="p-3 bg-[#E040FB]/10 rounded-lg border border-[#E040FB]/20 flex gap-3 text-sm text-[#F5EEFF]">
-                    <AlertCircle className="w-5 h-5 text-[#E040FB] shrink-0" />
+                  <div className="p-3 bg-brand/10 rounded-lg border border-brand/20 flex gap-3 text-sm text-brand font-medium">
+                    <AlertCircle className="w-5 h-5 text-brand shrink-0" />
                     <p>
                       En el futuro, esta tasa se sincronizará automáticamente
                       mediante el API del Banco Central a las 8:00 AM.
@@ -645,22 +645,22 @@ function SettingsContent() {
                 </div>
               </div>
 
-              <div className="bg-[#1A1220]/50 backdrop-blur-xl border border-[#E040FB]/10 rounded-2xl p-6">
-                <h2 className="text-xl font-bold text-[#F5EEFF] mb-2">
+              <div className="bg-surface-card border border-border/50 shadow-card rounded-2xl p-6">
+                <h2 className="text-xl font-bold font-montserrat text-text-1 mb-2">
                   Impuestos
                 </h2>
-                <p className="text-[#B8A0D0] text-sm mb-6">
+                <p className="text-text-2 text-sm mb-6">
                   Configura el porcentaje de IVA base para las transacciones.
                 </p>
 
                 <div className="max-w-xs space-y-2">
-                  <Label className="text-[#B8A0D0]">IVA Nacional (%)</Label>
+                  <Label className="text-xs font-bold font-montserrat text-text-1">IVA Nacional (%)</Label>
                   <Input
                     defaultValue="16"
                     disabled
-                    className="bg-[#0F0A12] border-[#E040FB]/10 text-[#6B5280] opacity-50"
+                    className="bg-surface-input border border-border/40 text-text-1 opacity-50 font-bold font-mono rounded-xl h-11"
                   />
-                  <p className="text-[10px] text-[#6B5280]">
+                  <p className="text-[10px] text-text-3 font-semibold">
                     Configuración avanzada bloqueada en plan actual.
                   </p>
                 </div>
