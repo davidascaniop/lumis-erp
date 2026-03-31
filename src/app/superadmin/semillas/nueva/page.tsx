@@ -133,7 +133,7 @@ export default function NuevaSemillaPage() {
               <label className="block text-[11px] font-bold text-text-2 uppercase tracking-wide">Reflexión Diaria</label>
               <button 
                 onClick={handleAIInspiration}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-brand/10 hover:bg-brand/20 text-brand rounded-lg text-xs font-bold transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#E040FB]/10 hover:bg-[#E040FB]/20 text-[#E040FB] rounded-lg text-xs font-bold transition-colors"
               >
                 <Sparkles className="w-3.5 h-3.5" /> Inspiración IA
               </button>
@@ -172,7 +172,7 @@ export default function NuevaSemillaPage() {
                   onClick={() => setVideoType(opt.id as any)}
                   className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                     videoType === opt.id
-                      ? "bg-brand text-white shadow-md shadow-brand/20"
+                      ? "bg-[#E040FB] text-white shadow-md shadow-[#E040FB]/20"
                       : "bg-surface-base border border-border text-text-2 hover:bg-surface-hover"
                   }`}
                 >
@@ -216,8 +216,8 @@ export default function NuevaSemillaPage() {
               onClick={() => handleSubmit("published")}
               disabled={loading}
               className="flex items-center justify-center gap-2 px-8 py-3 rounded-xl text-sm font-bold text-white
-                                     bg-gradient-to-r from-brand to-brand-hover
-                                     shadow-lg shadow-brand/20
+                                     bg-gradient-to-r from-[#E040FB] to-[#7C4DFF]
+                                     shadow-lg shadow-[#E040FB]/20
                                      hover:-translate-y-0.5 transition-all disabled:opacity-50 w-full sm:w-auto sm:ml-auto"
             >
               {loading ? (
@@ -244,8 +244,8 @@ export default function NuevaSemillaPage() {
                 <div className="w-24 h-6 bg-surface-card rounded-full absolute top-2 left-1/2 -translate-x-1/2 z-10" />
                 
                 {/* Header App */}
-                <div className="bg-brand text-white pt-10 pb-4 px-5 relative shrink-0">
-                    <div className="absolute inset-0 bg-gradient-to-br from-brand to-[#7C4DFF] opacity-90" />
+                <div className="bg-[#E040FB] text-white pt-10 pb-4 px-5 relative shrink-0">
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] opacity-90" />
                     <div className="relative z-10">
                         <p className="text-[10px] font-bold uppercase tracking-wider opacity-80 mb-1">Semilla del Día</p>
                         <h2 className="text-lg font-bold">Lumis Feed</h2>

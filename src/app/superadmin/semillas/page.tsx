@@ -142,8 +142,8 @@ export default function SemillasPage() {
         <Link
           href="/superadmin/semillas/nueva"
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-white
-                               bg-gradient-to-r from-brand to-brand-hover
-                               shadow-lg shadow-brand/20
+                               bg-gradient-to-r from-[#E040FB] to-[#7C4DFF]
+                               shadow-lg shadow-[#E040FB]/20
                                hover:shadow-xl hover:-translate-y-0.5 transition-all text-sm"
         >
           <Plus className="w-4 h-4" />
@@ -317,7 +317,7 @@ export default function SemillasPage() {
                 <Link
                   href="/superadmin/semillas/nueva"
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-white
-                                      bg-brand shadow-lg shadow-brand/20 hover:bg-brand-hover hover:-translate-y-0.5 transition-all text-sm"
+                                      bg-[#E040FB] hover:bg-[#C236D9] shadow-lg shadow-[#E040FB]/20 hover:-translate-y-0.5 transition-all text-sm"
                 >
                   <Plus className="w-4 h-4" /> Escribir Primera Semilla
                 </Link>
