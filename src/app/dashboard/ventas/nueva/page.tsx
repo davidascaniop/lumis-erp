@@ -43,6 +43,9 @@ function NuevaVentaContent() {
   const [selectedPartner, setSelectedPartner] = useState<any>(null);
   const [cart, setCart] = useState<any[]>([]);
 
+  // Categories State
+  const [categories, setCategories] = useState<string[]>([]);
+
   // Payment State
   const [paymentType, setPaymentType] = useState<"contado" | "credito">(
     "contado",
@@ -73,7 +76,7 @@ function NuevaVentaContent() {
           .single();
         if (!usr) return;
 
-        const [pRes, prRes] = await Promise.all([
+        const [pRes, prRes, catRes] = await Promise.all([
           supabase
             .from("partners")
             .select("*")
@@ -84,10 +87,18 @@ function NuevaVentaContent() {
             .select("*")
             .eq("company_id", usr.company_id)
             .eq("status", "active"),
+          supabase
+            .from("product_categories")
+            .select("name")
+            .eq("company_id", usr.company_id)
+            .order("name"),
         ]);
 
         setPartners(pRes.data || []);
         setProducts(prRes.data || []);
+        if (catRes.data) {
+          setCategories(catRes.data.map((c: any) => c.name));
+        }
 
         if (preSelectedPartnerId && pRes.data) {
           const p = pRes.data.find((x) => x.id === preSelectedPartnerId);
@@ -145,6 +156,41 @@ function NuevaVentaContent() {
     [cart],
   );
   const total = subtotal;
+
+  // ── Crear Cliente Rápido ──
+  const handleCreateQuickClient = async (name: string, rif: string, phone: string): Promise<boolean> => {
+    if (!user?.company_id) return false;
+    try {
+      const { data: newP, error: pErr } = await supabase
+        .from("partners")
+        .insert({
+          company_id: user.company_id,
+          name: name,
+          rif: rif,
+          phone: phone,
+          status: "active",
+          credit_status: "green",
+          current_balance: 0,
+        } as any)
+        .select()
+        .single();
+
+      if (pErr) throw pErr;
+      
+      setPartners(prev => [...prev, newP]);
+      setSelectedPartner(newP);
+      setNewClientName("");
+      setNewClientRif("");
+      setNewClientPhone("");
+      toast.success("Cliente creado con éxito");
+      return true;
+    } catch (err: any) {
+      toast.error("Error al crear cliente rápido", {
+        description: err.message,
+      });
+      return false;
+    }
+  };
 
   // ── Crear Pedido (lógica de negocio IDÉNTICA al original) ──
   const handleCreateOrder = async () => {
@@ -308,7 +354,7 @@ function NuevaVentaContent() {
       <div className="flex flex-1 overflow-hidden bg-[#F8FAFC]">
         {/* CATÁLOGO (ANCHO) */}
         <div className="flex-[7] flex flex-col overflow-hidden">
-          <ProductoGrid productos={products} cart={cart} onAdd={addToCart} />
+          <ProductoGrid productos={products} cart={cart} onAdd={addToCart} categories={categories} />
         </div>
 
         {/* SIDEBAR DE PAGO (BUBBLE CARD STYLE - ENLARGED) */}
@@ -341,6 +387,7 @@ function NuevaVentaContent() {
               setNewClientPhone={setNewClientPhone}
               partners={partners}
               onSelectPartner={setSelectedPartner}
+              onCreateQuickClient={handleCreateQuickClient}
             />
           </div>
         </div>

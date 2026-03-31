@@ -7,23 +7,17 @@ export function ProductoGrid({
   productos,
   cart,
   onAdd,
+  categories,
 }: {
   productos: any[];
   cart: any[];
   onAdd: (p: any, qty?: number) => void;
+  categories: string[];
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [categoria, setCat] = useState<string | null>(null);
   const [justAdded, setAdded] = useState<Set<string>>(new Set());
-
-  const categorias = useMemo(
-    () =>
-      [
-        ...new Set(productos.map((p: any) => p.category).filter(Boolean)),
-      ].sort(),
-    [productos],
-  );
 
   const filtered = useMemo(() => {
     return productos.filter((p: any) => {
@@ -55,33 +49,23 @@ export function ProductoGrid({
       
       {/* ── FILTROS Y BÚSQUEDA ── */}
       <div className="flex items-center justify-between gap-4 bg-white p-3 rounded-2xl border border-[#EDF2F7] shadow-sm">
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-          <button
-            onClick={() => setCat(null)}
-            className={`px-4 py-1.5 rounded-lg text-[13px] font-bold transition-all font-outfit ${
-              !categoria ? "bg-[#CBD5E1] text-[#1E293B]" : "bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0]"
-            }`}
+        <div className="flex-1 max-w-[200px] xl:max-w-[250px]">
+          <select
+            value={categoria || ""}
+            onChange={(e) => setCat(e.target.value || null)}
+            className="w-full px-4 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[13px] font-bold text-slate-700 focus:outline-none focus:border-brand/40 font-outfit appearance-none cursor-pointer"
+            style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
           >
-            Todos
-          </button>
-          {categorias.slice(0, 4).map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setCat(cat)}
-              className={`px-4 py-1.5 rounded-lg text-[13px] font-bold transition-all font-outfit whitespace-nowrap ${
-                categoria === cat ? "bg-[#CBD5E1] text-[#1E293B]" : "bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0]"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+            <option value="">Todas las categorías</option>
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="flex items-center gap-3">
-          <button onClick={() => router.back()} className="text-[12px] font-bold text-text-3 font-outfit flex items-center gap-1 hover:text-brand">
-             <RotateCcw className="w-3.5 h-3.5" /> Regresar
-          </button>
-          <div className="h-4 w-[1px] bg-[#EDF2F7]"></div>
           <div className="relative w-48 xl:w-64">
              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
              <input
@@ -142,9 +126,9 @@ function ProductCard({
           </div>
           
           <div className="flex-1 min-w-0 py-1">
-            <h3 className="text-[15px] font-bold text-[#1A1125] font-outfit line-clamp-1 mb-0.5 leading-tight">{product.name}</h3>
+            <h3 className="text-[15px] font-bold text-[#1A1125] font-outfit line-clamp-2 mb-0.5 leading-tight" title={product.name}>{product.name}</h3>
             <p className="text-[11px] font-bold text-text-3 uppercase tracking-wide mb-2">
-               {product.department || product.category || "General"}
+               {product.category || "General"}
             </p>
             <p className="text-xl font-bold text-brand font-outfit mb-2">$ {Number(product.price_usd).toFixed(2)}</p>
             <div className="space-y-0.5">
