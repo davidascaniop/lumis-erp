@@ -78,6 +78,8 @@ export async function createBroadcast(data: {
   message: string;
   type: string;
   target: string;
+  channel?: string;
+  scheduled_for?: string | null;
 }) {
   const supabase = await createClient();
   const user = await assertSuperAdmin(supabase);
@@ -85,10 +87,12 @@ export async function createBroadcast(data: {
   await supabase.from("broadcasts").insert({
     ...data,
     created_by: user.id,
-    is_active: true,
+    is_active: data.scheduled_for ? false : true,
+    scheduled_for: data.scheduled_for || null,
+    channel: data.channel || 'app',
   });
 
-  revalidatePath("/superadmin/broadcast");
+  revalidatePath("/superadmin/comunicacion");
 }
 
 // ─── Registrar pago de suscripción ───────────────────────────

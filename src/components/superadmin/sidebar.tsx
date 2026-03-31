@@ -59,7 +59,7 @@ export function SuperAdminSidebar() {
       ],
     },
     { label: "Semillas", href: "/superadmin/semillas", icon: Sparkles },
-    { label: "Broadcast", href: "/superadmin/broadcast", icon: Megaphone },
+    { label: "Comunicación", href: "/superadmin/comunicacion", icon: Megaphone },
     { label: "Usuarios", href: "/superadmin/usuarios", icon: Users },
     { label: "Config", href: "/superadmin/config", icon: Settings },
   ];
