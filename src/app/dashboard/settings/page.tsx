@@ -295,29 +295,29 @@ function SettingsContent() {
               animate={{ opacity: 1, x: 0 }}
               className="space-y-6"
             >
-              <div className="bg-[#1A1220]/50 backdrop-blur-xl border border-[#E040FB]/10 rounded-2xl p-6">
-                <h2 className="text-xl font-bold text-[#F5EEFF] mb-6">
+              <div className="bg-surface-card border border-border/50 shadow-card rounded-2xl p-6">
+                <h2 className="text-xl font-bold font-montserrat text-text-1 mb-6">
                   Logo de tu Empresa
                 </h2>
                 <div className="flex items-center gap-6">
-                  <div className="w-24 h-24 rounded-2xl bg-[#0F0A12] border-2 border-dashed border-[#E040FB]/30 flex flex-col items-center justify-center gap-2 group cursor-pointer hover:border-[#E040FB] transition-colors overflow-hidden relative">
-                    <Upload className="w-6 h-6 text-[#E040FB] group-hover:scale-110 transition-transform" />
-                    <span className="text-[10px] text-[#B8A0D0]">
+                  <div className="w-24 h-24 rounded-2xl bg-surface-base border-2 border-dashed border-border/60 flex flex-col items-center justify-center gap-2 group cursor-pointer hover:border-brand transition-colors overflow-hidden relative shadow-sm">
+                    <Upload className="w-6 h-6 text-brand group-hover:scale-110 transition-transform" />
+                    <span className="text-[10px] text-text-3 font-bold uppercase tracking-wider">
                       Subir logo
                     </span>
                   </div>
                   <div className="flex-1 space-y-2">
-                    <p className="text-sm text-[#F5EEFF] font-medium">
+                    <p className="text-sm text-text-1 font-bold font-montserrat">
                       Sube el logotipo de tu organización.
                     </p>
-                    <p className="text-xs text-[#B8A0D0]">
+                    <p className="text-xs text-text-2 font-medium">
                       Se recomienda un formato .PNG cuadrado (ej. 512x512) sin
                       fondo. Este logo aparecerá en el dashboard y en las
                       facturas/notas de entrega.
                     </p>
                     <Button
                       variant="outline"
-                      className="mt-2 bg-transparent border-[#E040FB]/20 text-[#F5EEFF] hover:bg-[#E040FB]/10"
+                      className="mt-2 bg-white border-border/60 text-text-2 hover:bg-surface-base font-bold rounded-xl px-6"
                     >
                       Seleccionar Archivo
                     </Button>
@@ -325,21 +325,21 @@ function SettingsContent() {
                 </div>
               </div>
 
-              <div className="bg-[#1A1220]/50 backdrop-blur-xl border border-[#E040FB]/10 rounded-2xl p-6">
-                <h2 className="text-xl font-bold text-[#F5EEFF] mb-6">
+              <div className="bg-surface-card border border-border/50 shadow-card rounded-2xl p-6">
+                <h2 className="text-xl font-bold font-montserrat text-text-1 mb-6">
                   Información General
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label className="text-[#B8A0D0]">Nombre Completo</Label>
+                    <Label className="text-xs font-bold font-montserrat text-text-1">Nombre Completo</Label>
                     <Input
                       defaultValue={profile?.full_name || ""}
                       placeholder={isFetching ? "Cargando..." : "Juan Pérez"}
-                      className="bg-[#0F0A12] border-[#E040FB]/10 text-[#F5EEFF] focus-visible:ring-[#E040FB]/50"
+                      className="bg-surface-input border border-border/40 text-text-1 focus-visible:ring-brand/50 rounded-xl h-11 font-medium shadow-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[#B8A0D0]">
+                    <Label className="text-xs font-bold font-montserrat text-text-1">
                       Correo Electrónico (Solo lectura)
                     </Label>
                     <Input
@@ -348,11 +348,11 @@ function SettingsContent() {
                         isFetching ? "Cargando..." : "admin@empresa.com"
                       }
                       disabled
-                      className="bg-[#0F0A12] border-[#E040FB]/10 text-[#6B5280] opacity-50"
+                      className="bg-surface-base border border-border/40 text-text-3 font-medium opacity-70 rounded-xl h-11"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[#B8A0D0]">
+                    <Label className="text-xs font-bold font-montserrat text-text-1">
                       Nombre de la Empresa (Legal)
                     </Label>
                     <Input
@@ -361,30 +361,37 @@ function SettingsContent() {
                       placeholder={
                         isFetching ? "Cargando..." : "LUMIS Technologies"
                       }
-                      className="bg-[#0F0A12] border-[#E040FB]/10 text-[#F5EEFF] focus-visible:ring-[#E040FB]/50"
+                      className="bg-surface-input border border-border/40 text-text-1 focus-visible:ring-brand/50 rounded-xl h-11 font-medium shadow-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[#E040FB] font-bold">
+                    <Label className="text-xs font-bold font-montserrat text-brand flex items-center gap-1.5">
                       Nombre Comercial (Marca Blanca WhatsApp)
                     </Label>
                     <Input
                       value={company?.name_comercial || ""}
                       onChange={(e) => setCompany(prev => prev ? ({ ...prev, name_comercial: e.target.value }) : null)}
                       placeholder="Ej. Mi Tienda Express"
-                      className="bg-[#0F0A12] border-[#E040FB]/30 text-white focus-visible:ring-[#E040FB] border-2 shadow-[0_0_10px_rgba(224,64,251,0.1)]"
+                      className="bg-surface-input border border-brand/40 text-text-1 focus-visible:ring-brand border-2 shadow-[0_0_10px_rgba(224,64,251,0.05)] rounded-xl h-11 font-bold"
                     />
-                    <p className="text-[10px] text-[#B8A0D0] italic">
+                    <p className="text-[10px] text-text-3 italic font-medium">
                       Este nombre se usará en todos los mensajes de seguimiento automáticos.
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[#B8A0D0]">Rol Administrativo</Label>
-                    <Input
-                      defaultValue={profile?.role?.toUpperCase() || ""}
-                      disabled
-                      className="bg-[#0F0A12] border-[#E040FB]/10 text-[#00D4AA] font-bold opacity-80"
-                    />
+                    <Label className="text-xs font-bold font-montserrat text-text-1">Rol Administrativo</Label>
+                    <div className="relative">
+                      <Input
+                        defaultValue={profile?.role?.toUpperCase() || ""}
+                        disabled
+                        className="bg-surface-base border border-border/40 text-status-ok font-bold opacity-80 rounded-xl h-11 pl-4"
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                         <Badge className="bg-status-ok/10 text-status-ok border-status-ok/20 text-[10px] uppercase font-bold tracking-widest">
+                           {profile?.role || "USER"}
+                         </Badge>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -392,7 +399,7 @@ function SettingsContent() {
                   <Button
                     onClick={handleSaveProfile}
                     disabled={isLoading}
-                    className="bg-[#E040FB] hover:bg-[#C511E0] text-white shadow-[0_0_15px_rgba(224,64,251,0.4)]"
+                    className="bg-brand-gradient hover:opacity-90 text-white shadow-brand rounded-xl font-bold px-8 h-11"
                   >
                     {isLoading ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
