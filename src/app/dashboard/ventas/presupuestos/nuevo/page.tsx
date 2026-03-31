@@ -50,6 +50,16 @@ function NuevoPresupuestoContent() {
   const submitQuickClient = async () => {
     if (!newClientName || !newClientRif) return toast.error("Nombre y RIF son obligatorios");
     if (!user?.company_id) return;
+
+    const plan = user?.companies?.plan_type?.toLowerCase() || 'starter';
+    if (!plan.includes('pro') && !plan.includes('enterprise')) {
+        const { count } = await supabase.from('partners').select('*', { count: 'exact', head: true }).eq('company_id', user.company_id);
+        if (count !== null && count >= 50) {
+            toast.error('Alcanzaste el límite de tu plan, mejora a Pro Business para clientes ilimitados');
+            return;
+        }
+    }
+
     setIsSavingQuick(true);
     const rifCompleto = newClientRif.includes("-") || newClientRif.startsWith("V") || newClientRif.startsWith("J") || newClientRif.startsWith("E") 
       ? newClientRif 

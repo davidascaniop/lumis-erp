@@ -6,6 +6,9 @@ import { Building2, Eye, Loader2, Search, X } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { Edit2, Save } from "lucide-react";
 
 export default function EmpresasPage() {
   const supabase = createClient();
@@ -16,11 +19,19 @@ export default function EmpresasPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
+  const [editingCompany, setEditingCompany] = useState<any>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editForm, setEditForm] = useState({
+    plan_type: "starter",
+    subscription_status: "active",
+    grace_period_days: 0,
+  });
+
   const fetchCompanies = async () => {
     setIsLoading(true);
     let query = supabase
       .from("companies")
-      .select(`id, name, plan_type, subscription_status, created_at, owner_email`)
+      .select(`id, name, plan_type, subscription_status, created_at, owner_email, settings`)
       .order("created_at", { ascending: false });
 
     if (search) {
@@ -40,9 +51,43 @@ export default function EmpresasPage() {
     fetchCompanies();
   }, [search, statusFilter]);
 
-  // Impersonate function
   const handleImpersonate = (companyId: string) => {
     alert(`Modo Dios: Iniciando sesión en la empresa ${companyId}... \n(Requiere integración de Custom Claims en Backend)`);
+  };
+
+  const handleEdit = (company: any) => {
+    const gracePeriod = company.settings?.grace_period_days || 0;
+    setEditForm({
+      plan_type: company.plan_type || "starter",
+      subscription_status: company.subscription_status || "active",
+      grace_period_days: gracePeriod,
+    });
+    setEditingCompany(company);
+  };
+
+  const saveCompany = async () => {
+    if (!editingCompany) return;
+    setIsSaving(true);
+    try {
+      const newSettings = { ...editingCompany.settings, grace_period_days: editForm.grace_period_days };
+      const { error } = await supabase
+        .from("companies")
+        .update({
+          plan_type: editForm.plan_type,
+          subscription_status: editForm.subscription_status,
+          settings: newSettings,
+        } as any)
+        .eq("id", editingCompany.id);
+
+      if (error) throw error;
+      toast.success("Empresa actualizada");
+      setEditingCompany(null);
+      fetchCompanies();
+    } catch (err: any) {
+      toast.error("Error al actualizar la empresa: " + err.message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -166,6 +211,13 @@ export default function EmpresasPage() {
                     <td className="px-5 py-4 text-right">
                       <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
+                          title="Editar suscripción y plan"
+                          onClick={() => handleEdit(c)}
+                          className="h-9 w-9 flex items-center justify-center bg-surface-base border border-border hover:border-brand text-text-2 hover:text-brand hover:bg-brand/5 rounded-lg transition-all"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
                           title="Modo Dios (Impersonate)"
                           onClick={() => handleImpersonate(c.id)}
                           className="h-9 w-9 flex items-center justify-center bg-surface-base border border-border hover:border-brand text-text-2 hover:text-brand hover:bg-brand/5 rounded-lg transition-all"
@@ -181,6 +233,69 @@ export default function EmpresasPage() {
           </table>
         </div>
       </div>
+
+      <Dialog open={!!editingCompany} onOpenChange={(val) => !val && setEditingCompany(null)}>
+        <DialogContent className="bg-surface-base border-border rounded-2xl w-full max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Editar Empresa: {editingCompany?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-text-2 uppercase">Plan de Suscripción</label>
+              <select
+                value={editForm.plan_type}
+                onChange={(e) => setEditForm(prev => ({...prev, plan_type: e.target.value}))}
+                className="w-full px-3 py-2 bg-surface-card border border-border rounded-xl text-sm focus:outline-none"
+              >
+                <option value="starter">Lumis Starter ($19.99)</option>
+                <option value="pro">Lumis Pro Business ($79.99)</option>
+                <option value="enterprise">Lumis Enterprise ($119.99)</option>
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-text-2 uppercase">Estado de la cuenta</label>
+              <select
+                value={editForm.subscription_status}
+                onChange={(e) => setEditForm(prev => ({...prev, subscription_status: e.target.value}))}
+                className="w-full px-3 py-2 bg-surface-card border border-border rounded-xl text-sm focus:outline-none"
+              >
+                <option value="active">Activa (App operando normal)</option>
+                <option value="suspended">Suspendida (Bloqueo de login)</option>
+                <option value="trial">Trial (Prueba gratuita)</option>
+                <option value="pending_verification">Pendiente Verificación</option>
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-text-2 uppercase">Días Extra de Gracia</label>
+              <input
+                type="number"
+                value={editForm.grace_period_days}
+                onChange={(e) => setEditForm(prev => ({...prev, grace_period_days: Number(e.target.value)}))}
+                className="w-full px-3 py-2 bg-surface-card border border-border rounded-xl text-sm focus:outline-none"
+                min="0"
+                step="1"
+              />
+              <p className="text-[10px] text-text-3">Permitir entrada a la app sin pago confirmado este # de días extra.</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <button
+              onClick={() => setEditingCompany(null)}
+              className="px-4 py-2 rounded-xl text-sm font-medium text-text-2 hover:bg-surface-hover transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={saveCompany}
+              disabled={isSaving}
+              className="px-4 py-2 rounded-xl text-sm font-semibold bg-brand text-white hover:opacity-90 flex items-center gap-2 transition-opacity disabled:opacity-50"
+            >
+              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              Guardar Cambios
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

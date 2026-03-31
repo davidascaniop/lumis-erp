@@ -72,7 +72,7 @@ const NAV_SECTIONS: NavSection[] = [
       { href: "/dashboard/productos", label: "Lista de Productos", icon: Package },
       { href: "/dashboard/inventario", label: "Ajustes de Stock", icon: Gauge },
       { href: "/dashboard/productos/categorias", label: "Categorías y Atributos", icon: Tags },
-      { href: "/dashboard/productos/kits", label: "Kits & Ensambles", icon: Layers },
+      { href: "/dashboard/productos/kits", label: "Kits & Ensambles", icon: Layers, requiredPlan: ["pro", "enterprise"] },
     ],
   },
   {
@@ -80,9 +80,9 @@ const NAV_SECTIONS: NavSection[] = [
     label: "Finanzas",
     icon: DollarSign,
     children: [
-      { href: "/dashboard/cobranza", label: "Cuentas por Cobrar", icon: CreditCard },
-      { href: "/dashboard/compras/gastos", label: "Gastos / CxP", icon: Receipt },
-      { href: "/dashboard/finanzas/flujo", label: "Flujo de Caja", icon: ArrowDownCircle },
+      { href: "/dashboard/cobranza", label: "Cuentas por Cobrar", icon: CreditCard, requiredPlan: ["pro", "enterprise"] },
+      { href: "/dashboard/compras/gastos", label: "Gastos / CxP", icon: Receipt, requiredPlan: ["pro", "enterprise"] },
+      { href: "/dashboard/finanzas/flujo", label: "Flujo de Caja", icon: ArrowDownCircle, requiredPlan: ["pro", "enterprise"] },
     ],
   },
   {
@@ -90,9 +90,9 @@ const NAV_SECTIONS: NavSection[] = [
     label: "Logística",
     icon: Truck,
     children: [
-      { href: "/dashboard/compras/despachos", label: "Despachos y Envíos", icon: Truck },
-      { href: "/dashboard/compras/proveedores", label: "Proveedores", icon: ClipboardList },
-      { href: "/dashboard/compras", label: "Órdenes de Compra", icon: Wallet },
+      { href: "/dashboard/compras/despachos", label: "Despachos y Envíos", icon: Truck, requiredPlan: ["pro", "enterprise"] },
+      { href: "/dashboard/compras/proveedores", label: "Proveedores", icon: ClipboardList, requiredPlan: ["pro", "enterprise"] },
+      { href: "/dashboard/compras", label: "Órdenes de Compra", icon: Wallet, requiredPlan: ["pro", "enterprise"] },
     ],
   },
   {
@@ -101,8 +101,8 @@ const NAV_SECTIONS: NavSection[] = [
     icon: BarChart3,
     children: [
       { href: "/dashboard/reportes/ventas", label: "Reporte de Ventas", icon: BarChart3 },
-      { href: "/dashboard/reportes/productos", label: "Productos e Inventario", icon: TrendingUp },
-      { href: "/dashboard/reportes/equipo", label: "Equipo de Ventas", icon: PieChart },
+      { href: "/dashboard/reportes/productos", label: "Productos e Inventario", icon: TrendingUp, requiredPlan: ["pro", "enterprise"] },
+      { href: "/dashboard/reportes/equipo", label: "Equipo de Ventas", icon: PieChart, requiredPlan: ["pro", "enterprise"] },
     ],
   },
 ];
@@ -120,7 +120,8 @@ export function Sidebar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [hasCRM, setHasCRM] = useState(true);
+  const [userPlan, setUserPlan] = useState("starter");
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Find the most specific active child globally:
   const allChildren = NAV_SECTIONS.flatMap(s => s.children);
@@ -154,17 +155,12 @@ export function Sidebar() {
   }, [pathname]);
 
   useEffect(() => {
-    async function checkPlan() {
-      if (user?.company_id) {
-        const { data: org } = await supabase
-          .from("companies")
-          .select("plan_type")
-          .eq("id", user.company_id)
-          .single();
-        setHasCRM(org?.plan_type === "pro" || org?.plan_type === "enterprise");
-      }
+    if (user?.companies?.plan_type) {
+      const plan = user.companies.plan_type.toLowerCase();
+      setUserPlan(plan.includes("pro") ? "pro" : plan.includes("enterprise") ? "enterprise" : "starter");
+    } else {
+      setUserPlan("starter");
     }
-    checkPlan();
   }, [user]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -314,25 +310,30 @@ export function Sidebar() {
                   >
                     <div className="pl-3 pt-0.5 pb-1 space-y-0.5 border-l border-border/60 ml-5 mt-1">
                       {section.children.map((child) => {
-                        const isCRMLocked = child.requiredPlan && !hasCRM;
-                        const childHref = isCRMLocked ? "/dashboard/upgrade" : child.href;
+                        const isLocked = child.requiredPlan && !child.requiredPlan.includes(userPlan);
                         const isChildActive = activeChild?.href === child.href;
 
                         return (
                           <Link
                             key={child.href}
-                            href={childHref}
+                            href={isLocked ? "#" : child.href}
+                            onClick={(e) => {
+                              if (isLocked) {
+                                e.preventDefault();
+                                setShowUpgradeModal(true);
+                              }
+                            }}
                             className={cn(
-                              "flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] transition-all duration-150 group/child",
-                              isChildActive
-                                ? "text-text-1 font-bold"
+                              "flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] transition-all duration-150 group/child cursor-pointer",
+                              isChildActive && !isLocked
+                                ? "text-text-1 font-bold bg-surface-hover/5"
                                 : "text-text-3 hover:text-text-1 hover:bg-surface-hover/5",
-                              isCRMLocked ? "opacity-60" : "",
+                              isLocked ? "opacity-70 opacity-80" : "",
                             )}
                           >
-                            <child.icon className={cn("w-3.5 h-3.5 flex-shrink-0", isChildActive ? "text-text-1" : "text-text-3 group-hover/child:text-text-2")} />
+                            <child.icon className={cn("w-3.5 h-3.5 flex-shrink-0", (isChildActive && !isLocked) ? "text-text-1" : "text-text-3 group-hover/child:text-text-2")} />
                             <span className="flex-1 leading-tight">{child.label}</span>
-                            {isCRMLocked && <Lock className="w-3 h-3 text-text-3" />}
+                            {isLocked && <Lock className="w-3.5 h-3.5 text-text-3 shrink-0" />}
                           </Link>
                         );
                       })}
@@ -456,6 +457,52 @@ export function Sidebar() {
           </div>
         </Link>
       </div>
+
+      {/* MODAL MEJORAR PLAN */}
+      <AnimatePresence>
+        {showUpgradeModal && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowUpgradeModal(false)}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-sm bg-surface-elevated rounded-3xl p-6 shadow-elevated border border-border"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-brand/10 text-brand flex items-center justify-center mx-auto mb-4">
+                <Lock className="w-6 h-6" />
+              </div>
+              <h2 className="text-xl font-bold text-center text-text-1 mb-2 font-display">Función Bloqueada</h2>
+              <p className="text-sm text-center text-text-3 mb-6">
+                Esta función no está disponible en tu plan actual. Mejora tu plan para desbloquear su potencial completo.
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    setShowUpgradeModal(false);
+                    router.push("/dashboard/settings");
+                  }}
+                  className="w-full py-3 rounded-xl bg-brand text-white font-bold text-sm hover:opacity-90 transition-opacity"
+                >
+                  Mejorar Plan
+                </button>
+                <button
+                  onClick={() => setShowUpgradeModal(false)}
+                  className="w-full py-3 rounded-xl bg-surface-base text-text-2 font-bold text-sm hover:bg-surface-hover transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </aside>
   );
 }

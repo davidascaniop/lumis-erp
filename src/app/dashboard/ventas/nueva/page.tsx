@@ -160,6 +160,17 @@ function NuevaVentaContent() {
   // ── Crear Cliente Rápido ──
   const handleCreateQuickClient = async (name: string, rif: string, phone: string): Promise<boolean> => {
     if (!user?.company_id) return false;
+    
+    // Check limit
+    const plan = user?.companies?.plan_type?.toLowerCase() || 'starter';
+    if (!plan.includes('pro') && !plan.includes('enterprise')) {
+        const { count } = await supabase.from('partners').select('*', { count: 'exact', head: true }).eq('company_id', user.company_id);
+        if (count !== null && count >= 50) {
+            toast.error('Alcanzaste el límite de tu plan, mejora a Pro Business para clientes ilimitados');
+            return false;
+        }
+    }
+
     try {
       const { data: newP, error: pErr } = await supabase
         .from("partners")

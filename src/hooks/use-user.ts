@@ -17,7 +17,7 @@ export function useUser() {
         if (authUser) {
           const { data: profile } = await supabase
             .from("users")
-            .select("*")
+            .select("*, companies(id, is_active, plan_type, settings, subscription_status)")
             .eq("auth_id", authUser.id)
             .single();
 
