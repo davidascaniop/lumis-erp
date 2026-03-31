@@ -124,7 +124,8 @@ export default function SemillasPage() {
 
   // Derive Stats
   const totalViews = seeds.reduce((acc, s) => acc + (s.views_count || 0), 0);
-  const totalReactions = seeds.reduce((acc, s) => acc + (s.reactions_count || Math.floor((s.views_count || 0) * 0.15)), 0); // fallback for layout demo
+  const totalReactions = seeds.reduce((acc, s) => acc + (s.blessings_count || 0), 0);
+  const totalShares = seeds.reduce((acc, s) => acc + (s.shares_count || 0), 0);
   const connectionRate = totalViews > 0 ? Math.round((totalReactions / totalViews) * 100) : 0;
 
   return (
@@ -393,12 +394,12 @@ export default function SemillasPage() {
                     {seed.video_url && <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-text-3" /> Video Intro</span>}
                     {seed.case_story && <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-text-3" /> Caso Base</span>}
                     
-                    <div className="ml-auto flex items-center gap-2">
-                       <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-base border border-border text-text-2 font-bold shadow-sm group-hover:border-brand/30 transition-colors">
-                          <Eye className="w-3.5 h-3.5 text-text-3 group-hover:text-brand transition-colors" /> {seed.views_count ?? 0}
+                    <div className="ml-auto flex items-center gap-3">
+                       <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-base border border-border text-text-2 font-bold shadow-sm group-hover:border-[#E040FB]/30 transition-colors">
+                          <Heart className="w-3.5 h-3.5 text-text-3 group-hover:text-[#E040FB] transition-colors" /> {seed.blessings_count ?? 0}
                        </span>
-                       <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-base border border-border text-text-2 font-bold shadow-sm group-hover:border-status-danger/30 transition-colors">
-                          <Heart className="w-3.5 h-3.5 text-text-3 group-hover:text-status-danger transition-colors" /> {seed.reactions_count ?? Math.floor((seed.views_count || 0) * 0.15)}
+                       <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-base border border-border text-text-2 font-bold shadow-sm group-hover:border-brand/30 transition-colors">
+                          <Send className="w-3.5 h-3.5 text-text-3 group-hover:text-brand transition-colors" /> {seed.shares_count ?? 0}
                        </span>
                     </div>
                   </div>

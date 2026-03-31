@@ -102,3 +102,35 @@ export async function recordSeedView(seedId: string, companyId: string) {
     }
   }
 }
+
+export async function recordSeedBlessing(seedId: string) {
+  const supabase = await createClient();
+  const { data: seed } = await supabase
+    .from("daily_seeds")
+    .select("blessings_count")
+    .eq("id", seedId)
+    .single();
+
+  if (seed) {
+    await supabase
+      .from("daily_seeds")
+      .update({ blessings_count: (seed.blessings_count || 0) + 1 } as any)
+      .eq("id", seedId);
+  }
+}
+
+export async function recordSeedShare(seedId: string) {
+  const supabase = await createClient();
+  const { data: seed } = await supabase
+    .from("daily_seeds")
+    .select("shares_count")
+    .eq("id", seedId)
+    .single();
+
+  if (seed) {
+    await supabase
+      .from("daily_seeds")
+      .update({ shares_count: (seed.shares_count || 0) + 1 } as any)
+      .eq("id", seedId);
+  }
+}
