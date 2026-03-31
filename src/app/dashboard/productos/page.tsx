@@ -260,7 +260,7 @@ export default function ProductosPage() {
                   </div>
                   <div className="p-5 space-y-4">
                     <div className="min-h-[54px] flex flex-col justify-center">
-                      <h3 className="text-white font-secondary text-[15px] font-bold leading-tight mb-0.5">
+                      <h3 className="text-text-1 font-secondary text-[15px] font-bold leading-tight mb-0.5">
                         {p.name}
                       </h3>
                       <p className="text-[11px] text-text-3 font-medium uppercase tracking-wide">
@@ -273,7 +273,7 @@ export default function ProductosPage() {
                         <span className="text-[10px] text-text-3 uppercase font-bold tracking-wider">
                           Precio Unit.
                         </span>
-                        <span className="text-xl font-primary">
+                        <span className="text-xl font-primary text-text-1">
                           ${Number(p.price_usd).toFixed(2)}
                         </span>
                       </div>
