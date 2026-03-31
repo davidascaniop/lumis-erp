@@ -259,20 +259,22 @@ export default function EquipoVentasPage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Vendedores Activos", val: activeSellers.length, icon: Users, col: "text-text-1", bg: "bg-surface-elevated border-border border" },
-          { label: "Vendedor del Período", val: topSeller ? topSeller.name : "N/A", sub: topSeller ? `$${topSeller.total_usd.toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "–", icon: Trophy, col: "text-brand", bg: "bg-brand/10 border-brand/20 border" },
-          { label: "Clientes Nuevos", val: partnerStatus.nuevos, icon: UserPlus, col: "text-[#6C63FF]", bg: "bg-[#6C63FF]/10 border-[#6C63FF]/20 border" },
-          { label: "Clientes Recurrentes", val: partnerStatus.recurrentes, icon: UserCheck, col: "text-[#00E5CC]", bg: "bg-[#00E5CC]/10 border-[#00E5CC]/20 border" },
+          { label: "Vendedores Activos", val: activeSellers.length, icon: Users, col: "text-brand", bg: "bg-brand/10" },
+          { label: "Vendedor del Período", val: topSeller ? topSeller.name.split(" ")[0] : "N/A", sub: topSeller ? `$${topSeller.total_usd.toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "–", icon: Trophy, col: "text-[#FFB800]", bg: "bg-[#FFB800]/10" },
+          { label: "Clientes Nuevos", val: partnerStatus.nuevos, icon: UserPlus, col: "text-[#6C63FF]", bg: "bg-[#6C63FF]/10" },
+          { label: "Clientes Recurrentes", val: partnerStatus.recurrentes, icon: UserCheck, col: "text-[#00E5CC]", bg: "bg-[#00E5CC]/10" },
         ].map((c, idx) => (
           <motion.div key={c.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.07 }}>
-            <Card className={`p-5 shadow-card flex items-center gap-4 hover-card-effect transition-all ${c.bg}`}>
-              <div className={`w-11 h-11 rounded-xl flex items-center justify-center bg-surface-base border border-border shadow-sm`}>
+            <Card className="p-5 bg-surface-card shadow-card border-border/50 flex items-center gap-4 hover-card-effect transition-all h-full">
+              <div className={`w-11 h-11 rounded-xl flex shrink-0 items-center justify-center ${c.bg}`}>
                 <c.icon className={`w-5 h-5 ${c.col}`} />
               </div>
-              <div className="overflow-hidden">
+              <div className="overflow-hidden flex-1">
                 <p className="text-[11px] font-montserrat font-bold text-text-3 mb-0.5 uppercase tracking-wide truncate">{c.label}</p>
-                <p className="text-2xl font-montserrat font-bold text-text-1 truncate">{c.val}</p>
-                {c.sub && <p className="text-xs font-mono font-bold text-brand mt-0.5 truncate">{c.sub}</p>}
+                <div className="flex items-end gap-2 truncate">
+                  <p className="text-2xl font-montserrat font-bold text-text-1 truncate">{c.val}</p>
+                  {c.sub && <p className="text-[11px] font-mono font-bold text-text-3 mb-1 truncate">({c.sub})</p>}
+                </div>
               </div>
             </Card>
           </motion.div>
