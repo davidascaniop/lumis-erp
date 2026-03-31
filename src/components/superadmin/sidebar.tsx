@@ -11,21 +11,9 @@ import {
   Settings,
   Shield,
   ChevronRight,
+  ChevronDown,
+  Briefcase
 } from "lucide-react";
-
-const NAV = [
-  { label: "Command Center", href: "/superadmin", icon: LayoutDashboard },
-  { label: "Empresas", href: "/superadmin/empresas", icon: Building2 },
-  {
-    label: "Suscripciones",
-    href: "/superadmin/suscripciones",
-    icon: CreditCard,
-  },
-  { label: "Semillas", href: "/superadmin/semillas", icon: Sparkles },
-  { label: "Broadcast", href: "/superadmin/broadcast", icon: Megaphone },
-  { label: "Usuarios", href: "/superadmin/usuarios", icon: Users },
-  { label: "Config", href: "/superadmin/config", icon: Settings },
-];
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -33,6 +21,17 @@ import { createClient } from "@/lib/supabase/client";
 export function SuperAdminSidebar() {
   const path = usePathname();
   const [pendingCount, setPendingCount] = useState(0);
+
+  // Determinar si el menú 'Clientes' debe estar abierto por defecto
+  const isClientesPath = path.startsWith("/superadmin/clientes");
+  const [clientesExpanded, setClientesExpanded] = useState(isClientesPath);
+
+  useEffect(() => {
+    // Mantener abierto si cambiamos de ruta interna de clientes
+    if (path.startsWith("/superadmin/clientes")) {
+      setClientesExpanded(true);
+    }
+  }, [path]);
 
   useEffect(() => {
     const fetchPending = async () => {
@@ -46,10 +45,24 @@ export function SuperAdminSidebar() {
     };
 
     fetchPending();
-
-    // Optional: Set up real-time subscription here if desired, 
-    // but a simple fetch on mount is fine for now.
   }, []);
+
+  const NAV = [
+    { label: "Command Center", href: "/superadmin", icon: LayoutDashboard },
+    {
+      label: "Clientes",
+      icon: Briefcase,
+      isDropdown: true,
+      subItems: [
+        { label: "Empresas", href: "/superadmin/clientes/empresas", icon: Building2 },
+        { label: "Suscripciones", href: "/superadmin/clientes/suscripciones", icon: CreditCard },
+      ],
+    },
+    { label: "Semillas", href: "/superadmin/semillas", icon: Sparkles },
+    { label: "Broadcast", href: "/superadmin/broadcast", icon: Megaphone },
+    { label: "Usuarios", href: "/superadmin/usuarios", icon: Users },
+    { label: "Config", href: "/superadmin/config", icon: Settings },
+  ];
 
   return (
     <aside
@@ -75,17 +88,94 @@ export function SuperAdminSidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 py-4 px-2 space-y-0.5">
-        {NAV.map(({ label, href, icon: Icon }) => {
+      <nav className="flex-1 py-4 px-2 space-y-0.5 overflow-y-auto">
+        {NAV.map((item, idx) => {
+          if (item.isDropdown) {
+            const hasActiveChild = item.subItems?.some((sub) => path.startsWith(sub.href));
+            const Icon = item.icon;
+
+            return (
+              <div key={item.label} className="mt-2 mb-1">
+                <button
+                  onClick={() => setClientesExpanded(!clientesExpanded)}
+                  className={`w-full relative flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl
+                              transition-all duration-150 group cursor-pointer ${
+                                hasActiveChild && !clientesExpanded
+                                  ? "bg-brand/5 border border-brand/10"
+                                  : "hover:bg-surface-hover/10 border border-transparent"
+                              }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon
+                      className={`w-4 h-4 flex-shrink-0 ${
+                        hasActiveChild || clientesExpanded
+                          ? "text-[#E040FB]"
+                          : "text-text-3 group-hover:text-text-1"
+                      } transition-colors`}
+                    />
+                    <span
+                      className={`text-sm font-medium ${
+                        hasActiveChild || clientesExpanded
+                          ? "text-[#E040FB] font-semibold"
+                          : "text-text-2 group-hover:text-text-1"
+                      } transition-colors`}
+                    >
+                      {item.label}
+                    </span>
+                  </div>
+                  {clientesExpanded ? (
+                    <ChevronDown className="w-3 h-3 text-text-3" />
+                  ) : (
+                    <ChevronRight className="w-3 h-3 text-text-3" />
+                  )}
+                </button>
+
+                {clientesExpanded && item.subItems && (
+                  <div className="mt-1 ml-4 pl-3 border-l-2 border-border/50 space-y-1">
+                    {item.subItems.map((sub) => {
+                      const isSubActive = path.startsWith(sub.href);
+                      const SubIcon = sub.icon;
+
+                      return (
+                        <Link
+                          key={sub.href}
+                          href={sub.href}
+                          className={`relative flex items-center gap-2.5 px-3 py-2 rounded-lg
+                                      transition-all duration-150 group ${
+                                        isSubActive
+                                          ? "bg-brand/10 text-[#E040FB] font-semibold"
+                                          : "text-text-2 hover:bg-surface-hover/10 hover:text-text-1"
+                                      }`}
+                        >
+                          <SubIcon className={`w-3.5 h-3.5 ${isSubActive ? "text-[#E040FB]" : "text-text-3 group-hover:text-text-1"}`} />
+                          <span className="text-sm flex-1">{sub.label}</span>
+                          
+                          {sub.href === "/superadmin/clientes/suscripciones" && pendingCount > 0 && (
+                            <div className="w-4 h-4 rounded-full bg-status-danger text-white text-[9px] font-bold flex items-center justify-center shadow-sm leading-none animate-pulse">
+                              {pendingCount}
+                            </div>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
+          // Item normal
           const isActive =
-            href === "/superadmin"
+            item.href === "/superadmin"
               ? path === "/superadmin"
-              : path.startsWith(href);
+              : path.startsWith(item.href as string);
+          
+          const Icon = item.icon as any;
 
           return (
             <Link
-              key={href}
-              href={href}
+              key={item.href}
+              href={item.href as string}
               className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl
                           transition-all duration-150 group ${
                             isActive
@@ -110,22 +200,16 @@ export function SuperAdminSidebar() {
               />
 
               <span
-                className={`text-sm font-medium ${
+                className={`text-sm font-medium flex-1 ${
                   isActive
                     ? "text-[#E040FB] font-semibold"
                     : "text-text-2 group-hover:text-text-1"
-                } transition-colors flex-1`}
+                } transition-colors`}
               >
-                {label}
+                {item.label}
               </span>
 
-              {href === "/superadmin/suscripciones" && pendingCount > 0 && (
-                <div className="w-5 h-5 rounded-full bg-status-danger text-white text-[10px] font-bold flex items-center justify-center -mr-1 shadow-sm leading-none animate-pulse">
-                  {pendingCount}
-                </div>
-              )}
-
-              {href !== "/superadmin/suscripciones" && !isActive && (
+              {!isActive && (
                 <ChevronRight
                   className="w-3 h-3 text-text-3 ml-auto
                                          opacity-0 group-hover:opacity-100 transition-opacity"

@@ -121,7 +121,7 @@ export default async function SuperAdminHome() {
           {/* FILA 1: FINANZAS DESTACADAS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* MRR */}
-            <Link href="/superadmin/suscripciones" className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-visible group hover:border-brand/30 transition-all cursor-pointer">
+            <Link href="/superadmin/clientes/suscripciones" className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-visible group hover:border-brand/30 transition-all cursor-pointer">
               <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
               <div className="flex items-start justify-between mb-4 relative z-10">
                 <div className="p-3 rounded-2xl bg-brand/10 border border-brand/20 relative group-hover:bg-brand/15 transition-colors">
@@ -147,7 +147,7 @@ export default async function SuperAdminHome() {
             </Link>
 
             {/* ARR */}
-            <Link href="/superadmin/suscripciones" className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group hover:border-[#00AF9C]/30 transition-all cursor-pointer">
+            <Link href="/superadmin/clientes/suscripciones" className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group hover:border-[#00AF9C]/30 transition-all cursor-pointer">
                <div className="absolute top-0 right-0 w-32 h-32 bg-[#00E5CC]/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
               <div className="flex items-start justify-between mb-4 relative z-10">
                 <div className="p-3 rounded-2xl bg-[#00E5CC]/10 border border-[#00E5CC]/20 group-hover:bg-[#00E5CC]/15 transition-colors">
@@ -171,7 +171,7 @@ export default async function SuperAdminHome() {
           {/* FILA 2: OPERACIONES (Compactas) */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
              {/* Empresas Activas */}
-             <Link href="/superadmin/empresas" className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-brand/30 transition-all group cursor-pointer">
+             <Link href="/superadmin/clientes/empresas" className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-brand/30 transition-all group cursor-pointer">
                 <div className="flex justify-between items-start mb-2">
                    <div className="p-2 bg-brand/10 rounded-lg text-brand">
                      <Building2 className="w-4 h-4" />
@@ -196,7 +196,7 @@ export default async function SuperAdminHome() {
              </Link>
 
              {/* Trial */}
-             <Link href="/superadmin/empresas?filter=trial" className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-status-warn/30 transition-all group cursor-pointer">
+             <Link href="/superadmin/clientes/empresas?filter=trial" className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-status-warn/30 transition-all group cursor-pointer">
                 <div className="flex justify-between items-start mb-2">
                    <div className="p-2 bg-status-warn/10 rounded-lg text-status-warn">
                      <Clock className="w-4 h-4" />
@@ -207,7 +207,7 @@ export default async function SuperAdminHome() {
              </Link>
 
              {/* Pagos Vencidos */}
-             <Link href="/superadmin/suscripciones?filter=vencidos" className="bg-[#FFF0F2] border border-[#FFCCD5] rounded-2xl p-4 shadow-sm hover:border-status-danger transition-all group relative overflow-hidden cursor-pointer">
+             <Link href="/superadmin/clientes/suscripciones?filter=vencidos" className="bg-[#FFF0F2] border border-[#FFCCD5] rounded-2xl p-4 shadow-sm hover:border-status-danger transition-all group relative overflow-hidden cursor-pointer">
                 <div className="absolute inset-0 bg-status-danger/5 group-hover:bg-status-danger/10 transition-colors" />
                 <div className="flex justify-between items-start mb-2 relative z-10">
                    <div className="p-2 bg-status-danger/20 rounded-lg text-status-danger shadow-sm">
@@ -312,7 +312,7 @@ export default async function SuperAdminHome() {
                            <p className="text-xs font-medium text-text-2 mt-0.5">
                               {act.type === 'new_registration' ? (
                                 <Link 
-                                  href={`/superadmin/empresas?search=${encodeURIComponent(act.company)}`}
+                                  href={`/superadmin/clientes/empresas?search=${encodeURIComponent(act.company)}`}
                                   className="font-semibold text-brand hover:underline transition-all"
                                 >
                                   {act.company}
@@ -324,7 +324,7 @@ export default async function SuperAdminHome() {
                          </div>
                          
                          {act.type === 'payment_uploaded' && (
-                           <Link href="/superadmin/suscripciones" className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-brand bg-brand/10 hover:bg-brand/20 px-2 py-1 rounded-md transition-colors">
+                           <Link href="/superadmin/clientes/suscripciones" className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-brand bg-brand/10 hover:bg-brand/20 px-2 py-1 rounded-md transition-colors">
                              Validar Pago →
                            </Link>
                          )}
@@ -335,7 +335,7 @@ export default async function SuperAdminHome() {
              </div>
 
              <div className="mt-6 pt-5 border-t border-border">
-                <Link href="/superadmin/empresas" className="w-full flex items-center justify-center gap-2 py-2.5 font-bold text-xs uppercase tracking-wider text-text-2 bg-surface-base hover:bg-surface-hover hover:text-text-1 rounded-xl border border-border transition-colors">
+                <Link href="/superadmin/clientes/empresas" className="w-full flex items-center justify-center gap-2 py-2.5 font-bold text-xs uppercase tracking-wider text-text-2 bg-surface-base hover:bg-surface-hover hover:text-text-1 rounded-xl border border-border transition-colors">
                   Ver todas las empresas
                 </Link>
              </div>
