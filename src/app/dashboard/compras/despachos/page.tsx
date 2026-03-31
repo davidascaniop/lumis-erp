@@ -457,7 +457,7 @@ export default function DespachosPage() {
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-primary text-text-1">
+          <h1 className="text-3xl font-montserrat font-bold text-text-1">
             Despachos y Envíos
           </h1>
           <p className="text-text-2 mt-1 text-sm">
@@ -518,8 +518,8 @@ export default function DespachosPage() {
                 <card.icon className={`w-5 h-5 ${card.color}`} />
               </div>
               <div>
-                <p className="text-xs text-text-3 font-medium">{card.label}</p>
-                <p className="text-2xl font-primary text-text-1">
+                <p className="text-xs text-text-1 font-montserrat font-bold">{card.label}</p>
+                <p className="text-2xl font-montserrat font-bold text-text-1">
                   {loading ? "–" : card.value}
                 </p>
               </div>
@@ -560,7 +560,7 @@ export default function DespachosPage() {
                 ].map((h) => (
                   <th
                     key={h}
-                    className="px-5 py-4 font-bold uppercase text-[10px] tracking-widest"
+                    className="px-5 py-4 font-bold font-montserrat text-[11px] text-text-1"
                   >
                     {h}
                   </th>
@@ -661,7 +661,7 @@ export default function DespachosPage() {
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
         <DialogContent className="bg-surface-base border-border text-text-1 sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-primary text-xl flex items-center gap-2">
+            <DialogTitle className="font-montserrat font-bold text-xl text-text-1 flex items-center gap-2">
               <Truck className="w-5 h-5 text-brand" />
               {selectedDispatch?.dispatch_number}
             </DialogTitle>
@@ -678,7 +678,7 @@ export default function DespachosPage() {
             <div className="space-y-6 py-2">
               {/* ── Timeline ── */}
               <div className="bg-surface-card border border-border rounded-2xl p-5">
-                <p className="text-xs font-bold text-text-3 uppercase tracking-widest mb-5">
+                <p className="text-xs font-bold text-text-1 font-montserrat mb-5">
                   Progreso del Envío
                 </p>
                 <div className="flex items-start justify-between relative">
@@ -746,7 +746,7 @@ export default function DespachosPage() {
               {/* ── Client & Address ── */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-surface-card border border-border rounded-xl p-4 space-y-1">
-                  <p className="text-[10px] uppercase tracking-widest text-text-3 font-bold">
+                  <p className="text-[11px] text-text-1 font-montserrat font-bold mb-1">
                     Cliente
                   </p>
                   <p className="font-bold text-text-1">
@@ -757,7 +757,7 @@ export default function DespachosPage() {
                   </p>
                 </div>
                 <div className="bg-surface-card border border-border rounded-xl p-4 space-y-1">
-                  <p className="text-[10px] uppercase tracking-widest text-text-3 font-bold flex items-center gap-1">
+                  <p className="text-[11px] text-text-1 font-montserrat font-bold mb-1 flex items-center gap-1">
                     <MapPin className="w-3 h-3" /> Dirección de Entrega
                   </p>
                   <p className="text-sm text-text-1">
@@ -765,7 +765,7 @@ export default function DespachosPage() {
                   </p>
                 </div>
                 <div className="bg-surface-card border border-border rounded-xl p-4 space-y-1">
-                  <p className="text-[10px] uppercase tracking-widest text-text-3 font-bold">
+                  <p className="text-[11px] text-text-1 font-montserrat font-bold mb-1">
                     Transportista
                   </p>
                   <p className="text-sm text-text-1">
@@ -773,7 +773,7 @@ export default function DespachosPage() {
                   </p>
                 </div>
                 <div className="bg-surface-card border border-border rounded-xl p-4 space-y-1">
-                  <p className="text-[10px] uppercase tracking-widest text-text-3 font-bold flex items-center gap-1">
+                  <p className="text-[11px] text-text-1 font-montserrat font-bold mb-1 flex items-center gap-1">
                     <Calendar className="w-3 h-3" /> F. Estimada Entrega
                   </p>
                   <p className="text-sm text-text-1">
@@ -792,7 +792,7 @@ export default function DespachosPage() {
 
               {/* ── Products ── */}
               <div>
-                <p className="text-xs font-bold text-text-3 uppercase tracking-widest mb-3">
+                <p className="text-xs font-bold text-text-1 font-montserrat mb-3">
                   Productos incluidos
                 </p>
                 {dispatchItems.length === 0 ? (
@@ -825,7 +825,7 @@ export default function DespachosPage() {
 
               {/* ── Status Log ── */}
               <div>
-                <p className="text-xs font-bold text-text-3 uppercase tracking-widest mb-3">
+                <p className="text-xs font-bold text-text-1 font-montserrat mb-3">
                   Historial de actualizaciones
                 </p>
                 {statusLog.length === 0 ? (
@@ -868,7 +868,7 @@ export default function DespachosPage() {
       <Dialog open={newOpen} onOpenChange={setNewOpen}>
         <DialogContent className="bg-surface-base border-border text-text-1 sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-primary text-xl flex items-center gap-2">
+            <DialogTitle className="font-montserrat font-extrabold text-xl text-text-1 flex items-center gap-2">
               <Plus className="w-5 h-5 text-brand" />
               Nuevo Despacho
             </DialogTitle>
@@ -880,7 +880,7 @@ export default function DespachosPage() {
           <div className="space-y-4 py-2">
             {/* Pedido vinculado */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-text-3 uppercase tracking-wider">
+              <label className="text-xs font-bold text-text-1 font-montserrat">
                 Pedido vinculado *
               </label>
               <Select
@@ -924,7 +924,7 @@ export default function DespachosPage() {
 
             {/* Dirección */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-text-3 uppercase tracking-wider">
+              <label className="text-xs font-bold text-text-1 font-montserrat">
                 Dirección de entrega
               </label>
               <Input
@@ -939,7 +939,7 @@ export default function DespachosPage() {
 
             {/* Transportista */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-text-3 uppercase tracking-wider">
+              <label className="text-xs font-bold text-text-1 font-montserrat">
                 Transportista
               </label>
               <Input
@@ -954,7 +954,7 @@ export default function DespachosPage() {
 
             {/* Fecha estimada */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-text-3 uppercase tracking-wider">
+              <label className="text-xs font-bold text-text-1 font-montserrat">
                 Fecha estimada de entrega
               </label>
               <Input
@@ -969,7 +969,7 @@ export default function DespachosPage() {
 
             {/* Notas */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-text-3 uppercase tracking-wider">
+              <label className="text-xs font-bold text-text-1 font-montserrat">
                 Notas de entrega (opcional)
               </label>
               <textarea
@@ -1011,7 +1011,7 @@ export default function DespachosPage() {
       <Dialog open={updateOpen} onOpenChange={setUpdateOpen}>
         <DialogContent className="bg-surface-base border-border text-text-1 sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-primary text-lg flex items-center gap-2">
+            <DialogTitle className="font-montserrat font-bold text-lg text-text-1 flex items-center gap-2">
               <RefreshCw className="w-4 h-4 text-brand" />
               Actualizar Estado
             </DialogTitle>
@@ -1023,7 +1023,7 @@ export default function DespachosPage() {
 
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-text-3 uppercase tracking-wider">
+              <label className="text-xs font-bold text-text-1 font-montserrat">
                 Nuevo estado
               </label>
               <Select
@@ -1049,7 +1049,7 @@ export default function DespachosPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-text-3 uppercase tracking-wider">
+              <label className="text-xs font-bold text-text-1 font-montserrat">
                 Nota (opcional)
               </label>
               <Input
