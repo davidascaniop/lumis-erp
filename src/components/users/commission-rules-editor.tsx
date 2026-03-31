@@ -92,34 +92,34 @@ export function CommissionRulesEditor({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] bg-[#1A1220] border-[#E040FB]/20 text-[#F5EEFF]">
+      <DialogContent className="sm:max-w-[700px] bg-surface-card border-border text-text-1 rounded-2xl shadow-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-2xl font-heading">
-            <Percent className="text-[#E040FB]" />
+          <DialogTitle className="flex items-center gap-2 text-2xl font-montserrat font-bold text-text-1">
+            <Percent className="text-brand w-6 h-6" />
             Reglas de Comisión: {user?.full_name}
           </DialogTitle>
-          <DialogDescription className="text-[#B8A0D0]">
-            Define cómo gana Pedro sus comisiones según marca, departamento o tipo de precio.
+          <DialogDescription className="text-text-2 font-medium">
+            Define cómo gana {user?.full_name?.split(" ")[0] || "el usuario"} sus comisiones según marca, departamento o tipo de precio.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto no-scrollbar pr-2">
           {rules.length === 0 && (
-            <div className="text-center py-10 bg-white/5 rounded-2xl border border-dashed border-white/10">
-              <Target className="w-10 h-10 text-white/20 mx-auto mb-2" />
-              <p className="text-text-3 text-sm">No hay reglas configuradas.</p>
+            <div className="text-center py-10 bg-surface-base/50 rounded-2xl border border-dashed border-border/60">
+              <Target className="w-10 h-10 text-text-3/20 mx-auto mb-2" />
+              <p className="text-text-3 text-sm font-medium">No hay reglas configuradas.</p>
             </div>
           )}
 
           {rules.map((rule) => (
-            <div key={rule.id} className="grid grid-cols-12 gap-3 items-end bg-[#0F0A12] p-4 rounded-xl border border-[#E040FB]/10 group animate-in fade-in zoom-in-95 duration-200">
+            <div key={rule.id} className="grid grid-cols-12 gap-3 items-end bg-surface-base p-4 rounded-xl border border-border/40 group animate-in fade-in zoom-in-95 duration-200 shadow-sm">
               <div className="col-span-3 space-y-1.5">
-                <label className="text-[10px] font-bold text-[#6B5280] uppercase">Criterio</label>
+                <label className="text-[10px] font-bold text-text-3 uppercase tracking-wider">Criterio</label>
                 <Select value={rule.type} onValueChange={(v: any) => updateRule(rule.id, { type: v, value: v === "global" ? "all" : "" })}>
-                  <SelectTrigger className="bg-[#1A1220] border-none text-[#F5EEFF] h-9">
+                  <SelectTrigger className="bg-surface-card border border-border/30 text-text-1 h-10 rounded-lg shadow-sm font-medium">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#1A1220] border-[#E040FB]/20">
+                  <SelectContent className="bg-surface-elevated border-border text-text-1 z-[9999]">
                     <SelectItem value="global">Global (Todo)</SelectItem>
                     <SelectItem value="brand">Marca</SelectItem>
                     <SelectItem value="department">Departamento</SelectItem>
@@ -129,15 +129,15 @@ export function CommissionRulesEditor({
               </div>
 
               <div className="col-span-3 space-y-1.5">
-                <label className="text-[10px] font-bold text-[#6B5280] uppercase">Valor</label>
+                <label className="text-[10px] font-bold text-text-3 uppercase tracking-wider">Valor</label>
                 {rule.type === "global" ? (
-                  <Input disabled value="Todos los items" className="bg-[#1A1220] border-none opacity-50 h-9" />
+                  <Input disabled value="Todos los items" className="bg-surface-card border border-border/30 opacity-50 h-10 rounded-lg text-text-3 font-medium" />
                 ) : rule.type === "price_level" ? (
                   <Select value={rule.value} onValueChange={(v) => updateRule(rule.id, { value: v })}>
-                    <SelectTrigger className="bg-[#1A1220] border-none text-[#F5EEFF] h-9">
+                    <SelectTrigger className="bg-surface-card border border-border/30 text-text-1 h-10 rounded-lg shadow-sm font-medium">
                       <SelectValue placeholder="Nivel..." />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#1A1220] border-[#E040FB]/20">
+                    <SelectContent className="bg-surface-elevated border-border text-text-1 z-[9999]">
                       <SelectItem value="price_usd">P1: General</SelectItem>
                       <SelectItem value="price_usd_2">P2: Mayorista</SelectItem>
                       <SelectItem value="price_usd_3">P3: Distribuidor</SelectItem>
@@ -150,31 +150,31 @@ export function CommissionRulesEditor({
                     value={rule.value} 
                     onChange={(e) => updateRule(rule.id, { value: e.target.value })}
                     placeholder="Ej. Polar, Hogar..."
-                    className="bg-[#1A1220] border-none h-9 text-[#F5EEFF]"
+                    className="bg-surface-card border border-border/30 h-10 text-text-1 rounded-lg shadow-sm font-medium"
                   />
                 )}
               </div>
 
               <div className="col-span-2 space-y-1.5">
-                <label className="text-[10px] font-bold text-[#6B5280] uppercase">% Com.</label>
+                <label className="text-[10px] font-bold text-text-3 uppercase tracking-wider">% Com.</label>
                 <div className="relative">
                   <Input 
                     type="number" 
                     value={rule.percentage} 
                     onChange={(e) => updateRule(rule.id, { percentage: Number(e.target.value) })}
-                    className="bg-[#1A1220] border-none pr-6 h-9 font-bold text-[#00D4AA]"
+                    className="bg-surface-card border border-border/30 pr-6 h-10 font-bold font-mono text-brand rounded-lg shadow-sm"
                   />
-                  <span className="absolute right-2 top-2 text-[10px] text-white/30">%</span>
+                  <span className="absolute right-2 top-2.5 text-[10px] text-text-3 font-bold">%</span>
                 </div>
               </div>
 
               <div className="col-span-3 space-y-1.5">
-                <label className="text-[10px] font-bold text-[#6B5280] uppercase">Trigger</label>
+                <label className="text-[10px] font-bold text-text-3 uppercase tracking-wider">Trigger</label>
                 <Select value={rule.condition} onValueChange={(v: any) => updateRule(rule.id, { condition: v })}>
-                  <SelectTrigger className="bg-[#1A1220] border-none text-[#F5EEFF] h-9">
+                  <SelectTrigger className="bg-surface-card border border-border/30 text-text-1 h-10 rounded-lg shadow-sm font-medium">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#1A1220] border-[#E040FB]/20">
+                  <SelectContent className="bg-surface-elevated border-border text-text-1 z-[9999]">
                     <SelectItem value="sale">💳 Al Vender</SelectItem>
                     <SelectItem value="collection">💰 Al Cobrar</SelectItem>
                   </SelectContent>
@@ -184,7 +184,7 @@ export function CommissionRulesEditor({
               <div className="col-span-1 pb-1">
                 <button 
                   onClick={() => removeRule(rule.id)}
-                  className="p-2 text-[#FF4757]/50 hover:text-[#FF4757] hover:bg-[#FF4757]/10 rounded-lg transition-all"
+                  className="p-2 text-status-danger/40 hover:text-status-danger hover:bg-status-danger/10 rounded-lg transition-all border border-transparent hover:border-status-danger/20"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -193,19 +193,19 @@ export function CommissionRulesEditor({
           ))}
         </div>
 
-        <div className="flex justify-between items-center mt-6">
+        <div className="flex justify-between items-center mt-6 pt-6 border-t border-border/40">
           <button 
             onClick={addRule}
-            className="flex items-center gap-2 text-sm font-bold text-[#E040FB] hover:underline"
+            className="flex items-center gap-2 text-sm font-bold text-brand hover:opacity-80 transition-all font-montserrat"
           >
-            <Plus className="w-4 h-4" /> Agregar Regla
+            <Plus className="w-5 h-5" /> Agregar Regla
           </button>
           
           <div className="flex gap-3">
-            <Button variant="outline" onClick={() => onOpenChange(false)} className="bg-transparent border-[#E040FB]/20 text-white hover:bg-white/5">
+            <Button variant="outline" onClick={() => onOpenChange(false)} className="bg-white border border-border/40 text-text-2 hover:bg-surface-base font-bold rounded-xl px-6 h-11 transition-all">
               Cancelar
             </Button>
-            <Button onClick={handleSave} disabled={loading} className="bg-[#E040FB] hover:bg-[#C511E0] text-white font-bold px-8 shadow-glow">
+            <Button onClick={handleSave} disabled={loading} className="bg-brand-gradient hover:opacity-90 text-white font-bold px-8 shadow-brand rounded-xl h-11 transition-all">
               {loading ? "Guardando..." : "Guardar Reglas"}
             </Button>
           </div>
