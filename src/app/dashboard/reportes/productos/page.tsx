@@ -135,7 +135,7 @@ export default function ProductosReportePage() {
 
   const criticalStockProducts = products.filter(p => (p.stock_qty || 0) <= (p.min_stock || 0));
   
-  const totalInventoryValue = products.reduce((acc, p) => acc + (Number(p.stock_qty || 0) * Number(p.cost_usd || 0)), 0);
+  const totalInventoryValue = products.reduce((acc, p) => acc + (Number(p.price_usd || 0) * Number(p.stock || p.stock_qty || 0)), 0);
 
   // Categories for select
   const categories = useMemo(() => {
