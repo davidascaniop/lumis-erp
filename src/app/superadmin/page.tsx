@@ -121,52 +121,57 @@ export default async function SuperAdminHome() {
           {/* FILA 1: FINANZAS DESTACADAS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* MRR */}
-            <div className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group">
+            <Link href="/superadmin/suscripciones" className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-visible group hover:border-brand/30 transition-all cursor-pointer">
               <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
               <div className="flex items-start justify-between mb-4 relative z-10">
-                <div className="p-3 rounded-2xl bg-brand/10 border border-brand/20">
+                <div className="p-3 rounded-2xl bg-brand/10 border border-brand/20 relative group-hover:bg-brand/15 transition-colors">
                   <DollarSign className="w-5 h-5 text-brand" />
+                  {/* Tooltip */}
+                  <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity bg-[#1A1125] text-white text-[10px] font-medium rounded-md px-2.5 py-1.5 shadow-xl -top-10 -left-4 pointer-events-none z-30 whitespace-nowrap">
+                    Suma de todas las suscripciones activas este mes
+                    <div className="absolute bottom-[-4px] left-6 w-2 h-2 bg-[#1A1125] rotate-45 transform"></div>
+                  </div>
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest bg-surface-base px-2 py-1 rounded-md border border-border shadow-sm">
+                  <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest bg-surface-base px-2 py-1 rounded-md border border-border shadow-sm group-hover:border-brand/20 transition-colors">
                     MRR Actual
                   </span>
                 </div>
               </div>
               <div className="relative z-10">
-                <h3 className="text-sm font-bold text-text-2 mb-1">Ingresos Recurrentes Mensuales</h3>
+                <h3 className="text-sm font-bold text-text-2 mb-1 group-hover:text-text-1 transition-colors">Ingresos Recurrentes Mensuales</h3>
                 <div className="font-heading text-4xl font-black text-text-1 tracking-tight">
                   ${mrr.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </div>
-            </div>
+            </Link>
 
             {/* ARR */}
-            <div className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group">
+            <Link href="/superadmin/suscripciones" className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group hover:border-[#00AF9C]/30 transition-all cursor-pointer">
                <div className="absolute top-0 right-0 w-32 h-32 bg-[#00E5CC]/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
               <div className="flex items-start justify-between mb-4 relative z-10">
-                <div className="p-3 rounded-2xl bg-[#00E5CC]/10 border border-[#00E5CC]/20">
+                <div className="p-3 rounded-2xl bg-[#00E5CC]/10 border border-[#00E5CC]/20 group-hover:bg-[#00E5CC]/15 transition-colors">
                   <TrendingUp className="w-5 h-5 text-[#00AF9C]" />
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest bg-surface-base px-2 py-1 rounded-md border border-border shadow-sm">
+                  <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest bg-surface-base px-2 py-1 rounded-md border border-border shadow-sm group-hover:border-[#00AF9C]/20 transition-colors">
                     ARR Proyectado
                   </span>
                 </div>
               </div>
               <div className="relative z-10">
-                <h3 className="text-sm font-bold text-text-2 mb-1">Ingresos Recurrentes Anuales</h3>
+                <h3 className="text-sm font-bold text-text-2 mb-1 group-hover:text-text-1 transition-colors">Ingresos Recurrentes Anuales</h3>
                 <div className="font-heading text-4xl font-black text-text-1 tracking-tight">
                   ${arr.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
 
           {/* FILA 2: OPERACIONES (Compactas) */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
              {/* Empresas Activas */}
-             <div className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-brand/30 transition-all group">
+             <Link href="/superadmin/empresas" className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-brand/30 transition-all group cursor-pointer">
                 <div className="flex justify-between items-start mb-2">
                    <div className="p-2 bg-brand/10 rounded-lg text-brand">
                      <Building2 className="w-4 h-4" />
@@ -175,35 +180,35 @@ export default async function SuperAdminHome() {
                      +{newCompaniesThisMonth?.length ?? 0} este mes
                    </span>
                 </div>
-                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1">Empresas Activas</h4>
+                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1 group-hover:text-text-2 transition-colors">Empresas Activas</h4>
                 <p className="text-2xl font-heading font-black text-text-1">{activeCompanies || 0}</p>
-             </div>
+             </Link>
 
              {/* Usuarios */}
-             <div className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-brand/30 transition-all group">
+             <Link href="/superadmin/usuarios" className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-[#0288D1]/30 transition-all group cursor-pointer">
                 <div className="flex justify-between items-start mb-2">
                    <div className="p-2 bg-[#4FC3F7]/10 rounded-lg text-[#0288D1]">
                      <Users className="w-4 h-4" />
                    </div>
                 </div>
-                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1">Usuarios Totales</h4>
+                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1 group-hover:text-text-2 transition-colors">Usuarios Totales</h4>
                 <p className="text-2xl font-heading font-black text-text-1">{totalUsers || 0}</p>
-             </div>
+             </Link>
 
              {/* Trial */}
-             <div className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-brand/30 transition-all group">
+             <Link href="/superadmin/empresas?filter=trial" className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-status-warn/30 transition-all group cursor-pointer">
                 <div className="flex justify-between items-start mb-2">
                    <div className="p-2 bg-status-warn/10 rounded-lg text-status-warn">
                      <Clock className="w-4 h-4" />
                    </div>
                 </div>
-                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1">Cuentas en Trial</h4>
+                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1 group-hover:text-text-2 transition-colors">Cuentas en Trial</h4>
                 <p className="text-2xl font-heading font-black text-text-1">{trialCompanies || 0}</p>
-             </div>
+             </Link>
 
              {/* Pagos Vencidos */}
-             <div className="bg-[#FFF0F2] border border-[#FFCCD5] rounded-2xl p-4 shadow-sm hover:border-status-danger transition-all group relative overflow-hidden">
-                <div className="absolute inset-0 bg-status-danger/5" />
+             <Link href="/superadmin/suscripciones?filter=vencidos" className="bg-[#FFF0F2] border border-[#FFCCD5] rounded-2xl p-4 shadow-sm hover:border-status-danger transition-all group relative overflow-hidden cursor-pointer">
+                <div className="absolute inset-0 bg-status-danger/5 group-hover:bg-status-danger/10 transition-colors" />
                 <div className="flex justify-between items-start mb-2 relative z-10">
                    <div className="p-2 bg-status-danger/20 rounded-lg text-status-danger shadow-sm">
                      <AlertTriangle className="w-4 h-4" />
@@ -217,7 +222,7 @@ export default async function SuperAdminHome() {
                 </div>
                 <h4 className="text-[11px] font-bold text-status-danger uppercase tracking-wider mb-1 relative z-10">Pagos Vencidos</h4>
                 <p className="text-2xl font-heading font-black text-status-danger relative z-10">{overdueCompanies?.length ?? 0}</p>
-             </div>
+             </Link>
           </div>
 
           {/* FILA 3: GRÁFICOS */}
@@ -234,21 +239,37 @@ export default async function SuperAdminHome() {
                   </p>
                 </div>
               </div>
-              <SaasLineChart data={growthChart} />
+              {totalCompanies === 0 ? (
+                <div className="h-64 flex flex-col items-center justify-center text-center bg-surface-base rounded-2xl border border-dashed border-border px-4 py-8">
+                  <Activity className="w-8 h-8 text-text-3/50 mb-3" />
+                  <p className="text-sm font-medium text-text-2">Sin datos suficientes</p>
+                  <p className="text-xs text-text-3 mt-1">Aún no hay empresas registradas en la plataforma</p>
+                </div>
+              ) : (
+                <SaasLineChart data={growthChart} />
+              )}
             </div>
 
             {/* Donuts */}
-            <div className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm">
+            <div className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm flex flex-col">
               <h2 className="text-lg font-heading font-bold text-text-1 mb-1">Distribución Tarifaria</h2>
               <p className="text-xs font-semibold text-text-3 uppercase tracking-wider mb-6">Empresas por Plan</p>
               
-              <PlanDonutChart
-                data={[
-                  { name: "Starter", value: planCounts.basic ?? 0, color: "#4FC3F7" },
-                  { name: "Pro", value: planCounts.pro ?? 0, color: "#E040FB" },
-                  { name: "Enterprise", value: planCounts.enterprise ?? 0, color: "#7C4DFF" },
-                ].filter(d => d.value > 0)}
-              />
+              <div className="flex-1 flex flex-col justify-center">
+                {totalCompanies === 0 ? (
+                  <div className="h-48 flex flex-col items-center justify-center text-center bg-surface-base rounded-2xl border border-dashed border-border px-4 py-6">
+                    <p className="text-xs font-medium text-text-3">Sin datos suficientes</p>
+                  </div>
+                ) : (
+                  <PlanDonutChart
+                    data={[
+                      { name: "Starter", value: planCounts.basic ?? 0, color: "#4FC3F7" },
+                      { name: "Pro", value: planCounts.pro ?? 0, color: "#E040FB" },
+                      { name: "Enterprise", value: planCounts.enterprise ?? 0, color: "#7C4DFF" },
+                    ].filter(d => d.value > 0)}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -289,7 +310,16 @@ export default async function SuperAdminHome() {
                               {act.message}
                            </p>
                            <p className="text-xs font-medium text-text-2 mt-0.5">
-                              <span className="font-semibold text-brand">{act.company}</span>
+                              {act.type === 'new_registration' ? (
+                                <Link 
+                                  href={`/superadmin/empresas?search=${encodeURIComponent(act.company)}`}
+                                  className="font-semibold text-brand hover:underline transition-all"
+                                >
+                                  {act.company}
+                                </Link>
+                              ) : (
+                                <span className="font-semibold text-brand">{act.company}</span>
+                              )}
                            </p>
                          </div>
                          
