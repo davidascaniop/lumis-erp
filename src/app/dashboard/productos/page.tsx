@@ -259,13 +259,13 @@ export default function ProductosPage() {
                     )}
                   </div>
                   <div className="p-5 space-y-4">
-                    <div className="min-h-[48px]">
-                      <p className="text-[10px] text-[#E040FB] font-primary uppercase tracking-widest mb-1.5">
-                        {p.category || "General"}
-                      </p>
-                      <h3 className="text-white font-secondary text-sm leading-snug">
+                    <div className="min-h-[54px] flex flex-col justify-center">
+                      <h3 className="text-white font-secondary text-[15px] font-bold leading-tight mb-0.5">
                         {p.name}
                       </h3>
+                      <p className="text-[11px] text-text-3 font-medium uppercase tracking-wide">
+                        {p.department || p.category || "General"}
+                      </p>
                     </div>
 
                     <div className="flex items-center justify-between border-t border-border pt-4">

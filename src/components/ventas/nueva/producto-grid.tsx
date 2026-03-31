@@ -142,7 +142,10 @@ function ProductCard({
           </div>
           
           <div className="flex-1 min-w-0 py-1">
-            <h3 className="text-[15px] font-bold text-[#1A1125] font-outfit line-clamp-1 mb-1">{product.name}</h3>
+            <h3 className="text-[15px] font-bold text-[#1A1125] font-outfit line-clamp-1 mb-0.5 leading-tight">{product.name}</h3>
+            <p className="text-[11px] font-bold text-text-3 uppercase tracking-wide mb-2">
+               {product.department || product.category || "General"}
+            </p>
             <p className="text-xl font-bold text-brand font-outfit mb-2">$ {Number(product.price_usd).toFixed(2)}</p>
             <div className="space-y-0.5">
                <p className="text-[10px] font-bold text-text-3 uppercase font-outfit tracking-wide">SKU: {product.sku || 'N/A'}</p>
