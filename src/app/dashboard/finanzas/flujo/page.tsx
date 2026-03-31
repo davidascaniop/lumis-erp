@@ -168,7 +168,8 @@ function FlujoContent() {
 
   const filteredMovements = useMemo(() => {
     const today = new Date();
-    let start, end;
+    let start: Date | undefined;
+    let end: Date | undefined;
     if (timeFilter === "mes") {
       start = startOfMonth(today);
       end = endOfMonth(today);
