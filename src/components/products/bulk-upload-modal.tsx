@@ -127,8 +127,11 @@ export function BulkUploadModal({
         company_id: user.company_id
       }));
 
-      // Insert products
-      const { data: insertedProducts, error: pError } = await supabase.from("products").insert(payload).select('id, name, sku, stock');
+      // Upsert products: Si el SKU ya existe para esta empresa, lo actualiza (Ideal para masivas rápidas)
+      const { data: insertedProducts, error: pError } = await supabase
+        .from("products")
+        .upsert(payload, { onConflict: "company_id,sku" })
+        .select("id, name, sku, stock");
       if (pError) throw pError;
 
       // If warehouse is selected, insert warehouse_stock
@@ -204,6 +207,13 @@ export function BulkUploadModal({
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-start gap-3">
+             <AlertCircle className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
+             <p className="text-[11px] text-blue-700 leading-normal">
+                <span className="font-bold">Modo Inteligente (Upsert):</span> Si el sistema detecta un <span className="font-bold">SKU</span> que ya existe en tu inventario, lo <span className="font-bold text-blue-900 underline">actualizará</span> con los datos del CSV en lugar de crear uno nuevo. Ideal para corregir precios o costos masivamente.
+             </p>
           </div>
 
           <div 
