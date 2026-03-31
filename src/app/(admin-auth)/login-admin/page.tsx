@@ -40,10 +40,10 @@ export default function SuperAdminLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050208] flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-surface-base flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background Glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#E040FB]/10 blur-[120px] rounded-full" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#7C4DFF]/10 blur-[120px] rounded-full" />
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand/5 blur-[120px] rounded-full" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand/5 blur-[120px] rounded-full" />
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -51,48 +51,48 @@ export default function SuperAdminLogin() {
         className="max-w-md w-full relative z-10"
       >
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_30px_rgba(224,64,251,0.3)]">
+          <div className="w-16 h-16 bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-brand/20 shadow-lg">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-display font-bold text-white tracking-tight">LUMIS <span className="text-[#E040FB]">Super Login</span></h1>
-          <p className="text-[#9585B8] mt-2">Acceso exclusivo para personal autorizado</p>
+          <h1 className="text-3xl font-display font-bold text-text-1 tracking-tight">LUMIS <span className="text-brand">Super Login</span></h1>
+          <p className="text-text-2 mt-2 font-medium">Acceso exclusivo para personal autorizado</p>
         </div>
 
-        <div className="glass p-8 rounded-3xl border border-white/5 relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#E040FB]/40 to-transparent" />
+        <div className="bg-surface-card p-8 rounded-3xl border border-border shadow-card relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-brand-gradient opacity-10" />
           
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
-              <label className="text-[11px] font-bold text-[#3D2D5C] uppercase tracking-widest ml-1">Correo Master</label>
+              <label className="text-[11px] font-bold text-text-3 uppercase tracking-widest ml-1">Correo Master</label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#3D2D5C]" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
                 <input 
                   required
                   name="email"
                   type="email" 
                   placeholder="admin@lumis.com"
-                  className="w-full bg-white/2 border border-white/5 rounded-xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:border-[#E040FB]/30 focus:bg-white/5 transition-all"
+                  className="w-full bg-surface-base border border-border rounded-xl py-3 pl-11 pr-4 text-sm text-text-1 placeholder:text-text-3 focus:outline-none focus:border-brand/30 focus:ring-4 focus:ring-brand/5 transition-all font-medium"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-[11px] font-bold text-[#3D2D5C] uppercase tracking-widest ml-1">Contraseña</label>
+              <label className="text-[11px] font-bold text-text-3 uppercase tracking-widest ml-1">Contraseña</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#3D2D5C]" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
                 <input 
                   required
                   name="password"
                   type="password" 
                   placeholder="••••••••"
-                  className="w-full bg-white/2 border border-white/5 rounded-xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:border-[#E040FB]/30 focus:bg-white/5 transition-all"
+                  className="w-full bg-surface-base border border-border rounded-xl py-3 pl-11 pr-4 text-sm text-text-1 placeholder:text-text-3 focus:outline-none focus:border-brand/30 focus:ring-4 focus:ring-brand/5 transition-all font-medium"
                 />
               </div>
             </div>
 
             <button 
               disabled={loading}
-              className="w-full bg-gradient-to-r from-[#E040FB] to-[#7C4DFF] hover:from-[#E040FB]/90 hover:to-[#7C4DFF]/90 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 group transition-all shadow-[0_0_20px_rgba(224,64,251,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-brand-gradient hover:opacity-90 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 group transition-all shadow-brand/30 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider text-xs"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                 <>
@@ -104,7 +104,7 @@ export default function SuperAdminLogin() {
           </form>
         </div>
 
-        <p className="text-center mt-6 text-[#3D2D5C] text-sm italic">
+        <p className="text-center mt-6 text-text-3 text-sm font-medium italic">
           Entorno de alta seguridad — Registro de IP activado
         </p>
       </motion.div>
