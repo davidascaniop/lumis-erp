@@ -134,7 +134,7 @@ export default async function SuperAdminHome() {
                 </div>
               </div>
               <div className="relative z-10">
-                <h3 className="text-sm font-bold text-text-2 mb-1">Monthly Recurring Revenue</h3>
+                <h3 className="text-sm font-bold text-text-2 mb-1">Ingresos Recurrentes Mensuales</h3>
                 <div className="font-heading text-4xl font-black text-text-1 tracking-tight">
                   ${mrr.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
@@ -155,7 +155,7 @@ export default async function SuperAdminHome() {
                 </div>
               </div>
               <div className="relative z-10">
-                <h3 className="text-sm font-bold text-text-2 mb-1">Annual Recurring Revenue</h3>
+                <h3 className="text-sm font-bold text-text-2 mb-1">Ingresos Recurrentes Anuales</h3>
                 <div className="font-heading text-4xl font-black text-text-1 tracking-tight">
                   ${arr.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
@@ -260,7 +260,7 @@ export default async function SuperAdminHome() {
                 <div>
                   <h2 className="text-lg font-heading font-bold text-text-1 flex items-center gap-2">
                     <Activity className="w-5 h-5 text-brand" />
-                    Action Center
+                    Centro de Acción
                   </h2>
                   <p className="text-xs font-semibold text-text-3 mt-1 uppercase tracking-wider">
                     Actividad y Pendientes
