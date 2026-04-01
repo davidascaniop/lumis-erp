@@ -41,8 +41,7 @@ export default function EmpresasUsuariosPage() {
           *,
           users (
             id,
-            first_name,
-            last_name,
+            full_name,
             email,
             role,
             created_at,
@@ -115,7 +114,7 @@ export default function EmpresasUsuariosPage() {
     const term = search.toLowerCase();
     const matchCompany = c.name?.toLowerCase().includes(term);
     const matchUser = c.users?.some((u: any) => 
-      (u.first_name + " " + u.last_name).toLowerCase().includes(term) ||
+      (u.full_name || "").toLowerCase().includes(term) ||
       u.email?.toLowerCase().includes(term)
     );
     return matchCompany || matchUser;
@@ -253,10 +252,10 @@ export default function EmpresasUsuariosPage() {
                                   <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
                                       <div className="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold text-xs">
-                                        {(user.first_name || user.email || "U")?.[0].toUpperCase()}
+                                        {(user.full_name || user.email || "U")?.[0]?.toUpperCase()}
                                       </div>
                                       <div>
-                                        <p className="text-sm font-bold text-text-1">{user.first_name} {user.last_name}</p>
+                                        <p className="text-sm font-bold text-text-1">{user.full_name}</p>
                                         <div className="flex items-center gap-1.5 mt-0.5 text-text-3 text-xs">
                                           <Mail className="w-3 h-3" /> {user.email}
                                         </div>

@@ -101,8 +101,7 @@ export default function EquipoAdminPage() {
         .from("users")
         .insert({
           company_id: "5a888a7b-aa3d-47f7-a517-37d94e9b4d45",
-          first_name: inviteName.split(' ')[0],
-          last_name: inviteName.split(' ').slice(1).join(' ') || '',
+          full_name: inviteName,
           email: inviteEmail.toLowerCase(),
           role: inviteRole,
           status: "pending_invite",
@@ -119,8 +118,7 @@ export default function EquipoAdminPage() {
             .from("users")
             .insert({
               company_id: "5a888a7b-aa3d-47f7-a517-37d94e9b4d45",
-              first_name: inviteName.split(' ')[0],
-              last_name: inviteName.split(' ').slice(1).join(' ') || '',
+              full_name: inviteName,
               email: inviteEmail.toLowerCase(),
               role: inviteRole,
               status: "pending_invite",
@@ -169,7 +167,7 @@ export default function EquipoAdminPage() {
 
   const filteredTeam = team.filter(member => {
     const term = search.toLowerCase();
-    const fullName = `${member.first_name} ${member.last_name}`.toLowerCase();
+    const fullName = (member.full_name || "").toLowerCase();
     return fullName.includes(term) || member.email?.toLowerCase().includes(term);
   });
 
@@ -232,7 +230,7 @@ export default function EquipoAdminPage() {
                 ) : (
                   filteredTeam.map((member: any) => {
                     const isSuperadminOwner = member.email === 'davidascaniop@gmail.com';
-                    const initials = ((member.first_name?.[0] || '') + (member.last_name?.[0] || '')).toUpperCase() || member.email[0].toUpperCase();
+                    const initials = member.full_name?.[0]?.toUpperCase() || member.email[0].toUpperCase();
                     
                     return (
                       <tr key={member.id} className="hover:bg-white transition-colors">
@@ -244,7 +242,7 @@ export default function EquipoAdminPage() {
                           </div>
                         </td>
                         <td className="px-5 py-4">
-                          <p className="text-sm font-bold text-text-1">{member.first_name} {member.last_name}</p>
+                          <p className="text-sm font-bold text-text-1">{member.full_name || "Usuario de Equipo"}</p>
                           <div className="flex items-center gap-1.5 mt-0.5 text-text-3 text-xs font-medium">
                             <Mail className="w-3 h-3 text-text-3/70" /> {member.email}
                           </div>
