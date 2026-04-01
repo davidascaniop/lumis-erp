@@ -70,12 +70,17 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
   const handleStatusChange = async (newStatus: "active" | "suspended") => {
     setIsProcessing(true);
     try {
-      const { error } = await supabase
+      const { data: updatedData, error } = await supabase
         .from("companies")
         .update({ subscription_status: newStatus })
-        .eq("id", id);
+        .eq("id", id)
+        .select()
+        .single();
         
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase Update Error:", error);
+        throw new Error(error.message + " (Posible problema de permisos RLS)");
+      }
       
       toast.success(`Cuenta ${newStatus === "active" ? "activada" : "suspendida"} exitosamente`);
       setCompany({ ...company, subscription_status: newStatus });
