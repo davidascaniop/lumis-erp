@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Building2, Eye, Loader2, Search, X } from "lucide-react";
 import { format } from "date-fns";
@@ -12,6 +13,7 @@ import { Edit2, Save } from "lucide-react";
 
 export default function EmpresasPage() {
   const supabase = createClient();
+  const router = useRouter();
   const [companies, setCompanies] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -168,7 +170,11 @@ export default function EmpresasPage() {
                 </tr>
               ) : (
                 companies.map((c) => (
-                  <tr key={c.id} className="hover:bg-surface-hover/30 transition-colors group">
+                  <tr 
+                    key={c.id} 
+                    onClick={() => router.push(`/superadmin/clientes/empresas/${c.id}`)}
+                    className="hover:bg-surface-hover transition-colors group cursor-pointer"
+                  >
                     <td className="px-5 py-4">
                       <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-sm bg-gradient-to-br from-brand/80 to-brand">
                         {c.name.substring(0, 2).toUpperCase()}
@@ -212,14 +218,14 @@ export default function EmpresasPage() {
                       <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           title="Editar suscripción y plan"
-                          onClick={() => handleEdit(c)}
+                          onClick={(e) => { e.stopPropagation(); handleEdit(c); }}
                           className="h-9 w-9 flex items-center justify-center bg-surface-base border border-border hover:border-brand text-text-2 hover:text-brand hover:bg-brand/5 rounded-lg transition-all"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           title="Modo Dios (Impersonate)"
-                          onClick={() => handleImpersonate(c.id)}
+                          onClick={(e) => { e.stopPropagation(); handleImpersonate(c.id); }}
                           className="h-9 w-9 flex items-center justify-center bg-surface-base border border-border hover:border-brand text-text-2 hover:text-brand hover:bg-brand/5 rounded-lg transition-all"
                         >
                           <Eye className="w-4 h-4" />

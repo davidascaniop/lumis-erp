@@ -233,7 +233,8 @@ export function RegisterForm() {
       const refData = { 
         name: values.paymentName, 
         source: values.paymentEmailOrPhone, 
-        bank_last4: values.paymentBankOrLast4 
+        bank_last4: values.paymentBankOrLast4,
+        bcv_rate: rate || 0
       };
 
       await supabase.from("subscription_payments").insert({
