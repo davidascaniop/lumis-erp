@@ -9,7 +9,7 @@ import { es } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Edit2, Save } from "lucide-react";
+import { Edit2, Save, Trash2 } from "lucide-react";
 
 export default function EmpresasPage() {
   const supabase = createClient();
@@ -89,6 +89,31 @@ export default function EmpresasPage() {
       toast.error("Error al actualizar la empresa: " + err.message);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (companyId: string, companyName: string) => {
+    if (companyId === "0005ff1f-b046-44f9-aa85-7dfa66913807") {
+      toast.error("Acción denegada", { description: "Esta empresa base no puede ser eliminada." });
+      return;
+    }
+    
+    if (!window.confirm(`¿Estás seguro que deseas ELIMINAR permanentemente la empresa "${companyName}" y TODOS sus datos asociados?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("companies")
+        .delete()
+        .eq("id", companyId);
+
+      if (error) throw error;
+      
+      toast.success("Empresa eliminada exitosamente");
+      setCompanies(prev => prev.filter(c => c.id !== companyId));
+    } catch (error: any) {
+      toast.error("Error al eliminar", { description: error.message });
     }
   };
 
@@ -230,6 +255,15 @@ export default function EmpresasPage() {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
+                        {c.id !== "0005ff1f-b046-44f9-aa85-7dfa66913807" && (
+                          <button
+                            title="Eliminar Empresa"
+                            onClick={(e) => { e.stopPropagation(); handleDelete(c.id, c.name); }}
+                            className="h-9 w-9 flex items-center justify-center bg-surface-base border border-border hover:border-status-danger text-text-2 hover:text-status-danger hover:bg-status-danger/10 rounded-lg transition-all"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
