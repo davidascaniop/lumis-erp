@@ -44,9 +44,7 @@ export default function EmpresasUsuariosPage() {
             full_name,
             email,
             role,
-            created_at,
-            status,
-            is_active
+            created_at
           )
         `)
         .order("created_at", { ascending: false });
@@ -74,14 +72,13 @@ export default function EmpresasUsuariosPage() {
   const toggleUserStatus = async (userId: string, currentStatus: string | boolean) => {
     setProcessingUser(userId);
     try {
-      // Para soportar 'status' (text) o 'is_active' (boolean) basado en tus columnas de users:
-      const newStatusValue = typeof currentStatus === 'boolean' 
-        ? !currentStatus 
-        : (currentStatus === 'active' ? 'suspended' : 'active');
-        
-      const updatePayload = typeof currentStatus === 'boolean' 
-        ? { is_active: newStatusValue } 
-        : { status: newStatusValue };
+      // Determine what to toggle. We will try both just to be safe if we don't know the schema,
+      // but typically we can just show a toast if no column works, or we can assume `is_active` exists.
+      // Wait, let's just use `is_active` parameter.
+      const userIsCurrentlyActive = typeof currentStatus === 'boolean' ? currentStatus : (currentStatus === 'active');
+      const newStatusValue = !userIsCurrentlyActive;
+      
+      const updatePayload = { is_active: newStatusValue };
 
       const { error } = await supabase
         .from("users")
@@ -241,9 +238,7 @@ export default function EmpresasUsuariosPage() {
                             </tr>
                           ) : (
                             users.map((user: any) => {
-                              const isActive = typeof user.status === 'boolean' 
-                                ? user.is_active 
-                                : (user.status === 'active' || user.is_active === true);
+                              const isActive = user.status ? user.status === 'active' : (user.is_active !== false);
                               
                               const isProcessingThis = processingUser === user.id;
 
@@ -282,7 +277,7 @@ export default function EmpresasUsuariosPage() {
                                   </td>
                                   <td className="px-6 py-4 text-right">
                                     <button
-                                      onClick={() => toggleUserStatus(user.id, user.status || user.is_active)}
+                                      onClick={() => toggleUserStatus(user.id, isActive)}
                                       disabled={isProcessingThis}
                                       title={isActive ? "Desactivar usuario" : "Activar usuario"}
                                       className={`h-8 px-3 rounded-lg text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-all border ${
