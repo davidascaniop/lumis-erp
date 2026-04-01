@@ -62,7 +62,7 @@ export default function EquipoAdminPage() {
       const { data, error } = await supabase
         .from("users")
         .select("*")
-        .eq("company_id", "5a888a7b-aa3d-47f7-a517-37d94e9b4d45")
+        .in("role", ["superadmin", "system_admin", "soporte", "finanzas"])
         .order("created_at", { ascending: true }); // Ascanio usually created first
 
       if (error) throw error;
@@ -100,7 +100,7 @@ export default function EquipoAdminPage() {
       let { data, error } = await supabase
         .from("users")
         .insert({
-          company_id: "5a888a7b-aa3d-47f7-a517-37d94e9b4d45",
+          company_id: null, // Usuarios de sistema no pertenecen a una empresa cliente
           full_name: inviteName,
           email: inviteEmail.toLowerCase(),
           role: inviteRole,
@@ -117,7 +117,7 @@ export default function EquipoAdminPage() {
            const { data: d2, error: e2 } = await supabase
             .from("users")
             .insert({
-              company_id: "5a888a7b-aa3d-47f7-a517-37d94e9b4d45",
+              company_id: null,
               full_name: inviteName,
               email: inviteEmail.toLowerCase(),
               role: inviteRole,
@@ -253,7 +253,7 @@ export default function EquipoAdminPage() {
                               ? 'bg-brand/10 text-brand border-brand/20' 
                               : 'bg-surface-base text-text-2 border-border'}`}
                           >
-                            {isSuperadminOwner ? 'Superadmin' : member.role || 'Admin'}
+                            {isSuperadminOwner ? 'Superadmin' : (member.role === 'system_admin' ? 'Admin' : member.role || 'Admin')}
                           </Badge>
                           {member.status === "pending_invite" && (
                             <div className="mt-1 text-[9px] text-status-warn font-bold uppercase flex items-center gap-1">
@@ -345,7 +345,7 @@ export default function EquipoAdminPage() {
                 onChange={(e) => setInviteRole(e.target.value)}
                 className="w-full px-4 py-2.5 bg-surface-card border border-border rounded-xl text-sm focus:outline-none focus:border-brand/40 text-text-1"
               >
-                <option value="admin">Administrador General</option>
+                <option value="system_admin">Administrador General</option>
                 <option value="soporte">Agente de Soporte</option>
                 <option value="finanzas">Analista de Finanzas</option>
               </select>

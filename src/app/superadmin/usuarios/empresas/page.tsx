@@ -176,13 +176,16 @@ export default function EmpresasUsuariosPage() {
                     <div>
                       <h3 className="font-heading font-bold text-text-1 text-base">{company.name}</h3>
                       <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider border-border text-text-2">
-                          {company.plan_type || "Básico"}
-                        </Badge>
+                        {company.subscription_status !== "demo" && (
+                          <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider border-border text-text-2">
+                            {company.plan_type || "Básico"}
+                          </Badge>
+                        )}
                         <Badge variant="outline" className={`text-[10px] uppercase font-bold tracking-wider ${
                           company.subscription_status === "active" ? "text-status-ok border-status-ok/20 bg-status-ok/5" : 
                           company.subscription_status === "trial" ? "text-status-warn border-status-warn/20 bg-status-warn/5" : 
                           company.subscription_status === "suspended" ? "text-status-danger border-status-danger/20 bg-status-danger/5" : 
+                          company.subscription_status === "demo" ? "text-[#1E88E5] border-[#1E88E5]/20 bg-[#1E88E5]/5" :
                           "text-[#0288D1] border-[#0288D1]/20 bg-[#0288D1]/5"
                         }`}>
                           {company.subscription_status || "Pendiente"}
