@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ArrowLeft, Building2, Calendar, CreditCard, Download, FileText, Mail, Phone, User, Wallet, Loader2, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
@@ -9,7 +9,8 @@ import { es } from "date-fns/locale";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
-export default function CompanyDetailPage({ params }: { params: { id: string } }) {
+export default function CompanyDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const supabase = createClient();
   const router = useRouter();
   
@@ -21,7 +22,7 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
 
   useEffect(() => {
     fetchCompanyData();
-  }, [params.id]);
+  }, [id]);
 
   const fetchCompanyData = async () => {
     setIsLoading(true);
@@ -30,7 +31,7 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
       const { data: compData, error: compErr } = await supabase
         .from("companies")
         .select("*")
-        .eq("id", params.id)
+        .eq("id", id)
         .single();
         
       if (compErr) throw compErr;
@@ -40,7 +41,7 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
       const { data: userData } = await supabase
         .from("users")
         .select("*")
-        .eq("company_id", params.id)
+        .eq("company_id", id)
         .eq("role", "admin")
         .limit(1)
         .maybeSingle();
@@ -51,7 +52,7 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
       const { data: payData } = await supabase
         .from("subscription_payments")
         .select("*")
-        .eq("company_id", params.id)
+        .eq("company_id", id)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -72,7 +73,7 @@ export default function CompanyDetailPage({ params }: { params: { id: string } }
       const { error } = await supabase
         .from("companies")
         .update({ subscription_status: newStatus })
-        .eq("id", params.id);
+        .eq("id", id);
         
       if (error) throw error;
       
