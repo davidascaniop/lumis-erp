@@ -22,14 +22,17 @@ export function SuperAdminSidebar() {
   const path = usePathname();
   const [pendingCount, setPendingCount] = useState(0);
 
-  // Determinar si el menú 'Clientes' debe estar abierto por defecto
-  const isClientesPath = path.startsWith("/superadmin/clientes");
-  const [clientesExpanded, setClientesExpanded] = useState(isClientesPath);
+  const [expandedSection, setExpandedSection] = useState<string | null>(
+    path.startsWith("/superadmin/clientes") ? "Clientes" 
+    : path.startsWith("/superadmin/usuarios") ? "Usuarios" 
+    : null
+  );
 
   useEffect(() => {
-    // Mantener abierto si cambiamos de ruta interna de clientes
     if (path.startsWith("/superadmin/clientes")) {
-      setClientesExpanded(true);
+      setExpandedSection("Clientes");
+    } else if (path.startsWith("/superadmin/usuarios")) {
+      setExpandedSection("Usuarios");
     }
   }, [path]);
 
@@ -60,7 +63,15 @@ export function SuperAdminSidebar() {
     },
     { label: "Semillas", href: "/superadmin/semillas", icon: Sparkles },
     { label: "Comunicación", href: "/superadmin/comunicacion", icon: Megaphone },
-    { label: "Usuarios", href: "/superadmin/usuarios", icon: Users },
+    {
+      label: "Usuarios",
+      icon: Users,
+      isDropdown: true,
+      subItems: [
+        { label: "Sistema", href: "/superadmin/usuarios", icon: Users },
+        { label: "Por Empresa", href: "/superadmin/usuarios/empresas", icon: Building2 },
+      ],
+    },
     { label: "Config", href: "/superadmin/config", icon: Settings },
   ];
 
@@ -91,16 +102,18 @@ export function SuperAdminSidebar() {
       <nav className="flex-1 py-4 px-2 space-y-0.5 overflow-y-auto">
         {NAV.map((item, idx) => {
           if (item.isDropdown) {
-            const hasActiveChild = item.subItems?.some((sub) => path.startsWith(sub.href));
+            // Un subitem está activo si la ruta coincide o empieza con la ruta del subitem (excepto para home routes base si las hay, pero en superadmin funciona)
+            const hasActiveChild = item.subItems?.some((sub) => path === sub.href || path.startsWith(sub.href + "/"));
+            const isExpanded = expandedSection === item.label;
             const Icon = item.icon;
 
             return (
               <div key={item.label} className="mt-2 mb-1">
                 <button
-                  onClick={() => setClientesExpanded(!clientesExpanded)}
+                  onClick={() => setExpandedSection(isExpanded ? null : item.label)}
                   className={`w-full relative flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl
                               transition-all duration-150 group cursor-pointer ${
-                                hasActiveChild && !clientesExpanded
+                                hasActiveChild && !isExpanded
                                   ? "bg-brand/5 border border-brand/10"
                                   : "hover:bg-surface-hover/10 border border-transparent"
                               }`}
@@ -108,14 +121,14 @@ export function SuperAdminSidebar() {
                   <div className="flex items-center gap-3">
                     <Icon
                       className={`w-4 h-4 flex-shrink-0 ${
-                        hasActiveChild || clientesExpanded
+                        hasActiveChild || isExpanded
                           ? "text-[#E040FB]"
                           : "text-text-3 group-hover:text-text-1"
                       } transition-colors`}
                     />
                     <span
                       className={`text-sm font-medium ${
-                        hasActiveChild || clientesExpanded
+                        hasActiveChild || isExpanded
                           ? "text-[#E040FB] font-semibold"
                           : "text-text-2 group-hover:text-text-1"
                       } transition-colors`}
@@ -123,14 +136,14 @@ export function SuperAdminSidebar() {
                       {item.label}
                     </span>
                   </div>
-                  {clientesExpanded ? (
+                  {isExpanded ? (
                     <ChevronDown className="w-3 h-3 text-text-3" />
                   ) : (
                     <ChevronRight className="w-3 h-3 text-text-3" />
                   )}
                 </button>
 
-                {clientesExpanded && item.subItems && (
+                {isExpanded && item.subItems && (
                   <div className="mt-1 ml-4 pl-3 border-l-2 border-border/50 space-y-1">
                     {item.subItems.map((sub) => {
                       const isSubActive = path.startsWith(sub.href);
