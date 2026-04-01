@@ -3,11 +3,13 @@
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { ArrowLeft, Building2, Calendar, CreditCard, Download, FileText, Mail, Phone, User, Wallet, Loader2, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
-import { format } from "date-fns";
+import { ArrowLeft, Building2, Calendar, CreditCard, Download, FileText, Mail, Phone, User, Wallet, Loader2, CheckCircle2, AlertTriangle, XCircle, Save, Clock } from "lucide-react";
+import { format, addDays } from "date-fns";
 import { es } from "date-fns/locale";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 export default function CompanyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -19,6 +21,14 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
   const [payment, setPayment] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+  const [isExtendModalOpen, setIsExtendModalOpen] = useState(false);
+  
+  const [selectedPlan, setSelectedPlan] = useState("");
+  const [extendValue, setExtendValue] = useState<string>("7");
+  const [customDate, setCustomDate] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     fetchCompanyData();
@@ -88,6 +98,62 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
       toast.error("Error al actualizar estado: " + error.message);
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const handleChangePlan = async () => {
+    if (!selectedPlan) return;
+    setIsUpdating(true);
+    try {
+      const { error } = await supabase
+        .from("companies")
+        .update({ plan_type: selectedPlan, plan: selectedPlan })
+        .eq("id", id);
+      if (error) throw error;
+      toast.success("Plan actualizado correctamente");
+      setCompany({ ...company, plan_type: selectedPlan, plan: selectedPlan });
+      setIsPlanModalOpen(false);
+    } catch (error: any) {
+      toast.error("Error al cambiar plan: " + error.message);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleExtendPeriod = async () => {
+    setIsUpdating(true);
+    try {
+      let newDate: Date;
+      if (extendValue === "custom") {
+        if (!customDate) throw new Error("Debes seleccionar una fecha");
+        newDate = new Date(customDate);
+      } else {
+        newDate = addDays(new Date(), parseInt(extendValue));
+      }
+
+      const { error } = await supabase
+        .from("companies")
+        .update({ 
+           trial_ends_at: newDate.toISOString(),
+           subscription_status: company.subscription_status === 'suspended' ? 'trial' : company.subscription_status
+        })
+        .eq("id", id);
+        
+      if (error) throw error;
+      
+      // Log extensión logic en broadcast o notas:
+      // Lo dejaremos simple: sólo actualizamos company
+      toast.success("Período extendido correctamente");
+      setCompany({ 
+         ...company, 
+         trial_ends_at: newDate.toISOString(),
+         subscription_status: company.subscription_status === 'suspended' ? 'trial' : company.subscription_status
+      });
+      setIsExtendModalOpen(false);
+    } catch (error: any) {
+      toast.error("Error al extender período: " + error.message);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -208,8 +274,20 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
                 </Badge>
               </div>
               <div className="text-right">
-                <p className="text-3xl font-black text-text-1">${currentPrice.toFixed(2)}</p>
-                <p className="text-[10px] font-bold text-text-3 uppercase">/ mensuales</p>
+                {company.subscription_status === "trial" ? (
+                  <>
+                    <p className="text-lg font-black text-status-warn tracking-tight overflow-hidden text-ellipsis whitespace-nowrap hidden sm:block">TRIAL ACTIVO</p>
+                    <p className="text-sm sm:hidden font-black text-status-warn tracking-tight">TRIAL</p>
+                    <p className="text-[10px] font-bold text-text-3 uppercase mt-1">
+                      Vence: {company.trial_ends_at ? format(new Date(company.trial_ends_at), "dd/MMM/yyyy") : "N/D"}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-3xl font-black text-text-1">${currentPrice.toFixed(2)}</p>
+                    <p className="text-[10px] font-bold text-text-3 uppercase">/ mensuales</p>
+                  </>
+                )}
               </div>
             </div>
             
@@ -221,10 +299,16 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button className="flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border border-border hover:border-brand text-text-2 hover:text-brand bg-surface-base transition-colors shadow-sm">
+              <button 
+                onClick={() => { setSelectedPlan(company.plan_type || "basic"); setIsPlanModalOpen(true); }}
+                className="flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border border-border hover:border-brand text-text-2 hover:text-brand bg-surface-base transition-colors shadow-sm"
+              >
                 Cambiar plan
               </button>
-              <button className="flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border border-border hover:border-brand text-text-2 hover:text-brand bg-surface-base transition-colors shadow-sm">
+              <button 
+                onClick={() => { setIsExtendModalOpen(true); }}
+                className="flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border border-border hover:border-brand text-text-2 hover:text-brand bg-surface-base transition-colors shadow-sm"
+              >
                 Extender período
               </button>
             </div>
@@ -340,6 +424,121 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
       </div>
+
+      {/* Cambiar Plan Modal */}
+      <Dialog open={isPlanModalOpen} onOpenChange={setIsPlanModalOpen}>
+        <DialogContent className="bg-surface-base border-border rounded-2xl sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Cambiar Plan</DialogTitle>
+            <DialogDescription>
+              Selecciona el nuevo plan para {company.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3 py-4">
+            {[
+              { id: "basic", name: "Lumis Starter", price: "$19.99/mes", feat: "Facturación, CRM esencial" },
+              { id: "pro", name: "Lumis Pro Business", price: "$79.99/mes", feat: "CRM avanzado, WhatsApp Integration" },
+              { id: "enterprise", name: "Lumis Enterprise", price: "$119.99/mes", feat: "Multi-sucursal, Distribuidores" }
+            ].map(plan => (
+              <div 
+                key={plan.id}
+                onClick={() => setSelectedPlan(plan.id)}
+                className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                  selectedPlan === plan.id ? "border-brand bg-brand/5" : "border-border hover:border-brand/50 bg-surface-card"
+                }`}
+              >
+                <div className="flex justify-between items-center mb-1">
+                  <h3 className="font-bold text-text-1">{plan.name}</h3>
+                  <span className="font-black text-brand">{plan.price}</span>
+                </div>
+                <p className="text-xs text-text-3 font-medium">{plan.feat}</p>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <button
+              onClick={() => setIsPlanModalOpen(false)}
+              className="px-4 py-2 rounded-xl text-sm font-medium text-text-2 hover:bg-surface-hover transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleChangePlan}
+              disabled={isUpdating}
+              className="px-4 py-2 rounded-xl text-sm font-bold bg-brand text-white hover:opacity-90 flex items-center gap-2 transition-all disabled:opacity-50 inline-flex"
+            >
+              {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              Confirmar Cambio
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Extender Modal */}
+      <Dialog open={isExtendModalOpen} onOpenChange={setIsExtendModalOpen}>
+        <DialogContent className="bg-surface-base border-border rounded-2xl sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Extender Período / Trial</DialogTitle>
+            <DialogDescription>
+              Añade días extra de acceso a la plataforma sin requerir un pago confirmado.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3 py-4">
+            <label className="text-xs font-bold text-text-2 uppercase">Opción de extensión</label>
+            <select
+              value={extendValue}
+              onChange={(e) => setExtendValue(e.target.value)}
+              className="w-full px-4 py-3 bg-surface-card border border-border rounded-xl text-sm text-text-1 focus:outline-none focus:border-brand/40"
+            >
+              <option value="7">7 Días extra</option>
+              <option value="15">15 Días extra</option>
+              <option value="30">30 Días extra</option>
+              <option value="custom">Fecha personalizada...</option>
+            </select>
+            
+            {extendValue === "custom" && (
+              <div className="mt-2 space-y-1">
+                <label className="text-xs font-bold text-text-2 uppercase">Seleccionar Fecha Extendida</label>
+                <Input 
+                  type="date"
+                  value={customDate}
+                  onChange={(e) => setCustomDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="bg-surface-card border-border"
+                />
+              </div>
+            )}
+            
+            <div className="mt-4 p-4 bg-brand/5 border border-brand/20 rounded-xl flex items-start gap-3">
+              <Clock className="w-5 h-5 text-brand shrink-0" />
+              <div>
+                <p className="text-xs font-bold text-brand uppercase mb-0.5">Nuevo ingreso límite</p>
+                <p className="text-sm font-bold text-text-1">
+                  {extendValue === "custom" 
+                    ? (customDate ? format(new Date(customDate), "dd 'de' MMMM yyyy", { locale: es }) : "Seleccione una fecha")
+                    : format(addDays(new Date(), parseInt(extendValue)), "dd 'de' MMMM yyyy", { locale: es })}
+                </p>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <button
+              onClick={() => setIsExtendModalOpen(false)}
+              className="px-4 py-2 rounded-xl text-sm font-medium text-text-2 hover:bg-surface-hover transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleExtendPeriod}
+              disabled={isUpdating}
+              className="px-4 py-2 rounded-xl text-sm font-bold bg-brand text-white hover:opacity-90 flex items-center gap-2 transition-all disabled:opacity-50 inline-flex"
+            >
+              {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              Extender Acceso
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
