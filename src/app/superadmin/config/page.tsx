@@ -1,32 +1,36 @@
 import { createClient } from "@/lib/supabase/server";
-import { FeatureFlagToggle } from "@/components/superadmin/feature-flag-toggle";
 import { BcvOverrideForm } from "@/components/superadmin/bcv-override-form";
+import { FeatureFlagsSection } from "@/components/superadmin/config/feature-flags-section";
+import { PaymentMethodsSection } from "@/components/superadmin/config/payment-methods-section";
+import { PlansSection } from "@/components/superadmin/config/plans-section";
+import { NotificationsSection } from "@/components/superadmin/config/notifications-section";
 
 export default async function ConfigPage() {
   const supabase = await createClient();
 
+  // Fetch all feature flags (which includes JSON configs)
   const { data: flags } = await supabase
     .from("feature_flags")
     .select("*")
     .order("key");
 
   return (
-    <div className="space-y-6 page-enter max-w-2xl">
+    <div className="space-y-6 page-enter max-w-4xl pb-10">
       <div>
-        <h1 className="font-display text-2xl font-bold text-white">
+        <h1 className="font-display text-2xl font-bold text-gray-900">
           Configuración Global
         </h1>
-        <p className="text-sm text-[#9585B8] mt-0.5">
-          Controla funcionalidades para todas las empresas del SaaS
+        <p className="text-sm text-gray-500 mt-0.5">
+          Controla funcionalidades y ajustes para todas las empresas del SaaS
         </p>
       </div>
 
       {/* Tasa BCV manual */}
-      <div className="bg-[#18102A] border border-white/6 rounded-2xl p-6">
-        <h2 className="font-display text-sm font-bold text-white mb-1">
+      <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-6">
+        <h2 className="font-display text-sm font-bold text-gray-900 mb-1">
           Tasa BCV — Override de Emergencia
         </h2>
-        <p className="text-xs text-[#9585B8] mb-5">
+        <p className="text-xs text-gray-500 mb-4">
           Si la API de ve.dolarapi.com falla, puedes ingresar la tasa
           manualmente aquí. Dejar vacío = usar la API automática.
         </p>
@@ -38,23 +42,16 @@ export default async function ConfigPage() {
       </div>
 
       {/* Feature flags */}
-      <div className="bg-[#18102A] border border-white/6 rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-white/5">
-          <h2 className="font-display text-sm font-bold text-white">
-            Feature Flags
-          </h2>
-          <p className="text-xs text-[#9585B8] mt-0.5">
-            Activa o desactiva funcionalidades globalmente
-          </p>
-        </div>
-        <div className="divide-y divide-white/[0.03]">
-          {(flags ?? [])
-            .filter((f: any) => f.key !== "bcv_manual_rate")
-            .map((flag: any) => (
-              <FeatureFlagToggle key={flag.key} flag={flag} />
-            ))}
-        </div>
-      </div>
+      <FeatureFlagsSection flags={flags ?? []} />
+
+      {/* Métodos de Pago */}
+      <PaymentMethodsSection configJSON={flags?.find((f: any) => f.key === "payment_methods")?.value} />
+
+      {/* Planes y Precios */}
+      <PlansSection configJSON={flags?.find((f: any) => f.key === "plans_config")?.value} />
+
+      {/* Notificaciones del Sistema */}
+      <NotificationsSection configJSON={flags?.find((f: any) => f.key === "system_notifications")?.value} />
     </div>
   );
 }

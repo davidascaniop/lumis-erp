@@ -90,7 +90,33 @@ const plans = [
   },
 ];
 
-export function RegisterForm() {
+export function RegisterForm({ flags = [] }: { flags?: any[] }) {
+  // Parse dynamic plans from flags or fall back to defaults
+  const plansFlag = flags.find(f => f.key === "plans_config");
+  let dynamicPlans = plans;
+  if (plansFlag?.value) {
+    try {
+      const parsed = JSON.parse(plansFlag.value);
+      // Merge with static data for features if needed, or just use dynamic
+      dynamicPlans = parsed.map((p: any) => ({
+        ...p,
+        period: "/mes",
+        // Keep hardcoded features for now as they are not in the simple 'plans_config' yet, 
+        // or the user didn't ask to edit features in the modal.
+        features: plans.find(sp => sp.id === p.id)?.features || []
+      }));
+    } catch (e) {}
+  }
+
+  // Parse dynamic payment methods
+  const pmFlag = flags.find(f => f.key === "payment_methods");
+  let dynamicMethods: any[] = []; 
+  if (pmFlag?.value) {
+    try {
+      dynamicMethods = JSON.parse(pmFlag.value);
+    } catch (e) {}
+  }
+
   const router = useRouter();
   const supabase = createClient();
   const [step, setStep] = useState(1);
@@ -124,7 +150,7 @@ export function RegisterForm() {
   };
 
   const selectedPlanId = form.watch("plan");
-  const selectedPlan = plans.find((p) => p.id === selectedPlanId);
+  const selectedPlan = dynamicPlans.find((p: any) => p.id === selectedPlanId);
   const paymentMethod = form.watch("paymentMethod");
   const paymentConfirmed = form.watch("paymentConfirmed");
 
@@ -473,7 +499,7 @@ export function RegisterForm() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-3 overflow-y-auto no-scrollbar max-h-[300px] pb-2 pr-1">
-                  {plans.map((p) => {
+                  {dynamicPlans.map((p: any) => {
                     const isSelected = form.watch("plan") === p.id;
                     return (
                       <div
@@ -537,141 +563,139 @@ export function RegisterForm() {
                    
                    {/* Acordeones */}
                    <div className="space-y-2">
-                      {[
-                        { 
-                          id: "pago_movil", 
-                          name: "Pago Móvil", 
-                          active: true,
-                          content: (
-                            <div className="bg-white rounded-xl border border-[#EDF2F7] p-3 space-y-2 relative overflow-hidden">
-                              <div className="absolute top-0 right-0 w-16 h-16 bg-brand/5 rounded-bl-full -z-0" />
-                              <p className="text-[11px] text-[#64748B] font-medium leading-relaxed relative z-10">Realiza tu pago móvil a los siguientes datos. El monto exacto a transferir es <strong className="text-brand">Bs. {selectedPlan && (rate || 0) > 0 ? ((Number(selectedPlan.price.replace("$", "")) * (rate || 0)).toLocaleString("es-VE", { minimumFractionDigits: 2 })) : "0.00"}</strong>.</p>
-                              <div className="grid gap-2 relative z-10">
-                                <div className="flex justify-between items-center p-2.5 bg-[#F8FAFC] rounded-lg border border-[#EDF2F7]">
-                                  <div>
-                                    <p className="text-[9px] text-[#94A3B8] font-bold uppercase tracking-wider">Banco</p>
-                                    <p className="text-sm font-bold text-[#1A1125]">Banesco (0134)</p>
-                                  </div>
-                                </div>
-                                <div className="flex justify-between items-center p-2.5 bg-[#F8FAFC] rounded-lg border border-[#EDF2F7]">
-                                  <div>
-                                    <p className="text-[9px] text-[#94A3B8] font-bold uppercase tracking-wider">Teléfono</p>
-                                    <p className="text-sm font-bold text-[#1A1125]">04149406419</p>
-                                  </div>
-                                  <button type="button" onClick={() => handleCopy("04149406419")} className="p-1.5 text-brand hover:bg-brand/10 rounded-md transition-colors"><Copy className="w-4 h-4" /></button>
-                                </div>
-                                <div className="flex justify-between items-center p-2.5 bg-[#F8FAFC] rounded-lg border border-[#EDF2F7]">
-                                  <div>
-                                    <p className="text-[9px] text-[#94A3B8] font-bold uppercase tracking-wider">Cédula</p>
-                                    <p className="text-sm font-bold text-[#1A1125]">V-24647547</p>
-                                  </div>
-                                  <button type="button" onClick={() => handleCopy("24647547")} className="p-1.5 text-brand hover:bg-brand/10 rounded-md transition-colors"><Copy className="w-4 h-4" /></button>
-                                </div>
-                              </div>
-                            </div>
-                          )
-                        },
-                        { 
-                          id: "zinli", 
-                          name: "Zinli", 
-                          active: true,
-                          content: (
-                            <div className="bg-white rounded-xl border border-[#EDF2F7] p-3 space-y-2 relative overflow-hidden">
-                              <div className="absolute top-0 right-0 w-16 h-16 bg-brand/5 rounded-bl-full -z-0" />
-                              <p className="text-[11px] text-[#64748B] font-medium leading-relaxed relative z-10">Envía el monto de <strong className="text-brand text-sm">{selectedPlan?.price}</strong> al siguiente correo de Zinli:</p>
-                              <div className="flex justify-between items-center p-3 bg-[#F8FAFC] rounded-lg border border-[#EDF2F7] relative z-10 mt-2">
-                                  <div>
-                                    <p className="text-[9px] text-[#94A3B8] font-bold uppercase tracking-wider">Correo Zinli</p>
-                                    <p className="text-sm font-bold text-[#1A1125]">davidascaniop@gmail.com</p>
-                                  </div>
-                                  <button type="button" onClick={() => handleCopy("davidascaniop@gmail.com")} className="p-1.5 text-brand hover:bg-brand/10 rounded-md transition-colors"><Copy className="w-4 h-4" /></button>
-                              </div>
-                            </div>
-                          )
-                        },
-                        { 
-                          id: "binance", 
-                          name: "Binance Pay", 
-                          active: true,
-                          content: (
-                            <div className="bg-white rounded-xl border border-[#EDF2F7] p-3 space-y-2 relative overflow-hidden">
-                              <div className="absolute top-0 right-0 w-16 h-16 bg-[#FCD535]/10 rounded-bl-full -z-0" />
-                              <div className="flex items-center gap-2 mb-1 relative z-10">
-                                <div className="w-5 h-5 bg-[#FCD535] rounded-full flex items-center justify-center">
-                                  <img src="https://cryptologos.cc/logos/bnb-bnb-logo.svg?v=029" alt="Binance" className="w-3 h-3" />
-                                </div>
-                                <p className="text-[11px] text-[#64748B] font-medium">Transfiere <strong className="text-[#1A1125] text-sm">{selectedPlan?.price}</strong> (USDT)</p>
-                              </div>
-                              <div className="grid gap-2 relative z-10">
-                                <div className="flex justify-between items-center p-3 bg-[#F8FAFC] rounded-lg border border-[#EDF2F7]">
-                                  <div>
-                                    <p className="text-[9px] text-[#94A3B8] font-bold uppercase tracking-wider">Email (Pay ID)</p>
-                                    <p className="text-sm font-bold text-[#1A1125]">davidascaniop@gmail.com</p>
-                                  </div>
-                                  <button type="button" onClick={() => handleCopy("davidascaniop@gmail.com")} className="p-1.5 text-[#FCD535] hover:bg-[#FCD535]/10 rounded-md transition-colors"><Copy className="w-4 h-4" /></button>
-                                </div>
-                                <div className="flex justify-between items-center p-3 bg-[#F8FAFC] rounded-lg border border-[#EDF2F7]">
-                                  <div>
-                                    <p className="text-[9px] text-[#94A3B8] font-bold uppercase tracking-wider">Titular</p>
-                                    <p className="text-sm font-bold text-[#1A1125]">David Ascanio</p>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          )
-                        },
-                        { id: "zelle", name: "Zelle\u00AE", active: false },
+                      {(dynamicMethods.length > 0 ? dynamicMethods : [
+                        { id: "pago_movil", name: "Pago Móvil", active: true, data: { banco: "Banesco (0134)", telefono: "04149406419", cedula: "V-24647547" } },
+                        { id: "zinli", name: "Zinli", active: true, data: { email: "davidascaniop@gmail.com" } },
+                        { id: "binance", name: "Binance Pay", active: true, data: { email: "davidascaniop@gmail.com", titular: "David Ascanio" } },
+                        { id: "zelle", name: "Zelle", active: false },
                         { id: "stripe", name: "Stripe", active: false },
                         { id: "paypal", name: "PayPal", active: false }
-                      ].map(pm => {
-                        const isSelected = paymentMethod === pm.id;
-                        return (
-                          <div key={pm.id} className="w-full">
-                            <div 
-                              onClick={() => {
-                                if (!pm.active) toast.info("Disponible en la siguiente actualización");
-                                else form.setValue("paymentMethod", isSelected ? "" : pm.id);
-                              }}
-                              className={`w-full p-4 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                                !pm.active ? "opacity-50 grayscale bg-[#F8FAFC]" :
-                                isSelected ? "border-brand bg-brand/5 shadow-sm" : "border-[#EDF2F7] bg-white hover:border-brand/30 hover:bg-[#F8FAFC]"
-                              }`}
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className={`w-5 h-5 rounded-full flex items-center justify-center border-2 ${isSelected ? "border-brand bg-brand" : "border-[#CBD5E1]"}`}>
-                                  {isSelected && <Check className="w-3 h-3 text-white" />}
-                                </div>
-                                <span className={`text-sm font-outfit font-bold ${isSelected ? "text-brand" : "text-[#1A1125]"}`}>{pm.name}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {!pm.active && (
-                                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#EDF2F7] text-[#64748B] uppercase tracking-wider">Próximamente</span>
-                                )}
-                                {pm.active && (
-                                  <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isSelected ? "text-brand rotate-180" : "text-[#94A3B8]"}`} />
-                                )}
-                              </div>
-                            </div>
-                            
-                            {/* Cuerpo del Acordeón */}
-                            <AnimatePresence>
-                              {isSelected && pm.content && (
-                                <motion.div
-                                  initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: "auto", opacity: 1 }}
-                                  exit={{ height: 0, opacity: 0 }}
-                                  transition={{ duration: 0.2 }}
-                                  className="overflow-hidden"
-                                >
-                                  <div className="pt-2 px-1">
-                                    {pm.content}
-                                  </div>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        )
-                      })}
+                      ]).map((pm: any) => {
+                       const isSelected = paymentMethod === pm.id;
+                       
+                       // Render dynamic content for certain methods
+                       let pmContent = null;
+                       if (pm.active && pm.data) {
+                         if (pm.id === "pago_movil") {
+                           pmContent = (
+                             <div className="bg-white rounded-xl border border-[#EDF2F7] p-3 space-y-2 relative overflow-hidden">
+                               <div className="absolute top-0 right-0 w-16 h-16 bg-brand/5 rounded-bl-full -z-0" />
+                               <p className="text-[11px] text-[#64748B] font-medium leading-relaxed relative z-10">Realiza tu pago móvil a los siguientes datos. El monto exacto a transferir es <strong className="text-brand">Bs. {selectedPlan && (rate || 0) > 0 ? ((Number(selectedPlan.price.replace("$", "")) * (rate || 0)).toLocaleString("es-VE", { minimumFractionDigits: 2 })) : "0.00"}</strong>.</p>
+                               <div className="grid gap-2 relative z-10">
+                                 <div className="flex justify-between items-center p-2.5 bg-[#F8FAFC] rounded-lg border border-[#EDF2F7]">
+                                   <div>
+                                     <p className="text-[9px] text-[#94A3B8] font-bold uppercase tracking-wider">Banco</p>
+                                     <p className="text-sm font-bold text-[#1A1125]">{pm.data.banco}</p>
+                                   </div>
+                                 </div>
+                                 <div className="flex justify-between items-center p-2.5 bg-[#F8FAFC] rounded-lg border border-[#EDF2F7]">
+                                   <div>
+                                     <p className="text-[9px] text-[#94A3B8] font-bold uppercase tracking-wider">Teléfono</p>
+                                     <p className="text-sm font-bold text-[#1A1125]">{pm.data.telefono}</p>
+                                   </div>
+                                   <button type="button" onClick={() => handleCopy(pm.data.telefono)} className="p-1.5 text-brand hover:bg-brand/10 rounded-md transition-colors"><Copy className="w-4 h-4" /></button>
+                                 </div>
+                                 <div className="flex justify-between items-center p-2.5 bg-[#F8FAFC] rounded-lg border border-[#EDF2F7]">
+                                   <div>
+                                     <p className="text-[9px] text-[#94A3B8] font-bold uppercase tracking-wider">Cédula</p>
+                                     <p className="text-sm font-bold text-[#1A1125]">{pm.data.cedula}</p>
+                                   </div>
+                                   <button type="button" onClick={() => handleCopy(pm.data.cedula)} className="p-1.5 text-brand hover:bg-brand/10 rounded-md transition-colors"><Copy className="w-4 h-4" /></button>
+                                 </div>
+                               </div>
+                             </div>
+                           );
+                         } else if (pm.id === "zinli") {
+                           pmContent = (
+                             <div className="bg-white rounded-xl border border-[#EDF2F7] p-3 space-y-2 relative overflow-hidden">
+                               <div className="absolute top-0 right-0 w-16 h-16 bg-brand/5 rounded-bl-full -z-0" />
+                               <p className="text-[11px] text-[#64748B] font-medium leading-relaxed relative z-10">Envía el monto de <strong className="text-brand text-sm">{selectedPlan?.price}</strong> al siguiente correo de Zinli:</p>
+                               <div className="flex justify-between items-center p-3 bg-[#F8FAFC] rounded-lg border border-[#EDF2F7] relative z-10 mt-2">
+                                   <div>
+                                     <p className="text-[9px] text-[#94A3B8] font-bold uppercase tracking-wider">Correo Zinli</p>
+                                     <p className="text-sm font-bold text-[#1A1125]">{pm.data.email}</p>
+                                   </div>
+                                   <button type="button" onClick={() => handleCopy(pm.data.email)} className="p-1.5 text-brand hover:bg-brand/10 rounded-md transition-colors"><Copy className="w-4 h-4" /></button>
+                               </div>
+                             </div>
+                           );
+                         } else if (pm.id === "binance") {
+                           pmContent = (
+                             <div className="bg-white rounded-xl border border-[#EDF2F7] p-3 space-y-2 relative overflow-hidden">
+                               <div className="absolute top-0 right-0 w-16 h-16 bg-[#FCD535]/10 rounded-bl-full -z-0" />
+                               <div className="flex items-center gap-2 mb-1 relative z-10">
+                                 <div className="w-5 h-5 bg-[#FCD535] rounded-full flex items-center justify-center">
+                                   <img src="https://cryptologos.cc/logos/bnb-bnb-logo.svg?v=029" alt="Binance" className="w-3 h-3" />
+                                 </div>
+                                 <p className="text-[11px] text-[#64748B] font-medium">Transfiere <strong className="text-[#1A1125] text-sm">{selectedPlan?.price}</strong> (USDT)</p>
+                               </div>
+                               <div className="grid gap-2 relative z-10">
+                                 <div className="flex justify-between items-center p-3 bg-[#F8FAFC] rounded-lg border border-[#EDF2F7]">
+                                   <div>
+                                     <p className="text-[9px] text-[#94A3B8] font-bold uppercase tracking-wider">Email (Pay ID)</p>
+                                     <p className="text-sm font-bold text-[#1A1125]">{pm.data.email}</p>
+                                   </div>
+                                   <button type="button" onClick={() => handleCopy(pm.data.email)} className="p-1.5 text-[#FCD535] hover:bg-[#FCD535]/10 rounded-md transition-colors"><Copy className="w-4 h-4" /></button>
+                                 </div>
+                                 <div className="flex justify-between items-center p-3 bg-[#F8FAFC] rounded-lg border border-[#EDF2F7]">
+                                   <div>
+                                     <p className="text-[9px] text-[#94A3B8] font-bold uppercase tracking-wider">Titular</p>
+                                     <p className="text-sm font-bold text-[#1A1125]">{pm.data.titular}</p>
+                                   </div>
+                                 </div>
+                               </div>
+                             </div>
+                           );
+                         }
+                       }
+
+                       return (
+                         <div key={pm.id} className="w-full">
+                           <div 
+                             onClick={() => {
+                               if (!pm.active) toast.info("Disponible en la siguiente actualización");
+                               else form.setValue("paymentMethod", isSelected ? "" : pm.id);
+                             }}
+                             className={`w-full p-4 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                               !pm.active ? "opacity-50 grayscale bg-[#F8FAFC]" :
+                               isSelected ? "border-brand bg-brand/5 shadow-sm" : "border-[#EDF2F7] bg-white hover:border-brand/30 hover:bg-[#F8FAFC]"
+                             }`}
+                           >
+                             <div className="flex items-center gap-3">
+                               <div className={`w-5 h-5 rounded-full flex items-center justify-center border-2 ${isSelected ? "border-brand bg-brand" : "border-[#CBD5E1]"}`}>
+                                 {isSelected && <Check className="w-3 h-3 text-white" />}
+                               </div>
+                               <span className={`text-sm font-outfit font-bold ${isSelected ? "text-brand" : "text-[#1A1125]"}`}>{pm.name}</span>
+                             </div>
+                             <div className="flex items-center gap-2">
+                               {!pm.active && (
+                                 <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#EDF2F7] text-[#64748B] uppercase tracking-wider">Próximamente</span>
+                               )}
+                               {pm.active && (
+                                 <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isSelected ? "text-brand rotate-180" : "text-[#94A3B8]"}`} />
+                               )}
+                             </div>
+                           </div>
+                           
+                           {/* Cuerpo del Acordeón */}
+                           <AnimatePresence>
+                             {isSelected && pmContent && (
+                               <motion.div
+                                 initial={{ height: 0, opacity: 0 }}
+                                 animate={{ height: "auto", opacity: 1 }}
+                                 exit={{ height: 0, opacity: 0 }}
+                                 transition={{ duration: 0.2 }}
+                                 className="overflow-hidden"
+                               >
+                                 <div className="pt-2 px-1">
+                                   {pmContent}
+                                 </div>
+                               </motion.div>
+                             )}
+                           </AnimatePresence>
+                         </div>
+                       );
+                     })}
                    </div>
 
                    {/* Formulario Unificado de Confirmación */}

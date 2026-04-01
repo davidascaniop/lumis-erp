@@ -144,6 +144,42 @@ export async function updateFeatureFlag(key: string, value: string) {
   revalidatePath("/superadmin/config");
 }
 
+// ─── Upsert feature flag (crea o actualiza) ───────────────────
+export async function upsertFeatureFlag(key: string, value: string, description?: string) {
+  const supabase = await createClient();
+  const user = await assertSuperAdmin(supabase);
+
+  const { data: existing } = await supabase
+    .from("feature_flags")
+    .select("key")
+    .eq("key", key)
+    .single();
+
+  if (existing) {
+    await supabase
+      .from("feature_flags")
+      .update({
+        value,
+        updated_by: user.id,
+        updated_at: new Date().toISOString(),
+        ...(description && { description }),
+      })
+      .eq("key", key);
+  } else {
+    // try inserting with just the minimum required
+    await supabase
+      .from("feature_flags")
+      .insert({
+        key,
+        value,
+        ...(description && { description }),
+        updated_by: user.id,
+      });
+  }
+
+  revalidatePath("/superadmin/config");
+}
+
 // ─── Registrar Nuevo Superadmin (Setup Inicial) ────────────────
 export async function registerSuperAdmin(data: {
   fullName:   string

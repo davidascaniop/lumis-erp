@@ -25,7 +25,7 @@ export function BcvOverrideForm({ currentValue }: { currentValue: string }) {
         value={rate}
         onChange={(e) => setRate(e.target.value)}
         placeholder="Ej: 36.50"
-        className="bg-[#0F0818] border border-white/8 rounded-xl px-4 py-2 text-sm text-white w-32 focus:outline-none focus:border-[#E040FB]"
+        className="bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-900 w-32 focus:outline-none focus:border-[#E040FB] focus:ring-1 focus:ring-[#E040FB]/20"
       />
       <button
         onClick={handleSave}
