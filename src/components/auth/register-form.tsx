@@ -233,19 +233,29 @@ export function RegisterForm() {
       const planPriceStr = selectedPlan?.price.replace("$", "") || "0";
       const amountUsd = Number(planPriceStr);
       const amountBs = amountUsd * (rate || 0);
+      
+      const now = new Date();
+      const periodStart = now.toISOString().split("T")[0]; // YYYY-MM-DD
+      const nextMonth = new Date(now);
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      const periodEnd = nextMonth.toISOString().split("T")[0]; // YYYY-MM-DD
 
       const { error: paymentError } = await supabase.from("subscription_payments").insert({
         company_id: cData.id,
-        plan_type: values.plan,
+        plan: values.plan,        // Nombre de la columna original NOT NULL
+        plan_type: values.plan,   // Mantenemos por compatibilidad si la otra vista lo usa
+        plan_price: amountUsd,    // Nuevo campo solicitado
+        amount_usd: amountUsd,    // Original NOT NULL
+        amount_bs: amountBs,
+        bcv_rate: rate || 0,
+        period_start: periodStart, // Original NOT NULL
+        period_end: periodEnd,     // Original NOT NULL
         method: paymentMethod,
         holder_name: values.paymentName,
         contact_info: values.paymentEmailOrPhone,
         last_digits: values.paymentBankOrLast4 || null,
         receipt_url: receiptUrl,
-        amount_usd: amountUsd,
-        amount_bs: amountBs,
-        bcv_rate: rate || 0,
-        paid_at: new Date().toISOString(),
+        paid_at: now.toISOString(),
         status: "pending"
       } as any);
 
