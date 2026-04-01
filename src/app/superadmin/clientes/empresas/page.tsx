@@ -93,7 +93,7 @@ export default function EmpresasPage() {
   };
 
   const handleDelete = async (companyId: string, companyName: string) => {
-    if (companyId === "0005ff1f-b046-44f9-aa85-7dfa66913807") {
+    if (companyId === "5a888a7b-aa3d-47f7-a517-37d94e9b4d45") {
       toast.error("Acción denegada", { description: "Esta empresa base no puede ser eliminada." });
       return;
     }
@@ -255,7 +255,7 @@ export default function EmpresasPage() {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        {c.id !== "0005ff1f-b046-44f9-aa85-7dfa66913807" && (
+                        {c.id !== "5a888a7b-aa3d-47f7-a517-37d94e9b4d45" && (
                           <button
                             title="Eliminar Empresa"
                             onClick={(e) => { e.stopPropagation(); handleDelete(c.id, c.name); }}
