@@ -68,7 +68,7 @@ export function SuperAdminSidebar() {
       icon: Users,
       isDropdown: true,
       subItems: [
-        { label: "Sistema", href: "/superadmin/usuarios", icon: Users },
+        { label: "Equipo Admin", href: "/superadmin/usuarios/equipo", icon: Shield },
         { label: "Por Empresa", href: "/superadmin/usuarios/empresas", icon: Building2 },
       ],
     },
