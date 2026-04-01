@@ -32,7 +32,7 @@ export default function SuscripcionesPage({ searchParams }: { searchParams?: { f
     setIsLoading(true);
     let query = supabase
       .from("subscription_payments")
-      .select("*, companies(name, id)")
+      .select("*, companies(name, id, subscription_status)")
       .order("created_at", { ascending: false });
 
     if (statusFilter !== "all") {
@@ -54,6 +54,10 @@ export default function SuscripcionesPage({ searchParams }: { searchParams?: { f
       toast.error("Error al cargar pagos", { description: error.message });
     } else {
       let result = data || [];
+      
+      // Filter out demo companies on client-side (easier given nested foreign key data structure)
+      result = result.filter((p: any) => p.companies?.subscription_status !== "demo");
+
       if (search) {
          result = result.filter((p: any) => p.companies?.name?.toLowerCase().includes(search.toLowerCase()));
       }

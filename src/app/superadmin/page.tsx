@@ -10,6 +10,7 @@ import {
   Clock,
   FileText,
   XCircle,
+  Sparkles,
 } from "lucide-react";
 import { SaasLineChart } from "@/components/superadmin/saas-line-chart";
 import { PlanDonutChart } from "@/components/superadmin/plan-donut-chart";
@@ -27,6 +28,7 @@ export default async function SuperAdminHome() {
     { count: activeCompanies },
     { count: suspendedCompanies },
     { count: trialCompanies },
+    { count: demoCompanies },
     { count: totalUsers },
     { data: planDistribution },
     { data: newCompaniesThisMonth },
@@ -40,6 +42,7 @@ export default async function SuperAdminHome() {
     supabase.from("companies").select("*", { count: "exact", head: true }).eq("subscription_status", "active"), // Changed from plan_status
     supabase.from("companies").select("*", { count: "exact", head: true }).eq("subscription_status", "suspended"),
     supabase.from("companies").select("*", { count: "exact", head: true }).eq("subscription_status", "trial"), // Or 'pending_verification'
+    supabase.from("companies").select("*", { count: "exact", head: true }).eq("subscription_status", "demo"),
     supabase.from("users").select("*", { count: "exact", head: true }),
     supabase.from("companies").select("plan_type").in("subscription_status", ["active", "trial", "pending_verification"]),
     supabase.from("companies").select("id").gte("created_at", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
@@ -169,7 +172,7 @@ export default async function SuperAdminHome() {
           </div>
 
           {/* FILA 2: OPERACIONES (Compactas) */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
              {/* Empresas Activas */}
              <Link href="/superadmin/clientes/empresas" className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-brand/30 transition-all group cursor-pointer">
                 <div className="flex justify-between items-start mb-2">
@@ -202,8 +205,19 @@ export default async function SuperAdminHome() {
                      <Clock className="w-4 h-4" />
                    </div>
                 </div>
-                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1 group-hover:text-text-2 transition-colors">Cuentas en Trial</h4>
+                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1 group-hover:text-text-2 transition-colors">Cuentas Trial</h4>
                 <p className="text-2xl font-heading font-black text-text-1">{trialCompanies || 0}</p>
+             </Link>
+
+             {/* Demo */}
+             <Link href="/superadmin/clientes/empresas?filter=demo" className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-[#1E88E5]/30 transition-all group cursor-pointer">
+                <div className="flex justify-between items-start mb-2">
+                   <div className="p-2 bg-[#1E88E5]/10 rounded-lg text-[#1E88E5]">
+                     <Sparkles className="w-4 h-4" />
+                   </div>
+                </div>
+                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1 group-hover:text-text-2 transition-colors">Cuentas Demo</h4>
+                <p className="text-2xl font-heading font-black text-text-1">{demoCompanies || 0}</p>
              </Link>
 
              {/* Pagos Vencidos */}

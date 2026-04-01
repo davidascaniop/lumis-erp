@@ -77,12 +77,18 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
     }
   };
 
-  const handleStatusChange = async (newStatus: "active" | "suspended") => {
+  const handleStatusChange = async (newStatus: "active" | "suspended" | "demo") => {
     setIsProcessing(true);
     try {
+      const updates: any = { subscription_status: newStatus };
+      if (newStatus === "demo") {
+        updates.plan_type = null;
+        updates.plan = null;
+      }
+      
       const { data: updatedData, error } = await supabase
         .from("companies")
-        .update({ subscription_status: newStatus })
+        .update(updates)
         .eq("id", id)
         .select()
         .single();
@@ -213,6 +219,11 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
                   <span className="w-1.5 h-1.5 rounded-full bg-status-warn" /> Trial
                 </span>
               )}
+              {company.subscription_status === "demo" && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#1E88E5]/10 text-[#1E88E5] text-xs font-bold uppercase tracking-wider border border-[#1E88E5]/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#1E88E5]" /> Demo
+                </span>
+              )}
             </h1>
             <p className="text-sm font-medium text-text-3 mt-1 uppercase tracking-wider">ID: {company.id?.split('-')[0]}</p>
           </div>
@@ -269,12 +280,20 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
             <div className="flex items-center justify-between p-4 bg-surface-base rounded-xl border border-border">
               <div>
                 <p className="text-xs font-bold text-text-3 uppercase mb-1">Plan Actual</p>
-                <Badge variant="outline" className="bg-brand/5 text-brand border-brand/20 uppercase font-black tracking-widest px-3 py-1 text-xs">
-                  {company.plan_type || 'Básico'}
-                </Badge>
+                {company.subscription_status === "demo" ? (
+                  <Badge variant="outline" className="bg-[#1E88E5]/10 text-[#1E88E5] border-[#1E88E5]/30 uppercase font-black tracking-widest px-3 py-1 text-xs">
+                    CUENTA DEMO
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="bg-brand/5 text-brand border-brand/20 uppercase font-black tracking-widest px-3 py-1 text-xs">
+                    {company.plan_type || 'Básico'}
+                  </Badge>
+                )}
               </div>
               <div className="text-right">
-                {company.subscription_status === "trial" ? (
+                {company.subscription_status === "demo" ? (
+                  <p className="text-xl font-black text-[#1E88E5] tracking-tight overflow-hidden text-ellipsis whitespace-nowrap">ACCESO TOTAL</p>
+                ) : company.subscription_status === "trial" ? (
                   <>
                     <p className="text-lg font-black text-status-warn tracking-tight overflow-hidden text-ellipsis whitespace-nowrap hidden sm:block">TRIAL ACTIVO</p>
                     <p className="text-sm sm:hidden font-black text-status-warn tracking-tight">TRIAL</p>
@@ -298,25 +317,28 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
               </span>
             </div>
 
-            <div className="flex gap-3 pt-2">
-              <button 
-                onClick={() => { setSelectedPlan(company.plan_type || "basic"); setIsPlanModalOpen(true); }}
-                className="flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border border-border hover:border-brand text-text-2 hover:text-brand bg-surface-base transition-colors shadow-sm"
-              >
-                Cambiar plan
-              </button>
-              <button 
-                onClick={() => { setIsExtendModalOpen(true); }}
-                className="flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border border-border hover:border-brand text-text-2 hover:text-brand bg-surface-base transition-colors shadow-sm"
-              >
-                Extender período
-              </button>
-            </div>
+            {company.subscription_status !== "demo" && (
+              <div className="flex gap-3 pt-2">
+                <button 
+                  onClick={() => { setSelectedPlan(company.plan_type || "basic"); setIsPlanModalOpen(true); }}
+                  className="flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border border-border hover:border-brand text-text-2 hover:text-brand bg-surface-base transition-colors shadow-sm"
+                >
+                  Cambiar plan
+                </button>
+                <button 
+                  onClick={() => { setIsExtendModalOpen(true); }}
+                  className="flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border border-border hover:border-brand text-text-2 hover:text-brand bg-surface-base transition-colors shadow-sm"
+                >
+                  Extender período
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Section 3: Datos del pago */}
-        <div className="md:col-span-2 bg-surface-card border border-border rounded-2xl p-6 shadow-sm">
+        {company.subscription_status !== "demo" && (
+          <div className="md:col-span-2 bg-surface-card border border-border rounded-2xl p-6 shadow-sm">
           <h2 className="text-lg font-bold text-text-1 flex items-center gap-2 mb-4 border-b border-border/50 pb-3">
             <Wallet className="w-5 h-5 text-brand" />
             Datos del último pago
@@ -398,6 +420,7 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
             </div>
           )}
         </div>
+        )}
 
         {/* Section 4: Acciones */}
         <div className="md:col-span-2 bg-gradient-to-br from-surface-card to-surface-base border border-border rounded-2xl p-6 shadow-sm">
@@ -405,6 +428,14 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
             Acciones de la cuenta
           </h2>
           <div className="flex flex-col sm:flex-row gap-4">
+            <button
+              onClick={() => handleStatusChange("demo")}
+              disabled={isProcessing || company.subscription_status === "demo"}
+              className="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl text-sm font-bold uppercase tracking-wider bg-[#1E88E5] hover:bg-[#1E88E5]/90 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#1E88E5]/20"
+            >
+              {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+              Hacer Demo
+            </button>
             <button
               onClick={() => handleStatusChange("active")}
               disabled={isProcessing || company.subscription_status === "active"}
