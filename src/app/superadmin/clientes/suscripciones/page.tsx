@@ -114,22 +114,19 @@ export default function SuscripcionesPage({ searchParams }: { searchParams?: { f
   };
 
   const renderRefData = (payment: any) => {
-    const data = payment.reference_data;
-    if (!data) return "N/A";
-    
     if (payment.method === "pago_movil") {
       return (
         <div className="space-y-0.5">
-          <p><strong>Ref:</strong> {data.ref}</p>
-          <p className="text-text-3">Banco: {data.bank} - Céd: {data.dni}</p>
+          <p><strong>{payment.holder_name || "N/A"}:</strong> {payment.last_digits || "N/A"}</p>
+          <p className="text-text-3">Tel/Céd: {payment.contact_info || "N/A"}</p>
         </div>
       );
     }
     if (payment.method === "zinli" || payment.method === "zelle") {
       return (
         <div className="space-y-0.5">
-          <p><strong>{payment.method.toUpperCase()}:</strong> {data.name}</p>
-          <p className="text-text-3">{data.email}</p>
+          <p><strong>{payment.method.toUpperCase()}:</strong> {payment.holder_name || "N/A"}</p>
+          <p className="text-text-3">{payment.contact_info || "N/A"}</p>
         </div>
       );
     }

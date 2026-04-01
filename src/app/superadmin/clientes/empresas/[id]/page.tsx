@@ -106,9 +106,8 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
   const planPrices: Record<string, number> = { "basic": 19.99, "starter": 19.99, "pro": 79.99, "enterprise": 119.99 };
   const currentPrice = planPrices[company.plan_type] || 0;
   
-  // Try to match BCV rate if not explicitely saved (fallback to ref data or assume current, but since prompt says show if available)
-  const bcvRate = payment?.reference_data?.bcv_rate || 0; 
-  const amountBs = currentPrice * bcvRate;
+  const bcvRate = payment?.bcv_rate || 0; 
+  const amountBs = payment?.amount_bs || (currentPrice * bcvRate);
 
   return (
     <div className="space-y-6 page-enter pb-10 max-w-5xl mx-auto">
@@ -181,7 +180,7 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
               <span className="text-xs font-bold text-text-3 uppercase">Teléfono:</span>
               <span className="text-sm font-medium text-text-1 flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5 text-text-2" /> 
-                {adminUser?.phone || payment?.reference_data?.source || "No registrado"}
+                {adminUser?.phone || payment?.contact_info || "No registrado"}
               </span>
             </div>
             <div className="grid grid-cols-[120px_1fr] gap-2 items-center">
@@ -266,19 +265,19 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
                 <div className="bg-surface-base rounded-xl border border-border p-4 space-y-3">
                    <div className="grid grid-cols-[140px_1fr] gap-2 items-center">
                      <span className="text-xs font-bold text-text-3 uppercase flex items-center gap-1.5"><User className="w-3.5 h-3.5"/> Titular:</span>
-                     <span className="text-sm font-medium text-text-1">{payment.reference_data?.name || "Desconocido"}</span>
+                     <span className="text-sm font-medium text-text-1">{payment.holder_name || "Desconocido"}</span>
                    </div>
                    <div className="grid grid-cols-[140px_1fr] gap-2 items-center">
                      <span className="text-xs font-bold text-text-3 uppercase flex items-center gap-1.5"><Mail className="w-3.5 h-3.5"/> Correo/Tlf emisor:</span>
-                     <span className="text-sm font-medium text-text-1">{payment.reference_data?.source || "Desconocido"}</span>
+                     <span className="text-sm font-medium text-text-1">{payment.contact_info || "Desconocido"}</span>
                    </div>
                    <div className="grid grid-cols-[140px_1fr] gap-2 items-center">
                      <span className="text-xs font-bold text-text-3 uppercase flex items-center gap-1.5"><Wallet className="w-3.5 h-3.5"/> 4 Dig / Banco:</span>
-                     <span className="text-sm font-medium text-text-1">{payment.reference_data?.bank_last4 || "Desconocido"}</span>
+                     <span className="text-sm font-medium text-text-1">{payment.last_digits || "Desconocido"}</span>
                    </div>
                    <div className="grid grid-cols-[140px_1fr] gap-2 items-center">
                      <span className="text-xs font-bold text-text-3 uppercase flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5"/> Fecha de pago:</span>
-                     <span className="text-sm font-medium text-text-1">{format(new Date(payment.created_at), "dd/MM/yyyy HH:mm", { locale: es })}</span>
+                     <span className="text-sm font-medium text-text-1">{payment.paid_at ? format(new Date(payment.paid_at), "dd/MM/yyyy HH:mm", { locale: es }) : format(new Date(payment.created_at), "dd/MM/yyyy HH:mm", { locale: es })}</span>
                    </div>
                 </div>
               </div>

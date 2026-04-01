@@ -234,22 +234,18 @@ export function RegisterForm() {
       const amountUsd = Number(planPriceStr);
       const amountBs = amountUsd * (rate || 0);
 
-      const refData = { 
-        name: values.paymentName, 
-        source: values.paymentEmailOrPhone, 
-        bank_last4: values.paymentBankOrLast4,
-        bcv_rate: rate || 0,
-        amount_usd: amountUsd,
-        amount_bs: amountBs
-      };
-
       const { error: paymentError } = await supabase.from("subscription_payments").insert({
         company_id: cData.id,
         plan_type: values.plan,
         method: paymentMethod,
-        reference_data: refData,
+        holder_name: values.paymentName,
+        contact_info: values.paymentEmailOrPhone,
+        last_digits: values.paymentBankOrLast4 || null,
         receipt_url: receiptUrl,
-        amount_usd: amountUsd, // Guardamos también en una columna si existe
+        amount_usd: amountUsd,
+        amount_bs: amountBs,
+        bcv_rate: rate || 0,
+        paid_at: new Date().toISOString(),
         status: "pending"
       } as any);
 
