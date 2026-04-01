@@ -230,21 +230,37 @@ export function RegisterForm() {
       }
 
       // Guardar pago
+      const planPriceStr = selectedPlan?.price.replace("$", "") || "0";
+      const amountUsd = Number(planPriceStr);
+      const amountBs = amountUsd * (rate || 0);
+
       const refData = { 
         name: values.paymentName, 
         source: values.paymentEmailOrPhone, 
         bank_last4: values.paymentBankOrLast4,
-        bcv_rate: rate || 0
+        bcv_rate: rate || 0,
+        amount_usd: amountUsd,
+        amount_bs: amountBs
       };
 
-      await supabase.from("subscription_payments").insert({
+      const { error: paymentError } = await supabase.from("subscription_payments").insert({
         company_id: cData.id,
         plan_type: values.plan,
         method: paymentMethod,
         reference_data: refData,
         receipt_url: receiptUrl,
+        amount_usd: amountUsd, // Guardamos también en una columna si existe
         status: "pending"
       } as any);
+
+      if (paymentError) {
+        console.error("Payment insert error:", paymentError);
+        toast.error("Error al registrar el pago", {
+          description: paymentError.message || "Es posible que falten columnas en la base de datos",
+        });
+        // Removemos el return para que igual cree el usuario y no quede la cuenta a medias, 
+        // o lo dejamos, pero como ya creó la empresa es mejor advertir.
+      }
 
       // Crear Admin User
       const { error: userError } = await supabase.from("users").insert({
