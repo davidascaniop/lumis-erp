@@ -206,7 +206,7 @@ export default function SupplierDetailPage() {
          .select("id, company_id, product_id, supplier_id, min_quantity, unit_price_usd, valid_from, valid_until, products(name, sku)")
          .eq("supplier_id", id)
          .order("min_quantity", { ascending: true });
-      setVolumePrices(vpData || []);
+      setVolumePrices((vpData as any) || []);
 
       // 5. Active products for dropdown
       const { data: pds } = await supabase.from("products").select("id, name, sku").eq("company_id", user.company_id).eq("status", "active");
