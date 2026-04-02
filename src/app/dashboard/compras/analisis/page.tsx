@@ -89,6 +89,7 @@ export default function AnalisisPreciosPage() {
   const [viewMode, setViewMode] = useState<"proveedor" | "periodo">("proveedor");
   const [selectedProduct, setSelectedProduct] = useState<{name: string, sku: string} | null>(null);
   const [searchResults, setSearchResults] = useState<{ id: string; name: string; sku: string; hasHistory?: boolean }[]>([]);
+  const [allProducts, setAllProducts] = useState<{ id: string; name: string; sku: string }[]>([]);
   const [searching, setSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
@@ -129,6 +130,10 @@ export default function AnalisisPreciosPage() {
           old_price: Number(a.old_price), new_price: Number(a.new_price), variation_percent: Number(a.variation_percent)
         })));
       }
+
+      // 3. Independent: Fetch all products for searching
+      const { data: pData } = await supabase.from("products").select("id, name, sku").eq("company_id", user.company_id);
+      if (pData) setAllProducts(pData);
     } catch (err: any) {
       toast.error("Error al cargar datos", { description: err.message });
     } finally {
@@ -138,48 +143,29 @@ export default function AnalisisPreciosPage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // Real-time Search
+  // Real-time Search (In-memory for speed and reliability)
   useEffect(() => {
-    if (!searchQuery.trim() || !user?.company_id) {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) {
       setSearchResults([]);
       return;
     }
 
-    const timeoutId = setTimeout(async () => {
-      setSearching(true);
-      try {
-        const { data, error } = await supabase
-          .from("products")
-          .select("id, name, sku")
-          .eq("company_id", user.company_id)
-          .or(`name.ilike.%${searchQuery}%,sku.ilike.%${searchQuery}%`)
-          .limit(20);
+    const historyIds = new Set(rawData.map(r => r.product_id));
+    
+    const filtered = allProducts.filter(p => 
+       p.name.toLowerCase().includes(q) || (p.sku || "").toLowerCase().includes(q)
+    ).map(p => ({
+       ...p,
+       hasHistory: historyIds.has(p.id)
+    })).sort((a, b) => {
+       if (a.hasHistory && !b.hasHistory) return -1;
+       if (!a.hasHistory && b.hasHistory) return 1;
+       return a.name.localeCompare(b.name);
+    }).slice(0, 20);
 
-        if (error) throw error;
-
-        // Check which ones have history in our rawData (or we can use a quick query if needed, but rawData is already here)
-        const historyIds = new Set(rawData.map(r => r.product_id));
-        
-        const results = (data || []).map(p => ({
-          ...p,
-          hasHistory: historyIds.has(p.id)
-        })).sort((a, b) => {
-          // History first
-          if (a.hasHistory && !b.hasHistory) return -1;
-          if (!a.hasHistory && b.hasHistory) return 1;
-          return a.name.localeCompare(b.name);
-        });
-
-        setSearchResults(results);
-      } catch (err) {
-        console.error("Search error:", err);
-      } finally {
-        setSearching(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery, user?.company_id, rawData, supabase]);
+    setSearchResults(filtered);
+  }, [searchQuery, allProducts, rawData]);
 
   // Derived: By Supplier 
   const supplierComparisons = useMemo(() => {
