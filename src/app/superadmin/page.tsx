@@ -26,17 +26,20 @@ export default async function SuperAdminHome() {
     { count: totalUsersCountRaw },
     { data: allPaymentsData },
     { data: monthlyOrdersData },
+    { data: recurrentesData },
   ] = await Promise.all([
     supabase.from("companies").select("*", { count: "exact", head: true }),
     supabase.from("companies").select("id, name, created_at, subscription_status, plan_type, logo_url"),
     supabase.from("users").select("*", { count: "exact", head: true }),
     supabase.from("subscription_payments").select("*, companies(name)").order("created_at", { ascending: false }),
     supabase.from("orders").select("company_id, created_at").gte("created_at", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
+    supabase.from("recurring_expenses").select("*, companies(name)").eq("is_active", true),
   ]);
 
   const allCompanies = allCompaniesData || [];
   const allPayments = allPaymentsData || [];
   const monthlyOrders = monthlyOrdersData || [];
+  const allRecurrentes = (recurrentesData || []) as any[];
   const totalUsers = totalUsersCountRaw || 0;
   const totalCompanies = totalCompaniesCountRaw || 0;
 
@@ -83,6 +86,21 @@ export default async function SuperAdminHome() {
       icon: "building",
       color: 'text-brand bg-brand/10',
       link: `/superadmin/clientes/empresas/${c.id}`
+    }))),
+    ...(allRecurrentes.filter(r => {
+      const day = Number(r.due_day);
+      const today = new Date().getDate();
+      return (day - today) >= 0 && (day - today) <= (r.alert_days || 3);
+    }).map(r => ({
+      id: `rec-${r.id}`,
+      type: 'alert',
+      category: 'alert',
+      date: new Date(),
+      message: `Gasto Recurrente Próximo: ${r.name}`,
+      company: r.companies?.name || 'Empresa',
+      icon: "clock",
+      color: 'text-status-warn bg-status-warn/10',
+      link: `/superadmin/clientes/empresas/${r.company_id}`
     })))
   ].sort((a, b) => b.date.getTime() - a.date.getTime());
 

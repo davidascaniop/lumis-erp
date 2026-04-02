@@ -178,6 +178,7 @@ export default function DashboardPage() {
           creditsDueTodayRes,
           topClientsRes,
           topProductsRes,
+          recurringRes,
         ] = await Promise.all([
           // Existentes
           supabase
@@ -258,6 +259,11 @@ export default function DashboardPage() {
             )
             .eq("orders.company_id", companyId)
             .gte("orders.created_at", startMonth),
+          supabase
+            .from("recurring_expenses")
+            .select("*")
+            .eq("company_id", companyId)
+            .eq("is_active", true),
         ]);
 
         const recs = (receivablesRes.data as any[]) || [];
@@ -268,6 +274,7 @@ export default function DashboardPage() {
         const creditsDueRaw = (creditsDueTodayRes.data as any[]) || [];
         const topClientsRaw = (topClientsRes.data as any[]) || [];
         const topProductsRaw = (topProductsRes.data as any[]) || [];
+        const recurringAlerts = (recurringRes.data as any[]) || [];
 
         const totalCartera = recs.reduce(
           (s: number, r: any) => s + (r.balance_usd ?? 0),
@@ -280,6 +287,13 @@ export default function DashboardPage() {
           (s: number, p: any) => s + (p.amount_usd ?? 0),
           0,
         );
+
+        // Filter recurring alerts (e.g. within next 3 days)
+        const activeRecurringAlerts = recurringAlerts.filter(r => {
+          const day = Number(r.due_day);
+          const todayNum = today.getDate();
+          return (day - todayNum) >= 0 && (day - todayNum) <= (r.alert_days || 3);
+        });
         const porcentajeMora =
           totalCartera > 0 ? +((totalMora / totalCartera) * 100).toFixed(1) : 0;
         const collectionRate =
@@ -378,6 +392,7 @@ export default function DashboardPage() {
           creditsDueToday,
           topClients,
           topProducts,
+          activeRecurringAlerts,
         });
       } catch (err) {
         console.error("Dashboard load error:", err);
@@ -685,6 +700,47 @@ export default function DashboardPage() {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* GASTOS RECURRENTES PRÓXIMOS (ALERTA) */}
+          {data.activeRecurringAlerts?.length > 0 && (
+            <div
+              className="bg-brand/5 border border-brand/15
+                                        rounded-2xl p-4 shadow-card hover-card-effect"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <AlertTriangle className="w-4 h-4 text-brand flex-shrink-0" />
+                <p className="text-xs font-black text-brand uppercase tracking-wider">
+                  Gastos Proyectos ({data.activeRecurringAlerts.length})
+                </p>
+              </div>
+              <div className="space-y-2">
+                {data.activeRecurringAlerts.slice(0, 3).map((r: any) => (
+                  <div
+                    key={r.id}
+                    className="flex items-center justify-between py-1.5 border-b border-border last:border-0"
+                  >
+                    <div>
+                      <p className="text-[10px] font-black text-text-1 truncate max-w-[140px] uppercase">
+                        {r.name}
+                      </p>
+                      <p className="text-[8px] text-text-3 font-bold uppercase">Día {r.due_day} · {r.frequency}</p>
+                    </div>
+                    <span className="font-primary text-xs text-brand font-black">
+                      ${Number(r.amount_usd).toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <Link
+                href="/dashboard/finanzas/recurrentes"
+                className="mt-3 block w-full py-2 rounded-xl text-center text-[10px] font-black
+                                           bg-brand/10 text-brand border border-brand/20
+                                           hover:bg-brand hover:text-white transition-all uppercase"
+              >
+                Gestionar Pagos
+              </Link>
             </div>
           )}
 

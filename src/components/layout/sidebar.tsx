@@ -93,7 +93,8 @@ const NAV_SECTIONS: NavSection[] = [
     icon: DollarSign,
     children: [
       { href: "/dashboard/cobranza", label: "Cuentas por Cobrar", icon: CreditCard, requiredPlan: ["pro", "enterprise"] },
-      { href: "/dashboard/compras/gastos", label: "Gastos / CxP", icon: Receipt, requiredPlan: ["pro", "enterprise"] },
+      { href: "/dashboard/finanzas/gastos", label: "Gastos y Pagos", icon: Receipt, requiredPlan: ["pro", "enterprise"] },
+      { href: "/dashboard/finanzas/recurrentes", label: "Gastos Recurrentes", icon: FileClock, requiredPlan: ["pro", "enterprise"] },
       { href: "/dashboard/finanzas/flujo", label: "Flujo de Caja", icon: ArrowDownCircle, requiredPlan: ["pro", "enterprise"] },
     ],
   },
