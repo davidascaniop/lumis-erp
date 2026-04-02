@@ -34,6 +34,7 @@ interface PurchaseItem {
 
 interface Purchase {
   id: string;
+  company_id: string;
   purchase_number: string | null;
   supplier_id: string | null;
   status: PurchaseStatus;
