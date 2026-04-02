@@ -202,168 +202,158 @@ export default async function SuperAdminHome() {
                   <DollarSign className="w-5 h-5 text-brand" />
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest bg-surface-base px-2 py-1 rounded-md border border-border shadow-sm group-hover:border-brand/20 transition-colors">
-                    MRR Actual
+                  <span className="text-[11px] font-bold text-text-3 uppercase tracking-widest bg-surface-base px-2.5 py-1.5 rounded-lg border border-border shadow-sm group-hover:border-brand/20 transition-all whitespace-nowrap">
+                    Ingresos Mensuales
                   </span>
                 </div>
               </div>
               <div className="relative z-10">
-                <h3 className="text-sm font-bold text-text-2 mb-1 group-hover:text-text-1 transition-colors">Ingresos Recurrentes</h3>
-                <div className="font-heading text-3xl font-black text-text-1 tracking-tight">
-                  ${totalMrr.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <h3 className="text-sm font-bold text-text-3 mb-2 group-hover:text-text-2 transition-colors uppercase tracking-tight">Recurrentes (MRR)</h3>
+                <div className="font-heading text-4xl font-black text-text-1 tracking-tight">
+                  <span className="text-brand mr-1">$</span>{totalMrr.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </div>
             </Link>
 
             {/* ARR */}
-            <Link href="/superadmin/clientes/suscripciones" className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group hover:border-[#00AF9C]/30 transition-all cursor-pointer">
+            <Link href="/superadmin/clientes/suscripciones" className="bg-surface-card border border-border rounded-[32px] p-8 shadow-sm relative overflow-hidden group hover:border-[#00AF9C]/30 transition-all cursor-pointer min-h-[180px] flex flex-col justify-center">
                <div className="absolute top-0 right-0 w-32 h-32 bg-[#00E5CC]/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
-              <div className="flex items-start justify-between mb-4 relative z-10">
-                <div className="p-3 rounded-2xl bg-[#00E5CC]/10 border border-[#00E5CC]/20 group-hover:bg-[#00E5CC]/15 transition-colors">
-                  <TrendingUp className="w-5 h-5 text-[#00AF9C]" />
+              <div className="flex items-start justify-between mb-6 relative z-10">
+                <div className="p-3.5 rounded-2xl bg-[#00E5CC]/10 border border-[#00E5CC]/20 group-hover:bg-[#00E5CC]/15 transition-colors">
+                  <TrendingUp className="w-6 h-6 text-[#00AF9C]" />
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest bg-surface-base px-2 py-1 rounded-md border border-border shadow-sm group-hover:border-[#00AF9C]/20 transition-colors">
-                    ARR Proyectado
+                  <span className="text-[11px] font-bold text-text-3 uppercase tracking-widest bg-surface-base px-2.5 py-1.5 rounded-lg border border-border shadow-sm group-hover:border-[#00AF9C]/20 transition-all whitespace-nowrap">
+                    Ingresos Anuales
                   </span>
                 </div>
               </div>
               <div className="relative z-10">
-                <h3 className="text-sm font-bold text-text-2 mb-1 group-hover:text-text-1 transition-colors">Ingresos Anuales</h3>
-                <div className="font-heading text-3xl font-black text-text-1 tracking-tight">
-                  ${arr.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <h3 className="text-sm font-bold text-text-3 mb-2 group-hover:text-text-2 transition-colors uppercase tracking-tight">Proyectado (ARR)</h3>
+                <div className="font-heading text-4xl font-black text-text-1 tracking-tight">
+                  <span className="text-[#00AF9C] mr-1">$</span>{arr.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </div>
             </Link>
 
             {/* Churn Rate */}
-            <div className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group hover:border-status-danger/30 transition-all">
+            <div className="bg-surface-card border border-border rounded-[32px] p-8 shadow-sm relative overflow-hidden group hover:border-status-danger/30 transition-all min-h-[180px] flex flex-col justify-center">
               <div className="absolute top-0 right-0 w-32 h-32 bg-status-danger/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
-              <div className="flex items-start justify-between mb-4 relative z-10">
-                <div className="p-3 rounded-2xl bg-status-danger/10 border border-status-danger/20">
-                  <ArrowDownRight className="w-5 h-5 text-status-danger" />
+              <div className="flex items-start justify-between mb-6 relative z-10">
+                <div className="p-3.5 rounded-2xl bg-status-danger/10 border border-status-danger/20">
+                  <ArrowDownRight className="w-6 h-6 text-status-danger" />
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest bg-surface-base px-2 py-1 rounded-md border border-border shadow-sm">
-                    Tasa de Fuga
+                  <span className="text-[11px] font-bold text-text-3 uppercase tracking-widest bg-surface-base px-2.5 py-1.5 rounded-lg border border-border shadow-sm whitespace-nowrap">
+                    Tasa de Cancelación
                   </span>
                 </div>
               </div>
               <div className="relative z-10">
-                <h3 className="text-sm font-bold text-text-2 mb-1">Churn Rate</h3>
+                <h3 className="text-sm font-bold text-text-3 mb-2 uppercase tracking-tight">Pérdida de Clientes</h3>
                 <div className={cn(
-                  "font-heading text-3xl font-black tracking-tight",
+                  "font-heading text-4xl font-black tracking-tight",
                   churnRate === 0 ? "text-status-ok" : "text-status-danger"
                 )}>
-                  {churnRate.toFixed(1)}%
+                  {churnRate.toFixed(1)}<span className="text-xl ml-0.5">%</span>
                 </div>
               </div>
             </div>
 
             {/* LTV Promedio */}
-            <div className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group hover:border-status-warn/30 transition-all">
+            <div className="bg-surface-card border border-border rounded-[32px] p-8 shadow-sm relative overflow-hidden group hover:border-status-warn/30 transition-all min-h-[180px] flex flex-col justify-center">
               <div className="absolute top-0 right-0 w-32 h-32 bg-status-warn/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
-              <div className="flex items-start justify-between mb-4 relative z-10">
-                <div className="p-3 rounded-2xl bg-status-warn/10 border border-status-warn/20">
-                  <Gem className="w-5 h-5 text-status-warn" />
+              <div className="flex items-start justify-between mb-6 relative z-10">
+                <div className="p-3.5 rounded-2xl bg-status-warn/10 border border-status-warn/20">
+                  <Gem className="w-6 h-6 text-status-warn" />
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest bg-surface-base px-2 py-1 rounded-md border border-border shadow-sm">
-                    Valor Cliente
+                  <span className="text-[11px] font-bold text-text-3 uppercase tracking-widest bg-surface-base px-2.5 py-1.5 rounded-lg border border-border shadow-sm whitespace-nowrap">
+                    Valor de Vida del Cliente
                   </span>
                 </div>
               </div>
               <div className="relative z-10">
-                <h3 className="text-sm font-bold text-text-2 mb-1">LTV Promedio</h3>
-                <div className="font-heading text-3xl font-black text-text-1 tracking-tight">
-                  ${avgLTV.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <h3 className="text-sm font-bold text-text-3 mb-2 uppercase tracking-tight">Promedio (LTV)</h3>
+                <div className="font-heading text-4xl font-black text-text-1 tracking-tight">
+                  <span className="text-status-warn mr-1">$</span>{avgLTV.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </div>
             </div>
           </div>
 
+          <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent my-10" />
+
           {/* FILA 2: OPERACIONES */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
              {/* Empresas Activas */}
-             <Link href="/superadmin/clientes/empresas" className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-brand/30 transition-all group cursor-pointer">
-                <div className="flex justify-between items-start mb-2">
-                   <div className="p-2 bg-brand/10 rounded-lg text-brand">
-                     <Building2 className="w-4 h-4" />
-                   </div>
+             <Link href="/superadmin/clientes/empresas" className="bg-surface-card border border-border rounded-2xl p-6 shadow-sm hover:border-brand/30 transition-all group cursor-pointer flex flex-col items-center text-center">
+                <div className="p-3 bg-brand/10 rounded-xl text-brand mb-4 group-hover:scale-110 transition-transform">
+                  <Building2 className="w-5 h-5" />
                 </div>
-                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1 group-hover:text-text-2 transition-colors">Activas</h4>
-                <p className="text-2xl font-heading font-black text-text-1">{activeCompaniesCount}</p>
+                <h4 className="text-[10px] font-black text-text-3 uppercase tracking-widest mb-2 group-hover:text-text-2">Empresas Activas</h4>
+                <p className="text-3xl font-heading font-black text-text-1">{activeCompaniesCount}</p>
              </Link>
 
-             {/* Usuarios */}
-             <Link href="/superadmin/usuarios" className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-[#0288D1]/30 transition-all group cursor-pointer">
-                <div className="flex justify-between items-start mb-2">
-                   <div className="p-2 bg-[#4FC3F7]/10 rounded-lg text-[#0288D1]">
-                     <Users className="w-4 h-4" />
-                   </div>
+             {/* Usuarios Totales */}
+             <Link href="/superadmin/usuarios" className="bg-surface-card border border-border rounded-2xl p-6 shadow-sm hover:border-status-info/30 transition-all group cursor-pointer flex flex-col items-center text-center">
+                <div className="p-3 bg-status-info/10 rounded-xl text-status-info mb-4 group-hover:scale-110 transition-transform">
+                  <Users className="w-5 h-5" />
                 </div>
-                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1 group-hover:text-text-2 transition-colors">Usuarios</h4>
-                <p className="text-2xl font-heading font-black text-text-1">{totalUsers || 0}</p>
+                <h4 className="text-[10px] font-black text-text-3 uppercase tracking-widest mb-2 group-hover:text-text-2">Usuarios Totales</h4>
+                <p className="text-3xl font-heading font-black text-text-1">{totalUsers || 0}</p>
              </Link>
 
-             {/* Trial */}
-             <Link href="/superadmin/clientes/empresas?filter=trial" className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-status-warn/30 transition-all group cursor-pointer">
-                <div className="flex justify-between items-start mb-2">
-                   <div className="p-2 bg-status-warn/10 rounded-lg text-status-warn">
-                     <Clock className="w-4 h-4" />
-                   </div>
+             {/* En Trial */}
+             <Link href="/superadmin/clientes/empresas?filter=trial" className="bg-surface-card border border-border rounded-2xl p-6 shadow-sm hover:border-status-warn/30 transition-all group cursor-pointer flex flex-col items-center text-center">
+                <div className="p-3 bg-status-warn/10 rounded-xl text-status-warn mb-4 group-hover:scale-110 transition-transform">
+                  <Clock className="w-5 h-5" />
                 </div>
-                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1 group-hover:text-text-2 transition-colors">Trial</h4>
-                <p className="text-2xl font-heading font-black text-text-1">{trialCompaniesCount}</p>
+                <h4 className="text-[10px] font-black text-text-3 uppercase tracking-widest mb-2 group-hover:text-text-2">En Trial</h4>
+                <p className="text-3xl font-heading font-black text-text-1">{trialCompaniesCount}</p>
              </Link>
 
-             {/* Conversión Trial a Pago */}
-             <div className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-brand/30 transition-all group">
-                <div className="flex justify-between items-start mb-2">
-                   <div className="p-2 bg-brand/10 rounded-lg text-brand">
-                     <Percent className="w-4 h-4" />
-                   </div>
+             {/* Conversión */}
+             <div className="bg-surface-card border border-border rounded-2xl p-6 shadow-sm hover:border-brand/30 transition-all group flex flex-col items-center text-center">
+                <div className="p-3 bg-brand/10 rounded-xl text-brand mb-4 group-hover:scale-110 transition-transform">
+                  <Percent className="w-5 h-5" />
                 </div>
-                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1 group-hover:text-text-2 transition-colors">Conversión</h4>
-                <p className="text-2xl font-heading font-black text-text-1 whitespace-nowrap">
+                <h4 className="text-[10px] font-black text-text-3 uppercase tracking-widest mb-2 group-hover:text-text-2">Conversión</h4>
+                <p className="text-3xl font-heading font-black text-text-1 whitespace-nowrap">
                   {trialConversion.toFixed(0)}%
                 </p>
              </div>
 
-             {/* Registros Hoy */}
-             <div className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-[#00AF9C]/30 transition-all group">
-                <div className="flex justify-between items-start mb-2">
-                   <div className="p-2 bg-[#00E5CC]/10 rounded-lg text-[#00AF9C]">
-                     <CalendarPlus className="w-4 h-4" />
-                   </div>
+             {/* Hoy */}
+             <div className="bg-surface-card border border-border rounded-2xl p-6 shadow-sm hover:border-status-success/30 transition-all group flex flex-col items-center text-center">
+                <div className="p-3 bg-status-success/10 rounded-xl text-status-success mb-4 group-hover:scale-110 transition-transform">
+                  <CalendarPlus className="w-5 h-5" />
                 </div>
-                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1 group-hover:text-text-2 transition-colors">Hoy</h4>
-                <p className="text-2xl font-heading font-black text-text-1">{newToday}</p>
-                <p className="text-[10px] text-text-3 font-medium mt-1">Ayer: {newYesterday}</p>
+                <h4 className="text-[10px] font-black text-text-3 uppercase tracking-widest mb-2 group-hover:text-text-2">Hoy</h4>
+                <p className="text-3xl font-heading font-black text-text-1">{newToday}</p>
+                <p className="text-[11px] font-bold text-status-success/70 mt-1">Ayer: {newYesterday}</p>
              </div>
 
              {/* Demo */}
-             <Link href="/superadmin/clientes/empresas?filter=demo" className="bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-[#1E88E5]/30 transition-all group cursor-pointer">
-                <div className="flex justify-between items-start mb-2">
-                   <div className="p-2 bg-[#1E88E5]/10 rounded-lg text-[#1E88E5]">
-                     <Sparkles className="w-4 h-4" />
-                   </div>
+             <Link href="/superadmin/clientes/empresas?filter=demo" className="bg-surface-card border border-border rounded-2xl p-6 shadow-sm hover:border-status-info/30 transition-all group cursor-pointer flex flex-col items-center text-center">
+                <div className="p-3 bg-status-info/10 rounded-xl text-status-info mb-4 group-hover:scale-110 transition-transform">
+                  <Sparkles className="w-5 h-5" />
                 </div>
-                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1 group-hover:text-text-2 transition-colors">Demo</h4>
-                <p className="text-2xl font-heading font-black text-text-1">{demoCompaniesCount}</p>
+                <h4 className="text-[10px] font-black text-text-3 uppercase tracking-widest mb-2 group-hover:text-text-2">Demo</h4>
+                <p className="text-3xl font-heading font-black text-text-1">{demoCompaniesCount}</p>
              </Link>
 
-             {/* Pagos Vencidos */}
-             <Link href="/superadmin/clientes/suscripciones?filter=vencidos" className="bg-surface-card border border-status-danger/20 rounded-2xl p-4 shadow-sm hover:border-status-danger transition-all group relative overflow-hidden cursor-pointer">
-                <div className="flex justify-between items-start mb-2 relative z-10">
-                   <div className="p-2 bg-status-danger/10 rounded-lg text-status-danger shadow-sm">
-                     <AlertTriangle className="w-4 h-4" />
-                   </div>
+             {/* Vencidos */}
+             <Link href="/superadmin/clientes/suscripciones?filter=vencidos" className="bg-surface-card border border-status-danger/20 rounded-2xl p-6 shadow-sm hover:border-status-danger transition-all group relative overflow-hidden cursor-pointer flex flex-col items-center text-center">
+                <div className="p-3 bg-status-danger/10 rounded-xl text-status-danger mb-4 group-hover:scale-110 transition-transform">
+                  <AlertTriangle className="w-5 h-5" />
                 </div>
-                <h4 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-1 relative z-10">Vencidos</h4>
-                <p className="text-2xl font-heading font-black text-status-danger relative z-10">{overdueCompanies.length}</p>
+                <h4 className="text-[10px] font-black text-text-3 uppercase tracking-widest mb-2 group-hover:text-text-2">Vencidos</h4>
+                <p className="text-3xl font-heading font-black text-status-danger">{overdueCompanies.length}</p>
              </Link>
           </div>
+
+          <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent my-10" />
 
           {/* FILA 3: GRÁFICOS MRR Y RETENCIÓN (PASO 3 & 4) */}
           <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] gap-4">
@@ -391,6 +381,8 @@ export default async function SuperAdminHome() {
               </div>
             </div>
           </div>
+
+          <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent my-10" />
 
           {/* FILA 4: ACTIVIDAD Y CRECIMIENTO (PASO 5 & 6 + EXISTENTES) */}
           <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] gap-4">
@@ -437,16 +429,41 @@ export default async function SuperAdminHome() {
 
                 {/* Donuts (Movido) */}
                 <div className="bg-surface-card border border-border rounded-3xl p-5 shadow-sm">
-                  <h2 className="text-lg font-heading font-bold text-text-1 mb-1">Tarifas</h2>
+                  <h2 className="text-lg font-heading font-bold text-text-1 mb-1">Distribución Tarifaria</h2>
                   <p className="text-xs font-semibold text-text-3 uppercase tracking-wider mb-5">Por Plan</p>
-                  <div className="h-48 overflow-visible flex items-center justify-center">
-                    <PlanDonutChart
-                      data={[
-                        { name: "Starter", value: planCounts.basic ?? 0, color: "#4FC3F7" },
-                        { name: "Pro", value: planCounts.pro ?? 0, color: "#E040FB" },
-                        { name: "Enterprise", value: planCounts.enterprise ?? 0, color: "#7C4DFF" },
-                      ].filter(d => d.value > 0)}
-                    />
+                  <div className="min-h-[200px] overflow-visible flex items-center justify-center">
+                    {Object.values(planCounts).every(v => v === 0) ? (
+                      <div className="w-full space-y-3">
+                        {[
+                          { name: "Starter", value: planCounts.basic ?? 0, color: "bg-[#4FC3F7]" },
+                          { name: "Pro", value: planCounts.pro ?? 0, color: "bg-[#E040FB]" },
+                          { name: "Enterprise", value: planCounts.enterprise ?? 0, color: "bg-[#7C4DFF]" },
+                        ].map(plan => {
+                          const total = Object.values(planCounts).reduce((a: any, b: any) => a + b, 0) || 1;
+                          const perc = (Number(plan.value) / Number(total)) * 100;
+                          return (
+                            <div key={plan.name} className="flex items-center justify-between p-3 bg-surface-base rounded-xl border border-border/50">
+                               <div className="flex items-center gap-3">
+                                 <div className={cn("w-3 h-3 rounded-full", plan.color)} />
+                                 <span className="text-sm font-bold text-text-1">{plan.name}</span>
+                               </div>
+                               <div className="flex items-center gap-4">
+                                 <span className="text-xs font-black text-text-2">{plan.value} empresas</span>
+                                 <span className="text-xs font-bold text-brand">{perc.toFixed(0)}%</span>
+                               </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <PlanDonutChart
+                        data={[
+                          { name: "Starter", value: planCounts.basic ?? 0, color: "#4FC3F7" },
+                          { name: "Pro", value: planCounts.pro ?? 0, color: "#E040FB" },
+                          { name: "Enterprise", value: planCounts.enterprise ?? 0, color: "#7C4DFF" },
+                        ].filter(d => d.value > 0)}
+                      />
+                    )}
                   </div>
                 </div>
              </div>
