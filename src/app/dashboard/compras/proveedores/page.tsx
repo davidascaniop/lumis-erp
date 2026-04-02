@@ -484,12 +484,12 @@ export default function ProveedoresPage() {
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => openDetail(s)}
+                        <a
+                          href={`/dashboard/compras/proveedores/${s.id}`}
                           className="px-3 py-1.5 text-[11px] font-bold font-montserrat bg-brand/10 text-brand border border-brand/20 rounded-lg hover:bg-brand hover:text-white transition-all"
                         >
                           Ver ficha
-                        </button>
+                        </a>
                         <button
                           onClick={() => handleOpenEdit(s)}
                           className="p-1.5 rounded-lg text-text-3 hover:text-brand hover:bg-brand/10 transition-all"

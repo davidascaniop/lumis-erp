@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, Loader2, Plus, ClipboardList, DollarSign,
   X, ChevronRight, Truck, CheckCircle2, XCircle, Clock,
-  FileText, AlertCircle, ShoppingBag, Wallet,
+  FileText, AlertCircle, ShoppingBag, Wallet, TrendingUp, TrendingDown, History,
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -83,6 +83,7 @@ export default function OrdenesCompraPage() {
   const [products, setProducts]       = useState<Product[]>([]);
   const [prodSearch, setProdSearch]   = useState("");
   const [saving, setSaving]           = useState(false);
+  const [priceHints, setPriceHints]   = useState<Record<string, { lastPrice: number | null; lastDays: number | null; bestPrice: number | null; bestSupplier: string | null; isFirst: boolean }>>({}); 
   const [form, setForm] = useState({ 
     supplier_id: "", 
     expected_date: "", 
@@ -262,7 +263,7 @@ export default function OrdenesCompraPage() {
         subtotal_usd: it.subtotal_usd 
       })) as any);
 
-      // 3. If emitted, create expense in CxP
+      // 3. If emitted, create expense in CxP + price history
       if (emit) {
         await supabase.from("expenses").insert({
           company_id: companyId,
@@ -276,6 +277,19 @@ export default function OrdenesCompraPage() {
           type: "compra",
           date: form.emission_date || new Date().toISOString()
         } as any);
+
+        // 4. Insert price history for each item
+        await supabase.from("purchase_price_history").insert(items.map(it => ({
+          company_id: companyId,
+          product_id: it.product_id,
+          supplier_id: form.supplier_id,
+          purchase_order_id: (purchase as any).id,
+          unit_price_usd: it.unit_cost_usd,
+          unit_price_bs: it.unit_cost_usd * currentRate,
+          bcv_rate: currentRate,
+          quantity: it.qty,
+          purchased_at: form.emission_date ? new Date(form.emission_date).toISOString() : new Date().toISOString()
+        })) as any);
       }
 
       toast.success(emit ? `Orden ${pNum} emitida ✓` : `Borrador ${pNum} guardado`);
@@ -292,6 +306,48 @@ export default function OrdenesCompraPage() {
     (p.name.toLowerCase().includes(prodSearch.toLowerCase()) || (p.sku ?? "").toLowerCase().includes(prodSearch.toLowerCase())) &&
     !items.find(i => i.product_id === p.id)
   ).slice(0, 8);
+
+  // ── Price Hints (PASO 2) ──────────────────────────────────────────────────
+  useEffect(() => {
+    if (!form.supplier_id || !companyId || filteredProds.length === 0) return;
+    const fetchHints = async () => {
+      const prodIds = filteredProds.map(p => p.id);
+      const { data: history } = await supabase
+        .from("purchase_price_history")
+        .select("product_id, supplier_id, unit_price_usd, purchased_at, suppliers:supplier_id(name)")
+        .eq("company_id", companyId)
+        .in("product_id", prodIds)
+        .order("purchased_at", { ascending: false });
+
+      const hints: typeof priceHints = {};
+      for (const prod of filteredProds) {
+        const forProduct = (history as any[] ?? []).filter((h: any) => h.product_id === prod.id);
+        const withSupplier = forProduct.filter((h: any) => h.supplier_id === form.supplier_id);
+        const best = forProduct.length > 0 ? forProduct.reduce((a: any, b: any) => a.unit_price_usd < b.unit_price_usd ? a : b) : null;
+
+        if (withSupplier.length > 0) {
+          const last = withSupplier[0];
+          const daysDiff = Math.round((Date.now() - new Date(last.purchased_at).getTime()) / 86400000);
+          hints[prod.id] = {
+            lastPrice: last.unit_price_usd,
+            lastDays: daysDiff,
+            bestPrice: best && best.supplier_id !== form.supplier_id ? best.unit_price_usd : null,
+            bestSupplier: best && best.supplier_id !== form.supplier_id ? best.suppliers?.name ?? null : null,
+            isFirst: false
+          };
+        } else {
+          hints[prod.id] = {
+            lastPrice: null, lastDays: null,
+            bestPrice: best ? best.unit_price_usd : null,
+            bestSupplier: best ? best.suppliers?.name ?? null : null,
+            isFirst: true
+          };
+        }
+      }
+      setPriceHints(hints);
+    };
+    fetchHints();
+  }, [prodSearch, form.supplier_id, companyId]);
 
   const handleCancel = async (p: Purchase) => {
     if (!confirm(`¿Estás seguro de cancelar la orden ${p.purchase_number}?`)) return;
@@ -464,15 +520,32 @@ export default function OrdenesCompraPage() {
               </div>
               {prodSearch && filteredProds.length > 0 && (
                 <div className="border border-border rounded-xl overflow-hidden bg-surface-card shadow-lg">
-                  {filteredProds.map(p => (
-                    <button key={p.id} onClick={() => addProduct(p)} className="w-full p-3 hover:bg-brand/5 border-b border-border last:border-b-0 flex justify-between items-center text-left">
-                      <div>
-                        <p className="text-sm font-bold text-text-1">{p.name}</p>
-                        <p className="text-[10px] text-text-3 font-mono">{p.sku}</p>
-                      </div>
-                      <span className="text-xs font-bold text-brand">${p.cost_usd?.toFixed(2)}</span>
-                    </button>
-                  ))}
+                  {filteredProds.map(p => {
+                    const hint = priceHints[p.id];
+                    return (
+                      <button key={p.id} onClick={() => addProduct(p)} className="w-full p-3 hover:bg-brand/5 border-b border-border last:border-b-0 text-left">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-sm font-bold text-text-1">{p.name}</p>
+                            <p className="text-[10px] text-text-3 font-mono">{p.sku}</p>
+                          </div>
+                          <span className="text-xs font-bold text-brand">${p.cost_usd?.toFixed(2)}</span>
+                        </div>
+                        {hint && form.supplier_id && (
+                          <div className="mt-1.5 space-y-0.5">
+                            {hint.isFirst ? (
+                              <p className="text-[10px] text-text-3 flex items-center gap-1"><History className="w-3 h-3" /> Primera compra de este producto con este proveedor</p>
+                            ) : (
+                              <p className="text-[10px] text-status-info flex items-center gap-1"><History className="w-3 h-3" /> Último precio con este proveedor: <strong>${hint.lastPrice?.toFixed(2)}</strong> (hace {hint.lastDays} días)</p>
+                            )}
+                            {hint.bestPrice && hint.bestSupplier && (
+                              <p className="text-[10px] text-status-ok flex items-center gap-1"><TrendingDown className="w-3 h-3" /> Mejor precio histórico: <strong>${hint.bestPrice?.toFixed(2)}</strong> — {hint.bestSupplier}</p>
+                            )}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
 

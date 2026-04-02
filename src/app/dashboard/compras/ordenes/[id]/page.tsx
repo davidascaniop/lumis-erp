@@ -9,7 +9,7 @@ import {
   CheckCircle2, Clock, FileText, AlertCircle,
   Building2, Calendar, Package, DollarSign,
   Loader2, ArrowRight, ShieldCheck, Camera,
-  X,
+  X, TrendingUp, TrendingDown, History,
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -17,6 +17,38 @@ import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+
+// ─── Price Comparison Badge ────────────────────────────────────────────────────
+function PriceCompareBadge({ current, previous }: { current: number; previous: number | null }) {
+  if (previous === null) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface-base text-text-3 border border-border">
+        Primera compra
+      </span>
+    );
+  }
+  if (previous === 0) return null;
+  const pct = ((current - previous) / previous) * 100;
+  if (Math.abs(pct) < 0.01) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface-base text-text-3 border border-border">
+        Sin cambio
+      </span>
+    );
+  }
+  const up = pct > 0;
+  return (
+    <span className={cn(
+      "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border",
+      up
+        ? "bg-status-danger/10 text-status-danger border-status-danger/20"
+        : "bg-status-ok/10 text-status-ok border-status-ok/20"
+    )}>
+      {up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+      {up ? "+" : ""}{pct.toFixed(1)}%
+    </span>
+  );
+}
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type PurchaseStatus = "draft" | "confirmed" | "partial" | "received" | "cancelled";
@@ -80,6 +112,8 @@ export default function PurchaseDetailPage() {
   const [purchase, setPurchase] = useState<Purchase | null>(null);
   const [items, setItems] = useState<PurchaseItem[]>([]);
   const [loading, setLoading] = useState(true);
+  // Price history comparison per item
+  const [priceComparisons, setPriceComparisons] = useState<Record<string, number | null>>({});
   
   // States for panels
   const [showReception, setShowReception] = useState(false);
@@ -135,6 +169,23 @@ export default function PurchaseDetailPage() {
       const init: Record<string, number> = {};
       mapped.forEach(it => { init[it.id] = Math.max(0, it.qty - it.qty_received); });
       setReceiveQtys(init);
+
+      // Load price comparisons vs previous purchase per product
+      if (data?.supplier_id) {
+        const comparisons: Record<string, number | null> = {};
+        await Promise.all(mapped.map(async (it) => {
+          const { data: prevHistory } = await supabase
+            .from("purchase_price_history")
+            .select("unit_price_usd, purchased_at")
+            .eq("product_id", it.product_id)
+            .eq("supplier_id", data.supplier_id)
+            .lt("purchase_order_id", id as string)
+            .order("purchased_at", { ascending: false })
+            .limit(1);
+          comparisons[it.product_id] = (prevHistory as any[])?.[0]?.unit_price_usd ?? null;
+        }));
+        setPriceComparisons(comparisons);
+      }
 
     } catch (e: any) {
       toast.error("Error al cargar orden");
@@ -415,6 +466,49 @@ export default function PurchaseDetailPage() {
                   </tr>
                 </tfoot>
               </table>
+            </div>
+          </Card>
+
+          {/* ── Price History Section ── */}
+          <Card className="overflow-hidden bg-surface-card border-border">
+            <div className="p-4 bg-surface-base/30 border-b border-border">
+              <h3 className="text-sm font-bold font-montserrat text-text-1 flex items-center gap-2">
+                <History className="w-4 h-4 text-brand" />
+                Historial de Precios en esta Orden
+              </h3>
+              <p className="text-[11px] text-text-3 mt-0.5">Comparación vs compra anterior con el mismo proveedor</p>
+            </div>
+            <div className="divide-y divide-border">
+              {items.map((it) => {
+                const prevPrice = priceComparisons[it.product_id];
+                return (
+                  <div key={it.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-surface-hover/10 transition-colors">
+                    <div>
+                      <p className="font-bold text-text-1 text-sm">{it.product_name}</p>
+                      <p className="text-[10px] text-text-3 font-mono">{it.sku}</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {prevPrice !== undefined && prevPrice !== null && (
+                        <div className="text-right">
+                          <p className="text-[10px] text-text-3">Anterior</p>
+                          <p className="text-xs font-mono text-text-2">${prevPrice.toFixed(4)}</p>
+                        </div>
+                      )}
+                      <div className="text-right">
+                        <p className="text-[10px] text-text-3">Esta compra</p>
+                        <p className="text-sm font-bold font-mono text-text-1">${it.unit_cost_usd.toFixed(4)}</p>
+                      </div>
+                      <PriceCompareBadge
+                        current={it.unit_cost_usd}
+                        previous={prevPrice !== undefined ? prevPrice : null}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+              {items.length === 0 && (
+                <div className="py-8 text-center text-text-3 text-sm">Sin productos</div>
+              )}
             </div>
           </Card>
         </div>
