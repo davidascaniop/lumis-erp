@@ -263,7 +263,7 @@ export default function OrdenesCompraPage() {
       if (error) throw error;
 
       // 2. Create items
-      await supabase.from("purchase_items").insert(items.map(it => ({ 
+      const { error: itemsError } = await supabase.from("purchase_items").insert(items.map(it => ({ 
         purchase_id: (purchase as any).id, 
         product_id: it.product_id, 
         qty: it.qty, 
@@ -271,6 +271,8 @@ export default function OrdenesCompraPage() {
         total_unit_cost_usd: it.unit_cost_usd, 
         subtotal_usd: it.subtotal_usd 
       })) as any);
+
+      if (itemsError) throw itemsError;
 
       // 3. If emitted, create expense in CxP + price history
       if (emit) {
