@@ -37,6 +37,7 @@ interface PurchaseItem {
   qty_received: number;
   unit_cost_usd: number;
   subtotal_usd: number;
+  _volume_discount?: boolean;
 }
 
 interface Purchase {
@@ -98,6 +99,8 @@ export default function OrdenesCompraPage() {
   // Quick Supplier Form
   const [showQuickSupplier, setShowQuickSupplier] = useState(false);
   const [quickSupplier, setQuickSupplier] = useState({ name: "", rif: "", phone: "", email: "" });
+
+  const [volumeRules, setVolumeRules] = useState<any[]>([]);
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
@@ -232,10 +235,39 @@ export default function OrdenesCompraPage() {
     }
   };
 
+  useEffect(() => {
+    if (!form.supplier_id || !companyId) {
+        setVolumeRules([]);
+        return;
+    }
+    const fetchVP = async () => {
+       const { data } = await supabase.from("volume_prices").select("*").eq("company_id", companyId).eq("supplier_id", form.supplier_id);
+       setVolumeRules(data || []);
+    };
+    fetchVP();
+  }, [form.supplier_id, companyId, supabase]);
+
+  const applyVolumeDiscount = (it: PurchaseItem, rules: any[]): PurchaseItem => {
+     const ruleProducts = rules.filter(r => r.product_id === it.product_id).sort((a,b)=>b.min_quantity - a.min_quantity);
+     const matchedRule = ruleProducts.find(r => it.qty >= r.min_quantity);
+     if (matchedRule) {
+        it.unit_cost_usd = matchedRule.unit_price_usd;
+        it._volume_discount = true;
+     } else {
+        const defaultProd = products.find(p => p.id === it.product_id);
+        if (defaultProd && it._volume_discount) {
+           it.unit_cost_usd = defaultProd.cost_usd ?? 0;
+        }
+        it._volume_discount = false;
+     }
+     it.subtotal_usd = it.qty * it.unit_cost_usd;
+     return it;
+  };
+
   // ── Order Items Logic ─────────────────────────────────────────────────────
   const addProduct = (prod: Product) => {
     if (items.find(i => i.product_id === prod.id)) return;
-    setItems(prev => [...prev, { 
+    let newItem: PurchaseItem = { 
       product_id: prod.id, 
       product_name: prod.name, 
       sku: prod.sku ?? "", 
@@ -243,15 +275,22 @@ export default function OrdenesCompraPage() {
       qty_received: 0, 
       unit_cost_usd: prod.cost_usd ?? 0, 
       subtotal_usd: prod.cost_usd ?? 0 
-    }]);
+    };
+    newItem = applyVolumeDiscount(newItem, volumeRules);
+    setItems(prev => [...prev, newItem]);
     setProdSearch("");
   };
 
   const updateItem = (idx: number, field: "qty" | "unit_cost_usd", val: number) => {
     setItems(prev => prev.map((it, i) => {
       if (i !== idx) return it;
-      const u = { ...it, [field]: val };
-      u.subtotal_usd = u.qty * u.unit_cost_usd;
+      let u = { ...it, [field]: val };
+      if (field === "qty") {
+         u = applyVolumeDiscount(u, volumeRules);
+      } else {
+         u._volume_discount = false; 
+         u.subtotal_usd = u.qty * u.unit_cost_usd;
+      }
       return u;
     }));
   };
@@ -650,7 +689,10 @@ export default function OrdenesCompraPage() {
                         <tr key={it.product_id}>
                           <td className="px-3 py-3">
                             <p className="font-bold text-text-1">{it.product_name}</p>
-                            <p className="text-[10px] text-text-3 font-mono">{it.sku}</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                               <span className="text-[10px] text-text-3 font-mono border px-1 rounded">{it.sku}</span>
+                               {it._volume_discount && <span className="bg-brand/10 text-brand text-[8px] font-bold px-1.5 py-0.25 rounded uppercase tracking-wider">Desc. Volumen</span>}
+                            </div>
                           </td>
                           <td className="px-3 py-3 w-20">
                             <input type="number" min={1} value={it.qty} onChange={e => updateItem(idx, "qty", +e.target.value)}

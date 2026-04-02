@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useUser } from "@/hooks/use-user";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronLeft, Building2, Phone, Mail, MapPin, User,
   Package, DollarSign, Search, ArrowUpDown,
   Loader2, TrendingUp, TrendingDown, Minus, Calendar,
-  ClipboardList, Hash,
+  ClipboardList, Plus, Trash2, Save, X, Edit
 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -16,6 +17,9 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface Supplier {
@@ -42,6 +46,18 @@ interface PriceHistoryItem {
   prev_price_usd: number | null;
   variation_pct: number | null;
   last_purchase: string;
+}
+
+interface VolumePrice {
+  id: string;
+  company_id: string;
+  product_id: string;
+  supplier_id: string;
+  min_quantity: number;
+  unit_price_usd: number;
+  valid_from: string | null;
+  valid_until: string | null;
+  products?: { name: string, sku: string };
 }
 
 type SortField = "product" | "date" | "price";
@@ -83,19 +99,32 @@ export default function SupplierDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const supabase = createClient();
+  const { user } = useUser();
 
   const [supplier, setSupplier] = useState<Supplier | null>(null);
   const [priceHistory, setPriceHistory] = useState<PriceHistoryItem[]>([]);
+  const [volumePrices, setVolumePrices] = useState<VolumePrice[]>([]);
+  const [products, setProducts] = useState<any[]>([]); // For volume prices form
+  
   const [totalOrders, setTotalOrders] = useState(0);
   const [totalSpent, setTotalSpent] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  const [activeTab, setActiveTab] = useState<"resumen" | "volumen">("resumen");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<SortField>("date");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
 
+  // Volume price form state
+  const [vpForm, setVpForm] = useState<{product_id: string, min_quantity: string, unit_price_usd: string, valid_until: string}>({
+     product_id: "", min_quantity: "", unit_price_usd: "", valid_until: ""
+  });
+  const [savingVP, setSavingVP] = useState(false);
+
   // ── Fetch ─────────────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
+    if (!user?.company_id) return;
     setLoading(true);
     try {
       // 1. Supplier info
@@ -103,6 +132,7 @@ export default function SupplierDetailPage() {
         .from("suppliers")
         .select("*")
         .eq("id", id)
+        .eq("company_id", user.company_id)
         .single();
       if (supErr) throw supErr;
       setSupplier(sup as Supplier);
@@ -169,17 +199,66 @@ export default function SupplierDetailPage() {
       });
 
       setPriceHistory(items);
+
+      // 4. Volume Prices
+      const { data: vpData } = await supabase
+         .from("volume_prices")
+         .select("id, company_id, product_id, supplier_id, min_quantity, unit_price_usd, valid_from, valid_until, products(name, sku)")
+         .eq("supplier_id", id)
+         .order("min_quantity", { ascending: true });
+      setVolumePrices(vpData || []);
+
+      // 5. Active products for dropdown
+      const { data: pds } = await supabase.from("products").select("id, name, sku").eq("company_id", user.company_id).eq("status", "active");
+      setProducts(pds || []);
+
     } catch (err: any) {
       toast.error("Error al cargar ficha de proveedor", { description: err.message });
       router.push("/dashboard/compras/proveedores");
     } finally {
       setLoading(false);
     }
-  }, [id, supabase, router]);
+  }, [id, supabase, router, user]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // ── Handlers ─────────────────────────────────────────────────────────────
+  const handleSaveVP = async () => {
+     if (!vpForm.product_id || !vpForm.min_quantity || !vpForm.unit_price_usd) {
+        return toast.error("Por favor completa los campos del baremo.");
+     }
+     
+     setSavingVP(true);
+     try {
+        const { error } = await supabase.from("volume_prices").insert({
+           company_id: user!.company_id,
+           supplier_id: id,
+           product_id: vpForm.product_id,
+           min_quantity: Number(vpForm.min_quantity),
+           unit_price_usd: Number(vpForm.unit_price_usd),
+           valid_until: vpForm.valid_until ? new Date(vpForm.valid_until).toISOString() : null,
+           valid_from: new Date().toISOString()
+        });
+        if (error) throw error;
+        toast.success("Regla pre-acordada guardada");
+        setVpForm({ product_id: "", min_quantity: "", unit_price_usd: "", valid_until: "" });
+        fetchData();
+     } catch (err: any) {
+        toast.error("Error", { description: err.message });
+     } finally {
+        setSavingVP(false);
+     }
+  };
+
+  const handleDeleteVP = async (vpId: string) => {
+     try {
+        await supabase.from("volume_prices").delete().eq("id", vpId);
+        toast.success("Regla eliminada");
+        fetchData();
+     } catch (e: any) { toast.error("Error", {description: e.message}); }
+  };
 
   // ── Sort & Filter ─────────────────────────────────────────────────────────
   const filteredHistory = priceHistory
@@ -217,6 +296,15 @@ export default function SupplierDetailPage() {
     />
   );
 
+  const groupedVolumePrices = useMemo(() => {
+     const map = new Map<string, VolumePrice[]>();
+     volumePrices.forEach(v => {
+        if (!map.has(v.product_id)) map.set(v.product_id, []);
+        map.get(v.product_id)!.push(v);
+     });
+     return map;
+  }, [volumePrices]);
+
   if (loading)
     return (
       <div className="py-20 flex items-center justify-center">
@@ -230,15 +318,12 @@ export default function SupplierDetailPage() {
     <div className="space-y-6 max-w-5xl mx-auto animate-fade-in pb-10">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <button
-          onClick={() => router.back()}
-          className="p-2 rounded-xl bg-surface-card border border-border text-text-3 hover:text-text-1 transition-colors"
-        >
+        <button onClick={() => router.back()} className="p-2 rounded-xl bg-surface-card border border-border text-text-3 hover:text-text-1 transition-colors">
           <ChevronLeft className="w-5 h-5" />
         </button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
               <Building2 className="w-5 h-5 text-brand" />
             </div>
             <div>
@@ -281,151 +366,247 @@ export default function SupplierDetailPage() {
         ))}
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="p-5 bg-gradient-to-br from-brand/10 to-surface-card border-brand/20">
-          <p className="text-[10px] font-bold text-text-3 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-            <ClipboardList className="w-3 h-3 text-brand" />
-            Total Órdenes
-          </p>
-          <p className="text-3xl font-montserrat font-bold text-brand">{totalOrders}</p>
-        </Card>
-        <Card className="p-5 bg-surface-card border-border">
-          <p className="text-[10px] font-bold text-text-3 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-            <DollarSign className="w-3 h-3 text-status-ok" />
-            Comprado Total
-          </p>
-          <p className="text-3xl font-montserrat font-bold text-status-ok">
-            ${totalSpent.toLocaleString("es-VE", { minimumFractionDigits: 2 })}
-          </p>
-        </Card>
-        <Card className="p-5 bg-surface-card border-border">
-          <p className="text-[10px] font-bold text-text-3 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-            <Package className="w-3 h-3 text-[#7C4DFF]" />
-            Productos Distintos
-          </p>
-          <p className="text-3xl font-montserrat font-bold text-[#7C4DFF]">
-            {priceHistory.length}
-          </p>
-        </Card>
+      {/* TABS */}
+      <div className="flex gap-2 border-b border-border mt-6">
+         <button onClick={() => setActiveTab("resumen")} className={cn("px-4 py-3 font-bold border-b-2 text-sm transition-all", activeTab === "resumen" ? "border-brand text-brand" : "border-transparent text-text-3 hover:text-text-1")}>
+            Historial de Compras
+         </button>
+         <button onClick={() => setActiveTab("volumen")} className={cn("px-4 py-3 font-bold border-b-2 text-sm transition-all flex items-center gap-2", activeTab === "volumen" ? "border-brand text-brand" : "border-transparent text-text-3 hover:text-text-1")}>
+            Precios por Volumen 
+            {volumePrices.length > 0 && <span className="bg-brand/10 text-brand text-[10px] px-1.5 py-0.5 rounded-full">{volumePrices.length} reglas</span>}
+         </button>
       </div>
 
-      {/* Price History Section */}
-      <Card className="overflow-hidden bg-surface-card border-border">
-        <div className="p-4 bg-surface-base/40 border-b border-border">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <h2 className="font-montserrat font-bold text-text-1 text-sm flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-brand" />
-              Historial de Precios por Producto
-            </h2>
-            <div className="relative w-full sm:w-72">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
-              <Input
-                placeholder="Buscar producto o SKU..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-surface-base border-border h-9 text-sm"
-              />
-            </div>
-          </div>
-        </div>
+      {activeTab === "resumen" && (
+         <div className="space-y-6 animate-fade-in">
+           {/* KPI Cards */}
+           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+             <Card className="p-5 bg-gradient-to-br from-brand/5 to-surface-card border-brand/20">
+               <p className="text-[10px] font-bold text-text-3 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                 <ClipboardList className="w-3 h-3 text-brand" /> Total Órdenes
+               </p>
+               <p className="text-3xl font-montserrat font-bold text-brand">{totalOrders}</p>
+             </Card>
+             <Card className="p-5 bg-surface-card border-border">
+               <p className="text-[10px] font-bold text-text-3 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                 <DollarSign className="w-3 h-3 text-status-ok" /> Comprado Total
+               </p>
+               <p className="text-3xl font-montserrat font-bold text-status-ok">
+                 ${totalSpent.toLocaleString("es-VE", { minimumFractionDigits: 2 })}
+               </p>
+             </Card>
+             <Card className="p-5 bg-surface-card border-border">
+               <p className="text-[10px] font-bold text-text-3 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                 <Package className="w-3 h-3 text-[#7C4DFF]" /> Productos Distintos
+               </p>
+               <p className="text-3xl font-montserrat font-bold text-[#7C4DFF]">
+                 {priceHistory.length}
+               </p>
+             </Card>
+           </div>
 
-        {filteredHistory.length === 0 ? (
-          <div className="py-16 flex flex-col items-center gap-3 text-text-3">
-            <Package className="w-12 h-12 opacity-20" />
-            <p className="text-sm">
-              {priceHistory.length === 0
-                ? "Aún no hay historial de precios con este proveedor"
-                : "Sin resultados para la búsqueda"}
-            </p>
-            <p className="text-xs opacity-60">
-              Los datos se generan automáticamente al emitir Órdenes de Compra
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-surface-base text-[11px] font-bold text-text-3 uppercase tracking-wider border-b border-border">
-                <tr>
-                  <th
-                    className="px-5 py-3 cursor-pointer hover:text-text-1 transition-colors"
-                    onClick={() => handleSort("product")}
-                  >
-                    Producto <SortIcon field="product" />
-                  </th>
-                  <th className="px-5 py-3">SKU</th>
-                  <th className="px-5 py-3 text-right">Últ. Cant.</th>
-                  <th
-                    className="px-5 py-3 text-right cursor-pointer hover:text-text-1 transition-colors"
-                    onClick={() => handleSort("price")}
-                  >
-                    Precio USD <SortIcon field="price" />
-                  </th>
-                  <th className="px-5 py-3 text-right">Precio Bs.</th>
-                  <th className="px-5 py-3 text-center">Variación</th>
-                  <th
-                    className="px-5 py-3 cursor-pointer hover:text-text-1 transition-colors"
-                    onClick={() => handleSort("date")}
-                  >
-                    Última Compra <SortIcon field="date" />
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filteredHistory.map((item) => (
-                  <motion.tr
-                    key={item.product_id}
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="hover:bg-surface-hover/20 transition-colors"
-                  >
-                    <td className="px-5 py-4">
-                      <p className="font-bold text-text-1">{item.product_name}</p>
-                      {item.prev_price_usd !== null && (
-                        <p className="text-[10px] text-text-3 mt-0.5">
-                          Anterior: <span className="font-mono">${item.prev_price_usd.toFixed(4)}</span>
-                        </p>
-                      )}
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className="font-mono text-xs bg-surface-base px-2 py-0.5 rounded-md text-text-3">
-                        {item.product_sku}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-right font-bold text-text-1 font-mono">
-                      {item.last_qty}
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                      <span className="font-bold font-mono text-text-1">
-                        ${item.last_price_usd.toFixed(4)}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                      <span className="font-mono text-xs text-text-2">
-                        Bs. {item.last_price_bs.toFixed(2)}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-center">
-                      <VariationBadge pct={item.variation_pct} />
-                    </td>
-                    <td className="px-5 py-4">
-                      <p className="text-xs text-text-2">
-                        {format(new Date(item.last_purchase), "dd MMM yyyy", { locale: es })}
-                      </p>
-                      <p className="text-[10px] text-text-3 mt-0.5">
-                        {formatDistanceToNow(new Date(item.last_purchase), {
-                          addSuffix: true,
-                          locale: es,
-                        })}
-                      </p>
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+           {/* Price History Section */}
+           <Card className="overflow-hidden bg-surface-card border-border">
+             <div className="p-4 bg-surface-base/40 border-b border-border">
+               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                 <h2 className="font-montserrat font-bold text-text-1 text-sm flex items-center gap-2">
+                   <TrendingUp className="w-4 h-4 text-brand" />
+                   Historial de Precios por Producto
+                 </h2>
+                 <div className="relative w-full sm:w-72">
+                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
+                   <Input
+                     placeholder="Buscar producto o SKU..."
+                     value={searchQuery}
+                     onChange={(e) => setSearchQuery(e.target.value)}
+                     className="pl-10 bg-surface-input border-border/50 h-9 text-sm"
+                   />
+                 </div>
+               </div>
+             </div>
+
+             {filteredHistory.length === 0 ? (
+               <div className="py-16 flex flex-col items-center gap-3 text-text-3">
+                 <Package className="w-12 h-12 opacity-20" />
+                 <p className="text-sm">
+                   {priceHistory.length === 0
+                     ? "Aún no hay historial de precios con este proveedor"
+                     : "Sin resultados para la búsqueda"}
+                 </p>
+                 <p className="text-xs opacity-60">
+                   Los datos se generan automáticamente al emitir Órdenes de Compra
+                 </p>
+               </div>
+             ) : (
+               <div className="overflow-x-auto">
+                 <table className="w-full text-sm text-left">
+                   <thead className="bg-surface-base text-[11px] font-bold text-text-3 uppercase tracking-wider border-b border-border">
+                     <tr>
+                       <th
+                         className="px-5 py-3 cursor-pointer hover:text-text-1 transition-colors"
+                         onClick={() => handleSort("product")}
+                       >
+                         Producto <SortIcon field="product" />
+                       </th>
+                       <th className="px-5 py-3">SKU</th>
+                       <th className="px-5 py-3 text-right">Últ. Cant.</th>
+                       <th
+                         className="px-5 py-3 text-right cursor-pointer hover:text-text-1 transition-colors"
+                         onClick={() => handleSort("price")}
+                       >
+                         Precio USD <SortIcon field="price" />
+                       </th>
+                       <th className="px-5 py-3 text-right">Precio Bs.</th>
+                       <th className="px-5 py-3 text-center">Variación</th>
+                       <th
+                         className="px-5 py-3 cursor-pointer hover:text-text-1 transition-colors"
+                         onClick={() => handleSort("date")}
+                       >
+                         Última Compra <SortIcon field="date" />
+                       </th>
+                     </tr>
+                   </thead>
+                   <tbody className="divide-y divide-border">
+                     {filteredHistory.map((item) => (
+                       <motion.tr
+                         key={item.product_id}
+                         initial={{ opacity: 0, y: 4 }}
+                         animate={{ opacity: 1, y: 0 }}
+                         className="hover:bg-surface-hover/20 transition-colors"
+                       >
+                         <td className="px-5 py-4">
+                           <p className="font-bold text-text-1">{item.product_name}</p>
+                           {item.prev_price_usd !== null && (
+                             <p className="text-[10px] text-text-3 mt-0.5">
+                               Anterior: <span className="font-mono">${item.prev_price_usd.toFixed(4)}</span>
+                             </p>
+                           )}
+                         </td>
+                         <td className="px-5 py-4">
+                           <span className="font-mono text-[10px] border px-1.5 py-0.5 rounded-md text-text-3">
+                             {item.product_sku}
+                           </span>
+                         </td>
+                         <td className="px-5 py-4 text-right font-bold text-text-1 font-mono">
+                           {item.last_qty}
+                         </td>
+                         <td className="px-5 py-4 text-right">
+                           <span className="font-bold font-mono text-text-1">
+                             ${item.last_price_usd.toFixed(4)}
+                           </span>
+                         </td>
+                         <td className="px-5 py-4 text-right">
+                           <span className="font-mono text-[10px] text-text-3">
+                             Bs. {item.last_price_bs.toFixed(2)}
+                           </span>
+                         </td>
+                         <td className="px-5 py-4 text-center">
+                           <VariationBadge pct={item.variation_pct} />
+                         </td>
+                         <td className="px-5 py-4">
+                           <p className="text-xs text-text-2">
+                             {format(new Date(item.last_purchase), "dd MMM yyyy", { locale: es })}
+                           </p>
+                           <p className="text-[10px] text-text-3 mt-0.5">
+                             {formatDistanceToNow(new Date(item.last_purchase), {
+                               addSuffix: true,
+                               locale: es,
+                             })}
+                           </p>
+                         </td>
+                       </motion.tr>
+                     ))}
+                   </tbody>
+                 </table>
+               </div>
+             )}
+           </Card>
+         </div>
+      )}
+
+      {activeTab === "volumen" && (
+         <div className="space-y-6 animate-fade-in">
+            <div className="bg-brand/10 border border-brand/20 p-4 rounded-xl flex items-start gap-4">
+               <div className="bg-brand rounded-full p-2 mt-1">
+                  <Package className="w-5 h-5 text-white" />
+               </div>
+               <div>
+                  <h3 className="font-bold text-sm text-brand mb-1">Automatiza descuentos por volumen</h3>
+                  <p className="text-xs text-brand/80">Agrega acuerdos pactados con este proveedor. Cuando incluyas este producto en una Nueva Orden de Compra, el sistema detectará la cantidad seleccionada y ajustará el precio unitario automáticamente.</p>
+               </div>
+            </div>
+
+            <Card className="p-4 bg-surface-card border-border overflow-visible">
+               <h3 className="text-xs font-bold uppercase tracking-widest text-text-3 mb-4">Añadir Nueva Regla</h3>
+               <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
+                  <div className="sm:col-span-2">
+                     <label className="text-[10px] font-bold text-text-3 block mb-1">Producto <span className="text-status-danger">*</span></label>
+                     <Select value={vpForm.product_id} onValueChange={(val) => setVpForm(p => ({...p, product_id: val}))}>
+                        <SelectTrigger className="bg-surface-input border-border/50 text-sm h-10"><SelectValue placeholder="Selecciona un producto..."/></SelectTrigger>
+                        <SelectContent className="max-h-[250px]">
+                           {products.map(p => <SelectItem key={p.id} value={p.id}>{p.sku} - {p.name}</SelectItem>)}
+                        </SelectContent>
+                     </Select>
+                  </div>
+                  <div>
+                     <label className="text-[10px] font-bold text-text-3 block mb-1">Llevando más de... <span className="text-status-danger">*</span></label>
+                     <Input type="number" min="1" placeholder="Ej: 50" value={vpForm.min_quantity} onChange={e => setVpForm(p => ({...p, min_quantity: e.target.value}))} className="bg-surface-input border-border/50 h-10 font-mono" />
+                  </div>
+                  <div>
+                     <label className="text-[10px] font-bold text-text-3 block mb-1">Precio Unitario (USD) <span className="text-status-danger">*</span></label>
+                     <Input type="number" step="0.0001" placeholder="Ej: 4.5" value={vpForm.unit_price_usd} onChange={e => setVpForm(p => ({...p, unit_price_usd: e.target.value}))} className="bg-surface-input border-border/50 h-10 font-mono" />
+                  </div>
+                  {/*<div>
+                     <label className="text-[10px] font-bold text-text-3 block mb-1 whitespace-nowrap">Válido hasta</label>
+                     <Input type="date" value={vpForm.valid_until} onChange={e => setVpForm(p => ({...p, valid_until: e.target.value}))} className="bg-surface-input border-border/50 h-10" />
+                  </div>*/}
+                  <div className="pt-2">
+                     <button disabled={savingVP} onClick={handleSaveVP} className="w-full h-10 bg-brand text-white font-bold text-xs rounded-lg flex items-center justify-center gap-2 hover:opacity-90">
+                        {savingVP ? <Loader2 className="w-4 h-4 animate-spin"/> : <Plus className="w-4 h-4" />} Agregar
+                     </button>
+                  </div>
+               </div>
+            </Card>
+
+            <div className="space-y-4">
+              {Array.from(groupedVolumePrices.entries()).map(([productId, rules]) => {
+                 const prod = rules[0].products;
+                 return (
+                    <Card key={productId} className="overflow-hidden bg-surface-card border-border">
+                       <div className="bg-surface-base/50 p-3 border-b border-border flex justify-between items-center">
+                          <p className="font-bold text-sm text-text-1">{prod?.name} <span className="font-mono text-[10px] text-text-3 ml-2 border px-1.5 py-0.5 rounded">{prod?.sku}</span></p>
+                       </div>
+                       <table className="w-full text-sm">
+                          <tbody className="divide-y divide-border/50">
+                             {rules.sort((a,b)=>a.min_quantity - b.min_quantity).map(rule => (
+                                <tr key={rule.id} className="hover:bg-surface-hover/10">
+                                   <td className="px-4 py-3 w-1/3">
+                                      <span className="text-xs text-text-2 bg-surface-base border border-border px-2 py-1 rounded w-fit inline-flex items-center gap-1.5 font-bold">
+                                         <ArrowUpDown className="w-3 h-3 text-brand"/> {rule.min_quantity}+ unidades
+                                      </span>
+                                   </td>
+                                   <td className="px-4 py-3 font-mono font-bold text-status-ok text-right">
+                                      ${Number(rule.unit_price_usd).toFixed(4)} <span className="text-[10px] font-sans text-text-3 ml-1">/c.u</span>
+                                   </td>
+                                   <td className="px-4 py-3 text-right">
+                                      <button onClick={() => handleDeleteVP(rule.id)} className="p-1.5 text-text-3 hover:text-status-danger hover:bg-status-danger/10 rounded transition-colors inline-block" title="Eliminar regla"><Trash2 className="w-4 h-4"/></button>
+                                   </td>
+                                </tr>
+                             ))}
+                          </tbody>
+                       </table>
+                    </Card>
+                 )
+              })}
+              {volumePrices.length === 0 && (
+                 <div className="py-10 text-center text-text-3 border-2 border-dashed border-border rounded-xl">
+                    <p className="text-sm font-bold">No hay precios por volumen configurados.</p>
+                    <p className="text-xs">Usa el formulario superior para añadir la primera regla.</p>
+                 </div>
+              )}
+            </div>
+         </div>
+      )}
     </div>
   );
 }
