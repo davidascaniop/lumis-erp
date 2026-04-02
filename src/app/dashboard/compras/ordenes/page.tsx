@@ -112,6 +112,13 @@ export default function OrdenesCompraPage() {
         .eq("company_id", ud.company_id)
         .order("created_at", { ascending: false });
 
+      const ids = (data ?? []).map((p: any) => p.id);
+      let counts: Record<string, number> = {};
+      if (ids.length > 0) {
+        const { data: ic } = await supabase.from("purchase_items").select("purchase_id").in("purchase_id", ids);
+        (ic ?? []).forEach((r: any) => { counts[r.purchase_id] = (counts[r.purchase_id] ?? 0) + 1; });
+      }
+
       setPurchases(((data as any[]) ?? []).map(p => ({ 
         ...p, 
         _item_count: counts[p.id] ?? 0,
