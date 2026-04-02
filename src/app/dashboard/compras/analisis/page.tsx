@@ -85,11 +85,11 @@ export default function AnalisisPreciosPage() {
   const [loading, setLoading] = useState(true);
   const [rawData, setRawData] = useState<PriceHistoryRow[]>([]);
   const [alerts, setAlerts] = useState<PriceAlert[]>([]);
-  const [products, setProducts] = useState<{ id: string; name: string; sku: string }[]>([]);
-  
-  // States
-  const [viewMode, setViewMode] = useState<"proveedor" | "periodo">("proveedor");
   const [selectedProductId, setSelectedProductId] = useState<string>("none");
+  const [viewMode, setViewMode] = useState<"proveedor" | "periodo">("proveedor");
+  const [selectedProduct, setSelectedProduct] = useState<{name: string, sku: string} | null>(null);
+  const [searchResults, setSearchResults] = useState<{ id: string; name: string; sku: string; hasHistory?: boolean }[]>([]);
+  const [searching, setSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
 
@@ -122,11 +122,6 @@ export default function AnalisisPreciosPage() {
       }));
       setRawData(mapped);
 
-      // Extract unique products
-      const prodMap = new Map<string, { id: string; name: string; sku: string }>();
-      mapped.forEach((r) => prodMap.set(r.product_id, { id: r.product_id, name: r.product_name, sku: r.product_sku }));
-      setProducts([...prodMap.values()].sort((a, b) => a.name.localeCompare(b.name)));
-
       if (alertRes.data) {
         setAlerts(alertRes.data.map((a: any) => ({
           ...a,
@@ -142,6 +137,49 @@ export default function AnalisisPreciosPage() {
   }, [user, supabase]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Real-time Search
+  useEffect(() => {
+    if (!searchQuery.trim() || !user?.company_id) {
+      setSearchResults([]);
+      return;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select("id, name, sku")
+          .eq("company_id", user.company_id)
+          .or(`name.ilike.%${searchQuery}%,sku.ilike.%${searchQuery}%`)
+          .limit(20);
+
+        if (error) throw error;
+
+        // Check which ones have history in our rawData (or we can use a quick query if needed, but rawData is already here)
+        const historyIds = new Set(rawData.map(r => r.product_id));
+        
+        const results = (data || []).map(p => ({
+          ...p,
+          hasHistory: historyIds.has(p.id)
+        })).sort((a, b) => {
+          // History first
+          if (a.hasHistory && !b.hasHistory) return -1;
+          if (!a.hasHistory && b.hasHistory) return 1;
+          return a.name.localeCompare(b.name);
+        });
+
+        setSearchResults(results);
+      } catch (err) {
+        console.error("Search error:", err);
+      } finally {
+        setSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, user?.company_id, rawData, supabase]);
 
   // Derived: By Supplier 
   const supplierComparisons = useMemo(() => {
@@ -261,17 +299,25 @@ export default function AnalisisPreciosPage() {
             className="pl-10 bg-surface-base border-border/50 focus:border-brand/50 h-12 text-sm transition-all"
           />
           {searchQuery && (
-             <div className="absolute top-[52px] left-0 right-0 bg-surface-card border border-border rounded-xl shadow-2xl max-h-[300px] overflow-y-auto animate-in fade-in slide-in-from-top-2">
-               {products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.sku.toLowerCase().includes(searchQuery.toLowerCase())).map(p => (
-                 <button key={p.id} onClick={() => { setSelectedProductId(p.id); setSearchQuery(""); }} className="w-full text-left px-4 py-3 hover:bg-surface-hover/50 border-b border-border/50 last:border-0 flex justify-between items-center transition-colors">
-                    <div>
-                      <p className="font-bold text-sm text-text-1">{p.name}</p>
+             <div className="absolute top-[52px] left-0 right-0 bg-surface-card border border-border rounded-xl shadow-2xl max-h-[300px] overflow-y-auto animate-in fade-in slide-in-from-top-2 z-50">
+               {searching && <div className="p-4 text-center"><Loader2 className="w-5 h-5 text-brand animate-spin mx-auto" /></div>}
+               {!searching && searchResults.map(p => (
+                 <button key={p.id} onClick={() => { setSelectedProductId(p.id); setSelectedProduct({name: p.name, sku: p.sku}); setSearchQuery(""); }} className="w-full text-left px-4 py-3 hover:bg-surface-hover/50 border-b border-border/50 last:border-0 flex justify-between items-center transition-colors">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-sm text-text-1">{p.name}</p>
+                        {p.hasHistory ? (
+                          <span className="bg-[#E040FB]/10 text-[#E040FB] text-[8px] font-bold px-1.5 py-0.5 rounded border border-[#E040FB]/20 uppercase">Con historial</span>
+                        ) : (
+                          <span className="bg-text-3/10 text-text-3 text-[8px] font-bold px-1.5 py-0.5 rounded border border-border/50 uppercase">Sin compras aún</span>
+                        )}
+                      </div>
                       <p className="font-mono text-[10px] text-text-3">{p.sku}</p>
                     </div>
                     {activeProductAlerts.has(p.id) && <Bell className="w-4 h-4 text-status-danger" />}
                  </button>
                ))}
-               {products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.sku.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+               {!searching && searchResults.length === 0 && (
                  <p className="p-4 text-center text-text-3 text-sm">No se encontraron productos compatibles.</p>
                )}
              </div>
@@ -284,10 +330,10 @@ export default function AnalisisPreciosPage() {
                  <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center shrink-0"><Package className="w-4 h-4 text-brand" /></div>
                  <div>
                     <p className="text-[9px] text-brand font-bold uppercase tracking-widest leading-tight">Analizando producto</p>
-                    <p className="text-sm font-bold text-text-1 leading-tight mt-0.5">{products.find(p=>p.id===selectedProductId)?.name} <span className="text-text-3 font-mono text-xs ml-1">({products.find(p=>p.id===selectedProductId)?.sku})</span></p>
+                    <p className="text-sm font-bold text-text-1 leading-tight mt-0.5">{selectedProduct?.name} <span className="text-text-3 font-mono text-xs ml-1">({selectedProduct?.sku})</span></p>
                  </div>
               </div>
-              <button onClick={() => setSelectedProductId("none")} className="p-2 hover:bg-status-danger/10 text-text-3 hover:text-status-danger rounded-lg transition-colors"><X className="w-4 h-4"/></button>
+              <button onClick={() => { setSelectedProductId("none"); setSelectedProduct(null); }} className="p-2 hover:bg-status-danger/10 text-text-3 hover:text-status-danger rounded-lg transition-colors"><X className="w-4 h-4"/></button>
            </div>
         )}
       </Card>
@@ -311,6 +357,20 @@ export default function AnalisisPreciosPage() {
         </Card>
       ) : loading ? (
         <div className="py-20 flex center justify-center"><Loader2 className="w-8 h-8 text-brand animate-spin mx-auto" /></div>
+      ) : supplierComparisons.length === 0 ? (
+        <Card className="p-16 bg-surface-card border-border flex flex-col items-center justify-center text-center border-dashed">
+            <div className="w-16 h-16 rounded-full bg-brand/5 flex items-center justify-center mb-6">
+              <ShoppingBag className="w-8 h-8 text-brand/40" />
+            </div>
+            <h3 className="text-lg font-bold text-text-1 mb-2">Sin historial de compra</h3>
+            <p className="text-sm text-text-3 max-w-sm">
+              Este producto aún no tiene compras registradas. <br />
+              Cuando realices tu primera orden de compra con este producto podrás ver aquí el análisis de precios.
+            </p>
+            <Link href={`/dashboard/compras/ordenes?new=1&product_id=${selectedProductId}`} className="mt-6 px-6 py-2 bg-brand text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all">
+              Crear Primera Orden
+            </Link>
+        </Card>
       ) : viewMode === "proveedor" ? (
         <div className="space-y-6">
           {/* Supplier Cards */}
