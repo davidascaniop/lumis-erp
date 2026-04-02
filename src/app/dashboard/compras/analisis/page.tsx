@@ -92,6 +92,7 @@ export default function AnalisisPreciosPage() {
   const [allProducts, setAllProducts] = useState<{ id: string; name: string; sku: string }[]>([]);
   const [searching, setSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
 
   // Fetch
@@ -164,6 +165,7 @@ export default function AnalisisPreciosPage() {
        return a.name.localeCompare(b.name);
     }).slice(0, 20);
 
+    console.log("Search query:", q, "Results:", filtered.length);
     setSearchResults(filtered);
   }, [searchQuery, allProducts, rawData]);
 
@@ -274,7 +276,7 @@ export default function AnalisisPreciosPage() {
       </div>
 
       {/* Main Selector */}
-      <Card className="p-4 bg-surface-card border-border relative z-30 shadow-sm">
+      <Card className="p-4 bg-surface-card border-border relative z-30 shadow-sm overflow-visible">
         <label className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-2 block">Selecciona un Producto para Analizar</label>
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
@@ -282,9 +284,11 @@ export default function AnalisisPreciosPage() {
             placeholder="Buscar por producto (nombre o SKU)..." 
             value={searchQuery} 
             onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setIsOpen(true)}
+            onBlur={() => setTimeout(() => setIsOpen(false), 200)}
             className="pl-10 bg-surface-base border-border/50 focus:border-brand/50 h-12 text-sm transition-all"
           />
-          {searchQuery && (
+          {(searchQuery || isOpen) && searchResults.length > 0 && (
              <div className="absolute top-[52px] left-0 right-0 bg-surface-card border border-border rounded-xl shadow-2xl max-h-[300px] overflow-y-auto animate-in fade-in slide-in-from-top-2 z-50">
                {searching && <div className="p-4 text-center"><Loader2 className="w-5 h-5 text-brand animate-spin mx-auto" /></div>}
                {!searching && searchResults.map(p => (
