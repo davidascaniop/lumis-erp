@@ -65,6 +65,7 @@ function SettingsContent() {
     name_comercial: string;
     rif: string;
     plan_type: string;
+    subscription_status: string;
   } | null>(null);
   const [bcvRate, setBcvRate] = useState("56.42");
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
@@ -107,7 +108,7 @@ function SettingsContent() {
           if (uData.company_id) {
             const { data: companyData } = await supabase
               .from("companies")
-              .select("id, name, name_comercial, rif, plan_type")
+              .select("id, name, name_comercial, rif, plan_type, subscription_status")
               .eq("id", uData.company_id)
               .single();
 
@@ -682,99 +683,122 @@ function SettingsContent() {
               animate={{ opacity: 1, x: 0 }}
               className="space-y-6"
             >
-              <div className="bg-gradient-to-br from-[#1A1220] to-[#0A1A17] backdrop-blur-xl border border-[#00D4AA]/30 rounded-2xl p-8 relative overflow-hidden">
-                <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#00D4AA]/10 rounded-full blur-3xl pointer-events-none" />
-
-                <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center relative z-10">
-                  <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <h2 className="text-2xl font-bold text-[#F5EEFF]">
-                        Plan Actual
-                      </h2>
-                      <Badge className="bg-[#00D4AA]/20 text-[#00D4AA] border-[#00D4AA]/30 px-3 py-1 uppercase tracking-widest">
-                        {company?.plan_type || "BASIC"}
-                      </Badge>
-                    </div>
-                    <p className="text-[#B8A0D0] max-w-md">
-                      Estás utilizando las cuotas y funcionalidades asignadas al
-                      plan de inicio. Potencia tu empresa escalando a Pro.
-                    </p>
-                  </div>
-                  <div className="text-left md:text-right">
-                    <p className="text-3xl font-bold text-[#00D4AA] mb-1">
-                      $29{" "}
-                      <span className="text-lg text-[#6B5280] font-normal">
-                        / mes
-                      </span>
-                    </p>
-                    <p className="text-xs text-[#00D4AA]">
-                      Próximo cobro: 15 de Oct, 2026
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-8 border-t border-[#00D4AA]/10">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-[#B8A0D0]">
-                        Usuarios de Sistema
-                      </span>
-                      <span className="text-[#F5EEFF] font-medium">1 / 2</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-[#0F0A12] rounded-full overflow-hidden">
-                      <div className="h-full bg-[#00D4AA] w-[50%]" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-[#B8A0D0]">
-                        Almacenamiento (Docs)
-                      </span>
-                      <span className="text-[#F5EEFF] font-medium">
-                        20 MB / 5 GB
-                      </span>
-                    </div>
-                    <div className="h-1.5 w-full bg-[#0F0A12] rounded-full overflow-hidden">
-                      <div className="h-full bg-[#00D4AA] w-[1%]" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-[#B8A0D0]">Emisiones PDF</span>
-                      <span className="text-[#F5EEFF] font-medium">
-                        Ilimitado
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-[#1A1220]/50 backdrop-blur-xl border border-[#E040FB]/20 rounded-2xl p-6 hover:border-[#E040FB]/50 transition-colors">
-                <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] rounded-xl flex items-center justify-center p-0.5 shadow-glow">
-                      <div className="w-full h-full bg-[#1A1220] rounded-[10px] flex items-center justify-center">
-                        <Sparkles className="w-6 h-6 text-[#E040FB]" />
+              {company?.subscription_status === 'demo' ? (
+                 <div className="bg-gradient-to-br from-[#1A1220] to-[#011B16] backdrop-blur-xl border border-[#00E5CC]/30 rounded-2xl p-8 relative overflow-hidden">
+                    <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#00E5CC]/10 rounded-full blur-3xl pointer-events-none" />
+                    <div className="flex items-center gap-6 relative z-10">
+                      <div className="w-16 h-16 bg-[#00E5CC]/20 rounded-2xl flex items-center justify-center p-0.5 border border-[#00E5CC]/30">
+                        <Sparkles className="w-8 h-8 text-[#00E5CC]" />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-[#F5EEFF]">Cuenta Demo</h2>
+                        <p className="text-[#00E5CC] font-bold text-lg mt-1 flex items-center gap-2">
+                           Acceso completo habilitado
+                           <Shield className="w-5 h-5" />
+                        </p>
+                        <p className="text-[#B8A0D0] mt-3 max-w-md text-sm leading-relaxed">
+                          Esta cuenta tiene privilegios especiales para demostración. Disfrutas de todas las funcionalidades del <strong>Plan Enterprise</strong> de forma ilimitada.
+                        </p>
                       </div>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-[#F5EEFF]">
-                        Mejora a Plan Profesional
-                      </h3>
-                      <p className="text-sm text-[#B8A0D0]">
-                        Hasta 10 usuarios, reportes avanzados, Multi-moneda y
-                        KPIs sin bloqueo.
-                      </p>
+                 </div>
+              ) : (
+                <>
+                  <div className="bg-gradient-to-br from-[#1A1220] to-[#0A1A17] backdrop-blur-xl border border-[#00D4AA]/30 rounded-2xl p-8 relative overflow-hidden">
+                    <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#00D4AA]/10 rounded-full blur-3xl pointer-events-none" />
+
+                    <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center relative z-10">
+                      <div>
+                        <div className="flex items-center gap-3 mb-2">
+                          <h2 className="text-2xl font-bold text-[#F5EEFF]">
+                            Plan Actual
+                          </h2>
+                          <Badge className="bg-[#00D4AA]/20 text-[#00D4AA] border-[#00D4AA]/30 px-3 py-1 uppercase tracking-widest">
+                            {company?.plan_type || "BASIC"}
+                          </Badge>
+                        </div>
+                        <p className="text-[#B8A0D0] max-w-md">
+                          Estás utilizando las cuotas y funcionalidades asignadas al
+                          plan de inicio. Potencia tu empresa escalando a Pro.
+                        </p>
+                      </div>
+                      <div className="text-left md:text-right">
+                        <p className="text-3xl font-bold text-[#00D4AA] mb-1">
+                          $29{" "}
+                          <span className="text-lg text-[#6B5280] font-normal">
+                            / mes
+                          </span>
+                        </p>
+                        <p className="text-xs text-[#00D4AA]">
+                          Próximo cobro: 15 de Oct, 2026
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-8 border-t border-[#00D4AA]/10">
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-[#B8A0D0]">
+                            Usuarios de Sistema
+                          </span>
+                          <span className="text-[#F5EEFF] font-medium">1 / 2</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-[#0F0A12] rounded-full overflow-hidden">
+                          <div className="h-full bg-[#00D4AA] w-[50%]" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-[#B8A0D0]">
+                            Almacenamiento (Docs)
+                          </span>
+                          <span className="text-[#F5EEFF] font-medium">
+                            20 MB / 5 GB
+                          </span>
+                        </div>
+                        <div className="h-1.5 w-full bg-[#0F0A12] rounded-full overflow-hidden">
+                          <div className="h-full bg-[#00D4AA] w-[1%]" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-[#B8A0D0]">Emisiones PDF</span>
+                          <span className="text-[#F5EEFF] font-medium">
+                            Ilimitado
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <Button
-                    onClick={handleUpgradePlan}
-                    className="bg-gradient-to-r from-[#E040FB] to-[#7C4DFF] text-white hover:opacity-90 w-full md:w-auto shadow-glow font-bold"
-                  >
-                    Actualizar al Plan Pro
-                  </Button>
-                </div>
-              </div>
+
+                  <div className="bg-[#1A1220]/50 backdrop-blur-xl border border-[#E040FB]/20 rounded-2xl p-6 hover:border-[#E040FB]/50 transition-colors">
+                    <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] rounded-xl flex items-center justify-center p-0.5 shadow-glow">
+                          <div className="w-full h-full bg-[#1A1220] rounded-[10px] flex items-center justify-center">
+                            <Sparkles className="w-6 h-6 text-[#E040FB]" />
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-[#F5EEFF]">
+                            Mejora a Plan Profesional
+                          </h3>
+                          <p className="text-sm text-[#B8A0D0]">
+                            Hasta 10 usuarios, reportes avanzados, Multi-moneda y
+                            KPIs sin bloqueo.
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={handleUpgradePlan}
+                        className="bg-gradient-to-r from-[#E040FB] to-[#7C4DFF] text-white hover:opacity-90 w-full md:w-auto shadow-glow font-bold"
+                      >
+                        Actualizar al Plan Pro
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
             </motion.div>
           )}
         </div>

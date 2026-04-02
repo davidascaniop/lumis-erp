@@ -155,8 +155,12 @@ export function Sidebar() {
   }, [pathname]);
 
   useEffect(() => {
-    if (user?.companies?.plan_type) {
-      const plan = user.companies.plan_type.toLowerCase();
+    if (user?.companies) {
+      if (user.companies.subscription_status === 'demo') {
+        setUserPlan('enterprise');
+        return;
+      }
+      const plan = (user.companies.plan_type || "starter").toLowerCase();
       setUserPlan(plan.includes("pro") ? "pro" : plan.includes("enterprise") ? "enterprise" : "starter");
     } else {
       setUserPlan("starter");
@@ -328,12 +332,12 @@ export function Sidebar() {
                               isChildActive && !isLocked
                                 ? "text-text-1 font-bold bg-surface-hover/5"
                                 : "text-text-3 hover:text-text-1 hover:bg-surface-hover/5",
-                              isLocked ? "opacity-70 opacity-80" : "",
+                              isLocked ? "opacity-40 grayscale pointer-events-none" : "",
                             )}
                           >
                             <child.icon className={cn("w-3.5 h-3.5 flex-shrink-0", (isChildActive && !isLocked) ? "text-text-1" : "text-text-3 group-hover/child:text-text-2")} />
                             <span className="flex-1 leading-tight">{child.label}</span>
-                            {isLocked && <Lock className="w-3.5 h-3.5 text-text-3 shrink-0" />}
+                            {isLocked && !isChildActive && <Lock className="w-3.5 h-3.5 text-text-3/40 shrink-0" />}
                           </Link>
                         );
                       })}
