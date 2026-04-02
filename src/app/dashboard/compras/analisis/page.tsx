@@ -156,12 +156,21 @@ export default function AnalisisPreciosPage() {
     return Array.from(bySup.entries()).map(([supId, rows]) => {
       const sorted = rows.sort((a,b) => new Date(a.purchased_at).getTime() - new Date(b.purchased_at).getTime());
       const last = sorted[sorted.length - 1];
+      const prev = sorted.length > 1 ? sorted[sorted.length - 2] : null;
+      let trend: "up" | "down" | "flat" | "none" = "none";
+      if (prev) {
+        if (last.unit_price_usd > prev.unit_price_usd) trend = "up";
+        else if (last.unit_price_usd < prev.unit_price_usd) trend = "down";
+        else trend = "flat";
+      }
+
       const usdPrices = sorted.map(r => r.unit_price_usd);
       return {
         supplier_id: supId,
         supplier_name: last.supplier_name,
         last_price_usd: last.unit_price_usd,
         last_price_bs: last.unit_price_bs,
+        trend,
         min: Math.min(...usdPrices),
         max: Math.max(...usdPrices),
         avg: usdPrices.reduce((a,b)=>a+b,0) / usdPrices.length,
@@ -241,33 +250,46 @@ export default function AnalisisPreciosPage() {
       </div>
 
       {/* Main Selector */}
-      <Card className="p-4 bg-surface-card border-border flex flex-col sm:flex-row items-center gap-4">
-        <div className="relative flex-1 min-w-[250px]">
+      <Card className="p-4 bg-surface-card border-border relative z-30 shadow-sm">
+        <label className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-2 block">Selecciona un Producto para Analizar</label>
+        <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
           <Input 
             placeholder="Buscar por producto (nombre o SKU)..." 
             value={searchQuery} 
             onChange={(e) => setSearchQuery(e.target.value)}
-             className="pl-10 bg-surface-base border-border"
+            className="pl-10 bg-surface-base border-border/50 focus:border-brand/50 h-12 text-sm transition-all"
           />
+          {searchQuery && (
+             <div className="absolute top-[52px] left-0 right-0 bg-surface-card border border-border rounded-xl shadow-2xl max-h-[300px] overflow-y-auto animate-in fade-in slide-in-from-top-2">
+               {products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.sku.toLowerCase().includes(searchQuery.toLowerCase())).map(p => (
+                 <button key={p.id} onClick={() => { setSelectedProductId(p.id); setSearchQuery(""); }} className="w-full text-left px-4 py-3 hover:bg-surface-hover/50 border-b border-border/50 last:border-0 flex justify-between items-center transition-colors">
+                    <div>
+                      <p className="font-bold text-sm text-text-1">{p.name}</p>
+                      <p className="font-mono text-[10px] text-text-3">{p.sku}</p>
+                    </div>
+                    {activeProductAlerts.has(p.id) && <Bell className="w-4 h-4 text-status-danger" />}
+                 </button>
+               ))}
+               {products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.sku.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                 <p className="p-4 text-center text-text-3 text-sm">No se encontraron productos compatibles.</p>
+               )}
+             </div>
+          )}
         </div>
-        <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-          <SelectTrigger className="w-[300px] bg-surface-base border-border font-bold">
-            <Package className="w-4 h-4 mr-2" />
-            <SelectValue placeholder="Selecciona un producto..." />
-          </SelectTrigger>
-          <SelectContent className="bg-surface-card border-border max-h-[300px]">
-             <SelectItem value="none">Seleccione producto...</SelectItem>
-            {products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.sku.toLowerCase().includes(searchQuery.toLowerCase())).map(p => (
-              <SelectItem key={p.id} value={p.id}>
-                <div className="flex items-center justify-between w-[250px]">
-                   <span className="truncate">{p.sku} — {p.name}</span>
-                   {activeProductAlerts.has(p.id) && <Bell className="w-3 h-3 text-status-danger ml-2 flex-shrink-0" />}
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        
+        {selectedProductId !== "none" && (
+           <div className="mt-4 p-3 bg-brand/5 border border-brand/20 rounded-xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                 <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center shrink-0"><Package className="w-4 h-4 text-brand" /></div>
+                 <div>
+                    <p className="text-[9px] text-brand font-bold uppercase tracking-widest leading-tight">Analizando producto</p>
+                    <p className="text-sm font-bold text-text-1 leading-tight mt-0.5">{products.find(p=>p.id===selectedProductId)?.name} <span className="text-text-3 font-mono text-xs ml-1">({products.find(p=>p.id===selectedProductId)?.sku})</span></p>
+                 </div>
+              </div>
+              <button onClick={() => setSelectedProductId("none")} className="p-2 hover:bg-status-danger/10 text-text-3 hover:text-status-danger rounded-lg transition-colors"><X className="w-4 h-4"/></button>
+           </div>
+        )}
       </Card>
 
       {/* Tabs */}
@@ -291,31 +313,47 @@ export default function AnalisisPreciosPage() {
         <div className="py-20 flex center justify-center"><Loader2 className="w-8 h-8 text-brand animate-spin mx-auto" /></div>
       ) : viewMode === "proveedor" ? (
         <div className="space-y-6">
-          {/* Chart */}
+          {/* Supplier Cards */}
           {supplierComparisons.length > 0 && (
-            <Card className="p-4 sm:p-6 bg-surface-card border-border">
-              <h2 className="font-montserrat font-bold text-text-1 mb-4 flex items-center gap-2 text-sm">
-                <BarChart3 className="w-4 h-4 text-brand" /> Último precio por proveedor USD
-              </h2>
-              <div className="h-64 sm:h-[300px] w-full overflow-hidden text-xs">
-                 <ResponsiveContainer width="100%" height="100%">
-                   <BarChart data={supplierComparisons} layout="vertical" margin={{ top: 0, right: 30, left: 0, bottom: 0 }}>
-                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={true} vertical={false} />
-                     <XAxis type="number" tickFormatter={v => `$${v}`} tick={{fill:"var(--text-3)", fontSize: 11}} axisLine={false} tickLine={false} />
-                     <YAxis type="category" dataKey="supplier_name" width={150} tick={{fill:"var(--text-2)", fontSize: 11}} axisLine={false} tickLine={false} />
-                     <Tooltip 
-                       formatter={(val: any) => [`$${Number(val).toFixed(2)}`, "Precio USD"]} 
-                       contentStyle={{background:"var(--surface-color)", border:"1px solid var(--border-color)", borderRadius:"8px", color:"var(--text-1)"}}
-                     />
-                     <Bar dataKey="last_price_usd" radius={[0,4,4,0]}>
-                       {supplierComparisons.map((s, idx) => (
-                         <Cell key={idx} fill={idx === 0 ? "var(--status-ok)" : "var(--brand-color)"} />
-                       ))}
-                     </Bar>
-                   </BarChart>
-                 </ResponsiveContainer>
-              </div>
-            </Card>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+               {supplierComparisons.map((s, idx) => (
+                    <Card key={s.supplier_id} className={cn("p-5 bg-surface-card border relative overflow-hidden transition-all hover:border-brand/40 shadow-sm", s.is_cheapest ? "border-status-ok/40 shadow-status-ok/5" : "border-border/60")}>
+                       {s.is_cheapest && <div className="absolute top-0 inset-x-0 h-1 bg-status-ok" />}
+                       
+                       <div className="flex justify-between items-start mb-4">
+                         <h3 className="font-bold text-text-1 text-sm flex items-center gap-2"><Building2 className="w-4 h-4 text-text-3"/> {s.supplier_name}</h3>
+                         <div className="flex flex-col gap-1 items-end">
+                            {s.is_cheapest && <span className="bg-status-ok/10 text-status-ok text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border border-status-ok/20">Mejor Precio</span>}
+                            {s.is_most_bought && <span className="bg-[#E040FB]/10 text-[#E040FB] text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border border-[#E040FB]/20">Más Usado</span>}
+                         </div>
+                       </div>
+                       
+                       <div className="flex items-center justify-between mb-4">
+                         <div>
+                            <p className="text-[10px] text-text-3 font-bold uppercase tracking-widest mb-1">Precio Actual</p>
+                            <p className={cn("text-3xl font-montserrat font-bold", s.is_cheapest ? "text-status-ok" : "text-text-1")}>${s.last_price_usd.toFixed(2)}</p>
+                            <p className="text-[11px] text-text-3 font-mono mt-1">Bs. {s.last_price_bs.toFixed(2)}</p>
+                         </div>
+                         <div className="flex flex-col items-end">
+                            {s.trend === "up" ? (
+                               <div className="flex flex-col items-center"><TrendingUp className="w-6 h-6 text-status-danger" /><span className="text-[9px] font-bold text-status-danger mt-1">SUBIÓ</span></div>
+                            ) : s.trend === "down" ? (
+                               <div className="flex flex-col items-center"><TrendingDown className="w-6 h-6 text-status-ok" /><span className="text-[9px] font-bold text-status-ok mt-1">BAJÓ</span></div>
+                            ) : s.trend === "flat" ? (
+                               <div className="flex flex-col items-center"><Minus className="w-6 h-6 text-text-3" /><span className="text-[9px] font-bold text-text-3 mt-1">IGUAL</span></div>
+                            ) : (
+                               <div className="flex flex-col items-center"><Minus className="w-6 h-6 text-text-3/50" /><span className="text-[9px] font-bold text-text-3/50 mt-1">NUEVO</span></div>
+                            )}
+                         </div>
+                       </div>
+
+                       <div className="pt-3 border-t border-border/50 text-[10px] text-text-3 flex items-center justify-between font-mono">
+                          <span className="flex items-center gap-1"><Clock className="w-3 h-3"/> Última vez: {format(new Date(s.last_date), "dd/MM/yyyy")}</span>
+                          <span>{s.total_qty} uds. compradas</span>
+                       </div>
+                    </Card>
+               ))}
+            </div>
           )}
 
           {/* Table */}
@@ -375,30 +413,87 @@ export default function AnalisisPreciosPage() {
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
-           {/* Period View */}
-           <div className="flex justify-end">
-              <button onClick={handleExportPeriod} className="flex items-center gap-2 px-4 py-2 bg-surface-card border border-border rounded-xl text-xs font-bold text-text-1 hover:bg-surface-base transition-all">
-                <Download className="w-4 h-4 text-brand" /> Exportar a Excel
-              </button>
-           </div>
+        <div className="space-y-6">
+           {/* Period View Line Chart */}
+           <Card className="p-6 bg-white border border-border shadow-card">
+             <div className="flex justify-between items-center mb-6">
+                <div>
+                   <h2 className="font-montserrat font-bold text-gray-800 text-lg flex items-center gap-2">
+                     Evolución de Precios USD
+                   </h2>
+                   <p className="text-xs text-gray-500 mt-1">Línea de tiempo histórica de las compras a proveedores</p>
+                </div>
+                {periodHistory.length > 0 && (
+                   <button onClick={handleExportPeriod} className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-100 transition-all shadow-sm">
+                     <Download className="w-4 h-4 text-brand" /> Exportar Data
+                   </button>
+                )}
+             </div>
+
+             {periodHistory.length < 2 ? (
+                <div className="h-[250px] flex items-center justify-center border-2 border-dashed border-gray-200 rounded-xl text-gray-400 bg-gray-50">
+                   <p className="text-sm font-bold text-center">Necesitas registrar al menos 2 compras<br/>para ver la evolución de precios en el gráfico.</p>
+                </div>
+             ) : (
+                <div className="h-[300px] w-full text-xs">
+                   <ResponsiveContainer width="100%" height="100%">
+                     <LineChart data={[...periodHistory].reverse()} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
+                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                       <XAxis 
+                         dataKey="purchased_at" 
+                         tickFormatter={(val) => format(new Date(val), "MMM yyyy", {locale: es})} 
+                         tick={{fill: "#6B7280", fontSize: 11, fontWeight: 500}} 
+                         axisLine={{stroke: "#D1D5DB", strokeWidth: 2}}
+                         tickLine={false}
+                       />
+                       <YAxis 
+                         tickFormatter={(val) => `$${val}`} 
+                         tick={{fill: "#6B7280", fontSize: 11, fontWeight: 500}} 
+                         axisLine={false} 
+                         tickLine={false} 
+                       />
+                       <Tooltip 
+                         formatter={(val: any, name: string) => [`$${Number(val).toFixed(2)}`, name]}
+                         labelFormatter={(lbl) => format(new Date(lbl), "dd MMM yyyy", {locale: es})}
+                         contentStyle={{background: "white", border: "1px solid #E5E7EB", borderRadius: "12px", color: "#1F2937", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)", fontWeight: "bold"}}
+                       />
+                       <Legend wrapperStyle={{fontSize: "12px", fontWeight: "bold", paddingTop: "20px"}} />
+                       {Array.from(new Set(periodHistory.map(r=>r.supplier_name))).map((sName, idx) => (
+                          <Line 
+                            key={sName} 
+                            type="monotone" 
+                            dataKey={(row) => row.supplier_name === sName ? row.unit_price_usd : null} 
+                            name={sName} 
+                            stroke={LINE_COLORS[idx % LINE_COLORS.length]} 
+                            strokeWidth={3} 
+                            dot={{r: 4, strokeWidth: 2, fill: "white"}} 
+                            activeDot={{r: 6, strokeWidth: 0, fill: LINE_COLORS[idx % LINE_COLORS.length]}} 
+                            connectNulls
+                          />
+                       ))}
+                     </LineChart>
+                   </ResponsiveContainer>
+                </div>
+             )}
+           </Card>
+
            <div className="bg-surface-card border border-border rounded-2xl overflow-hidden shadow-card">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
                   <thead className="bg-surface-base text-[11px] font-bold text-text-3 uppercase tracking-wider border-b border-border">
                     <tr>
-                      <th className="px-5 py-4">Mes (Fecha)</th>
+                      <th className="px-5 py-4">Fecha</th>
                       <th className="px-5 py-4">Proveedor</th>
                       <th className="px-5 py-4 text-right">Precio USD</th>
                       <th className="px-5 py-4 text-right">Precio Bs</th>
-                      <th className="px-5 py-4 text-right">Tasa BCV</th>
+                      <th className="px-5 py-4 text-center">Tasa BCV</th>
                       <th className="px-5 py-4 text-center">Cant. Comprada</th>
                       <th className="px-5 py-4 text-center">Variación %</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
                     {periodHistory.length === 0 ? (
-                      <tr><td colSpan={7} className="text-center py-10 text-text-3">No hay compras registradas para este producto.</td></tr>
+                      <tr><td colSpan={7} className="text-center py-16 text-text-3 font-bold">No hay historial de compras para este producto. Crea tu primera orden de compra para empezar a ver comparativas.</td></tr>
                     ) : periodHistory.map((r, idx) => {
                       const prev = periodHistory[idx + 1]; // next in array is chronologically previous
                       let varPct = null;
