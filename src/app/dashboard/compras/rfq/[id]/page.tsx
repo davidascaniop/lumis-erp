@@ -12,6 +12,10 @@ import { es } from "date-fns/locale";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 
 export default function RFQDetailPage() {
   const params = useParams();
@@ -297,7 +301,7 @@ export default function RFQDetailPage() {
                   </tr>
                </thead>
                <tbody className="divide-y divide-border">
-                  {matrix.map((row) => (
+                  {matrix.map((row: any) => (
                      <tr key={row.product_id} className="hover:bg-surface-hover/20 transition-colors">
                         <td className="px-5 py-4 border-r border-border/50 bg-surface-base/30 relative">
                            <p className="font-bold text-text-1 text-xs">{row.name}</p>
@@ -372,7 +376,7 @@ export default function RFQDetailPage() {
                               <p className="text-[10px] text-brand">x{p.quantity_requested} unid.</p>
                            </div>
                            <div className="w-1/3">
-                              <Input type="number" placeholder="Precio USD" value={quoteForm[p.product_id] || ""} onChange={e => setQuoteForm(prev=>({...prev, [p.product_id]: e.target.value}))} className="h-8 text-right bg-surface-input border-border/50 font-mono text-sm" />
+                              <Input type="number" placeholder="Precio USD" value={quoteForm[p.product_id] || ""} onChange={(e: any) => setQuoteForm((prev: any)=>({...prev, [p.product_id]: e.target.value}))} className="h-8 text-right bg-surface-input border-border/50 font-mono text-sm" />
                            </div>
                         </div>
                      ))}
