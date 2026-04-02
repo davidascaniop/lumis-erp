@@ -153,6 +153,12 @@ export default function ProveedoresPage() {
       setCompanyId(userData.company_id);
       setUserId(userData.id);
 
+      const { data } = await supabase
+        .from("suppliers")
+        .select("*")
+        .eq("company_id", userData.company_id)
+        .order("name", { ascending: true });
+
       const { data: ordersData } = await supabase
         .from("purchases")
         .select("supplier_id")
