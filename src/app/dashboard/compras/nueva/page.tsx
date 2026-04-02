@@ -153,7 +153,7 @@ function NuevaCompraContent() {
       }
 
       toast.success("Compra registrada y stock actualizado");
-      router.push("/dashboard/compras");
+      router.push("/dashboard/compras/ordenes");
     } catch (err: any) {
       toast.error("Error al guardar compra", { description: err.message });
     } finally {

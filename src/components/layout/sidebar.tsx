@@ -7,7 +7,7 @@ import {
   CreditCard, ShoppingCart, Users, LayoutDashboard, Truck, Sparkles,
   DollarSign, AlertTriangle, CheckCircle2, Briefcase, Lock, Wallet,
   FileText, FileClock, TrendingUp, PieChart, Store, ClipboardList,
-  Tags, Layers, Receipt, ArrowDownCircle, Gauge, MessageSquare,
+  Tags, Layers, Receipt, ArrowDownCircle, Gauge, MessageSquare, ShoppingBag, Box,
 } from "lucide-react";
 import { cn, formatNumber } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -54,6 +54,18 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    id: "compras",
+    label: "Compras",
+    icon: ShoppingBag,
+    children: [
+      { href: "/dashboard/compras/proveedores", label: "Proveedores", icon: ClipboardList, requiredPlan: ["pro", "enterprise"] },
+      { href: "/dashboard/compras/ordenes", label: "Órdenes de Compra", icon: Wallet, requiredPlan: ["pro", "enterprise"] },
+      { href: "/dashboard/compras/recepciones", label: "Recepción de Mercancía", icon: Box },
+      { href: "/dashboard/compras/facturas", label: "Facturas de Compra", icon: FileText },
+      { href: "/dashboard/compras/fiscal", label: "Fiscal", icon: Receipt },
+    ],
+  },
+  {
     id: "clientes",
     label: "Clientes & CRM",
     icon: Users,
@@ -91,8 +103,6 @@ const NAV_SECTIONS: NavSection[] = [
     icon: Truck,
     children: [
       { href: "/dashboard/compras/despachos", label: "Despachos y Envíos", icon: Truck, requiredPlan: ["pro", "enterprise"] },
-      { href: "/dashboard/compras/proveedores", label: "Proveedores", icon: ClipboardList, requiredPlan: ["pro", "enterprise"] },
-      { href: "/dashboard/compras", label: "Órdenes de Compra", icon: Wallet, requiredPlan: ["pro", "enterprise"] },
     ],
   },
   {
