@@ -112,15 +112,17 @@ export default function OrdenesCompraPage() {
         .eq("company_id", ud.company_id)
         .order("created_at", { ascending: false });
 
-      // Fetch item counts
-      const ids = (data ?? []).map((p: any) => p.id);
-      let counts: Record<string, number> = {};
-      if (ids.length > 0) {
-        const { data: ic } = await supabase.from("purchase_items").select("purchase_id").in("purchase_id", ids);
-        (ic ?? []).forEach((r: any) => { counts[r.purchase_id] = (counts[r.purchase_id] ?? 0) + 1; });
-      }
-      setPurchases(((data as any[]) ?? []).map(p => ({ ...p, _item_count: counts[p.id] ?? 0 })));
-    } catch { toast.error("Error al cargar órdenes"); }
+      setPurchases(((data as any[]) ?? []).map(p => ({ 
+        ...p, 
+        _item_count: counts[p.id] ?? 0,
+        total_usd: Number(p.total_usd || 0),
+        total_bs: Number(p.total_bs || 0),
+        subtotal_usd: Number(p.subtotal_usd || 0)
+      })));
+    } catch (e: any) { 
+      console.error("Error fetching purchases:", e);
+      toast.error("Error al cargar órdenes"); 
+    }
     finally { setLoading(false); }
   }, [supabase]);
 
@@ -426,9 +428,16 @@ export default function OrdenesCompraPage() {
                   </td>
                   <td className="px-5 py-4 text-text-2 text-xs">{p._item_count ?? 0} ítems</td>
                   <td className="px-5 py-4 font-bold text-text-1">${(p.total_usd ?? 0).toLocaleString("es-VE", { minimumFractionDigits: 2 })}</td>
-                  <td className="px-5 py-4 text-text-3 text-xs">Bs. {(p.total_bs ?? 0).toLocaleString("es-VE", { minimumFractionDigits: 2 })}</td>
-                  <td className="px-5 py-4 text-text-2 text-xs">{format(new Date(p.created_at), "dd/MM/yyyy")}</td>
-                  <td className="px-5 py-4 text-text-2 text-xs">{(p.expected_date) ? format(new Date(p.expected_date + "T00:00:00"), "dd/MM/yyyy") : "–"}</td>
+                   <td className="px-5 py-4 text-text-3 text-xs">Bs. {(p.total_bs ?? 0).toLocaleString("es-VE", { minimumFractionDigits: 2 })}</td>
+                  <td className="px-5 py-4 text-text-2 text-xs">{p.created_at ? format(new Date(p.created_at), "dd/MM/yyyy") : "–"}</td>
+                  <td className="px-5 py-4 text-text-2 text-xs">
+                    {p.expected_date ? (() => {
+                      try {
+                        const d = new Date(p.expected_date);
+                        return isNaN(d.getTime()) ? "–" : format(d, "dd/MM/yyyy");
+                      } catch { return "–"; }
+                    })() : "–"}
+                  </td>
                   <td className="px-5 py-4">
                     <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border", STATUS_CFG[p.status]?.cls || "bg-surface-base text-text-3")}>
                       {STATUS_CFG[p.status]?.label || p.status}
