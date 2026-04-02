@@ -453,7 +453,7 @@ export default function AnalisisPreciosPage() {
                          tickLine={false} 
                        />
                        <Tooltip 
-                         formatter={(val: any, name: string) => [`$${Number(val).toFixed(2)}`, name]}
+                         formatter={(val: any, name: any) => [`$${Number(val).toFixed(2)}`, name]}
                          labelFormatter={(lbl) => format(new Date(lbl), "dd MMM yyyy", {locale: es})}
                          contentStyle={{background: "white", border: "1px solid #E5E7EB", borderRadius: "12px", color: "#1F2937", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)", fontWeight: "bold"}}
                        />
