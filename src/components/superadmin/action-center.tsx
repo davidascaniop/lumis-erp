@@ -15,6 +15,13 @@ import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
+const IconMap: Record<string, any> = {
+  clock: Clock,
+  check: CheckCircle2,
+  alert: AlertTriangle,
+  building: Building2,
+};
+
 export function ActionCenter({ initialActivities }: { initialActivities: any[] }) {
   const [filter, setFilter] = useState("all");
 
@@ -72,7 +79,7 @@ export function ActionCenter({ initialActivities }: { initialActivities: any[] }
           </div>
         ) : (
           filteredActivities.map((act) => {
-            const Icon = act.icon;
+            const Icon = IconMap[act.icon] || Activity;
             return (
               <Link 
                 key={act.id} 

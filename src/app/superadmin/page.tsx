@@ -148,7 +148,7 @@ export default async function SuperAdminHome() {
       date: new Date(p.created_at),
       message: p.status === 'pending' ? 'Pago pendiente de revisión' : (p.status === 'approved' ? 'Cuenta activada correctamente' : 'Pago rechazado o vencido'),
       company: p.companies?.name || 'Empresa Desconocida',
-      icon: p.status === 'pending' ? Clock : (p.status === 'approved' ? CheckCircle2 : AlertTriangle),
+      icon: p.status === 'pending' ? "clock" : (p.status === 'approved' ? "check" : "alert"),
       color: p.status === 'pending' ? 'text-status-warn bg-status-warn/10' : (p.status === 'approved' ? 'text-status-ok bg-status-ok/10' : 'text-status-danger bg-status-danger/10'),
       link: '/superadmin/clientes/suscripciones'
     }))),
@@ -159,7 +159,7 @@ export default async function SuperAdminHome() {
       date: new Date(c.created_at || now),
       message: 'Nuevo registro de empresa',
       company: c.name,
-      icon: Building2,
+      icon: "building",
       color: 'text-brand bg-brand/10',
       link: `/superadmin/clientes/empresas/${c.id}`
     })))
