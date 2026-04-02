@@ -59,6 +59,7 @@ interface Supplier {
   is_active: boolean;
   created_at: string;
   last_purchase_at?: string | null;
+  _total_orders?: number;
 }
 
 interface Purchase {
@@ -152,13 +153,20 @@ export default function ProveedoresPage() {
       setCompanyId(userData.company_id);
       setUserId(userData.id);
 
-      const { data } = await supabase
-        .from("suppliers")
-        .select("*")
-        .eq("company_id", userData.company_id)
-        .order("name", { ascending: true });
+      const { data: ordersData } = await supabase
+        .from("purchases")
+        .select("supplier_id")
+        .eq("company_id", userData.company_id);
+      
+      const orderCounts: Record<string, number> = {};
+      (ordersData ?? []).forEach(o => {
+        if (o.supplier_id) orderCounts[o.supplier_id] = (orderCounts[o.supplier_id] ?? 0) + 1;
+      });
 
-      setSuppliers((data as Supplier[]) || []);
+      setSuppliers(((data as Supplier[]) ?? []).map(s => ({
+        ...s,
+        _total_orders: orderCounts[s.id] ?? 0
+      })));
 
       // Purchases stats this month
       const now = new Date();
@@ -387,7 +395,7 @@ export default function ProveedoresPage() {
           <table className="w-full text-sm text-left whitespace-nowrap">
             <thead className="bg-surface-base/80 text-text-1 sticky top-0 z-10 backdrop-blur-lg border-b-2 border-border/50">
               <tr>
-                {["Proveedor", "RIF", "Teléfono", "Email", "Categoría", "Última Compra", "Estado", "Acciones"].map((h) => (
+                {["Proveedor", "RIF", "Órdenes", "Teléfono", "Categoría", "Última Compra", "Estado", "Acciones"].map((h) => (
                   <th
                     key={h}
                     className="px-5 py-4 font-bold font-montserrat text-[11px] text-text-1"
@@ -437,8 +445,12 @@ export default function ProveedoresPage() {
                       </div>
                     </td>
                     <td className="px-5 py-4 font-mono text-text-2 text-xs">{s.rif}</td>
+                    <td className="px-5 py-4 text-center">
+                      <span className="font-bold text-brand shadow-sm bg-brand/5 px-2 py-1 rounded-lg border border-brand/10">
+                        {s._total_orders ?? 0}
+                      </span>
+                    </td>
                     <td className="px-5 py-4 text-text-2 text-xs">{s.phone ?? "–"}</td>
-                    <td className="px-5 py-4 text-text-2 text-xs max-w-[160px] truncate">{s.email ?? "–"}</td>
                     <td className="px-5 py-4">
                       {s.category ? (
                         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#7C4DFF]/10 text-[#7C4DFF] border border-[#7C4DFF]/20">

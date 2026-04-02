@@ -58,10 +58,8 @@ const NAV_SECTIONS: NavSection[] = [
     label: "Compras",
     icon: ShoppingBag,
     children: [
-      { href: "/dashboard/compras/proveedores", label: "Proveedores", icon: ClipboardList, requiredPlan: ["pro", "enterprise"] },
       { href: "/dashboard/compras/ordenes", label: "Órdenes de Compra", icon: Wallet, requiredPlan: ["pro", "enterprise"] },
-      { href: "/dashboard/compras/recepciones", label: "Recepción de Mercancía", icon: Box },
-      { href: "/dashboard/compras/facturas", label: "Facturas de Compra", icon: FileText },
+      { href: "/dashboard/compras/proveedores", label: "Proveedores", icon: ClipboardList, requiredPlan: ["pro", "enterprise"] },
       { href: "/dashboard/compras/fiscal", label: "Fiscal", icon: Receipt },
     ],
   },
