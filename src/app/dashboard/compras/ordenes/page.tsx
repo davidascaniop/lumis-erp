@@ -3,10 +3,11 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Search, Loader2, Plus, ClipboardList, DollarSign,
   X, ChevronRight, Truck, CheckCircle2, XCircle, Clock,
-  FileText, AlertCircle, ShoppingBag, Wallet, TrendingUp, TrendingDown, History,
+  FileText, AlertCircle, ShoppingBag, Wallet, TrendingUp, TrendingDown, History, Building2, Bell
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -71,8 +72,10 @@ const STATUS_CFG: Record<PurchaseStatus, { label: string; cls: string; icon: any
 export default function OrdenesCompraPage() {
   const supabase = createClient();
   const { rate: bcvRate } = useBCV();
+  const searchParams = useSearchParams();
 
   const [purchases, setPurchases]     = useState<Purchase[]>([]);
+  const [topAlerts, setTopAlerts]     = useState<any[]>([]);
   const [loading, setLoading]         = useState(true);
   const [companyId, setCompanyId]     = useState<string | null>(null);
   const [search, setSearch]           = useState("");
@@ -126,6 +129,9 @@ export default function OrdenesCompraPage() {
         total_bs: Number(p.total_bs || 0),
         subtotal_usd: Number(p.subtotal_usd || 0)
       })));
+
+      const { data: alerts } = await supabase.from("price_alerts").select("*, products(name), suppliers(name)").eq("company_id", ud.company_id).eq("is_read", false).order("created_at", { ascending: false }).limit(3);
+      if (alerts) setTopAlerts(alerts);
     } catch (e: any) { 
       console.error("Error fetching purchases:", e);
       toast.error("Error al cargar órdenes"); 
@@ -160,9 +166,9 @@ export default function OrdenesCompraPage() {
     setProducts((pr as Product[]) ?? []);
   }, [companyId, supabase]);
 
-  const handleOpenNew = async () => {
+  const handleOpenNew = async (sId?: string, forceOpen?: boolean) => {
     setForm({ 
-      supplier_id: "", 
+      supplier_id: sId || "", 
       expected_date: "", 
       emission_date: new Date().toISOString().split("T")[0], 
       notes: "" 
@@ -171,8 +177,32 @@ export default function OrdenesCompraPage() {
     setProdSearch("");
     setShowQuickSupplier(false);
     await loadMeta();
-    setNewOpen(true);
+    if (forceOpen || !newOpen) setNewOpen(true);
   };
+
+  useEffect(() => {
+    if (searchParams?.get("new") === "1" && companyId && !newOpen) {
+      const sId = searchParams.get("supplier_id") || undefined;
+      const pId = searchParams.get("product_id");
+      handleOpenNew(sId, true).then(async () => {
+        if (pId && sId) {
+           const { data } = await supabase.from("products").select("*").eq("id", pId).single();
+           if (data) {
+             setItems([{ 
+               product_id: data.id, 
+               product_name: data.name, 
+               sku: data.sku ?? "", 
+               qty: 1, 
+               qty_received: 0, 
+               unit_cost_usd: data.cost_usd ?? 0, 
+               subtotal_usd: data.cost_usd ?? 0 
+             }]);
+           }
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, companyId]);
 
   // ── Quick Supplier Logic ──────────────────────────────────────────────────
   const handleCreateSupplier = async () => {
@@ -379,7 +409,7 @@ export default function OrdenesCompraPage() {
           <h1 className="text-3xl font-montserrat font-bold text-text-1">Órdenes de Compra</h1>
           <p className="text-text-2 mt-1 text-sm">Gestiona todo el ciclo de compra desde un solo lugar</p>
         </div>
-        <button onClick={handleOpenNew}
+        <button onClick={() => handleOpenNew()}
           className="px-6 py-3 bg-brand-gradient text-white font-bold font-montserrat rounded-xl text-sm shadow-brand hover:opacity-90 transition-all active:scale-95 flex items-center gap-2 self-start sm:self-auto">
           <Plus className="w-4 h-4" /> Nueva Orden
         </button>
@@ -405,6 +435,42 @@ export default function OrdenesCompraPage() {
           </motion.div>
         ))}
       </div>
+
+      {topAlerts.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-montserrat font-bold text-text-1 text-sm flex items-center gap-2 mb-1">
+              <Bell className="w-4 h-4 text-brand" /> Alertas de Precios Recientes
+            </h3>
+            <Link href="/dashboard/compras/analisis" className="text-[10px] uppercase font-bold tracking-wider text-brand hover:underline">
+              Ver Todas
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {topAlerts.map(a => (
+              <div key={a.id} className={cn("p-4 rounded-xl border relative overflow-hidden bg-surface-card", a.alert_type === 'precio_subida' ? "border-status-danger/30" : "border-status-ok/30")}>
+                 <div className={cn("absolute top-0 right-0 left-0 h-1", a.alert_type === 'precio_subida' ? "bg-status-danger" : "bg-status-ok")} />
+                 <div className="flex justify-between items-start mb-2">
+                    <p className="text-xs font-bold text-text-1 leading-tight">{a.products?.name}</p>
+                    <div className={cn("w-6 h-6 rounded-full flex items-center justify-center shrink-0", a.alert_type === 'precio_subida' ? "bg-status-danger/10 text-status-danger" : "bg-status-ok/10 text-status-ok")}>
+                       {a.alert_type === 'precio_subida' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                    </div>
+                 </div>
+                 <p className="text-[10px] text-text-3 font-mono flex items-center gap-1 mb-3"><Building2 className="w-3 h-3" /> {a.suppliers?.name}</p>
+                 <div className="flex justify-between items-center text-xs">
+                    <p className="text-text-3 font-mono line-through">${Number(a.old_price).toFixed(2)}</p>
+                    <p className="font-bold font-mono text-text-1 flex items-center gap-1">
+                      ${Number(a.new_price).toFixed(2)}
+                      <span className={cn("text-[9px] px-1.5 py-0.5 rounded", a.alert_type === 'precio_subida' ? "bg-status-danger/10 text-status-danger" : "bg-status-ok/10 text-status-ok")}>
+                         {a.alert_type === 'precio_subida' ? "+" : ""}{Number(a.variation_percent).toFixed(1)}%
+                      </span>
+                    </p>
+                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Tabla Paso 2 */}
       <div className="bg-surface-card border border-border rounded-2xl overflow-hidden shadow-card flex flex-col min-h-[500px]">

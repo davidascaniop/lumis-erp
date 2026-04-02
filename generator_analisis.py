@@ -1,4 +1,6 @@
-"use client";
+import os
+
+content = """\"use client\";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -20,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  Legend, ResponsiveContainer, Cell
+  Legend, ResponsiveContainer,
 } from "recharts";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -204,8 +206,8 @@ export default function AnalisisPreciosPage() {
   const handleExportPeriod = () => {
     if (periodHistory.length === 0) return;
     const header = "Fecha,Proveedor,Precio USD,Precio Bs,Tasa BCV,Cantidad";
-    const body = periodHistory.map(r => `"${format(new Date(r.purchased_at),"dd/MM/yyyy")}","${r.supplier_name}",${r.unit_price_usd},${r.unit_price_bs},${r.bcv_rate},${r.quantity}`).join("\n");
-    const blob = new Blob([header + "\n" + body], { type: "text/csv;charset=utf-8;" });
+    const body = periodHistory.map(r => `"${format(new Date(r.purchased_at),"dd/MM/yyyy")}","${r.supplier_name}",${r.unit_price_usd},${r.unit_price_bs},${r.bcv_rate},${r.quantity}`).join("\\n");
+    const blob = new Blob([header + "\\n" + body], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href=url; a.download=`historial-periodo.csv`; a.click();
   };
@@ -245,7 +247,7 @@ export default function AnalisisPreciosPage() {
         <div className="relative flex-1 min-w-[250px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
           <Input 
-            placeholder="Buscar por producto (nombre o SKU)..." 
+            placeholder="Buscar por producto..." 
             value={searchQuery} 
             onChange={(e) => setSearchQuery(e.target.value)}
              className="pl-10 bg-surface-base border-border"
@@ -260,9 +262,9 @@ export default function AnalisisPreciosPage() {
              <SelectItem value="none">Seleccione producto...</SelectItem>
             {products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.sku.toLowerCase().includes(searchQuery.toLowerCase())).map(p => (
               <SelectItem key={p.id} value={p.id}>
-                <div className="flex items-center justify-between w-[250px]">
-                   <span className="truncate">{p.sku} — {p.name}</span>
-                   {activeProductAlerts.has(p.id) && <Bell className="w-3 h-3 text-status-danger ml-2 flex-shrink-0" />}
+                <div className="flex items-center justify-between w-full pr-4">
+                   <span>{p.sku} — {p.name}</span>
+                   {activeProductAlerts.has(p.id) && <Bell className="w-3 h-3 text-status-danger ml-2" />}
                 </div>
               </SelectItem>
             ))}
@@ -277,7 +279,7 @@ export default function AnalisisPreciosPage() {
             Comparativa entre Proveedores
           </button>
           <button onClick={() => setViewMode("periodo")} className={cn("px-4 py-3 font-bold border-b-2 text-sm transition-all", viewMode === "periodo" ? "border-brand text-brand" : "border-transparent text-text-3 hover:text-text-1")}>
-            Historial del Producto (Período)
+            Historial del Producto
           </button>
         </div>
       )}
@@ -292,31 +294,26 @@ export default function AnalisisPreciosPage() {
       ) : viewMode === "proveedor" ? (
         <div className="space-y-6">
           {/* Chart */}
-          {supplierComparisons.length > 0 && (
-            <Card className="p-4 sm:p-6 bg-surface-card border-border">
-              <h2 className="font-montserrat font-bold text-text-1 mb-4 flex items-center gap-2 text-sm">
-                <BarChart3 className="w-4 h-4 text-brand" /> Último precio por proveedor USD
-              </h2>
-              <div className="h-64 sm:h-[300px] w-full overflow-hidden text-xs">
-                 <ResponsiveContainer width="100%" height="100%">
-                   <BarChart data={supplierComparisons} layout="vertical" margin={{ top: 0, right: 30, left: 0, bottom: 0 }}>
-                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={true} vertical={false} />
-                     <XAxis type="number" tickFormatter={v => `$${v}`} tick={{fill:"var(--text-3)", fontSize: 11}} axisLine={false} tickLine={false} />
-                     <YAxis type="category" dataKey="supplier_name" width={150} tick={{fill:"var(--text-2)", fontSize: 11}} axisLine={false} tickLine={false} />
-                     <Tooltip 
-                       formatter={(val: any) => [`$${Number(val).toFixed(2)}`, "Precio USD"]} 
-                       contentStyle={{background:"var(--surface-color)", border:"1px solid var(--border-color)", borderRadius:"8px", color:"var(--text-1)"}}
-                     />
-                     <Bar dataKey="last_price_usd" radius={[0,4,4,0]}>
-                       {supplierComparisons.map((s, idx) => (
-                         <Cell key={idx} fill={idx === 0 ? "var(--status-ok)" : "var(--brand-color)"} />
-                       ))}
-                     </Bar>
-                   </BarChart>
-                 </ResponsiveContainer>
-              </div>
-            </Card>
-          )}
+          <Card className="p-6 bg-surface-card border-border">
+            <h2 className="font-montserrat font-bold text-text-1 mb-4 flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-brand" /> Último precio por proveedor USD
+            </h2>
+            <div className="h-64 sm:h-80 w-full overflow-hidden">
+               <ResponsiveContainer width="100%" height="100%">
+                 <BarChart data={supplierComparisons} layout="vertical" margin={{ top: 0, right: 30, left: 0, bottom: 0 }}>
+                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
+                   <XAxis type="number" tickFormatter={v => `$${v}`} tick={{fill:"var(--text-3)", fontSize: 11}} axisLine={false} tickLine={false} />
+                   <YAxis type="category" dataKey="supplier_name" width={150} tick={{fill:"var(--text-2)", fontSize: 11}} axisLine={false} tickLine={false} />
+                   <Tooltip formatter={(val: number) => [`$${val.toFixed(2)}`, "Precio USD"]} contentStyle={{background:"var(--surface-color)", border:"1px solid var(--border-color)", borderRadius:"8px", color:"var(--text-1)"}}/>
+                   <Bar dataKey="last_price_usd" radius={[0,4,4,0]}>
+                     {supplierComparisons.map((s, idx) => (
+                       <cell key={idx} fill={idx === 0 ? "var(--status-ok)" : "var(--brand-color)"} style={{fill: idx === 0 ? "var(--status-ok)" : "var(--brand-color)"}} />
+                     ))}
+                   </Bar>
+                 </BarChart>
+               </ResponsiveContainer>
+            </div>
+          </Card>
 
           {/* Table */}
           <div className="bg-surface-card border border-border rounded-2xl overflow-hidden shadow-card">
@@ -339,7 +336,7 @@ export default function AnalisisPreciosPage() {
                       <td className="px-5 py-4">
                         <div className="flex flex-col gap-1 items-start">
                           <span className="font-bold text-text-1">{s.supplier_name}</span>
-                          <div className="flex gap-1 flex-wrap">
+                          <div className="flex gap-1">
                             {s.is_cheapest && <span className="bg-status-ok/10 border border-status-ok/20 text-status-ok text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Mejor Precio</span>}
                             {s.is_most_bought && <span className="bg-[#E040FB]/10 border border-[#E040FB]/20 text-[#E040FB] text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Más Comprado</span>}
                           </div>
@@ -350,7 +347,7 @@ export default function AnalisisPreciosPage() {
                         <p className="text-[10px] text-text-3">Bs. {s.last_price_bs.toFixed(2)}</p>
                       </td>
                       <td className="px-5 py-4 text-right font-mono text-xs">
-                         <span className="text-status-ok">${s.min.toFixed(2)}</span><br/><span className="text-status-danger">${s.max.toFixed(2)}</span>
+                         <span className="text-status-ok">${s.min.toFixed(2)}</span> / <span className="text-status-danger">${s.max.toFixed(2)}</span>
                       </td>
                       <td className="px-5 py-4 text-center font-mono font-bold text-text-2">${s.avg.toFixed(2)}</td>
                       <td className="px-5 py-4 text-center">
@@ -360,15 +357,12 @@ export default function AnalisisPreciosPage() {
                         {format(new Date(s.last_date), "dd/MM/yyyy")}
                       </td>
                       <td className="px-5 py-4 text-center">
-                        <Link href={`/dashboard/compras/ordenes?new=1&supplier_id=${s.supplier_id}&product_id=${selectedProductId}`} className="inline-flex items-center gap-1.5 bg-brand text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:opacity-90 transition-opacity whitespace-nowrap shadow-brand">
+                        <Link href={`/dashboard/compras/ordenes?action=new_order&supplier_id=${s.supplier_id}&product_id=${selectedProductId}`} className="inline-flex items-center gap-1.5 bg-brand-gradient text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:opacity-90 transition-opacity whitespace-nowrap shadow-brand">
                           <ShoppingBag className="w-3.5 h-3.5" /> Ordenar
                         </Link>
                       </td>
                     </tr>
                   ))}
-                  {supplierComparisons.length === 0 && (
-                    <tr><td colSpan={7} className="text-center py-10 text-text-3">Sin datos para este producto.</td></tr>
-                  )}
                 </tbody>
               </table>
             </div>
@@ -379,7 +373,7 @@ export default function AnalisisPreciosPage() {
            {/* Period View */}
            <div className="flex justify-end">
               <button onClick={handleExportPeriod} className="flex items-center gap-2 px-4 py-2 bg-surface-card border border-border rounded-xl text-xs font-bold text-text-1 hover:bg-surface-base transition-all">
-                <Download className="w-4 h-4 text-brand" /> Exportar a Excel
+                <Download className="w-4 h-4 text-brand" /> Excel
               </button>
            </div>
            <div className="bg-surface-card border border-border rounded-2xl overflow-hidden shadow-card">
@@ -387,19 +381,17 @@ export default function AnalisisPreciosPage() {
                 <table className="w-full text-sm text-left">
                   <thead className="bg-surface-base text-[11px] font-bold text-text-3 uppercase tracking-wider border-b border-border">
                     <tr>
-                      <th className="px-5 py-4">Mes (Fecha)</th>
+                      <th className="px-5 py-4">Fecha</th>
                       <th className="px-5 py-4">Proveedor</th>
                       <th className="px-5 py-4 text-right">Precio USD</th>
                       <th className="px-5 py-4 text-right">Precio Bs</th>
                       <th className="px-5 py-4 text-right">Tasa BCV</th>
-                      <th className="px-5 py-4 text-center">Cant. Comprada</th>
-                      <th className="px-5 py-4 text-center">Variación %</th>
+                      <th className="px-5 py-4 text-center">Cant.</th>
+                      <th className="px-5 py-4 text-center">Variación vs Anterior</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {periodHistory.length === 0 ? (
-                      <tr><td colSpan={7} className="text-center py-10 text-text-3">No hay compras registradas para este producto.</td></tr>
-                    ) : periodHistory.map((r, idx) => {
+                    {periodHistory.map((r, idx) => {
                       const prev = periodHistory[idx + 1]; // next in array is chronologically previous
                       let varPct = null;
                       if (prev) {
@@ -407,15 +399,12 @@ export default function AnalisisPreciosPage() {
                       }
                       return (
                         <tr key={r.id} className="hover:bg-surface-hover/20">
-                           <td className="px-5 py-4">
-                             <p className="font-bold text-text-1">{format(new Date(r.purchased_at), "MMMM yyyy", {locale:es}).replace(/^\w/, c => c.toUpperCase())}</p>
-                             <p className="text-xs text-text-3 font-mono mt-1">{format(new Date(r.purchased_at), "dd/MM/yyyy HH:mm")}</p>
-                           </td>
-                           <td className="px-5 py-4 text-text-1 font-bold">{r.supplier_name}</td>
-                           <td className="px-5 py-4 text-right font-bold text-brand font-mono">${r.unit_price_usd.toFixed(4)}</td>
+                           <td className="px-5 py-4 font-bold text-text-2 text-xs">{format(new Date(r.purchased_at), "dd MMM yyyy, HH:mm", {locale:es})}</td>
+                           <td className="px-5 py-4 text-text-1">{r.supplier_name}</td>
+                           <td className="px-5 py-4 text-right font-bold text-text-1 font-mono">${r.unit_price_usd.toFixed(4)}</td>
                            <td className="px-5 py-4 text-right text-text-3 font-mono text-xs">Bs. {r.unit_price_bs.toFixed(2)}</td>
                            <td className="px-5 py-4 text-right text-text-3 font-mono text-xs">{r.bcv_rate.toFixed(2)}</td>
-                           <td className="px-5 py-4 text-center font-bold text-text-1">{r.quantity}</td>
+                           <td className="px-5 py-4 text-center font-bold text-text-2">{r.quantity}</td>
                            <td className="px-5 py-4 text-center"><VariationBadge pct={varPct} /></td>
                         </tr>
                       )
@@ -435,7 +424,7 @@ export default function AnalisisPreciosPage() {
             <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="fixed right-0 top-0 bottom-0 w-full sm:w-[400px] bg-surface-base border-l border-border z-50 shadow-2xl flex flex-col">
               <div className="p-5 border-b border-border bg-surface-card flex items-center justify-between">
                 <h3 className="font-montserrat font-bold text-text-1 flex items-center gap-2">
-                  <Bell className="w-5 h-5 text-brand" /> Alertas de Precios {unreadAlerts.length > 0 && <span className="bg-status-danger text-white text-[10px] px-2 py-0.5 rounded-full">{unreadAlerts.length}</span>}
+                  <Bell className="w-5 h-5 text-brand" /> Alertas de Precios {unreadAlerts.length > 0 && <span className="bg-status-danger text-white text-xs px-2 py-0.5 rounded-full">{unreadAlerts.length}</span>}
                 </h3>
                 <div className="flex items-center gap-3">
                    {unreadAlerts.length > 0 && (
@@ -450,22 +439,22 @@ export default function AnalisisPreciosPage() {
                 {alerts.length === 0 ? (
                   <div className="py-20 flex flex-col items-center justify-center text-text-3 gap-3">
                     <Bell className="w-10 h-10 opacity-20" />
-                    <p className="text-sm border-b border-dashed pb-2">No hay alertas de variación</p>
+                    <p className="text-sm">No hay alertas de variación</p>
                   </div>
                 ) : (
                   alerts.map(a => (
-                    <div key={a.id} className={cn("p-4 rounded-xl border relative overflow-hidden transition-all", !a.is_read ? "bg-surface-card border-brand/30 shadow-card" : "bg-surface-base border-border opacity-75 grayscale-[0.3]")}>
+                    <div key={a.id} className={cn("p-4 rounded-xl border relative overflow-hidden transition-all", !a.is_read ? "bg-surface-card border-brand/30 shadow-brand/10" : "bg-surface-base border-border opacity-75")}>
                        {!a.is_read && <div className="absolute top-0 right-0 left-0 h-1 bg-brand-gradient" />}
-                       <div className="flex gap-3 mb-2 pt-1">
+                       <div className="flex gap-3 mb-2">
                           <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0", a.alert_type === 'precio_subida' ? "bg-status-danger/10 text-status-danger" : "bg-status-ok/10 text-status-ok")}>
                              {a.alert_type === 'precio_subida' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                           </div>
                           <div>
                             <p className="text-sm font-bold text-text-1 leading-tight">{a.product_name}</p>
-                            <p className="text-[10px] text-text-3 mt-1 flex items-center gap-1 font-mono uppercase"><Building2 className="w-3 h-3" /> {a.supplier_name}</p>
+                            <p className="text-xs text-text-3 mt-0.5 flex items-center gap-1"><Building2 className="w-3 h-3" /> {a.supplier_name}</p>
                           </div>
                        </div>
-                       <div className="grid grid-cols-2 gap-2 mt-4 bg-surface-input border border-border/50 p-2.5 rounded-lg">
+                       <div className="grid grid-cols-2 gap-2 mt-4 bg-surface-base border border-border/50 p-2.5 rounded-lg">
                           <div>
                             <p className="text-[9px] uppercase font-bold text-text-3 tracking-widest">Anterior</p>
                             <p className="font-mono font-bold text-text-2 text-xs">${a.old_price.toFixed(4)}</p>
@@ -478,7 +467,7 @@ export default function AnalisisPreciosPage() {
                             </div>
                           </div>
                        </div>
-                       <p className="text-[10px] text-text-3 mt-3 flex justify-end gap-1 items-center font-mono">
+                       <p className="text-[10px] text-text-3 mt-3 flex justify-end gap-1 items-center">
                           <Clock className="w-3 h-3" /> {format(new Date(a.created_at), "dd/MM/yyyy HH:mm")}
                        </p>
                     </div>
@@ -489,6 +478,13 @@ export default function AnalisisPreciosPage() {
           </>
         )}
       </AnimatePresence>
+
     </div>
   );
 }
+"""
+
+with open("src/app/dashboard/compras/analisis/page.tsx", "w", encoding="utf-8") as f:
+    f.write(content)
+
+print("Analysis Page Rewritten successfully.")
