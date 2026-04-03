@@ -714,18 +714,10 @@ function SettingsContent() {
                     const maxUsers = isEnterprise ? "∞" : isPro ? "10" : "2";
                     const storage = isEnterprise ? "Ilimitado" : isPro ? "50 GB" : "5 GB";
                     const isUnlimited = isEnterprise;
-                    // Calcular próximo cobro dinámicamente
+                    // Calcular próximo cobro: siempre el 1 del mes siguiente
                     const nextBilling = (() => {
                       const today = new Date();
-                      // Usar día de creación de la empresa como día de facturación, o el 1 si no existe
-                      const billingDay = company?.created_at
-                        ? new Date(company.created_at).getDate()
-                        : 1;
-                      const next = new Date(today.getFullYear(), today.getMonth(), billingDay);
-                      // Si ese día ya pasó este mes, ir al próximo mes
-                      if (next <= today) {
-                        next.setMonth(next.getMonth() + 1);
-                      }
+                      const next = new Date(today.getFullYear(), today.getMonth() + 1, 1);
                       return next.toLocaleDateString("es-VE", { day: "numeric", month: "long", year: "numeric" });
                     })();
                     return (
