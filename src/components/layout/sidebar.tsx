@@ -113,6 +113,7 @@ const NAV_SECTIONS: NavSection[] = [
     label: "Reportes",
     icon: BarChart3,
     children: [
+      { href: "/dashboard/reportes/ejecutivo", label: "Resumen Ejecutivo", icon: Sparkles, requiredPlan: ["pro", "enterprise"] },
       { href: "/dashboard/reportes/ventas", label: "Reporte de Ventas", icon: BarChart3 },
       { href: "/dashboard/reportes/productos", label: "Productos e Inventario", icon: TrendingUp, requiredPlan: ["pro", "enterprise"] },
       { href: "/dashboard/reportes/equipo", label: "Equipo de Ventas", icon: PieChart, requiredPlan: ["pro", "enterprise"] },
