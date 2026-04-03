@@ -103,7 +103,7 @@ export function DailySeed({ companyId }: { companyId: string }) {
         <blockquote className="text-sm font-normal leading-relaxed m-0 text-black font-montserrat not-italic">
           &ldquo;{seed.verse}&rdquo;
         </blockquote>
-        <cite className="text-[11px] font-medium text-brand/80 not-italic block mt-1.5">
+        <cite className="text-[11px] font-semibold text-black font-montserrat not-italic block mt-1.5">
           — {seed.verse_reference}
         </cite>
       </div>
