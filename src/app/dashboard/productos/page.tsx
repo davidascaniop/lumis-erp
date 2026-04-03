@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -27,6 +28,17 @@ import { toast } from "sonner";
 import { FileSpreadsheet } from "lucide-react";
 
 export default function ProductosPage() {
+  return (
+    <Suspense fallback={null}>
+      <ProductosContent />
+    </Suspense>
+  );
+}
+
+function ProductosContent() {
+  const searchParams = useSearchParams();
+  const filterParam = searchParams.get("filter");
+
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -68,11 +80,15 @@ export default function ProductosPage() {
     fetchProducts();
   }, []);
 
-  const filteredProducts = products.filter(
-    (p) =>
+  const filteredProducts = products.filter((p) => {
+    const matchesSearch =
       p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.sku?.toLowerCase().includes(search.toLowerCase()),
-  );
+      p.sku?.toLowerCase().includes(search.toLowerCase());
+    if (filterParam === "stock_critico") {
+      return matchesSearch && Number(p.stock_qty ?? p.stock ?? 0) <= Number(p.min_stock ?? 5);
+    }
+    return matchesSearch;
+  });
 
   const stats = {
     total: products.length,
@@ -170,6 +186,20 @@ export default function ProductosPage() {
           </div>
         </Card>
       </div>
+
+      {/* BANNER FILTRO STOCK CRÍTICO */}
+      {filterParam === "stock_critico" && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-red-50 border border-status-danger/20 rounded-xl">
+          <AlertCircle className="w-5 h-5 text-status-danger flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-bold text-status-danger">Mostrando productos con stock crítico</p>
+            <p className="text-xs text-red-500/70">{filteredProducts.length} producto{filteredProducts.length !== 1 ? "s" : ""} con stock igual o por debajo del mínimo configurado</p>
+          </div>
+          <a href="/dashboard/productos" className="text-xs font-bold text-status-danger underline underline-offset-2 hover:opacity-70 transition-opacity">
+            Ver todos
+          </a>
+        </div>
+      )}
 
       {/* SEARCH & FILTERS */}
       <div className="flex gap-4">

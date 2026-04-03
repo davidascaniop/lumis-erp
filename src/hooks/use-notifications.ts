@@ -222,7 +222,7 @@ export function useNotifications(companyId?: string, userCompanies?: any) {
           title: `${criticalProducts.length} productos con stock crítico`,
           description: "Revisa el inventario antes de recibir nuevos pedidos",
           time: "Ahora",
-          href: "/dashboard/productos",
+          href: "/dashboard/productos?filter=stock_critico",
           priority: "medium",
           createdAt: new Date(),
         });
@@ -236,7 +236,7 @@ export function useNotifications(companyId?: string, userCompanies?: any) {
             title: isZero ? "Producto sin stock" : "Stock crítico",
             description: `${p.name}: ${p.stock_qty} unidades (mín. ${p.min_stock})`,
             time: "Ahora",
-            href: "/dashboard/productos",
+            href: "/dashboard/productos?filter=stock_critico",
             priority: isZero ? "high" : "medium",
             createdAt: new Date(),
           });
