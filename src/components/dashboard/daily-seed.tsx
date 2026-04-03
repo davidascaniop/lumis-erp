@@ -100,7 +100,7 @@ export function DailySeed({ companyId }: { companyId: string }) {
 
       {/* Versículo — tipografía delicada, no bold */}
       <div className="relative pl-3 border-l-[1.5px] border-brand mb-2.5">
-        <blockquote className="text-sm font-normal leading-relaxed m-0 text-text-1 italic">
+        <blockquote className="text-sm font-normal leading-relaxed m-0 text-black font-montserrat not-italic">
           &ldquo;{seed.verse}&rdquo;
         </blockquote>
         <cite className="text-[11px] font-medium text-brand/80 not-italic block mt-1.5">
