@@ -80,57 +80,35 @@ export async function recordSeedView(seedId: string, companyId: string) {
 
   if (!dbUser) return;
 
+  // Intentar insertar vista única (puede fallar si ya existe por unique constraint)
   const { error } = await supabase.from("seed_views").insert({
     seed_id: seedId,
     company_id: companyId,
     user_id: dbUser.id,
   } as any);
 
-  // If insert succeeds (not a duplicate view for this user), increment count
+  // Solo incrementar si es una vista nueva (no duplicada)
   if (!error) {
-    const { data: seed } = await supabase
-      .from("daily_seeds")
-      .select("views_count")
-      .eq("id", seedId)
-      .single();
-
-    if (seed) {
-      await supabase
-        .from("daily_seeds")
-        .update({ views_count: (seed.views_count || 0) + 1 } as any)
-        .eq("id", seedId);
-    }
+    await (supabase as any).rpc("increment_seed_view", { p_seed_id: seedId });
   }
 }
 
 export async function recordSeedBlessing(seedId: string) {
   const supabase = await createClient();
-  const { data: seed } = await supabase
-    .from("daily_seeds")
-    .select("blessings_count")
-    .eq("id", seedId)
-    .single();
-
-  if (seed) {
-    await supabase
-      .from("daily_seeds")
-      .update({ blessings_count: (seed.blessings_count || 0) + 1 } as any)
-      .eq("id", seedId);
+  // Usar RPC con SECURITY DEFINER para bypassear RLS de forma segura
+  const { error } = await (supabase as any).rpc("increment_seed_blessing", { p_seed_id: seedId });
+  if (error) {
+    console.error("Error registrando bendición:", error.message);
+    throw new Error("No se pudo registrar la bendición");
   }
 }
 
 export async function recordSeedShare(seedId: string) {
   const supabase = await createClient();
-  const { data: seed } = await supabase
-    .from("daily_seeds")
-    .select("shares_count")
-    .eq("id", seedId)
-    .single();
-
-  if (seed) {
-    await supabase
-      .from("daily_seeds")
-      .update({ shares_count: (seed.shares_count || 0) + 1 } as any)
-      .eq("id", seedId);
+  // Usar RPC con SECURITY DEFINER para bypassear RLS de forma segura
+  const { error } = await (supabase as any).rpc("increment_seed_share", { p_seed_id: seedId });
+  if (error) {
+    console.error("Error registrando compartido:", error.message);
+    throw new Error("No se pudo registrar el compartido");
   }
 }
