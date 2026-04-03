@@ -160,6 +160,13 @@ function NuevaVentaContent() {
   );
   const total = subtotal;
 
+  // Sincronizar amountPaid con total cuando es contado
+  useEffect(() => {
+    if (paymentType === "contado") {
+      setAmountPaid(total);
+    }
+  }, [total, paymentType]);
+
   // ── Crear Cliente Rápido ──
   const handleCreateQuickClient = async (name: string, rif: string, phone: string): Promise<boolean> => {
     if (!user?.company_id) return false;
@@ -249,7 +256,9 @@ function NuevaVentaContent() {
       // 1. Crear el Order
       const orderNumber = `PED-${Date.now().toString().slice(-6)}`;
       const status = paymentType === "contado" ? "completed" : "pending";
-      const amountDue = total - amountPaid;
+      // Si es contado, el monto pagado es el total completo
+      const finalAmountPaid = paymentType === "contado" ? total : amountPaid;
+      const amountDue = total - finalAmountPaid;
 
       const { data: order, error: orderErr } = await supabase
         .from("orders")
@@ -264,7 +273,7 @@ function NuevaVentaContent() {
           currency: "USD",
           payment_type: paymentType,
           payment_method: paymentMethod,
-          amount_paid: amountPaid,
+          amount_paid: finalAmountPaid,
           amount_due: amountDue,
         } as any)
         .select()
