@@ -35,27 +35,38 @@ export async function registerTreasuryMovement(params: {
   companyId: string;
   accountId: string;
   type: "entrada" | "salida";
-  amount: number;
-  currency: string;
+  amount: number;       // always in USD (or the source currency)
+  currency: string;     // source currency: "usd" | "bs" | "usdt"
   description: string;
   category: string;
   originModule: "ventas" | "cxc" | "gastos" | "compras" | "recurrentes" | "manual" | "transferencia";
   referenceId?: string;
+  bcvRate?: number;     // required when account is Bs and amount is in USD
 }) {
   const supabase = createClient();
-  const { companyId, accountId, type, amount, currency, description, category, originModule, referenceId } = params;
+  const { companyId, accountId, type, amount, currency, description, category, originModule, referenceId, bcvRate } = params;
 
-  // 1. Get current balance
+  // 1. Get current balance AND account currency
   const { data: account, error: fetchErr } = await supabase
     .from("treasury_accounts")
-    .select("current_balance, min_alert_balance, name")
+    .select("current_balance, min_alert_balance, name, currency")
     .eq("id", accountId)
     .single();
 
   if (fetchErr || !account) throw new Error("Cuenta no encontrada");
 
+  // 2. Convert amount to the account's native currency if needed
+  let effectiveAmount = amount;
+  if (account.currency === "bs" && (currency === "usd" || currency === "usdt")) {
+    const rate = bcvRate || 1;
+    effectiveAmount = amount * rate;
+  } else if ((account.currency === "usd" || account.currency === "usdt") && currency === "bs") {
+    const rate = bcvRate || 1;
+    effectiveAmount = rate > 0 ? amount / rate : amount;
+  }
+
   const currentBalance = Number(account.current_balance);
-  const newBalance = type === "entrada" ? currentBalance + amount : currentBalance - amount;
+  const newBalance = type === "entrada" ? currentBalance + effectiveAmount : currentBalance - effectiveAmount;
 
   // 2. Update balance
   const { error: updateErr } = await supabase
@@ -65,15 +76,15 @@ export async function registerTreasuryMovement(params: {
 
   if (updateErr) throw updateErr;
 
-  // 3. Insert movement
+  // 3. Insert movement (store in account's native currency)
   const { error: insertErr } = await supabase
     .from("treasury_movements")
     .insert({
       company_id: companyId,
       account_id: accountId,
       type,
-      amount,
-      currency,
+      amount: effectiveAmount,
+      currency: account.currency,
       description,
       category,
       origin_module: originModule,

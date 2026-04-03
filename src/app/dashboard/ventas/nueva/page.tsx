@@ -337,6 +337,7 @@ function NuevaVentaContent() {
             category: "Venta",
             originModule: "ventas",
             referenceId: order.id,
+            bcvRate: rate || undefined,
           });
           if (result.isLowBalance) {
             toast.warning(`${result.accountName} tiene saldo bajo: $${result.newBalance.toFixed(2)}`);

@@ -303,6 +303,7 @@ function GastosContent() {
             category: selectedExpense.category || "Gasto",
             originModule: "gastos",
             referenceId: selectedExpense.id,
+            bcvRate: rate || undefined,
           });
           if (result.isNegativeOrZero) {
             toast.error(`${result.accountName} ha quedado en $0 o negativo`);
