@@ -704,48 +704,72 @@ function SettingsContent() {
                 </div>
               ) : (
                 <>
-                  {/* ── ESTADO ACTUAL ── */}
-                  <div className="bg-white border border-border rounded-2xl p-6">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                      <div>
-                        <div className="flex items-center gap-3 mb-1">
-                          <h2 className="text-lg font-montserrat font-bold text-text-1">Tu Plan Actual</h2>
-                          <span className="px-2.5 py-0.5 bg-brand/10 text-brand border border-brand/20 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                            {company?.plan_type || "Starter"}
-                          </span>
+                  {/* ── ESTADO ACTUAL (dinámico según plan_type) ── */}
+                  {(() => {
+                    const pt = (company?.plan_type || "basic").toLowerCase();
+                    const isPro = pt === "pro";
+                    const isEnterprise = pt === "enterprise";
+                    const price = isEnterprise ? "$119.99" : isPro ? "$79.99" : "$19.99";
+                    const planLabel = isEnterprise ? "Enterprise" : isPro ? "Pro Business" : "Starter";
+                    const maxUsers = isEnterprise ? "∞" : isPro ? "10" : "2";
+                    const storage = isEnterprise ? "Ilimitado" : isPro ? "50 GB" : "5 GB";
+                    const isUnlimited = isEnterprise;
+                    return (
+                      <div className="bg-white border border-border rounded-2xl p-6">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                          <div>
+                            <div className="flex items-center gap-3 mb-1">
+                              <h2 className="text-lg font-montserrat font-bold text-text-1">Tu Plan Actual</h2>
+                              <span className="px-2.5 py-0.5 bg-brand/10 text-brand border border-brand/20 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                                {planLabel}
+                              </span>
+                            </div>
+                            <p className="text-text-3 text-sm">
+                              {isEnterprise
+                                ? "Tienes acceso completo a todos los módulos y funcionalidades."
+                                : isPro
+                                ? "Acceso completo al ERP+CRM. Potencia máxima para tu negocio."
+                                : "Estás utilizando las cuotas asignadas al plan de inicio."}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-2xl font-montserrat font-black text-text-1">{price} <span className="text-sm font-normal text-text-3">/ mes</span></p>
+                            <p className="text-[10px] text-text-3 mt-0.5">Próximo cobro: 15 de Oct, 2026</p>
+                          </div>
                         </div>
-                        <p className="text-text-3 text-sm">Estás utilizando las cuotas asignadas a tu plan.</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-montserrat font-black text-text-1">$29 <span className="text-sm font-normal text-text-3">/ mes</span></p>
-                        <p className="text-[10px] text-text-3 mt-0.5">Próximo cobro: 15 de Oct, 2026</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-5 border-t border-border">
-                      <div className="space-y-1.5">
-                        <div className="flex justify-between text-xs font-medium">
-                          <span className="text-text-3">Usuarios del Sistema</span>
-                          <span className="text-text-1 font-bold">1 / 2</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-5 border-t border-border">
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between text-xs font-medium">
+                              <span className="text-text-3">Usuarios del Sistema</span>
+                              <span className="text-text-1 font-bold">1 / {maxUsers}</span>
+                            </div>
+                            {!isUnlimited && (
+                              <div className="h-1.5 w-full bg-surface-base rounded-full overflow-hidden">
+                                <div className="h-full bg-brand rounded-full" style={{ width: isPro ? "10%" : "50%" }} />
+                              </div>
+                            )}
+                            {isUnlimited && <p className="text-[10px] text-emerald-600 font-bold flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Sin límite</p>}
+                          </div>
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between text-xs font-medium">
+                              <span className="text-text-3">Almacenamiento</span>
+                              <span className="text-text-1 font-bold">{isUnlimited ? "Ilimitado" : `20 MB / ${storage}`}</span>
+                            </div>
+                            {!isUnlimited && (
+                              <div className="h-1.5 w-full bg-surface-base rounded-full overflow-hidden">
+                                <div className="h-full bg-brand rounded-full w-[1%]" />
+                              </div>
+                            )}
+                            {isUnlimited && <p className="text-[10px] text-emerald-600 font-bold flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Sin límite</p>}
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-text-3 font-medium">Emisiones PDF</span>
+                            <span className="text-xs font-bold text-emerald-600 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Ilimitado</span>
+                          </div>
                         </div>
-                        <div className="h-1.5 w-full bg-surface-base rounded-full overflow-hidden">
-                          <div className="h-full bg-brand rounded-full w-[50%]" />
-                        </div>
                       </div>
-                      <div className="space-y-1.5">
-                        <div className="flex justify-between text-xs font-medium">
-                          <span className="text-text-3">Almacenamiento</span>
-                          <span className="text-text-1 font-bold">20 MB / 5 GB</span>
-                        </div>
-                        <div className="h-1.5 w-full bg-surface-base rounded-full overflow-hidden">
-                          <div className="h-full bg-brand rounded-full w-[1%]" />
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-text-3 font-medium">Emisiones PDF</span>
-                        <span className="text-xs font-bold text-emerald-600 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Ilimitado</span>
-                      </div>
-                    </div>
-                  </div>
+                    );
+                  })()}
 
                   {/* ── COMPARACION DE PLANES ── */}
                   <div>
