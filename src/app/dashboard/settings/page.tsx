@@ -752,29 +752,33 @@ function SettingsContent() {
                     <h3 className="text-sm font-bold text-text-3 uppercase tracking-wider mb-4">Comparar Planes</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-                      {/* STARTER */}
+                      {/* LUMIS STARTER */}
                       {(() => {
-                        const isActive = !company?.plan_type || company?.plan_type?.toLowerCase() === 'starter' || company?.plan_type?.toLowerCase() === 'basic';
+                        const isActive = !company?.plan_type || ['starter','basic'].includes(company?.plan_type?.toLowerCase());
                         return (
                           <div className={`rounded-2xl border p-6 flex flex-col ${isActive ? 'bg-brand/5 border-brand/30' : 'bg-white border-border'}`}>
                             <div className="mb-4">
                               <div className="flex items-center justify-between mb-1">
-                                <p className="text-xs font-bold text-text-3 uppercase tracking-wider">Starter</p>
+                                <p className="text-xs font-bold text-text-3 uppercase tracking-wider">Lumis Starter</p>
                                 {isActive && <span className="text-[9px] font-bold px-2 py-0.5 bg-brand/10 text-brand rounded-full border border-brand/20">PLAN ACTUAL</span>}
                               </div>
-                              <p className="text-2xl font-montserrat font-black text-text-1">$0 <span className="text-xs font-normal text-text-3">/ mes</span></p>
+                              <p className="text-2xl font-montserrat font-black text-text-1">$19.99 <span className="text-xs font-normal text-text-3">/ mes</span></p>
+                              <p className="text-[10px] text-text-3 mt-0.5">Se acabó el desorden de facturas y el Excel manual</p>
                             </div>
                             <ul className="space-y-2.5 flex-1 text-xs">
                               {[
-                                { label: "2 usuarios", ok: true },
-                                { label: "Módulos básicos (Ventas, Compras, Inventario)", ok: true },
+                                { label: "Hasta 2 usuarios", ok: true },
+                                { label: "Ventas completo (POS, Presupuestos, Historial)", ok: true },
+                                { label: "Inventario y Ajuste de Stock", ok: true },
+                                { label: "Directorio de Clientes", ok: true },
+                                { label: "Compras: solo módulo Fiscal", ok: true },
+                                { label: "Reporte de Ventas básico", ok: true },
                                 { label: "Semilla Diaria", ok: true },
-                                { label: "Reportes Avanzados", ok: false },
-                                { label: "Resumen Ejecutivo", ok: false },
-                                { label: "CRM Oportunidades", ok: false },
-                                { label: "Tesorería y Flujo de Caja", ok: false },
-                                { label: "5 GB almacenamiento", ok: true },
-                                { label: "Soporte por email", ok: true },
+                                { label: "Finanzas (CxC, Gastos, Tesorería)", ok: false },
+                                { label: "CRM Oportunidades y Mensajería", ok: false },
+                                { label: "Compras completo (OC, RFQ, Proveedores)", ok: false },
+                                { label: "Reportes Avanzados + Resumen Ejecutivo", ok: false },
+                                { label: "Kits & Ensambles", ok: false },
                               ].map((f, i) => (
                                 <li key={i} className="flex items-start gap-2">
                                   {f.ok
@@ -788,7 +792,7 @@ function SettingsContent() {
                         );
                       })()}
 
-                      {/* PRO BUSINESS */}
+                      {/* LUMIS PRO BUSINESS */}
                       {(() => {
                         const isActive = company?.plan_type?.toLowerCase() === 'pro';
                         return (
@@ -800,26 +804,27 @@ function SettingsContent() {
                             </div>
                             <div className="mb-4 mt-2">
                               <div className="flex items-center justify-between mb-1">
-                                <p className="text-xs font-bold text-brand uppercase tracking-wider">Pro Business</p>
+                                <p className="text-xs font-bold text-brand uppercase tracking-wider">Lumis Pro Business</p>
                                 {isActive && <span className="text-[9px] font-bold px-2 py-0.5 bg-brand/10 text-brand rounded-full border border-brand/20">PLAN ACTUAL</span>}
                               </div>
-                              <p className="text-2xl font-montserrat font-black text-text-1">$29 <span className="text-xs font-normal text-text-3">/ mes</span></p>
+                              <p className="text-2xl font-montserrat font-black text-text-1">$79.99 <span className="text-xs font-normal text-text-3">/ mes</span></p>
+                              <p className="text-[10px] text-text-3 mt-0.5">Multiplica tus ventas con WhatsApp y CRM integrado</p>
                             </div>
                             <ul className="space-y-2.5 flex-1 text-xs">
                               {[
-                                { label: "Hasta 10 usuarios", ok: true },
-                                { label: "Todos los módulos ERP+CRM", ok: true },
-                                { label: "Semilla Diaria", ok: true },
-                                { label: "Reportes Avanzados", ok: true },
-                                { label: "Resumen Ejecutivo (CEO)", ok: true },
-                                { label: "CRM Oportunidades completo", ok: true },
-                                { label: "Tesorería y Flujo de Caja", ok: true },
-                                { label: "50 GB almacenamiento", ok: true },
-                                { label: "Soporte prioritario", ok: true },
-                              ].map((f, i) => (
+                                "Hasta 10 usuarios",
+                                "Todo lo del plan Starter",
+                                "Finanzas completo: CxC, Gastos, Recurrentes, Mis Cuentas, Flujo de Caja",
+                                "CRM: Oportunidades, Mensajería, Seguimiento de Prospectos",
+                                "Compras completo: OC, RFQ, Proveedores, Análisis de Precios, Despachos",
+                                "Reportes Avanzados (Productos e Inventario, Equipo de Ventas)",
+                                "Resumen Ejecutivo (Dashboard CEO)",
+                                "Inventario: Kits & Ensambles",
+                                "Soporte prioritario",
+                              ].map((label, i) => (
                                 <li key={i} className="flex items-start gap-2">
                                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                                  <span className="text-text-2">{f.label}</span>
+                                  <span className="text-text-2">{label}</span>
                                 </li>
                               ))}
                             </ul>
@@ -828,40 +833,41 @@ function SettingsContent() {
                                 onClick={handleUpgradePlan}
                                 className="mt-5 w-full py-2.5 bg-brand-gradient text-white rounded-xl font-bold text-sm shadow-brand hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2"
                               >
-                                <Zap className="w-4 h-4" /> Actualizar al Plan Pro
+                                <Zap className="w-4 h-4" /> Actualizar a Pro Business
                               </button>
                             )}
                           </div>
                         );
                       })()}
 
-                      {/* ENTERPRISE */}
+                      {/* LUMIS ENTERPRISE */}
                       {(() => {
                         const isActive = company?.plan_type?.toLowerCase() === 'enterprise';
                         return (
                           <div className={`rounded-2xl border p-6 flex flex-col ${isActive ? 'bg-brand/5 border-brand/30' : 'bg-white border-border'}`}>
                             <div className="mb-4">
                               <div className="flex items-center justify-between mb-1">
-                                <p className="text-xs font-bold text-text-3 uppercase tracking-wider">Enterprise</p>
+                                <p className="text-xs font-bold text-text-3 uppercase tracking-wider">Lumis Enterprise</p>
                                 {isActive && <span className="text-[9px] font-bold px-2 py-0.5 bg-brand/10 text-brand rounded-full border border-brand/20">PLAN ACTUAL</span>}
                               </div>
-                              <p className="text-2xl font-montserrat font-black text-text-1">A consultar</p>
+                              <p className="text-2xl font-montserrat font-black text-text-1">$119.99 <span className="text-xs font-normal text-text-3">/ mes</span></p>
+                              <p className="text-[10px] text-text-3 mt-0.5">Control total de todas tus sedes y distribuidores</p>
                             </div>
                             <ul className="space-y-2.5 flex-1 text-xs">
                               {[
-                                { label: "Usuarios ilimitados", ok: true },
-                                { label: "Todo lo del Plan Pro", ok: true },
-                                { label: "Almacenamiento ilimitado", ok: true },
-                                { label: "API Access", ok: true },
-                                { label: "Onboarding dedicado", ok: true },
-                                { label: "Multi-empresa", ok: true },
-                                { label: "Soporte 24/7 dedicado", ok: true },
-                                { label: "SLA garantizado", ok: true },
-                                { label: "Personalización a medida", ok: true },
-                              ].map((f, i) => (
+                                "Usuarios ilimitados",
+                                "Todo lo del Plan Pro Business",
+                                "Multi-empresa (varias sedes)",
+                                "Almacenamiento ilimitado",
+                                "API Access para integraciones",
+                                "Onboarding y capacitación dedicada",
+                                "Soporte 24/7 con agente asignado",
+                                "SLA de respuesta garantizado",
+                                "Personalización y desarrollo a medida",
+                              ].map((label, i) => (
                                 <li key={i} className="flex items-start gap-2">
                                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                                  <span className="text-text-2">{f.label}</span>
+                                  <span className="text-text-2">{label}</span>
                                 </li>
                               ))}
                             </ul>
