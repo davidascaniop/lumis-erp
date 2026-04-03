@@ -193,14 +193,23 @@ export default function VentasPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span
-                        className={`font-bold text-sm block ${Number(o.amount_due) > 0 ? "text-status-danger" : "text-status-ok"}`}
-                      >
-                        {formatCurrency(o.amount_due)}
-                      </span>
-                      <span className="text-[10px] text-text-3 block font-semibold transition-colors">
-                        Abono {formatCurrency(o.amount_paid)}
-                      </span>
+                      {(() => {
+                        const isPaid = o.status === "completed" || o.status === "paid" || o.status === "despachado";
+                        const isContado = o.payment_type === "contado";
+                        const legacyBug = isPaid && isContado && Number(o.amount_paid || 0) === 0;
+                        const displayDue = legacyBug ? 0 : Number(o.amount_due || 0);
+                        const displayPaid = legacyBug ? Number(o.total_usd) : Number(o.amount_paid || 0);
+                        return (
+                          <>
+                            <span className={`font-bold text-sm block ${displayDue > 0 ? "text-status-danger" : "text-status-ok"}`}>
+                              {formatCurrency(displayDue)}
+                            </span>
+                            <span className="text-[10px] text-text-3 block font-semibold transition-colors">
+                              Abono {formatCurrency(displayPaid)}
+                            </span>
+                          </>
+                        );
+                      })()}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <StatusBadge status={o.status || "draft"} />

@@ -178,6 +178,15 @@ export default function OrderDetailsPage({ params }: { params: any }) {
         100,
     ) || 0;
 
+  // Si es contado/completed pero los datos de pago están mal (legacy), los corregimos en display
+  const isFullyPaid = order.status === "completed" || order.status === "paid" || order.status === "despachado";
+  const displayAmountPaid = isFullyPaid && order.payment_type === "contado" && Number(order.amount_paid || 0) === 0
+    ? Number(order.total_usd)
+    : Number(order.amount_paid || 0);
+  const displayAmountDue = isFullyPaid && order.payment_type === "contado" && Number(order.amount_paid || 0) === 0
+    ? 0
+    : Number(order.amount_due || 0);
+
   return (
     <div className="max-w-7xl mx-auto space-y-6 animate-fade-in pb-20">
       {/* VOLVER */}
@@ -346,13 +355,13 @@ export default function OrderDetailsPage({ params }: { params: any }) {
                 <div className="flex justify-between text-xs text-text-1 font-bold font-outfit opacity-60">
                    <span>Pagado ($)</span>
                   <span className="text-status-ok font-bold financial">
-                    ${Number(order.amount_paid || 0).toFixed(2)}
+                    ${displayAmountPaid.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between text-xs text-text-1 font-bold font-outfit opacity-60">
                   <span>Deuda Restante ($)</span>
-                  <span className="text-status-danger font-bold financial">
-                    ${Number(order.amount_due || 0).toFixed(2)}
+                  <span className={displayAmountDue > 0 ? "text-status-danger font-bold financial" : "text-status-ok font-bold financial"}>
+                    ${displayAmountDue.toFixed(2)}
                   </span>
                 </div>
               </div>
