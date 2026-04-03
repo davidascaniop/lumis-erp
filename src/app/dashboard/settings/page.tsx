@@ -765,18 +765,19 @@ function SettingsContent() {
                               <p className="text-2xl font-montserrat font-black text-text-1">$19.99 <span className="text-xs font-normal text-text-3">/ mes</span></p>
                               <p className="text-[10px] text-text-3 mt-0.5">Se acabó el desorden de facturas y el Excel manual</p>
                             </div>
-                            <ul className="space-y-2.5 flex-1 text-xs">
+                            <ul className="space-y-2.5 flex-1 text-xs mb-5">
                               {[
                                 { label: "Hasta 2 usuarios", ok: true },
-                                { label: "Ventas completo (POS, Presupuestos, Historial)", ok: true },
+                                { label: "Ventas completo: POS, Presupuestos, Historial", ok: true },
                                 { label: "Inventario y Ajuste de Stock", ok: true },
+                                { label: "Categorías, Atributos de Productos", ok: true },
                                 { label: "Directorio de Clientes", ok: true },
-                                { label: "Compras: solo módulo Fiscal", ok: true },
+                                { label: "Compras: módulo Fiscal", ok: true },
                                 { label: "Reporte de Ventas básico", ok: true },
                                 { label: "Semilla Diaria", ok: true },
-                                { label: "Finanzas (CxC, Gastos, Tesorería)", ok: false },
-                                { label: "CRM Oportunidades y Mensajería", ok: false },
-                                { label: "Compras completo (OC, RFQ, Proveedores)", ok: false },
+                                { label: "Finanzas: CxC, Gastos, Tesorería, Flujo de Caja", ok: false },
+                                { label: "CRM: Oportunidades, Mensajería, Prospectos", ok: false },
+                                { label: "Compras: OC, RFQ, Proveedores, Análisis, Despachos", ok: false },
                                 { label: "Reportes Avanzados + Resumen Ejecutivo", ok: false },
                                 { label: "Kits & Ensambles", ok: false },
                               ].map((f, i) => (
@@ -788,6 +789,15 @@ function SettingsContent() {
                                 </li>
                               ))}
                             </ul>
+                            {isActive ? (
+                              <div className="py-2.5 w-full rounded-xl bg-brand/10 text-brand text-sm font-bold text-center border border-brand/20">
+                                Plan Activo
+                              </div>
+                            ) : (
+                              <button onClick={handleUpgradePlan} className="mt-auto w-full py-2.5 bg-white border border-border text-text-1 rounded-xl font-bold text-sm hover:bg-surface-hover/10 transition-all">
+                                Cambiar a Starter
+                              </button>
+                            )}
                           </div>
                         );
                       })()}
@@ -810,16 +820,18 @@ function SettingsContent() {
                               <p className="text-2xl font-montserrat font-black text-text-1">$79.99 <span className="text-xs font-normal text-text-3">/ mes</span></p>
                               <p className="text-[10px] text-text-3 mt-0.5">Multiplica tus ventas con WhatsApp y CRM integrado</p>
                             </div>
-                            <ul className="space-y-2.5 flex-1 text-xs">
+                            <ul className="space-y-2.5 flex-1 text-xs mb-5">
                               {[
                                 "Hasta 10 usuarios",
-                                "Todo lo del plan Starter",
+                                "Ventas completo: POS, Presupuestos, Historial",
+                                "Inventario, Stock, Categorías, Kits & Ensambles",
+                                "Directorio de Clientes",
                                 "Finanzas completo: CxC, Gastos, Recurrentes, Mis Cuentas, Flujo de Caja",
                                 "CRM: Oportunidades, Mensajería, Seguimiento de Prospectos",
                                 "Compras completo: OC, RFQ, Proveedores, Análisis de Precios, Despachos",
-                                "Reportes Avanzados (Productos e Inventario, Equipo de Ventas)",
+                                "Reportes Avanzados: Productos, Inventario, Equipo de Ventas",
                                 "Resumen Ejecutivo (Dashboard CEO)",
-                                "Inventario: Kits & Ensambles",
+                                "Semilla Diaria",
                                 "Soporte prioritario",
                               ].map((label, i) => (
                                 <li key={i} className="flex items-start gap-2">
@@ -828,12 +840,13 @@ function SettingsContent() {
                                 </li>
                               ))}
                             </ul>
-                            {!isActive && (
-                              <button
-                                onClick={handleUpgradePlan}
-                                className="mt-5 w-full py-2.5 bg-brand-gradient text-white rounded-xl font-bold text-sm shadow-brand hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2"
-                              >
-                                <Zap className="w-4 h-4" /> Actualizar a Pro Business
+                            {isActive ? (
+                              <div className="py-2.5 w-full rounded-xl bg-brand/10 text-brand text-sm font-bold text-center border border-brand/20">
+                                Plan Activo
+                              </div>
+                            ) : (
+                              <button onClick={handleUpgradePlan} className="mt-auto w-full py-2.5 bg-brand-gradient text-white rounded-xl font-bold text-sm shadow-brand hover:opacity-90 active:scale-95 transition-all">
+                                Actualizar a Pro Business
                               </button>
                             )}
                           </div>
@@ -853,13 +866,16 @@ function SettingsContent() {
                               <p className="text-2xl font-montserrat font-black text-text-1">$119.99 <span className="text-xs font-normal text-text-3">/ mes</span></p>
                               <p className="text-[10px] text-text-3 mt-0.5">Control total de todas tus sedes y distribuidores</p>
                             </div>
-                            <ul className="space-y-2.5 flex-1 text-xs">
+                            <ul className="space-y-2.5 flex-1 text-xs mb-5">
                               {[
                                 "Usuarios ilimitados",
-                                "Todo lo del Plan Pro Business",
-                                "Multi-empresa (varias sedes)",
+                                "Ventas, Inventario, CRM y Finanzas completo",
+                                "Compras completo: OC, RFQ, Proveedores, Análisis, Despachos",
+                                "Todos los Reportes + Resumen Ejecutivo CEO",
+                                "Kits & Ensambles, Categorías avanzadas",
+                                "Multi-empresa (varias sedes y distribuidores)",
                                 "Almacenamiento ilimitado",
-                                "API Access para integraciones",
+                                "API Access para integraciones externas",
                                 "Onboarding y capacitación dedicada",
                                 "Soporte 24/7 con agente asignado",
                                 "SLA de respuesta garantizado",
@@ -871,13 +887,13 @@ function SettingsContent() {
                                 </li>
                               ))}
                             </ul>
-                            {!isActive && (
-                              <a
-                                href="https://wa.me/584141234567"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="mt-5 w-full py-2.5 bg-white border border-border text-text-1 rounded-xl font-bold text-sm hover:bg-surface-hover/10 active:scale-95 transition-all flex items-center justify-center gap-2"
-                              >
+                            {isActive ? (
+                              <div className="py-2.5 w-full rounded-xl bg-brand/10 text-brand text-sm font-bold text-center border border-brand/20">
+                                Plan Activo
+                              </div>
+                            ) : (
+                              <a href="https://wa.me/584141234567" target="_blank" rel="noopener noreferrer"
+                                className="mt-auto w-full py-2.5 bg-white border border-border text-text-1 rounded-xl font-bold text-sm hover:bg-surface-hover/10 transition-all text-center block">
                                 Contactar Ventas
                               </a>
                             )}
