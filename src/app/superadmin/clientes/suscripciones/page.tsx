@@ -4,10 +4,30 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Check, X, Eye, Loader2, FileText, Search, CreditCard } from "lucide-react";
+import { Check, X, Eye, Loader2, FileText, Search, CreditCard, Bell, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, differenceInDays, addMonths } from "date-fns";
 import { es } from "date-fns/locale";
+
+// Calcula la próxima fecha de corte a partir del billing_day
+function getNextBillingDate(billingDay: number): Date {
+  const today = new Date();
+  const day = billingDay || 1;
+  let next = new Date(today.getFullYear(), today.getMonth(), day);
+  if (next <= today) next = addMonths(next, 1);
+  // Asegura que el día no supere el máximo del mes
+  next.setDate(Math.min(day, new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate()));
+  return next;
+}
+
+function getBillingAlert(billingDay: number): { label: string; color: string } | null {
+  const next = getNextBillingDate(billingDay);
+  const diff = differenceInDays(next, new Date());
+  if (diff === 0) return { label: "Vence hoy", color: "text-red-600 bg-red-50 border-red-200" };
+  if (diff <= 3) return { label: `Vence en ${diff}d`, color: "text-red-500 bg-red-50 border-red-200" };
+  if (diff <= 7) return { label: `Vence en ${diff}d`, color: "text-orange-500 bg-orange-50 border-orange-200" };
+  return null;
+}
 
 export default function SuscripcionesPage({ searchParams }: { searchParams?: { filter?: string } }) {
   const [payments, setPayments] = useState<any[]>([]);
@@ -32,7 +52,7 @@ export default function SuscripcionesPage({ searchParams }: { searchParams?: { f
     setIsLoading(true);
     let query = supabase
       .from("subscription_payments")
-      .select("*, companies(name, id, subscription_status)")
+      .select("*, companies(name, id, subscription_status, billing_day, plan_type)")
       .order("created_at", { ascending: false });
 
     if (statusFilter !== "all") {
@@ -200,7 +220,8 @@ export default function SuscripcionesPage({ searchParams }: { searchParams?: { f
                 <th className="px-5 py-4 text-left font-bold text-text-1 text-xs uppercase tracking-wider">Empresa</th>
                 <th className="px-5 py-4 text-left font-bold text-text-1 text-xs uppercase tracking-wider">Transacción</th>
                 <th className="px-5 py-4 text-left font-bold text-text-1 text-xs uppercase tracking-wider">Monto</th>
-                <th className="px-5 py-4 text-left font-bold text-text-1 whitespace-nowrap text-xs uppercase tracking-wider">Fecha</th>
+                <th className="px-5 py-4 text-left font-bold text-text-1 whitespace-nowrap text-xs uppercase tracking-wider">Fecha Pago</th>
+                <th className="px-5 py-4 text-left font-bold text-text-1 whitespace-nowrap text-xs uppercase tracking-wider">Próximo Corte</th>
                 <th className="px-5 py-4 text-left font-bold text-text-1 text-xs uppercase tracking-wider">Estatus</th>
                 <th className="px-5 py-4 text-right font-bold text-text-1 text-xs uppercase tracking-wider">Acciones</th>
               </tr>
@@ -208,7 +229,7 @@ export default function SuscripcionesPage({ searchParams }: { searchParams?: { f
             <tbody className="divide-y divide-border/40">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-16 text-center text-text-3 italic font-medium">
+                  <td colSpan={7} className="px-5 py-16 text-center text-text-3 italic font-medium">
                     <div className="flex flex-col items-center gap-3">
                       <Loader2 className="w-8 h-8 animate-spin text-brand" />
                       <p>Consultando registros financieros...</p>
@@ -217,7 +238,7 @@ export default function SuscripcionesPage({ searchParams }: { searchParams?: { f
                 </tr>
               ) : payments.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-16 text-center text-text-3 font-medium">
+                  <td colSpan={7} className="px-5 py-16 text-center text-text-3 font-medium">
                     No se encontraron pagos con esos filtros.
                   </td>
                 </tr>
@@ -243,6 +264,31 @@ export default function SuscripcionesPage({ searchParams }: { searchParams?: { f
                     </td>
                     <td className="px-5 py-4 text-xs text-text-2 font-medium whitespace-nowrap">
                       {format(new Date(payment.created_at), "dd MMM yyyy, p", { locale: es })}
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      {(() => {
+                        const billingDay = payment.companies?.billing_day;
+                        if (!billingDay) return <span className="text-xs text-text-3">—</span>;
+                        const nextDate = getNextBillingDate(billingDay);
+                        const alert = getBillingAlert(billingDay);
+                        return (
+                          <div className="space-y-1">
+                            <p className="text-xs font-bold text-text-1">
+                              {format(nextDate, "dd MMM yyyy", { locale: es })}
+                            </p>
+                            {alert ? (
+                              <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold border ${alert.color}`}>
+                                <AlertTriangle className="w-2.5 h-2.5" /> {alert.label}
+                              </span>
+                            ) : (
+                              <span className="text-[9px] text-text-3 flex items-center gap-1">
+                                <Bell className="w-2.5 h-2.5" />
+                                {differenceInDays(nextDate, new Date())}d restantes
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </td>
                     <td className="px-5 py-4">
                       {payment.status === "pending" && (

@@ -111,7 +111,7 @@ function SettingsContent() {
           if (uData.company_id) {
             const { data: companyData } = await supabase
               .from("companies")
-              .select("id, name, name_comercial, rif, plan_type, subscription_status")
+              .select("id, name, name_comercial, rif, plan_type, subscription_status, billing_day")
               .eq("id", uData.company_id)
               .single();
 
@@ -714,10 +714,12 @@ function SettingsContent() {
                     const maxUsers = isEnterprise ? "∞" : isPro ? "10" : "2";
                     const storage = isEnterprise ? "Ilimitado" : isPro ? "50 GB" : "5 GB";
                     const isUnlimited = isEnterprise;
-                    // Calcular próximo cobro: siempre el 1 del mes siguiente
+                    // Calcular próximo cobro desde billing_day (día de registro)
                     const nextBilling = (() => {
                       const today = new Date();
-                      const next = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+                      const day = (company as any)?.billing_day || today.getDate();
+                      let next = new Date(today.getFullYear(), today.getMonth(), day);
+                      if (next <= today) next = new Date(today.getFullYear(), today.getMonth() + 1, day);
                       return next.toLocaleDateString("es-VE", { day: "numeric", month: "long", year: "numeric" });
                     })();
                     return (
