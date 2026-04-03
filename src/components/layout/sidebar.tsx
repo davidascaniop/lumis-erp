@@ -8,29 +8,26 @@ import {
   DollarSign, AlertTriangle, CheckCircle2, Briefcase, Lock, Wallet,
   FileText, FileClock, TrendingUp, PieChart, Store, ClipboardList,
   Tags, Layers, Receipt, ArrowDownCircle, Gauge, MessageSquare, ShoppingBag, Box, LineChart,
-  Landmark,
+  Landmark, RefreshCw,
 } from "lucide-react";
 import { cn, formatNumber } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
 import { useBCV } from "@/hooks/use-bcv";
+import { useNotifications } from "@/hooks/use-notifications";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "./ThemeToggle";
 
-/* ─── Notificaciones mock ─── */
-const MOCK_NOTIFICATIONS = [
-  { id: "1", type: "payment" as const, read: false, title: "Pago pendiente de verificar", description: "Distribuidora Alpha registró un pago de $250.00", time: "Hace 15 min", href: "/dashboard/cobranza" },
-  { id: "2", type: "order" as const, read: false, title: "Nuevo pedido recibido", description: "Pedido #2491 creado por Vendedor 1", time: "Hace 1 hora", href: "/dashboard/ventas" },
-  { id: "3", type: "alert" as const, read: false, title: "Crédito vencido", description: "Cliente Megamart tiene $480 vencidos (+30 días)", time: "Hace 2 horas", href: "/dashboard/cobranza" },
-  { id: "4", type: "success" as const, read: true, title: "Pago verificado", description: "Se verificó el pago de $120.00 de Bodega Central", time: "Ayer", href: "/dashboard/cobranza" },
-];
-
-const NOTIFICATION_ICONS = {
-  payment: { icon: DollarSign, color: "#E040FB", bg: "rgba(224,64,251,0.10)" },
-  order: { icon: ShoppingCart, color: "#FFB800", bg: "rgba(255,184,0,0.10)" },
-  alert: { icon: AlertTriangle, color: "#FF2D55", bg: "rgba(255,45,85,0.10)" },
-  success: { icon: CheckCircle2, color: "#00E5CC", bg: "rgba(0,229,204,0.10)" },
+const NOTIFICATION_ICONS: Record<string, { icon: any; color: string; bg: string }> = {
+  payment:   { icon: DollarSign,    color: "#E040FB", bg: "rgba(224,64,251,0.10)" },
+  order:     { icon: ShoppingCart,  color: "#FFB800", bg: "rgba(255,184,0,0.10)"  },
+  alert:     { icon: AlertTriangle, color: "#FF2D55", bg: "rgba(255,45,85,0.10)"  },
+  success:   { icon: CheckCircle2,  color: "#00E5CC", bg: "rgba(0,229,204,0.10)"  },
+  stock:     { icon: Package,       color: "#FF2D55", bg: "rgba(255,45,85,0.10)"  },
+  treasury:  { icon: Landmark,      color: "#FF2D55", bg: "rgba(255,45,85,0.10)"  },
+  recurring: { icon: RefreshCw,     color: "#FFB800", bg: "rgba(255,184,0,0.10)"  },
+  plan:      { icon: Sparkles,      color: "#E040FB", bg: "rgba(224,64,251,0.10)" },
 };
 
 /* ─── Estructura del Menú Acordeón ─── */
@@ -132,10 +129,14 @@ export function Sidebar() {
   const { user } = useUser();
   const { rate } = useBCV();
   const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [userPlan, setUserPlan] = useState("starter");
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  const { notifications, unreadCount, markAsRead, markAllRead } = useNotifications(
+    user?.company_id,
+    user?.companies,
+  );
 
   // Find the most specific active child globally:
   const allChildren = NAV_SECTIONS.flatMap(s => s.children);
@@ -181,8 +182,6 @@ export function Sidebar() {
     }
   }, [user]);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push("/login");
@@ -198,9 +197,6 @@ export function Sidebar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  function markAllRead() { setNotifications((prev) => prev.map((n) => ({ ...n, read: true }))); }
-  function markAsRead(id: string) { setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n))); }
 
   const toggleSection = (id: string) => {
     setOpenSections((prev) => {
@@ -410,55 +406,64 @@ export function Sidebar() {
           </button>
 
           {showNotifications && (
-            <div className="absolute left-full bottom-0 ml-2 w-80 z-50 bg-surface-elevated border border-border rounded-2xl shadow-elevated overflow-hidden animate-fade-up">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <div className="absolute left-full bottom-0 ml-2 w-80 z-50 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden animate-fade-up">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-semibold text-text-1">Notificaciones</h3>
+                  <h3 className="text-sm font-bold text-slate-900">Notificaciones</h3>
                   {unreadCount > 0 && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-brand/15 text-brand">{unreadCount} nueva{unreadCount > 1 ? "s" : ""}</span>}
                 </div>
                 <div className="flex items-center gap-1">
                   {unreadCount > 0 && (
-                    <button onClick={markAllRead} className="text-[10px] font-semibold text-brand hover:text-text-1 transition-colors px-2 py-1 rounded-md hover:bg-surface-hover/10">
+                    <button onClick={markAllRead} className="text-[10px] font-semibold text-brand hover:text-brand/70 transition-colors px-2 py-1 rounded-md hover:bg-slate-50">
                       Marcar todas
                     </button>
                   )}
-                  <button onClick={() => setShowNotifications(false)} className="p-1 rounded-md hover:bg-surface-hover/10 transition-colors">
-                    <X className="w-3.5 h-3.5 text-text-3" />
+                  <button onClick={() => setShowNotifications(false)} className="p-1 rounded-md hover:bg-slate-100 transition-colors">
+                    <X className="w-3.5 h-3.5 text-slate-400" />
                   </button>
                 </div>
               </div>
               <div className="max-h-80 overflow-y-auto no-scrollbar">
-                {notifications.length === 0 ? (
+                {notifications.filter(n => !n.read).length === 0 ? (
                   <div className="py-10 text-center">
-                    <Bell className="w-8 h-8 text-text-3 mx-auto mb-2" />
-                    <p className="text-xs text-text-2">Sin notificaciones</p>
+                    <Bell className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                    <p className="text-xs text-slate-500 font-medium">Sin notificaciones pendientes</p>
+                    <p className="text-[10px] text-slate-400 mt-1">Todo está bajo control ✓</p>
                   </div>
                 ) : (
-                  notifications.map((n) => {
-                    const { icon: Icon, color, bg } = NOTIFICATION_ICONS[n.type];
+                  notifications.filter(n => !n.read).map((n) => {
+                    const iconConf = NOTIFICATION_ICONS[n.type] || NOTIFICATION_ICONS.alert;
+                    const { icon: Icon, color, bg } = iconConf;
+                    const isHigh = n.priority === "high";
                     return (
-                      <Link key={n.id} href={n.href} onClick={() => { markAsRead(n.id); setShowNotifications(false); }}
-                        className={cn("flex items-start gap-3 px-4 py-3 border-b border-border/10 last:border-0 transition-colors", n.read ? "hover:bg-surface-hover/5 opacity-60" : "bg-surface-hover/5 hover:bg-surface-hover/10")}
+                      <Link
+                        key={n.id}
+                        href={n.href}
+                        onClick={() => { markAsRead(n.id); setShowNotifications(false); }}
+                        className={cn(
+                          "flex items-start gap-3 px-4 py-3 border-b border-slate-100 last:border-0 transition-colors hover:bg-slate-50",
+                          isHigh && "bg-red-50/40"
+                        )}
                       >
                         <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: bg }}>
                           <Icon className="w-3.5 h-3.5" style={{ color }} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
-                            <p className={cn("text-xs leading-tight", n.read ? "text-text-2" : "text-text-1 font-medium")}>{n.title}</p>
-                            {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-brand flex-shrink-0 mt-1" />}
+                            <p className="text-xs font-semibold text-slate-800 leading-tight">{n.title}</p>
+                            <span className="w-1.5 h-1.5 rounded-full bg-brand flex-shrink-0 mt-1" />
                           </div>
-                          <p className="text-[10px] text-text-3 mt-0.5 truncate">{n.description}</p>
-                          <p className="text-[9px] text-text-3 mt-1">{n.time}</p>
+                          <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2 leading-tight">{n.description}</p>
+                          <p className="text-[9px] text-slate-400 mt-1 font-medium">{n.time}</p>
                         </div>
                       </Link>
                     );
                   })
                 )}
               </div>
-              <div className="px-4 py-2.5 border-t border-border bg-surface-hover/5">
-                <Link href="/dashboard/settings" onClick={() => setShowNotifications(false)} className="text-[10px] font-semibold text-brand hover:text-text-1 transition-colors block text-center">
-                  Ver historial completo
+              <div className="px-4 py-2.5 border-t border-slate-100 bg-slate-50">
+                <Link href="/dashboard/reportes/ejecutivo" onClick={() => setShowNotifications(false)} className="text-[10px] font-bold text-brand hover:text-brand/70 transition-colors block text-center">
+                  Ver Resumen Ejecutivo →
                 </Link>
               </div>
             </div>
