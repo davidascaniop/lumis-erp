@@ -25,7 +25,7 @@ export function Industries() {
   return (
     <section 
       ref={ref}
-      className="py-32 bg-[#08050F] relative px-6 overflow-hidden"
+      className="py-32 bg-white relative px-6 overflow-hidden"
       id="industrias"
     >
       <div className="max-w-6xl mx-auto">
@@ -33,7 +33,7 @@ export function Industries() {
           <motion.h2 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            className="font-display font-bold text-4xl md:text-6xl text-white mb-6 tracking-tight leading-tight"
+            className="font-display font-bold text-4xl md:text-6xl text-slate-900 mb-6 tracking-tight leading-tight"
           >
             Si vendes, 
             <br />
@@ -42,7 +42,7 @@ export function Industries() {
           <motion.p 
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : {}}
-            className="text-[#9585B8] text-lg max-w-xl mx-auto"
+            className="text-slate-500 text-lg max-w-xl mx-auto"
           >
             Diseñado para cualquier negocio venezolano que maneje inventario,
             clientes y cobros recurrentes.
@@ -56,17 +56,17 @@ export function Industries() {
                initial={{ opacity: 0, y: 20 }}
                animate={isInView ? { opacity: 1, y: 0 } : {}}
                transition={{ delay: 0.1 * i, duration: 0.5 }}
-               whileHover={{ y: -5, backgroundColor: 'rgba(255,255,255,0.03)' }}
-               className="group flex flex-col p-8 rounded-3xl bg-[#110B1A] border border-white/5 transition-all duration-300 hover:border-[#E040FB]/30 shadow-xl"
+               whileHover={{ y: -4 }}
+               className="group flex flex-col p-8 rounded-3xl bg-white border border-slate-200 transition-all duration-300 hover:border-[#E040FB]/40 hover:shadow-md shadow-sm"
             >
-               <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-8 group-hover:bg-[#E040FB]/10 transition-colors">
-                  <ind.icon className="w-6 h-6 text-[#9585B8] group-hover:text-[#E040FB] transition-colors" />
+               <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-8 group-hover:bg-[#E040FB]/10 transition-colors">
+                  <ind.icon className="w-6 h-6 text-slate-500 group-hover:text-[#E040FB] transition-colors" />
                </div>
-               
-               <h3 className="text-[17px] font-bold text-white mb-2 tracking-tight group-hover:text-[#E040FB] transition-colors">
+
+               <h3 className="text-[17px] font-bold text-slate-900 mb-2 tracking-tight group-hover:text-[#E040FB] transition-colors">
                   {ind.name}
                </h3>
-               <p className="text-sm text-[#9585B8] leading-relaxed font-normal opacity-80">
+               <p className="text-sm text-slate-500 leading-relaxed font-normal">
                   {ind.desc}
                </p>
             </motion.div>

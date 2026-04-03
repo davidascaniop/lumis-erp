@@ -15,7 +15,7 @@ import { Footer } from '@/components/landing/footer'
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-[#08050F] selection:bg-[#E040FB]/30 selection:text-white overflow-x-hidden">
+    <main className="min-h-screen bg-white selection:bg-[#E040FB]/30 selection:text-slate-900 overflow-x-hidden">
       <Nav />
       <Hero />
       <PainNumbers />

@@ -38,7 +38,7 @@ export function FAQ() {
   return (
     <section 
       ref={ref}
-      className="py-32 bg-[#08050F] relative px-6 overflow-hidden" 
+      className="py-32 bg-slate-50 relative px-6 overflow-hidden" 
       id="faq"
     >
       <div className="max-w-3xl mx-auto">
@@ -47,7 +47,7 @@ export function FAQ() {
           <motion.h2 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            className="font-display font-bold text-4xl md:text-6xl text-white mb-6 tracking-tight leading-tight"
+            className="font-display font-bold text-4xl md:text-6xl text-slate-900 mb-6 tracking-tight leading-tight"
           >
             Preguntas 
             <br />
@@ -63,9 +63,9 @@ export function FAQ() {
                animate={isInView ? { opacity: 1, x: 0 } : {}}
                transition={{ delay: 0.1 * i, duration: 0.5 }}
                className={`group border rounded-[1.5rem] overflow-hidden transition-all duration-300
-                  ${open === i 
-                    ? 'bg-[#110B1A] border-[#E040FB]/30 shadow-2xl mb-8' 
-                    : 'bg-transparent border-white/5 hover:border-white/10'
+                  ${open === i
+                    ? 'bg-white border-[#E040FB]/30 shadow-md mb-4'
+                    : 'bg-white border-slate-200 hover:border-slate-300'
                   }`}
             >
               <button
@@ -73,14 +73,14 @@ export function FAQ() {
                 className="w-full flex items-center justify-between px-8 py-6 text-left"
               >
                 <span className={`font-bold text-lg md:text-xl transition-colors duration-300 tracking-tight
-                   ${open === i ? 'text-white' : 'text-[#F4EDFF]/80 group-hover:text-white'}`}>
+                   ${open === i ? 'text-slate-900' : 'text-slate-700 group-hover:text-slate-900'}`}>
                   {faq.q}
                 </span>
                 
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500
-                   ${open === i 
-                     ? 'bg-[#E040FB] text-white rotate-0' 
-                     : 'bg-white/5 text-[#9585B8] rotate-0 group-hover:bg-white/10'
+                   ${open === i
+                     ? 'bg-[#E040FB] text-white'
+                     : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'
                    }`}>
                   {open === i ? <Minus className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                 </div>
@@ -95,8 +95,8 @@ export function FAQ() {
                      transition={{ duration: 0.4, ease: 'circOut' }}
                      className="px-8 pb-8 pt-0"
                   >
-                    <div className="h-px w-full bg-white/5 mb-6" />
-                    <p className="text-[#9585B8] text-base md:text-lg leading-relaxed font-normal opacity-90">
+                    <div className="h-px w-full bg-slate-100 mb-6" />
+                    <p className="text-slate-500 text-base md:text-lg leading-relaxed font-normal">
                       {faq.a}
                     </p>
                   </motion.div>
@@ -112,10 +112,10 @@ export function FAQ() {
            transition={{ delay: 1 }}
            className="mt-20 text-center"
         >
-           <a 
-             href="https://wa.me/584240000000" 
-             target="_blank"
-             className="text-xs font-bold text-[#9585B8] hover:text-[#E040FB] transition-colors border-b border-white/5 hover:border-[#E040FB]/30 pb-1"
+           <a
+             href="https://wa.me/584149406419?text=Hola%20LUMIS%2C%20tengo%20una%20pregunta"
+             target="_blank" rel="noopener noreferrer"
+             className="text-xs font-bold text-slate-500 hover:text-[#25D366] transition-colors border-b border-slate-200 hover:border-[#25D366]/50 pb-1"
            >
               ¿Tienes otra duda? Escríbenos por WhatsApp →
            </a>

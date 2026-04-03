@@ -27,7 +27,7 @@ export function HowItWorks() {
   return (
     <section 
       ref={ref}
-      className="py-32 bg-[#110B1A] relative px-6 border-y border-white/5"
+      className="py-32 bg-slate-50 relative px-6 border-y border-slate-200"
     >
       <div className="max-w-6xl mx-auto text-center relative">
         
@@ -35,7 +35,7 @@ export function HowItWorks() {
           <motion.h2 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            className="font-display font-bold text-4xl md:text-6xl text-white mb-6 tracking-tight leading-tight"
+            className="font-display font-bold text-4xl md:text-6xl text-slate-900 mb-6 tracking-tight leading-tight"
           >
             Tres pasos para 
             <br />
@@ -55,17 +55,17 @@ export function HowItWorks() {
                transition={{ delay: 0.2 + (i * 0.2), duration: 0.8 }}
                className="relative z-10 flex flex-col items-center group"
             >
-               <div className="w-20 h-20 rounded-2xl bg-[#08050F] border border-[#E040FB]/30 flex items-center justify-center mb-10
-                               shadow-[0_0_30px_rgba(224,64,251,0.1)] group-hover:border-[#E040FB] transition-colors duration-500">
+               <div className="w-20 h-20 rounded-2xl bg-white border border-[#E040FB]/30 flex items-center justify-center mb-10
+                               shadow-sm group-hover:border-[#E040FB] transition-colors duration-500">
                   <span className="font-display text-3xl font-bold bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] bg-clip-text text-transparent">
                      {step.num}
                   </span>
                </div>
                
-               <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">
+               <h3 className="text-2xl font-bold text-slate-900 mb-4 tracking-tight">
                   {step.title}
                </h3>
-               <p className="text-[#9585B8] text-base leading-relaxed font-normal max-w-[280px]">
+               <p className="text-slate-500 text-base leading-relaxed font-normal max-w-[280px]">
                   {step.desc}
                </p>
             </motion.div>
@@ -77,10 +77,10 @@ export function HowItWorks() {
            initial={{ opacity: 0 }}
            animate={isInView ? { opacity: 1 } : {}}
            transition={{ delay: 1 }}
-           className="mt-20 inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/[0.02] border border-white/5 shadow-xl"
+           className="mt-20 inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-white border border-slate-200 shadow-sm"
         >
-           <div className="w-2 h-2 rounded-full bg-[#00E5CC] animate-pulse" />
-           <span className="text-xs font-bold text-[#9585B8] uppercase tracking-widest">Soporte por WhatsApp incluido</span>
+           <div className="w-2 h-2 rounded-full bg-[#25D366] animate-pulse" />
+           <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Soporte por WhatsApp incluido</span>
         </motion.div>
 
       </div>

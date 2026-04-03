@@ -25,7 +25,7 @@ export function Footer() {
                   Luz para tu negocio.
                </p>
                <p className="text-sm text-[#9585B8] leading-relaxed">
-                  Hecho con ❤️ en Venezuela 🇻🇪 para emprendedores que no se rinden.
+                  🇻🇪 Hecho por Venezolanos para Venezolanos · Luz para tu negocio.
                </p>
                <a href="mailto:hola@lumis.app" className="block text-sm font-bold text-[#E040FB] hover:text-[#7C4DFF] transition-colors">
                   hola@lumis.app

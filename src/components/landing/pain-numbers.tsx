@@ -57,7 +57,7 @@ export function PainNumbers() {
   return (
     <section 
       ref={ref}
-      className="py-24 bg-[#110B1A] border-y border-white/5"
+      className="py-24 bg-slate-50 border-y border-slate-200"
     >
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-0">
@@ -65,12 +65,12 @@ export function PainNumbers() {
             <div 
               key={i} 
               className={`relative flex flex-col items-center text-center px-4
-                          ${i !== METRICS.length - 1 ? 'md:border-r md:border-white/5' : ''}`}
+                          ${i !== METRICS.length - 1 ? 'md:border-r md:border-slate-200' : ''}`}
             >
-              <div className="font-display font-bold text-4xl md:text-5xl lg:text-6xl text-white mb-3 tracking-tighter">
+              <div className="font-display font-bold text-4xl md:text-5xl lg:text-6xl text-slate-900 mb-3 tracking-tighter">
                 <Counter target={item.target} prefix={item.prefix} suffix={item.suffix} />
               </div>
-              <div className="text-sm font-bold text-[#9585B8] uppercase tracking-widest mb-1">
+              <div className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">
                 {item.label}
               </div>
               {item.sub && (

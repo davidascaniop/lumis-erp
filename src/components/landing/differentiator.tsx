@@ -29,7 +29,7 @@ export function Differentiator() {
   return (
     <section 
       ref={ref}
-      className="py-32 bg-[#08050F] relative overflow-hidden px-6"
+      className="py-32 bg-slate-50 relative overflow-hidden px-6"
     >
       {/* Background Effect */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#E040FB]/[0.02] to-transparent pointer-events-none" />
@@ -105,13 +105,13 @@ export function Differentiator() {
                initial={{ opacity: 0, rotate: 10, y: 60 }}
                animate={isInView ? { opacity: 1, rotate: 0, y: 0 } : {}}
                transition={{ duration: 1, ease: 'backOut' }}
-               className="relative w-[300px] h-[600px] bg-[#08050F] border-[8px] border-[#110B1A] rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.8)] overflow-hidden"
+               className="relative w-[300px] h-[600px] bg-slate-50 border-[8px] border-[#110B1A] rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.8)] overflow-hidden"
              >
                 {/* Notch */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-[#110B1A] rounded-b-2xl z-20" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-white rounded-b-2xl z-20" />
                 
                 {/* Pantalla del Portal */}
-                <div className="h-full bg-[#110B1A] p-6 pt-12">
+                <div className="h-full bg-white p-6 pt-12">
                    <div className="flex items-center gap-3 mb-8">
                       <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] flex items-center justify-center">
                          <Link2 className="w-4 h-4 text-white" />

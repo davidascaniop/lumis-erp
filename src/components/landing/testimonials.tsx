@@ -34,14 +34,14 @@ export function Testimonials() {
   return (
     <section 
       ref={ref}
-      className="py-32 bg-[#08050F] relative px-6 overflow-hidden"
+      className="py-32 bg-slate-50 relative px-6 overflow-hidden"
     >
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-24">
           <motion.h2 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            className="font-display font-bold text-4xl md:text-6xl text-white mb-6 tracking-tight leading-tight"
+            className="font-display font-bold text-4xl md:text-6xl text-slate-900 mb-6 tracking-tight leading-tight"
           >
             Lo que dicen los que 
             <br />
@@ -56,7 +56,7 @@ export function Testimonials() {
                initial={{ opacity: 0, y: 20 }}
                animate={isInView ? { opacity: 1, y: 0 } : {}}
                transition={{ delay: i * 0.2, duration: 0.8 }}
-               className="relative flex flex-col p-10 rounded-[2.5rem] bg-[#18102A] border border-white/5 shadow-2xl overflow-hidden group"
+               className="relative flex flex-col p-10 rounded-[2.5rem] bg-white border border-slate-200 shadow-md overflow-hidden group hover:shadow-lg transition-shadow"
             >
                {/* Decorative Quote Mark */}
                <Quote className="absolute top-8 right-8 w-16 h-16 text-[#E040FB] opacity-[0.03] rotate-12 transition-transform duration-700 group-hover:rotate-0" />
@@ -67,18 +67,18 @@ export function Testimonials() {
                   ))}
                </div>
 
-               <p className="text-[#F4EDFF] text-lg leading-relaxed font-normal mb-10 flex-1 italic tracking-tight">
+               <p className="text-slate-700 text-lg leading-relaxed font-normal mb-10 flex-1 italic tracking-tight">
                   "{t.quote}"
                </p>
 
-               <div className="flex items-center gap-4 pt-8 border-t border-white/5">
+               <div className="flex items-center gap-4 pt-8 border-t border-slate-100">
                   <div className="w-12 h-12 rounded-2xl flex items-center justify-center font-display font-bold text-white text-lg"
-                       style={{ background: `linear-gradient(135deg, ${t.color}, #08050F)` }}>
+                       style={{ background: `linear-gradient(135deg, ${t.color}, #7C4DFF)` }}>
                      {t.name[0]}
                   </div>
                   <div>
-                     <div className="text-white font-bold tracking-tight">{t.name}</div>
-                     <div className="text-xs font-bold text-[#9585B8] uppercase tracking-widest">
+                     <div className="text-slate-900 font-bold tracking-tight">{t.name}</div>
+                     <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">
                         {t.company} <span className="mx-1 opacity-30">·</span> {t.city}
                      </div>
                   </div>

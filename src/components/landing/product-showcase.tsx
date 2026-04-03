@@ -111,7 +111,7 @@ export function ProductShowcase() {
   return (
     <section 
       ref={ref} 
-      className="py-32 bg-[#08050F] relative px-6"
+      className="py-32 bg-slate-50 relative px-6"
       id="funciones"
     >
       <div className="max-w-6xl mx-auto">
@@ -137,7 +137,7 @@ export function ProductShowcase() {
                 className={`
                   group relative flex items-center gap-4 px-6 py-5 rounded-2xl text-left transition-all duration-300
                   ${activeTab === i 
-                    ? 'bg-white/[0.04] border border-white/10 shadow-2xl' 
+                    ? 'bg-white/[0.04] border border-slate-200 shadow-2xl' 
                     : 'bg-transparent border border-transparent opacity-40 hover:opacity-80'
                   }
                 `}
@@ -178,10 +178,10 @@ export function ProductShowcase() {
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 exit={{ opacity: 0, x: -20, scale: 0.98 }}
                 transition={{ duration: 0.5, ease: 'circOut' }}
-                className="relative bg-[#110B1A] border border-white/10 rounded-[2.5rem] p-8 md:p-12 shadow-[0_40px_100px_rgba(0,0,0,0.6)] overflow-hidden"
+                className="relative bg-white border border-slate-200 rounded-[2.5rem] p-8 md:p-12 shadow-[0_40px_100px_rgba(0,0,0,0.6)] overflow-hidden"
               >
                  <div className="max-w-xl mb-12">
-                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-[#9585B8] uppercase tracking-widest mb-6">
+                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-slate-200 text-[10px] font-bold text-[#9585B8] uppercase tracking-widest mb-6">
                       Módulo seleccionado
                    </div>
                    <h3 className="text-3xl font-bold text-white mb-4 tracking-tight">
@@ -193,7 +193,7 @@ export function ProductShowcase() {
                  </div>
 
                  {/* Mockup UI Placeholder */}
-                 <div className="bg-[#08050F]/50 border border-white/5 rounded-3xl p-6 md:p-10">
+                 <div className="bg-slate-50/50 border border-white/5 rounded-3xl p-6 md:p-10">
                     <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
                        <span className="text-sm font-bold text-white tracking-tight">{TABS[activeTab].mockup.title}</span>
                        <div className="flex gap-2">
