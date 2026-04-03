@@ -8,6 +8,7 @@ import {
   DollarSign, AlertTriangle, CheckCircle2, Briefcase, Lock, Wallet,
   FileText, FileClock, TrendingUp, PieChart, Store, ClipboardList,
   Tags, Layers, Receipt, ArrowDownCircle, Gauge, MessageSquare, ShoppingBag, Box, LineChart,
+  Landmark,
 } from "lucide-react";
 import { cn, formatNumber } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -95,6 +96,7 @@ const NAV_SECTIONS: NavSection[] = [
       { href: "/dashboard/cobranza", label: "Cuentas por Cobrar", icon: CreditCard, requiredPlan: ["pro", "enterprise"] },
       { href: "/dashboard/finanzas/gastos", label: "Gastos y Pagos", icon: Receipt, requiredPlan: ["pro", "enterprise"] },
       { href: "/dashboard/finanzas/recurrentes", label: "Gastos Recurrentes", icon: FileClock, requiredPlan: ["pro", "enterprise"] },
+      { href: "/dashboard/finanzas/cuentas", label: "Mis Cuentas", icon: Landmark, requiredPlan: ["pro", "enterprise"] },
       { href: "/dashboard/finanzas/flujo", label: "Flujo de Caja", icon: ArrowDownCircle, requiredPlan: ["pro", "enterprise"] },
     ],
   },

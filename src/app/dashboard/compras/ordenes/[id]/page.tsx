@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useTreasuryAccounts, registerTreasuryMovement } from "@/hooks/use-treasury";
 
 // ─── Price Comparison Badge ────────────────────────────────────────────────────
 function PriceCompareBadge({ current, previous }: { current: number; previous: number | null }) {
@@ -121,12 +122,16 @@ export default function PurchaseDetailPage() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const [showInvoice, setShowInvoice] = useState(false);
-  const [invoiceForm, setInvoiceForm] = useState({ 
-    number: "", 
-    date: new Date().toISOString().split("T")[0], 
+  const [invoiceForm, setInvoiceForm] = useState({
+    number: "",
+    date: new Date().toISOString().split("T")[0],
     amount_usd: 0,
-    amount_bs: 0 
+    amount_bs: 0
   });
+  const [selectedTreasuryAccountId, setSelectedTreasuryAccountId] = useState("");
+
+  // Treasury accounts for payment registration
+  const { accounts: treasuryAccounts, loading: loadingTreasury } = useTreasuryAccounts(purchase?.company_id);
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
   const fetchDetail = useCallback(async () => {
@@ -257,7 +262,8 @@ export default function PurchaseDetailPage() {
   const handleRegisterInvoice = async () => {
     if (!purchase) return;
     if (!invoiceForm.number) { toast.error("El número de factura es obligatorio"); return; }
-    
+    if (!selectedTreasuryAccountId) { toast.error("Selecciona una cuenta de origen para el pago"); return; }
+
     setIsProcessing(true);
     try {
       // 1. Update purchase record
@@ -281,11 +287,33 @@ export default function PurchaseDetailPage() {
         purchase_id: purchase.id
       } as any);
 
-      toast.success("Factura registrada vinculada a Finanzas");
+      // 3. Register treasury movement (salida)
+      const selectedAccount = treasuryAccounts.find(a => a.id === selectedTreasuryAccountId);
+      const movementResult = await registerTreasuryMovement({
+        companyId: purchase.company_id,
+        accountId: selectedTreasuryAccountId,
+        type: "salida",
+        amount: invoiceForm.amount_usd,
+        currency: selectedAccount?.currency ?? "USD",
+        description: `Pago Factura ${invoiceForm.number} – OC ${purchase.purchase_number}`,
+        category: "compras",
+        originModule: "compras",
+        referenceId: purchase.id,
+      });
+
+      // 4. Low balance alerts
+      if (movementResult.isNegativeOrZero) {
+        toast.warning(`La cuenta "${movementResult.accountName}" quedó con saldo $${movementResult.newBalance.toFixed(2)}`, { duration: 6000 });
+      } else if (movementResult.isLowBalance) {
+        toast.warning(`Saldo bajo en "${movementResult.accountName}": $${movementResult.newBalance.toFixed(2)}`, { duration: 5000 });
+      }
+
+      toast.success("Factura registrada vinculada a Finanzas y Tesorería");
       setShowInvoice(false);
+      setSelectedTreasuryAccountId("");
       fetchDetail();
     } catch (e: any) {
-      toast.error("Error al registrar factura");
+      toast.error("Error al registrar factura", { description: e.message });
     } finally {
       setIsProcessing(false);
     }
@@ -592,7 +620,7 @@ export default function PurchaseDetailPage() {
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-text-3 uppercase">Monto USD</label>
-                    <Input 
+                    <Input
                       type="number"
                       value={invoiceForm.amount_usd}
                       onChange={e => setInvoiceForm(p => ({ ...p, amount_usd: +e.target.value }))}
@@ -601,7 +629,7 @@ export default function PurchaseDetailPage() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-text-3 uppercase">Monto BS</label>
-                    <Input 
+                    <Input
                       type="number"
                       value={invoiceForm.amount_bs}
                       onChange={e => setInvoiceForm(p => ({ ...p, amount_bs: +e.target.value }))}
@@ -609,10 +637,39 @@ export default function PurchaseDetailPage() {
                     />
                   </div>
                 </div>
+
+                {/* Treasury Account Selector */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-text-3 uppercase flex items-center gap-1">
+                    <DollarSign className="w-3 h-3" /> Cuenta de origen
+                  </label>
+                  {loadingTreasury ? (
+                    <div className="flex items-center gap-2 text-xs text-text-3 py-2">
+                      <Loader2 className="w-3 h-3 animate-spin" /> Cargando cuentas...
+                    </div>
+                  ) : treasuryAccounts.length === 0 ? (
+                    <p className="text-[10px] text-status-warn font-medium py-1">
+                      No hay cuentas de tesorería activas
+                    </p>
+                  ) : (
+                    <select
+                      value={selectedTreasuryAccountId}
+                      onChange={e => setSelectedTreasuryAccountId(e.target.value)}
+                      className="w-full h-10 px-3 rounded-md border border-border bg-white text-sm text-text-1 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+                    >
+                      <option value="">Seleccionar cuenta...</option>
+                      {treasuryAccounts.map(acc => (
+                        <option key={acc.id} value={acc.id}>
+                          {acc.name} ({acc.currency}) — Saldo: {acc.currency === "USD" ? "$" : "Bs."}{Number(acc.current_balance).toLocaleString("es-VE", { minimumFractionDigits: 2 })}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
               </div>
 
-              <button 
-                disabled={isProcessing || !invoiceForm.number}
+              <button
+                disabled={isProcessing || !invoiceForm.number || !selectedTreasuryAccountId}
                 onClick={handleRegisterInvoice}
                 className="w-full py-3 bg-status-info text-white rounded-xl font-bold text-xs shadow-info hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
                 {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />} Registrar Factura en CxP

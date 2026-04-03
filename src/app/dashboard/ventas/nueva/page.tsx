@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
 import { useBCV } from "@/hooks/use-bcv";
+import { useTreasuryAccounts, registerTreasuryMovement } from "@/hooks/use-treasury";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { ProductoGrid } from "@/components/ventas/nueva/producto-grid";
@@ -32,6 +33,7 @@ function NuevaVentaContent() {
 
   const { user } = useUser();
   const { rate } = useBCV();
+  const { accounts: treasuryAccounts } = useTreasuryAccounts(user?.company_id);
   const supabase = createClient();
 
   // Data State
@@ -53,6 +55,7 @@ function NuevaVentaContent() {
   const [paymentMethod, setPaymentMethod] = useState("Efectivo");
   const [amountPaid, setAmountPaid] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [treasuryAccountId, setTreasuryAccountId] = useState("");
 
   // New Client State
   const [newClientName, setNewClientName] = useState("");
@@ -312,6 +315,28 @@ function NuevaVentaContent() {
         if (cxcErr) console.error("Error creating receivable:", cxcErr);
       }
 
+      // 5. Si hay pago de contado y cuenta seleccionada, registrar en tesorería
+      if (amountPaid > 0 && treasuryAccountId) {
+        try {
+          const result = await registerTreasuryMovement({
+            companyId: user.company_id,
+            accountId: treasuryAccountId,
+            type: "entrada",
+            amount: amountPaid,
+            currency: "usd",
+            description: `Venta ${orderNumber} - ${targetPartner.name}`,
+            category: "Venta",
+            originModule: "ventas",
+            referenceId: order.id,
+          });
+          if (result.isLowBalance) {
+            toast.warning(`${result.accountName} tiene saldo bajo: $${result.newBalance.toFixed(2)}`);
+          }
+        } catch (err) {
+          console.warn("Error registrando en tesorería:", err);
+        }
+      }
+
       toast.success(`Pedido ${orderNumber} creado con éxito`);
       router.push("/dashboard/ventas");
     } catch (error: any) {
@@ -399,6 +424,9 @@ function NuevaVentaContent() {
               partners={partners}
               onSelectPartner={setSelectedPartner}
               onCreateQuickClient={handleCreateQuickClient}
+              treasuryAccounts={treasuryAccounts}
+              treasuryAccountId={treasuryAccountId}
+              onTreasuryAccountChange={setTreasuryAccountId}
             />
           </div>
         </div>

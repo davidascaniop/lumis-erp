@@ -40,6 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTreasuryAccounts, registerTreasuryMovement } from "@/hooks/use-treasury";
 
 export default function CobranzaPage() {
   return (
@@ -64,6 +65,8 @@ function CobranzaContent() {
   const [pendingVerifications, setPendingVerifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [companyId, setCompanyId] = useState<string>("");
+  const { accounts: treasuryAccounts } = useTreasuryAccounts(companyId);
   const [filterType, setFilterType] = useState<"all" | "overdue">(
     initialFilter || "all",
   );
@@ -87,6 +90,7 @@ function CobranzaContent() {
         .eq("auth_id", user.id)
         .single();
       if (!userData) return;
+      setCompanyId(userData.company_id);
 
       const [recesRes, paymentsRes] = await Promise.all([
         supabase
@@ -136,6 +140,7 @@ function CobranzaContent() {
   const [paymentAmount, setPaymentAmount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("Efectivo");
   const [paymentRef, setPaymentRef] = useState("");
+  const [paymentAccountId, setPaymentAccountId] = useState("");
 
   const handleRegisterPayment = async () => {
     if (!selectedReceivable) return;
@@ -249,6 +254,28 @@ function CobranzaContent() {
                   status: newOrderStatus,
                 } as any)
                 .eq("id", receivable.order_id);
+            }
+          }
+
+          // Registrar en tesorería si hay cuenta seleccionada
+          if (paymentAccountId) {
+            try {
+              const result = await registerTreasuryMovement({
+                companyId: companyId,
+                accountId: paymentAccountId,
+                type: "entrada",
+                amount: Number(payment.amount_usd),
+                currency: "usd",
+                description: `Cobro ${receivable.invoice_number || "CxC"} - ${receivable.partners?.name || ""}`,
+                category: "Cobro CxC",
+                originModule: "cxc",
+                referenceId: payment.id,
+              });
+              if (result.isLowBalance) {
+                toast.warning(`${result.accountName} tiene saldo bajo: $${result.newBalance.toFixed(2)}`);
+              }
+            } catch (err) {
+              console.warn("Error registrando en tesorería:", err);
             }
           }
         }
@@ -557,6 +584,21 @@ function CobranzaContent() {
                 onChange={(e) => setPaymentRef(e.target.value)}
                 className="bg-surface-input border-none h-12"
               />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-text-3 uppercase tracking-wider">
+                Cuenta de Destino *
+              </label>
+              <Select value={paymentAccountId} onValueChange={setPaymentAccountId}>
+                <SelectTrigger className="bg-surface-input border-none h-12">
+                  <SelectValue placeholder="¿A qué cuenta entró el dinero?" />
+                </SelectTrigger>
+                <SelectContent className="bg-surface-card border-border text-black">
+                  {treasuryAccounts.map((a: any) => (
+                    <SelectItem key={a.id} value={a.id}>{a.name} ({a.currency?.toUpperCase()})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>

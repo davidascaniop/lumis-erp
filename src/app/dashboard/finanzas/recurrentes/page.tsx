@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
 import { useBCV } from "@/hooks/use-bcv";
+import { useTreasuryAccounts, registerTreasuryMovement } from "@/hooks/use-treasury";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Loader2,
@@ -81,11 +82,13 @@ function RecurrentesContent() {
   const supabase = createClient();
   const { user } = useUser();
   const { rate } = useBCV();
-  
+  const { accounts: treasuryAccounts } = useTreasuryAccounts(user?.company_id);
+
   const [recurrentes, setRecurrentes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [saving, setSaving] = useState(false);
+  const [payAccountId, setPayAccountId] = useState("");
 
   // Modals
   const [createOpen, setCreateOpen] = useState(false);
@@ -229,6 +232,30 @@ function RecurrentesContent() {
         user_id: user.id
       });
 
+      // 3. Register in Treasury
+      if (payAccountId) {
+        try {
+          const result = await registerTreasuryMovement({
+            companyId: user.company_id,
+            accountId: payAccountId,
+            type: "salida",
+            amount: Number(recurrente.amount_usd),
+            currency: "usd",
+            description: `Pago Recurrente: ${recurrente.name}`,
+            category: recurrente.category || "Recurrente",
+            originModule: "recurrentes",
+            referenceId: exp?.id || recurrente.id,
+          });
+          if (result.isNegativeOrZero) {
+            toast.error(`${result.accountName} ha quedado en $0 o negativo`);
+          } else if (result.isLowBalance) {
+            toast.warning(`${result.accountName} tiene saldo bajo: $${result.newBalance.toFixed(2)}`);
+          }
+        } catch (err) {
+          console.warn("Error registrando en tesorería:", err);
+        }
+      }
+
       toast.success("Pago registrado y descontado del flujo de caja");
       fetchData();
     } catch (err: any) {
@@ -357,13 +384,25 @@ function RecurrentesContent() {
                     <span className={cn("text-[10px] font-black uppercase tracking-wider", urgency.color)}>{urgency.label}</span>
                   </div>
 
-                  <button 
-                    onClick={() => registerPayment(recurrente)}
-                    disabled={saving}
-                    className="w-full py-3 bg-surface-base border border-border hover:bg-brand hover:border-brand hover:text-white text-text-1 text-xs font-black rounded-xl transition-all shadow-sm flex items-center justify-center gap-2"
-                  >
-                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CheckCircle2 className="w-4 h-4" /> REGISTRAR PAGO</>}
-                  </button>
+                  <div className="space-y-2">
+                    <select
+                      value={payAccountId}
+                      onChange={e => setPayAccountId(e.target.value)}
+                      className="w-full py-2 px-3 bg-surface-base border border-border rounded-lg text-[10px] text-text-2 font-bold"
+                    >
+                      <option value="">Cuenta de origen...</option>
+                      {treasuryAccounts.map((a: any) => (
+                        <option key={a.id} value={a.id}>{a.name} ({a.currency?.toUpperCase()})</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => registerPayment(recurrente)}
+                      disabled={saving}
+                      className="w-full py-3 bg-surface-base border border-border hover:bg-brand hover:border-brand hover:text-white text-text-1 text-xs font-black rounded-xl transition-all shadow-sm flex items-center justify-center gap-2"
+                    >
+                      {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CheckCircle2 className="w-4 h-4" /> REGISTRAR PAGO</>}
+                    </button>
+                  </div>
                 </Card>
               </motion.div>
             );

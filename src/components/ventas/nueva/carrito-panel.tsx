@@ -27,6 +27,9 @@ export function CarritoPanel({
   partners,
   onSelectPartner,
   onCreateQuickClient,
+  treasuryAccounts,
+  treasuryAccountId,
+  onTreasuryAccountChange,
 }: {
   cart: any[];
   onUpdateQty: (id: string, delta: number) => void;
@@ -51,6 +54,9 @@ export function CarritoPanel({
   partners: any[];
   onSelectPartner: (p: any | null) => void;
   onCreateQuickClient: (name: string, rif: string, phone: string) => Promise<boolean>;
+  treasuryAccounts?: any[];
+  treasuryAccountId?: string;
+  onTreasuryAccountChange?: (v: string) => void;
 }) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [rifPrefix, setRifPrefix] = useState("V");
@@ -265,6 +271,25 @@ export function CarritoPanel({
                ))}
             </div>
           </div>
+
+          {/* ── CUENTA DE DESTINO (Tesorería) ── */}
+          {treasuryAccounts && treasuryAccounts.length > 0 && (
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-2 text-text-3 font-bold text-[11px] font-outfit uppercase tracking-widest">
+                <CreditCard className="w-3 h-3" /> ¿A qué cuenta entró?
+              </div>
+              <select
+                value={treasuryAccountId || ""}
+                onChange={e => onTreasuryAccountChange?.(e.target.value)}
+                className="w-full py-2.5 px-3 rounded-xl border border-[#E2E8F0] text-[12px] font-bold font-outfit bg-[#F8FAFC] focus:outline-none focus:border-brand/40 transition-all"
+              >
+                <option value="">Seleccionar cuenta...</option>
+                {treasuryAccounts.map((a: any) => (
+                  <option key={a.id} value={a.id}>{a.name} ({a.currency?.toUpperCase()})</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         {/* ── SECCIÓN: ITEMS ── */}

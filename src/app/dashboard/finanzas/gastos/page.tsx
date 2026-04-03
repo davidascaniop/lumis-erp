@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
 import { useBCV } from "@/hooks/use-bcv";
+import { useTreasuryAccounts, registerTreasuryMovement } from "@/hooks/use-treasury";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -95,6 +96,7 @@ function GastosContent() {
   const supabase = createClient();
   const { user } = useUser();
   const { rate } = useBCV();
+  const { accounts: treasuryAccounts } = useTreasuryAccounts(user?.company_id);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -130,6 +132,7 @@ function GastosContent() {
     method: "Transferencia",
     date: format(new Date(), "yyyy-MM-dd"),
     receipt: null as File | null,
+    treasury_account_id: "",
   });
 
   const fetchData = async () => {
@@ -286,6 +289,30 @@ function GastosContent() {
         user_id: user.id
       });
       if (txErr) console.warn("Error transaction log:", txErr);
+
+      // 3. Register in Treasury
+      if (paymentData.treasury_account_id) {
+        try {
+          const result = await registerTreasuryMovement({
+            companyId: user.company_id,
+            accountId: paymentData.treasury_account_id,
+            type: "salida",
+            amount: amt,
+            currency: "usd",
+            description: `Pago Gasto: ${selectedExpense.reference || ""} (${beneficiary})`,
+            category: selectedExpense.category || "Gasto",
+            originModule: "gastos",
+            referenceId: selectedExpense.id,
+          });
+          if (result.isNegativeOrZero) {
+            toast.error(`${result.accountName} ha quedado en $0 o negativo`);
+          } else if (result.isLowBalance) {
+            toast.warning(`${result.accountName} tiene saldo bajo: $${result.newBalance.toFixed(2)}`);
+          }
+        } catch (err) {
+          console.warn("Error registrando en tesorería:", err);
+        }
+      }
 
       toast.success("Pago registrado con éxito");
       setPayOpen(false);
@@ -548,6 +575,18 @@ function GastosContent() {
                    <SelectContent className="bg-surface-card border-border text-black">
                       {["Efectivo", "Transferencia", "Pago Móvil", "Zelle", "Binance"].map(m => (
                          <SelectItem key={m} value={m}>{m}</SelectItem>
+                      ))}
+                   </SelectContent>
+                </Select>
+             </div>
+
+             <div className="space-y-1.5">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">¿De qué cuenta sale el dinero? *</label>
+                <Select value={paymentData.treasury_account_id} onValueChange={val => setPaymentData(p=>({...p, treasury_account_id: val}))}>
+                   <SelectTrigger className="h-11 bg-surface-input border-border/50"><SelectValue placeholder="Selecciona cuenta..." /></SelectTrigger>
+                   <SelectContent className="bg-surface-card border-border text-black">
+                      {treasuryAccounts.map((a: any) => (
+                         <SelectItem key={a.id} value={a.id}>{a.name} ({a.currency?.toUpperCase()})</SelectItem>
                       ))}
                    </SelectContent>
                 </Select>
