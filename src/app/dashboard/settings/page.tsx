@@ -19,6 +19,9 @@ import {
   Plus,
   Trash2,
   Mail,
+  CheckCircle2,
+  X,
+  Zap,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -684,117 +687,198 @@ function SettingsContent() {
               className="space-y-6"
             >
               {company?.subscription_status === 'demo' ? (
-                 <div className="bg-gradient-to-br from-[#1A1220] to-[#011B16] backdrop-blur-xl border border-[#00E5CC]/30 rounded-2xl p-8 relative overflow-hidden">
-                    <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#00E5CC]/10 rounded-full blur-3xl pointer-events-none" />
-                    <div className="flex items-center gap-6 relative z-10">
-                      <div className="w-16 h-16 bg-[#00E5CC]/20 rounded-2xl flex items-center justify-center p-0.5 border border-[#00E5CC]/30">
-                        <Sparkles className="w-8 h-8 text-[#00E5CC]" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-[#F5EEFF]">Cuenta Demo</h2>
-                        <p className="text-[#00E5CC] font-bold text-lg mt-1 flex items-center gap-2">
-                           Acceso completo habilitado
-                           <Shield className="w-5 h-5" />
-                        </p>
-                        <p className="text-[#B8A0D0] mt-3 max-w-md text-sm leading-relaxed">
-                          Esta cuenta tiene privilegios especiales para demostración. Disfrutas de todas las funcionalidades del <strong>Plan Enterprise</strong> de forma ilimitada.
-                        </p>
-                      </div>
-                    </div>
-                 </div>
+                /* ── DEMO ACCOUNT ── */
+                <div className="bg-white border border-emerald-200 rounded-2xl p-8 flex items-center gap-6">
+                  <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center border border-emerald-200 flex-shrink-0">
+                    <Sparkles className="w-8 h-8 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-montserrat font-bold text-text-1">Cuenta Demo</h2>
+                    <p className="text-emerald-600 font-bold text-base mt-1 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4" /> Acceso Enterprise completo habilitado
+                    </p>
+                    <p className="text-text-2 mt-2 max-w-md text-sm leading-relaxed">
+                      Esta cuenta tiene privilegios especiales para demostración. Disfrutas de todas las funcionalidades del <strong>Plan Enterprise</strong> de forma ilimitada.
+                    </p>
+                  </div>
+                </div>
               ) : (
                 <>
-                  <div className="bg-gradient-to-br from-[#1A1220] to-[#0A1A17] backdrop-blur-xl border border-[#00D4AA]/30 rounded-2xl p-8 relative overflow-hidden">
-                    <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#00D4AA]/10 rounded-full blur-3xl pointer-events-none" />
-
-                    <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center relative z-10">
+                  {/* ── ESTADO ACTUAL ── */}
+                  <div className="bg-white border border-border rounded-2xl p-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                       <div>
-                        <div className="flex items-center gap-3 mb-2">
-                          <h2 className="text-2xl font-bold text-[#F5EEFF]">
-                            Plan Actual
-                          </h2>
-                          <Badge className="bg-[#00D4AA]/20 text-[#00D4AA] border-[#00D4AA]/30 px-3 py-1 uppercase tracking-widest">
-                            {company?.plan_type || "BASIC"}
-                          </Badge>
-                        </div>
-                        <p className="text-[#B8A0D0] max-w-md">
-                          Estás utilizando las cuotas y funcionalidades asignadas al
-                          plan de inicio. Potencia tu empresa escalando a Pro.
-                        </p>
-                      </div>
-                      <div className="text-left md:text-right">
-                        <p className="text-3xl font-bold text-[#00D4AA] mb-1">
-                          $29{" "}
-                          <span className="text-lg text-[#6B5280] font-normal">
-                            / mes
+                        <div className="flex items-center gap-3 mb-1">
+                          <h2 className="text-lg font-montserrat font-bold text-text-1">Tu Plan Actual</h2>
+                          <span className="px-2.5 py-0.5 bg-brand/10 text-brand border border-brand/20 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                            {company?.plan_type || "Starter"}
                           </span>
-                        </p>
-                        <p className="text-xs text-[#00D4AA]">
-                          Próximo cobro: 15 de Oct, 2026
-                        </p>
+                        </div>
+                        <p className="text-text-3 text-sm">Estás utilizando las cuotas asignadas a tu plan.</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-montserrat font-black text-text-1">$29 <span className="text-sm font-normal text-text-3">/ mes</span></p>
+                        <p className="text-[10px] text-text-3 mt-0.5">Próximo cobro: 15 de Oct, 2026</p>
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-8 border-t border-[#00D4AA]/10">
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-[#B8A0D0]">
-                            Usuarios de Sistema
-                          </span>
-                          <span className="text-[#F5EEFF] font-medium">1 / 2</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-5 border-t border-border">
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between text-xs font-medium">
+                          <span className="text-text-3">Usuarios del Sistema</span>
+                          <span className="text-text-1 font-bold">1 / 2</span>
                         </div>
-                        <div className="h-1.5 w-full bg-[#0F0A12] rounded-full overflow-hidden">
-                          <div className="h-full bg-[#00D4AA] w-[50%]" />
+                        <div className="h-1.5 w-full bg-surface-base rounded-full overflow-hidden">
+                          <div className="h-full bg-brand rounded-full w-[50%]" />
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-[#B8A0D0]">
-                            Almacenamiento (Docs)
-                          </span>
-                          <span className="text-[#F5EEFF] font-medium">
-                            20 MB / 5 GB
-                          </span>
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between text-xs font-medium">
+                          <span className="text-text-3">Almacenamiento</span>
+                          <span className="text-text-1 font-bold">20 MB / 5 GB</span>
                         </div>
-                        <div className="h-1.5 w-full bg-[#0F0A12] rounded-full overflow-hidden">
-                          <div className="h-full bg-[#00D4AA] w-[1%]" />
+                        <div className="h-1.5 w-full bg-surface-base rounded-full overflow-hidden">
+                          <div className="h-full bg-brand rounded-full w-[1%]" />
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-[#B8A0D0]">Emisiones PDF</span>
-                          <span className="text-[#F5EEFF] font-medium">
-                            Ilimitado
-                          </span>
-                        </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-text-3 font-medium">Emisiones PDF</span>
+                        <span className="text-xs font-bold text-emerald-600 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Ilimitado</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-[#1A1220]/50 backdrop-blur-xl border border-[#E040FB]/20 rounded-2xl p-6 hover:border-[#E040FB]/50 transition-colors">
-                    <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] rounded-xl flex items-center justify-center p-0.5 shadow-glow">
-                          <div className="w-full h-full bg-[#1A1220] rounded-[10px] flex items-center justify-center">
-                            <Sparkles className="w-6 h-6 text-[#E040FB]" />
+                  {/* ── COMPARACION DE PLANES ── */}
+                  <div>
+                    <h3 className="text-sm font-bold text-text-3 uppercase tracking-wider mb-4">Comparar Planes</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                      {/* STARTER */}
+                      {(() => {
+                        const isActive = !company?.plan_type || company?.plan_type?.toLowerCase() === 'starter' || company?.plan_type?.toLowerCase() === 'basic';
+                        return (
+                          <div className={`rounded-2xl border p-6 flex flex-col ${isActive ? 'bg-brand/5 border-brand/30' : 'bg-white border-border'}`}>
+                            <div className="mb-4">
+                              <div className="flex items-center justify-between mb-1">
+                                <p className="text-xs font-bold text-text-3 uppercase tracking-wider">Starter</p>
+                                {isActive && <span className="text-[9px] font-bold px-2 py-0.5 bg-brand/10 text-brand rounded-full border border-brand/20">PLAN ACTUAL</span>}
+                              </div>
+                              <p className="text-2xl font-montserrat font-black text-text-1">$0 <span className="text-xs font-normal text-text-3">/ mes</span></p>
+                            </div>
+                            <ul className="space-y-2.5 flex-1 text-xs">
+                              {[
+                                { label: "2 usuarios", ok: true },
+                                { label: "Módulos básicos (Ventas, Compras, Inventario)", ok: true },
+                                { label: "Semilla Diaria", ok: true },
+                                { label: "Reportes Avanzados", ok: false },
+                                { label: "Resumen Ejecutivo", ok: false },
+                                { label: "CRM Oportunidades", ok: false },
+                                { label: "Tesorería y Flujo de Caja", ok: false },
+                                { label: "5 GB almacenamiento", ok: true },
+                                { label: "Soporte por email", ok: true },
+                              ].map((f, i) => (
+                                <li key={i} className="flex items-start gap-2">
+                                  {f.ok
+                                    ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                                    : <X className="w-3.5 h-3.5 text-text-3 flex-shrink-0 mt-0.5" />}
+                                  <span className={f.ok ? "text-text-2" : "text-text-3"}>{f.label}</span>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-bold text-[#F5EEFF]">
-                            Mejora a Plan Profesional
-                          </h3>
-                          <p className="text-sm text-[#B8A0D0]">
-                            Hasta 10 usuarios, reportes avanzados, Multi-moneda y
-                            KPIs sin bloqueo.
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        onClick={handleUpgradePlan}
-                        className="bg-gradient-to-r from-[#E040FB] to-[#7C4DFF] text-white hover:opacity-90 w-full md:w-auto shadow-glow font-bold"
-                      >
-                        Actualizar al Plan Pro
-                      </Button>
+                        );
+                      })()}
+
+                      {/* PRO BUSINESS */}
+                      {(() => {
+                        const isActive = company?.plan_type?.toLowerCase() === 'pro';
+                        return (
+                          <div className={`rounded-2xl border p-6 flex flex-col relative ${isActive ? 'bg-brand/5 border-brand/30' : 'bg-white border-brand shadow-sm'}`}>
+                            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                              <span className="px-3 py-1 bg-brand text-white text-[10px] font-bold rounded-full shadow-brand">
+                                ⭐ Recomendado
+                              </span>
+                            </div>
+                            <div className="mb-4 mt-2">
+                              <div className="flex items-center justify-between mb-1">
+                                <p className="text-xs font-bold text-brand uppercase tracking-wider">Pro Business</p>
+                                {isActive && <span className="text-[9px] font-bold px-2 py-0.5 bg-brand/10 text-brand rounded-full border border-brand/20">PLAN ACTUAL</span>}
+                              </div>
+                              <p className="text-2xl font-montserrat font-black text-text-1">$29 <span className="text-xs font-normal text-text-3">/ mes</span></p>
+                            </div>
+                            <ul className="space-y-2.5 flex-1 text-xs">
+                              {[
+                                { label: "Hasta 10 usuarios", ok: true },
+                                { label: "Todos los módulos ERP+CRM", ok: true },
+                                { label: "Semilla Diaria", ok: true },
+                                { label: "Reportes Avanzados", ok: true },
+                                { label: "Resumen Ejecutivo (CEO)", ok: true },
+                                { label: "CRM Oportunidades completo", ok: true },
+                                { label: "Tesorería y Flujo de Caja", ok: true },
+                                { label: "50 GB almacenamiento", ok: true },
+                                { label: "Soporte prioritario", ok: true },
+                              ].map((f, i) => (
+                                <li key={i} className="flex items-start gap-2">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                                  <span className="text-text-2">{f.label}</span>
+                                </li>
+                              ))}
+                            </ul>
+                            {!isActive && (
+                              <button
+                                onClick={handleUpgradePlan}
+                                className="mt-5 w-full py-2.5 bg-brand-gradient text-white rounded-xl font-bold text-sm shadow-brand hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2"
+                              >
+                                <Zap className="w-4 h-4" /> Actualizar al Plan Pro
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })()}
+
+                      {/* ENTERPRISE */}
+                      {(() => {
+                        const isActive = company?.plan_type?.toLowerCase() === 'enterprise';
+                        return (
+                          <div className={`rounded-2xl border p-6 flex flex-col ${isActive ? 'bg-brand/5 border-brand/30' : 'bg-white border-border'}`}>
+                            <div className="mb-4">
+                              <div className="flex items-center justify-between mb-1">
+                                <p className="text-xs font-bold text-text-3 uppercase tracking-wider">Enterprise</p>
+                                {isActive && <span className="text-[9px] font-bold px-2 py-0.5 bg-brand/10 text-brand rounded-full border border-brand/20">PLAN ACTUAL</span>}
+                              </div>
+                              <p className="text-2xl font-montserrat font-black text-text-1">A consultar</p>
+                            </div>
+                            <ul className="space-y-2.5 flex-1 text-xs">
+                              {[
+                                { label: "Usuarios ilimitados", ok: true },
+                                { label: "Todo lo del Plan Pro", ok: true },
+                                { label: "Almacenamiento ilimitado", ok: true },
+                                { label: "API Access", ok: true },
+                                { label: "Onboarding dedicado", ok: true },
+                                { label: "Multi-empresa", ok: true },
+                                { label: "Soporte 24/7 dedicado", ok: true },
+                                { label: "SLA garantizado", ok: true },
+                                { label: "Personalización a medida", ok: true },
+                              ].map((f, i) => (
+                                <li key={i} className="flex items-start gap-2">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                                  <span className="text-text-2">{f.label}</span>
+                                </li>
+                              ))}
+                            </ul>
+                            {!isActive && (
+                              <a
+                                href="https://wa.me/584141234567"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-5 w-full py-2.5 bg-white border border-border text-text-1 rounded-xl font-bold text-sm hover:bg-surface-hover/10 active:scale-95 transition-all flex items-center justify-center gap-2"
+                              >
+                                Contactar Ventas
+                              </a>
+                            )}
+                          </div>
+                        );
+                      })()}
+
                     </div>
                   </div>
                 </>
