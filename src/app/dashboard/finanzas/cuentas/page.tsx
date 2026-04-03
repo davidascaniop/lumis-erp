@@ -360,14 +360,12 @@ function CuentasContent() {
   }, [needsExchangeRate, rate]);
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto animate-fade-in pb-20 font-montserrat">
-      {/* HEADER */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+    <div className="space-y-6 max-w-7xl mx-auto animate-fade-in pb-20">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-4xl font-black text-text-1 tracking-tight">Mis Cuentas y Tesorería</h1>
-          <p className="text-text-2 mt-2 text-sm font-medium flex items-center gap-2">
-            <Wallet className="w-4 h-4 text-brand" /> Gestiona tus saldos bancarios, efectivo y plataformas digitales
-          </p>
+          <h1 className="text-3xl font-montserrat font-bold text-text-1">Mis Cuentas y Tesorería</h1>
+          <p className="text-text-2 mt-1 text-sm font-medium">Gestiona tus saldos bancarios, efectivo y plataformas digitales</p>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -378,57 +376,33 @@ function CuentasContent() {
           </button>
           <button
             onClick={() => { resetForm(); setCreateOpen(true); }}
-            className="flex items-center gap-2 px-6 py-3 bg-brand-gradient text-white rounded-xl font-bold shadow-brand hover:scale-105 active:scale-95 transition-all"
+            className="px-6 py-3 bg-brand-gradient text-white rounded-xl font-bold shadow-brand hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
           >
             <Plus className="w-5 h-5" /> Nueva Cuenta
           </button>
         </div>
       </div>
 
-      {/* RESUMEN DE LIQUIDEZ */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-6 bg-surface-card border-border shadow-sm border-l-4 border-l-brand">
-          <div className="flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-brand/10 flex items-center justify-center text-brand">
-              <DollarSign className="w-7 h-7" />
-            </div>
-            <div>
-              <p className="text-[10px] text-text-3 font-bold uppercase tracking-widest mb-1">Total Consolidado USD</p>
-              <p className="text-3xl font-black text-text-1 font-mono">{formatCurrency(summary.totalUsd)}</p>
-              <p className="text-[10px] text-brand font-bold">Todas las cuentas activas</p>
-            </div>
-          </div>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Card className="p-5 bg-surface-card border-border shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-brand/10 flex items-center justify-center text-brand"><DollarSign className="w-6 h-6" /></div>
+          <div><p className="text-[10px] text-text-3 font-bold uppercase tracking-wider">Total Consolidado USD</p><p className="text-xl font-bold text-text-1">{formatCurrency(summary.totalUsd)}</p></div>
         </Card>
-        <Card className="p-6 bg-surface-card border-border shadow-sm border-l-4 border-l-orange-500">
-          <div className="flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500">
-              <Banknote className="w-7 h-7" />
-            </div>
-            <div>
-              <p className="text-[10px] text-text-3 font-bold uppercase tracking-widest mb-1">Total en Bolívares</p>
-              <p className="text-3xl font-black text-text-1 font-mono">Bs. {Number(summary.totalBs).toLocaleString("es-VE", { minimumFractionDigits: 2 })}</p>
-              <p className="text-[10px] text-orange-500 font-bold">Cuentas en Bs</p>
-            </div>
-          </div>
+        <Card className="p-5 bg-surface-card border-border shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500"><Banknote className="w-6 h-6" /></div>
+          <div><p className="text-[10px] text-text-3 font-bold uppercase tracking-wider">Total en Bolívares</p><p className="text-xl font-bold text-text-1">Bs. {Number(summary.totalBs).toLocaleString("es-VE", { minimumFractionDigits: 2 })}</p></div>
         </Card>
-        <Card className="p-6 bg-surface-card border-border shadow-sm border-l-4 border-l-emerald-500">
-          <div className="flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-              <TrendingUp className="w-7 h-7" />
-            </div>
-            <div>
-              <p className="text-[10px] text-text-3 font-bold uppercase tracking-widest mb-1">Total USD Puro</p>
-              <p className="text-3xl font-black text-text-1 font-mono">{formatCurrency(summary.totalUsdPure)}</p>
-              <p className="text-[10px] text-emerald-500 font-bold">Solo cuentas en USD</p>
-            </div>
-          </div>
+        <Card className="p-5 bg-surface-card border-border shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500"><TrendingUp className="w-6 h-6" /></div>
+          <div><p className="text-[10px] text-text-3 font-bold uppercase tracking-wider">Total USD Puro</p><p className="text-xl font-bold text-text-1">{formatCurrency(summary.totalUsdPure)}</p></div>
         </Card>
       </div>
 
-      {/* BUSCADOR */}
-      <div className="relative w-full md:w-96">
+      {/* Buscador */}
+      <div className="relative w-full md:w-80">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
-        <Input placeholder="Buscar cuenta..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 h-12 bg-surface-card border-border shadow-sm" />
+        <Input placeholder="Buscar cuenta..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 h-11 bg-surface-card border-border shadow-sm" />
       </div>
 
       {/* TABLA DE CUENTAS */}

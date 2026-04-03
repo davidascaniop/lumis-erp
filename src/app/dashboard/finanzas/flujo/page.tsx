@@ -372,82 +372,56 @@ function FlujoContent() {
   const netBalance = totalIn - totalOut;
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto animate-fade-in pb-20 font-montserrat">
+    <div className="space-y-6 max-w-7xl mx-auto animate-fade-in pb-20">
       {/* ─── HEADER ─── */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-4xl font-black text-text-1 tracking-tight">Flujo de Caja</h1>
-          <p className="text-text-2 mt-2 text-sm font-medium flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-brand" /> Posición actual y proyección de liquidez de tu negocio
-          </p>
+          <h1 className="text-3xl font-montserrat font-bold text-text-1">Flujo de Caja</h1>
+          <p className="text-text-2 mt-1 text-sm font-medium">Posición actual y proyección de liquidez de tu negocio</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-1 bg-surface-card border border-border p-1 rounded-xl shadow-sm">
             {(["semana", "mes", "todo"] as const).map(f => (
-              <button key={f} onClick={() => setTimeFilter(f)} className={cn("px-4 py-1.5 text-[10px] font-black rounded-lg transition-all uppercase tracking-widest", timeFilter === f ? "bg-brand text-white shadow-brand" : "text-text-3 hover:text-text-1")}>
+              <button key={f} onClick={() => setTimeFilter(f)} className={cn("px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all uppercase", timeFilter === f ? "bg-brand text-white shadow-brand" : "text-text-3 hover:text-text-1")}>
                 {f === "semana" ? "Esta Semana" : f === "mes" ? "Este Mes" : "Histórico"}
               </button>
             ))}
           </div>
-          <button onClick={handleExport} className="flex items-center gap-2 px-5 py-2.5 bg-surface-card border border-border text-text-1 rounded-xl font-bold shadow-sm hover:bg-surface-hover/10 transition-all">
+          <button onClick={handleExport} className="flex items-center gap-2 px-5 py-3 bg-surface-card border border-border text-text-1 rounded-xl font-bold shadow-sm hover:bg-surface-hover/10 transition-all">
             <Download className="w-4 h-4" /> Exportar
           </button>
-          <button onClick={() => setManualOpen(true)} className="flex items-center gap-2 px-6 py-2.5 bg-brand-gradient text-white rounded-xl font-bold shadow-brand hover:scale-105 active:scale-95 transition-all">
+          <button onClick={() => setManualOpen(true)} className="px-6 py-3 bg-brand-gradient text-white rounded-xl font-bold shadow-brand hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
             <Plus className="w-5 h-5" /> Movimiento Manual
           </button>
         </div>
       </div>
 
       {/* ─── SECCIÓN 1: POSICIÓN ACTUAL ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <Card className="lg:col-span-1 p-8 bg-surface-card border-brand/50 border-2 relative overflow-hidden group shadow-elevation">
-          <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform duration-500">
-            <Wallet className="w-24 h-24 text-brand" />
-          </div>
-          <div className="relative z-10">
-            <p className="text-[10px] font-black text-brand uppercase tracking-widest mb-2 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" /> Saldo Total Disponible
-            </p>
-            <h2 className="text-4xl font-black text-text-1 font-mono tracking-tighter">
-              {loading ? "---" : formatCurrency(totalBalanceUsd)}
-            </h2>
-            <p className="text-[10px] text-text-3 mt-2 font-bold">Consolidado en USD (todas las cuentas)</p>
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="p-5 bg-surface-card border-border shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-brand/10 flex items-center justify-center text-brand"><Wallet className="w-6 h-6" /></div>
+          <div><p className="text-[10px] text-text-3 font-bold uppercase tracking-wider">Saldo Total USD</p><p className="text-xl font-bold text-text-1">{loading ? "---" : formatCurrency(totalBalanceUsd)}</p></div>
         </Card>
-
-        <Card className="p-6 bg-surface-card border-border shadow-sm flex items-center gap-4">
+        <Card className="p-5 bg-surface-card border-border shadow-sm flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500"><ArrowUpRight className="w-6 h-6" /></div>
-          <div>
-            <p className="text-[10px] text-text-3 font-bold uppercase tracking-widest">Entradas del Período</p>
-            <p className="text-2xl font-black text-emerald-500 font-mono">{formatCurrency(totalIn)}</p>
-          </div>
+          <div><p className="text-[10px] text-text-3 font-bold uppercase tracking-wider">Entradas del Período</p><p className="text-xl font-bold text-emerald-500">{formatCurrency(totalIn)}</p></div>
         </Card>
-
-        <Card className="p-6 bg-surface-card border-border shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500"><ArrowDownRight className="w-6 h-6" /></div>
-          <div>
-            <p className="text-[10px] text-text-3 font-bold uppercase tracking-widest">Salidas del Período</p>
-            <p className="text-2xl font-black text-red-500 font-mono">{formatCurrency(totalOut)}</p>
-          </div>
+        <Card className="p-5 bg-surface-card border-border shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-status-danger/10 flex items-center justify-center text-status-danger"><ArrowDownRight className="w-6 h-6" /></div>
+          <div><p className="text-[10px] text-text-3 font-bold uppercase tracking-wider">Salidas del Período</p><p className="text-xl font-bold text-status-danger">{formatCurrency(totalOut)}</p></div>
         </Card>
-
-        <Card className={cn("p-6 bg-surface-card border-border shadow-sm flex items-center gap-4", netBalance >= 0 ? "border-l-4 border-l-emerald-500" : "border-l-4 border-l-red-500")}>
-          <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", netBalance >= 0 ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500")}>
+        <Card className="p-5 bg-surface-card border-border shadow-sm flex items-center gap-4">
+          <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", netBalance >= 0 ? "bg-emerald-500/10 text-emerald-500" : "bg-status-danger/10 text-status-danger")}>
             <TrendingUp className="w-6 h-6" />
           </div>
-          <div>
-            <p className="text-[10px] text-text-3 font-bold uppercase tracking-widest">Balance Neto</p>
-            <p className={cn("text-2xl font-black font-mono", netBalance >= 0 ? "text-emerald-500" : "text-red-500")}>
-              {netBalance >= 0 ? "+" : ""}{formatCurrency(netBalance)}
-            </p>
-          </div>
+          <div><p className="text-[10px] text-text-3 font-bold uppercase tracking-wider">Balance Neto</p><p className={cn("text-xl font-bold", netBalance >= 0 ? "text-emerald-500" : "text-status-danger")}>{netBalance >= 0 ? "+" : ""}{formatCurrency(netBalance)}</p></div>
         </Card>
       </div>
 
       {/* ─── SECCIÓN 2: MIS CUENTAS (RESUMEN VISUAL) ─── */}
       {accounts.length > 0 && (
         <div>
-          <h3 className="text-lg font-black text-text-1 mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-montserrat font-bold text-text-1 mb-4 flex items-center gap-2">
             <Landmark className="w-5 h-5 text-brand" /> Mis Cuentas
           </h3>
           <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
@@ -486,25 +460,23 @@ function FlujoContent() {
       )}
 
       {/* ─── SECCIÓN 3: PROYECCIÓN 30 DÍAS ─── */}
-      <Card className="p-8 bg-surface-card border border-border rounded-3xl shadow-elevation relative overflow-hidden">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">
+      <Card className="p-6 bg-surface-card border border-border rounded-2xl shadow-card overflow-hidden">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
-            <h3 className="text-xl font-black text-text-1 flex items-center gap-2">
-              <TrendingUp className="w-6 h-6 text-brand" /> Proyección Próximos 30 Días
+            <h3 className="text-lg font-montserrat font-bold text-text-1 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-brand" /> Proyección Próximos 30 Días
             </h3>
             <p className="text-text-3 text-xs font-medium mt-1">Simulación basada en cuentas por cobrar, gastos recurrentes y compromisos pendientes</p>
           </div>
           <AnimatePresence>
             {deficitPoint && (
-              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-red-500/10 border border-red-500/30 p-4 rounded-2xl flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-500">
-                  <AlertTriangle className="w-6 h-6" />
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-status-danger/10 border border-status-danger/30 p-3 rounded-xl flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-status-danger/20 flex items-center justify-center text-status-danger">
+                  <AlertTriangle className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-red-500 text-[10px] font-black uppercase tracking-widest">Déficit Proyectado</p>
-                  <p className="text-text-1 text-xs font-bold mt-0.5">
-                    {formatCurrency(Math.abs(deficitPoint.balance))} en la semana {deficitWeek}
-                  </p>
+                  <p className="text-status-danger text-[10px] font-bold uppercase tracking-wider">Déficit Proyectado</p>
+                  <p className="text-text-1 text-xs font-bold">{formatCurrency(Math.abs(deficitPoint.balance))} en la semana {deficitWeek}</p>
                 </div>
               </motion.div>
             )}
@@ -558,14 +530,14 @@ function FlujoContent() {
       </Card>
 
       {/* ─── SECCIÓN 4 & 5: ENTRADAS Y SALIDAS ESPERADAS ─── */}
-      <div className="grid lg:grid-cols-2 gap-8">
+      <div className="grid lg:grid-cols-2 gap-6">
         {/* Entradas esperadas */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <h3 className="text-lg font-black text-text-1 flex items-center gap-2">
-              <ArrowUpRight className="w-5 h-5 text-emerald-500" /> Entradas Esperadas
+        <div className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-base font-montserrat font-bold text-text-1 flex items-center gap-2">
+              <ArrowUpRight className="w-4 h-4 text-emerald-500" /> Entradas Esperadas
             </h3>
-            <span className="text-[10px] font-black bg-emerald-500/10 text-emerald-500 px-2 py-1 rounded-lg uppercase tracking-widest">
+            <span className="text-[10px] font-bold bg-emerald-500/10 text-emerald-500 px-2 py-1 rounded-lg uppercase tracking-wider">
               Total: {formatCurrency(totalEntradas)}
             </span>
           </div>
@@ -603,12 +575,12 @@ function FlujoContent() {
         </div>
 
         {/* Salidas comprometidas */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <h3 className="text-lg font-black text-text-1 flex items-center gap-2">
-              <ArrowDownRight className="w-5 h-5 text-red-500" /> Salidas Comprometidas
+        <div className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-base font-montserrat font-bold text-text-1 flex items-center gap-2">
+              <ArrowDownRight className="w-4 h-4 text-status-danger" /> Salidas Comprometidas
             </h3>
-            <span className="text-[10px] font-black bg-red-500/10 text-red-500 px-2 py-1 rounded-lg uppercase tracking-widest">
+            <span className="text-[10px] font-bold bg-status-danger/10 text-status-danger px-2 py-1 rounded-lg uppercase tracking-wider">
               Total: {formatCurrency(totalSalidas)}
             </span>
           </div>
@@ -645,7 +617,7 @@ function FlujoContent() {
       </div>
 
       {/* ─── SECCIÓN 6: HISTORIAL DE MOVIMIENTOS ─── */}
-      <div className="bg-surface-card border border-border rounded-3xl overflow-hidden shadow-elevation flex flex-col" style={{ maxHeight: "70vh" }}>
+      <div className="bg-surface-card border border-border rounded-2xl overflow-hidden shadow-card flex flex-col" style={{ maxHeight: "70vh" }}>
         <div className="p-6 border-b border-border/40 bg-surface-card/40 flex flex-col xl:flex-row justify-between items-center gap-4">
           <div className="relative w-full xl:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
@@ -738,24 +710,22 @@ function FlujoContent() {
 
       {/* ─── DIALOG: MOVIMIENTO MANUAL ─── */}
       <Dialog open={manualOpen} onOpenChange={setManualOpen}>
-        <DialogContent className="bg-surface-card border-border text-text-1 sm:max-w-xl p-0 overflow-hidden rounded-3xl">
-          <div className="bg-brand-gradient p-8 text-white">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-black tracking-tight">Nuevo Movimiento Manual</DialogTitle>
-              <p className="text-white/70 text-xs font-medium mt-1">Registra entradas o salidas manuales a una cuenta específica.</p>
-            </DialogHeader>
-          </div>
-          <div className="p-8 space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-text-3 uppercase tracking-widest">Tipo</label>
+        <DialogContent className="bg-surface-card border-border text-text-1 sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-montserrat font-bold">Nuevo Movimiento Manual</DialogTitle>
+            <p className="text-text-3 text-xs">Registra entradas o salidas manuales a una cuenta específica.</p>
+          </DialogHeader>
+          <div className="space-y-5 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Tipo</label>
                 <div className="flex p-1 bg-surface-input rounded-xl border border-border/40">
                   <button onClick={() => setFormData(f => ({ ...f, type: "entrada" }))} className={cn("flex-1 py-2 text-[10px] font-black rounded-lg transition-all", formData.type === "entrada" ? "bg-white text-brand shadow-sm" : "text-text-3")}>ENTRADA</button>
                   <button onClick={() => setFormData(f => ({ ...f, type: "salida" }))} className={cn("flex-1 py-2 text-[10px] font-black rounded-lg transition-all", formData.type === "salida" ? "bg-white text-red-500 shadow-sm" : "text-text-3")}>SALIDA</button>
                 </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-text-3 uppercase tracking-widest">Cuenta *</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Cuenta *</label>
                 <Select value={formData.account_id} onValueChange={val => setFormData(f => ({ ...f, account_id: val }))}>
                   <SelectTrigger className="bg-surface-input border-border/40 h-11 rounded-xl"><SelectValue placeholder="Selecciona cuenta..." /></SelectTrigger>
                   <SelectContent className="bg-surface-card border-border text-text-1">
@@ -763,29 +733,29 @@ function FlujoContent() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-2 space-y-2">
-                <label className="text-[10px] font-black text-text-3 uppercase tracking-widest">Descripción *</label>
+              <div className="col-span-2 space-y-1.5">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Descripción *</label>
                 <Input placeholder="Ej: Aporte de socios, Ajuste de caja..." value={formData.description} onChange={e => setFormData(f => ({ ...f, description: e.target.value }))} className="bg-surface-input border border-border/40 h-11 rounded-xl font-bold" />
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-text-3 uppercase tracking-widest text-brand">Monto *</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider text-brand">Monto *</label>
                 <div className="relative">
                   <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
                   <Input type="number" step="0.01" placeholder="0.00" value={formData.amount} onChange={e => setFormData(f => ({ ...f, amount: e.target.value }))} className="pl-10 bg-surface-input border border-border/40 h-12 rounded-xl font-black text-lg" />
                 </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-text-3 uppercase tracking-widest">Fecha</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Fecha</label>
                 <Input type="date" value={formData.date} onChange={e => setFormData(f => ({ ...f, date: e.target.value }))} className="bg-surface-input border border-border/40 h-12 rounded-xl font-bold" />
               </div>
             </div>
           </div>
-          <div className="px-8 py-6 bg-surface-base flex justify-end gap-3">
-            <button onClick={() => setManualOpen(false)} className="px-6 py-2 text-text-3 font-black text-xs uppercase tracking-widest hover:text-text-1">Cancelar</button>
-            <button disabled={saving} onClick={handleRegisterManual} className="px-10 py-3 bg-brand-gradient text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-brand hover:scale-105 active:scale-95 transition-all disabled:opacity-50">
+          <DialogFooter>
+            <button onClick={() => setManualOpen(false)} className="px-6 py-2 text-text-3 font-bold">Cancelar</button>
+            <button disabled={saving} onClick={handleRegisterManual} className="px-8 py-3 bg-brand-gradient text-white rounded-xl font-bold shadow-brand flex items-center gap-2">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirmar Registro"}
             </button>
-          </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
