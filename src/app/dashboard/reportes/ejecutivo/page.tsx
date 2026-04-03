@@ -115,18 +115,18 @@ export default function ResumenEjecutivoPage() {
           ordRes, recvRes, payRes, prodRes, itemRes,
           tacRes, tmRes, purRes, expRes, recurRes, selRes, crmRes
         ] = await Promise.all([
-          supabase.from("orders").select("id,total_usd,amount_paid,amount_due,status,created_at,user_id,partner_id,partners(name)").eq("company_id", cid).gte("created_at", oneYearAgo),
-          supabase.from("receivables").select("*").eq("company_id", cid),
+          supabase.from("orders").select("id,total_usd,amount_paid,amount_due,status,created_at,user_id,partner_id").eq("company_id", cid).gte("created_at", oneYearAgo),
+          supabase.from("receivables").select("id,amount_usd,paid_usd,balance_usd,due_date,status").eq("company_id", cid),
           supabase.from("payments").select("amount_usd,created_at,verified_at").eq("company_id", cid).in("status", ["verified","completed","paid","approved"]),
           supabase.from("products").select("id,name,price_usd,cost_usd,stock_qty,min_stock,is_active,category").eq("company_id", cid).eq("is_active", true),
-          supabase.from("order_items").select("order_id,qty,subtotal,product_id,products(name)").eq("company_id" as any, cid).gte("created_at" as any, oneYearAgo),
-          supabase.from("treasury_accounts").select("*").eq("company_id", cid).eq("is_active", true),
+          (supabase.from("order_items") as any).select("order_id,qty,subtotal,product_id,products(name)").gte("created_at", oneYearAgo),
+          supabase.from("treasury_accounts").select("id,name,type,currency,current_balance,min_alert_balance,is_active").eq("company_id", cid).eq("is_active", true),
           supabase.from("treasury_movements").select("type,amount,currency,created_at,origin_module").eq("company_id", cid).gte("created_at", oneYearAgo),
-          supabase.from("purchases").select("id,total_usd,status,created_at,suppliers(name)").eq("company_id", cid).gte("created_at", oneYearAgo),
+          (supabase.from("purchases") as any).select("id,total_usd,status,created_at").eq("company_id", cid).gte("created_at", oneYearAgo),
           supabase.from("expenses").select("amount_usd,status,due_date,created_at,category").eq("company_id", cid).gte("created_at", oneYearAgo),
           supabase.from("recurring_expenses").select("amount_usd,due_day,is_active,name,category").eq("company_id", cid).eq("is_active", true),
-          supabase.from("users").select("id,full_name").eq("company_id", cid).eq("is_active" as any, true),
-          supabase.from("crm_oportunidades").select("id,etapa,score,created_at").eq("company_id" as any, cid),
+          supabase.from("users").select("id,full_name").eq("company_id", cid),
+          (supabase.from("crm_oportunidades") as any).select("id,etapa,score,created_at").eq("company_id", cid),
         ]);
 
         setOrders(ordRes.data || []);
