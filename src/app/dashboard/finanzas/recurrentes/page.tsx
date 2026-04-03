@@ -313,18 +313,18 @@ function RecurrentesContent() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-6 bg-surface-card border-border shadow-sm flex items-center gap-5 border-l-4 border-l-brand">
-           <div className="w-14 h-14 rounded-2xl bg-brand/10 flex items-center justify-center text-brand"><TrendingUp className="w-7 h-7" /></div>
-           <div><p className="text-xs text-text-3 font-bold uppercase tracking-widest mb-1">Total Comprometido</p><p className="text-3xl font-black text-text-1">{formatCurrency(stats.totalComprometido)}</p><p className="text-[10px] text-brand/80 font-bold">Base mensual est.</p></div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Card className="p-5 bg-surface-card border-border shadow-sm flex items-center gap-4">
+           <div className="w-12 h-12 rounded-xl bg-brand/10 flex items-center justify-center text-brand"><TrendingUp className="w-6 h-6" /></div>
+           <div><p className="text-[10px] text-text-3 font-bold uppercase tracking-wider">Total Comprometido</p><p className="text-xl font-bold text-text-1">{formatCurrency(stats.totalComprometido)}</p><p className="text-[10px] text-brand font-bold mt-0.5">Base mensual est.</p></div>
         </Card>
-        <Card className="p-6 bg-surface-card border-border shadow-sm flex items-center gap-5 border-l-4 border-l-orange-500">
-           <div className="w-14 h-14 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500"><Clock className="w-7 h-7" /></div>
-           <div><p className="text-xs text-text-3 font-bold uppercase tracking-widest mb-1">Próximos esta semana</p><p className="text-3xl font-black text-text-1">--</p><p className="text-[10px] text-orange-500/80 font-bold">Ver debajo</p></div>
+        <Card className="p-5 bg-surface-card border-border shadow-sm flex items-center gap-4">
+           <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500"><Clock className="w-6 h-6" /></div>
+           <div><p className="text-[10px] text-text-3 font-bold uppercase tracking-wider">Próximos esta semana</p><p className="text-xl font-bold text-text-1">--</p><p className="text-[10px] text-orange-500 font-bold mt-0.5">Ver debajo</p></div>
         </Card>
-        <Card className="p-6 bg-surface-card border-border shadow-sm flex items-center gap-5 border-l-4 border-l-emerald-500">
-           <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500"><CheckCircle2 className="w-7 h-7" /></div>
-           <div><p className="text-xs text-text-3 font-bold uppercase tracking-widest mb-1">Pagados este mes</p><p className="text-3xl font-black text-text-1">--</p><p className="text-[10px] text-emerald-500/80 font-bold">Historial activo</p></div>
+        <Card className="p-5 bg-surface-card border-border shadow-sm flex items-center gap-4">
+           <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500"><CheckCircle2 className="w-6 h-6" /></div>
+           <div><p className="text-[10px] text-text-3 font-bold uppercase tracking-wider">Pagados este mes</p><p className="text-xl font-bold text-text-1">--</p><p className="text-[10px] text-emerald-500 font-bold mt-0.5">Historial activo</p></div>
         </Card>
       </div>
 
