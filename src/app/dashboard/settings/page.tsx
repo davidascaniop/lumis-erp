@@ -714,6 +714,20 @@ function SettingsContent() {
                     const maxUsers = isEnterprise ? "∞" : isPro ? "10" : "2";
                     const storage = isEnterprise ? "Ilimitado" : isPro ? "50 GB" : "5 GB";
                     const isUnlimited = isEnterprise;
+                    // Calcular próximo cobro dinámicamente
+                    const nextBilling = (() => {
+                      const today = new Date();
+                      // Usar día de creación de la empresa como día de facturación, o el 1 si no existe
+                      const billingDay = company?.created_at
+                        ? new Date(company.created_at).getDate()
+                        : 1;
+                      const next = new Date(today.getFullYear(), today.getMonth(), billingDay);
+                      // Si ese día ya pasó este mes, ir al próximo mes
+                      if (next <= today) {
+                        next.setMonth(next.getMonth() + 1);
+                      }
+                      return next.toLocaleDateString("es-VE", { day: "numeric", month: "long", year: "numeric" });
+                    })();
                     return (
                       <div className="bg-white border border-border rounded-2xl p-6">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -734,7 +748,7 @@ function SettingsContent() {
                           </div>
                           <div className="text-right">
                             <p className="text-2xl font-montserrat font-black text-text-1">{price} <span className="text-sm font-normal text-text-3">/ mes</span></p>
-                            <p className="text-[10px] text-text-3 mt-0.5">Próximo cobro: 15 de Oct, 2026</p>
+                            <p className="text-[10px] text-text-3 mt-0.5">Próximo cobro: {nextBilling}</p>
                           </div>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-5 border-t border-border">
