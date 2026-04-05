@@ -12,7 +12,11 @@ import {
   Shield,
   ChevronRight,
   ChevronDown,
-  Briefcase
+  Briefcase,
+  LineChart,
+  PieChart,
+  DollarSign,
+  TrendingUp
 } from "lucide-react";
 
 import { useState, useEffect } from "react";
@@ -25,6 +29,7 @@ export function SuperAdminSidebar() {
   const [expandedSection, setExpandedSection] = useState<string | null>(
     path.startsWith("/superadmin/clientes") ? "Clientes" 
     : path.startsWith("/superadmin/usuarios") ? "Usuarios" 
+    : path.startsWith("/superadmin/reportes") ? "Reportes"
     : null
   );
 
@@ -33,6 +38,8 @@ export function SuperAdminSidebar() {
       setExpandedSection("Clientes");
     } else if (path.startsWith("/superadmin/usuarios")) {
       setExpandedSection("Usuarios");
+    } else if (path.startsWith("/superadmin/reportes")) {
+      setExpandedSection("Reportes");
     }
   }, [path]);
 
@@ -52,6 +59,17 @@ export function SuperAdminSidebar() {
 
   const NAV = [
     { label: "Command Center", href: "/superadmin", icon: LayoutDashboard },
+    {
+      label: "Reportes",
+      icon: LineChart,
+      isDropdown: true,
+      subItems: [
+        { label: "Resumen", href: "/superadmin/reportes/resumen", icon: PieChart },
+        { label: "Ingresos", href: "/superadmin/reportes/ingresos", icon: DollarSign },
+        { label: "Clientes", href: "/superadmin/reportes/clientes", icon: Users },
+        { label: "Crecimiento", href: "/superadmin/reportes/crecimiento", icon: TrendingUp },
+      ],
+    },
     {
       label: "Clientes",
       icon: Briefcase,
