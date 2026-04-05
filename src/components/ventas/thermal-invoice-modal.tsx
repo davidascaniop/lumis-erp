@@ -79,52 +79,50 @@ function paymentLabel(method: string) {
 // ─────────────────────────────────────────────────────────
 // Print CSS (90mm thermal)
 // ─────────────────────────────────────────────────────────
+// CSS que se inyecta en la ventana de impresión
 const PRINT_STYLES = `
-  @media print {
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    html, body { margin: 0 !important; padding: 0 !important; background: white !important; }
-    body > *:not(#thermal-print-root) { display: none !important; }
-    #thermal-print-root {
-      display: block !important;
-      position: fixed !important;
-      top: 0 !important; left: 0 !important;
-      width: 90mm !important;
-      background: white !important;
-      margin: 0 !important;
-      padding: 2mm !important;
-    }
-    .thermal-doc {
-      width: 86mm !important;
-      font-family: 'Courier New', Courier, monospace !important;
-      font-size: 11px !important;
-      color: #000 !important;
-      background: #fff !important;
-      line-height: 1.4 !important;
-    }
-    .thermal-doc img.company-logo {
-      max-width: 60mm !important;
-      height: auto !important;
-      display: block !important;
-      margin: 0 auto 4px auto !important;
-    }
-    .no-print { display: none !important; }
-    @page { size: 90mm auto; margin: 0; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
+  html, body {
+    margin: 0 !important;
+    padding: 2mm !important;
+    background: white !important;
+    width: 80mm !important;
   }
-  @media screen {
-    .thermal-doc {
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 12px;
-      color: #111;
-      background: #fff;
-      width: 86mm;
-      line-height: 1.5;
-    }
-    .thermal-doc img.company-logo {
-      max-width: 60mm;
-      height: auto;
-      display: block;
-      margin: 0 auto 4px auto;
-    }
+  .thermal-doc {
+    width: 76mm !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 11px !important;
+    color: #000 !important;
+    background: #fff !important;
+    line-height: 1.4 !important;
+  }
+  .thermal-doc img.company-logo {
+    max-width: 56mm !important;
+    height: auto !important;
+    display: block !important;
+    margin: 0 auto 4px auto !important;
+  }
+  @media print {
+    @page { size: 80mm auto; margin: 0; }
+    html, body { margin: 0 !important; padding: 2mm !important; }
+  }
+`;
+
+// CSS para la vista previa en pantalla (dentro del modal)
+const PREVIEW_SCREEN_STYLES = `
+  .thermal-doc {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    color: #111;
+    background: #fff;
+    width: 76mm;
+    line-height: 1.5;
+  }
+  .thermal-doc img.company-logo {
+    max-width: 56mm;
+    height: auto;
+    display: block;
+    margin: 0 auto 4px auto;
   }
 `;
 
@@ -370,39 +368,47 @@ export function ThermalInvoiceModal({
   }, [selected]);
 
   const handlePrint = () => {
-    // Inject print styles once
-    const styleId = "thermal-print-styles";
-    if (!document.getElementById(styleId)) {
-      const style = document.createElement("style");
-      style.id = styleId;
-      style.innerHTML = PRINT_STYLES;
-      document.head.appendChild(style);
-    }
-
-    // Move the print root to top-level body for clean print
     const root = printRootRef.current;
-    if (root) {
-      const clone = root.cloneNode(true) as HTMLElement;
-      clone.id = "thermal-print-root";
-      clone.style.display = "block";
-      document.body.appendChild(clone);
+    if (!root) return;
 
-      window.print();
+    // Obtenemos el HTML del ticket de la referencia oculta
+    const ticketHTML = root.innerHTML;
 
-      // Cleanup after print
-      setTimeout(() => {
-        const existing = document.getElementById("thermal-print-root");
-        if (existing) document.body.removeChild(existing);
-      }, 1000);
-    }
+    // Abrimos una ventana pequeña con SOLO el contenido del ticket
+    // Esto hace que Chrome muestre el diálogo de IMPRESORA del sistema (no PDF)
+    const printWindow = window.open("", "_blank", "width=420,height=650");
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html lang="es">
+        <head>
+          <meta charset="UTF-8" />
+          <title>Documento · ${docNumber}</title>
+          <style>${PRINT_STYLES}</style>
+        </head>
+        <body>
+          <div class="thermal-doc">${ticketHTML}</div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+
+    // Esperamos a que cargue (incluyendo imágenes del logo) y luego imprimimos
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+      // Cerramos la ventana después de que el usuario interactúe con el diálogo
+      printWindow.addEventListener("afterprint", () => printWindow.close());
+    };
   };
 
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      {/* ── PRINT STYLES INJECTED ── */}
-      <style dangerouslySetInnerHTML={{ __html: PRINT_STYLES }} />
+      {/* Estilos de pantalla para la vista previa dentro del modal */}
+      <style dangerouslySetInnerHTML={{ __html: PREVIEW_SCREEN_STYLES }} />
 
       {/* ── MODAL CARD — flex column with max-height so it scrolls on small screens ── */}
       <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
