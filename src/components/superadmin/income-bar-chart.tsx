@@ -43,7 +43,7 @@ export function IncomeBarChart({ data }: { data: any[] }) {
               fontSize: "10px",
               marginBottom: "4px",
             }}
-            formatter={(value: any, name: string) => [`$${Number(value).toLocaleString()}`, name]}
+            formatter={(value: any, name: any) => [`$${Number(value).toLocaleString()}`, name]}
           />
           <Legend wrapperStyle={{ fontSize: "11px", fontWeight: "bold" }} />
           <Bar dataKey="cobrados" name="Ingresos Cobrados" fill="#10B981" radius={[4, 4, 0, 0]} />

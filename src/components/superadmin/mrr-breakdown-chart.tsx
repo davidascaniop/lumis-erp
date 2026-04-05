@@ -43,7 +43,7 @@ export function MrrBreakdownChart({ data }: { data: any[] }) {
               fontSize: "10px",
               marginBottom: "4px",
             }}
-            formatter={(value: any, name: string) => [`$${value.toLocaleString()}`, name]}
+            formatter={(value: any, name: any) => [`$${value.toLocaleString()}`, name]}
           />
           <Legend wrapperStyle={{ fontSize: "11px", fontWeight: "bold" }} />
           <Line type="monotone" dataKey="neto" name="MRR Neto" stroke="#E040FB" strokeWidth={3} dot={{ fill: "#E040FB" }} />
