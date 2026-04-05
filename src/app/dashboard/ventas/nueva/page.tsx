@@ -62,6 +62,7 @@ function NuevaVentaContent() {
   const [newClientName, setNewClientName] = useState("");
   const [newClientRif, setNewClientRif] = useState("");
   const [newClientPhone, setNewClientPhone] = useState("");
+  const [newClientAddress, setNewClientAddress] = useState("");
 
   // ── Print Modal State ──────────────────────────────────
   const [printModalOpen, setPrintModalOpen] = useState(false);
@@ -179,7 +180,12 @@ function NuevaVentaContent() {
   }, [total, paymentType]);
 
   // ── Crear Cliente Rápido ──
-  const handleCreateQuickClient = async (name: string, rif: string, phone: string): Promise<boolean> => {
+  const handleCreateQuickClient = async (
+    name: string,
+    rif: string,
+    phone: string,
+    address: string,
+  ): Promise<boolean> => {
     if (!user?.company_id) return false;
 
     const plan = user?.companies?.plan_type?.toLowerCase() || "starter";
@@ -202,6 +208,7 @@ function NuevaVentaContent() {
           name,
           rif,
           phone,
+          address,
           status: "active",
           credit_status: "green",
           current_balance: 0,
@@ -213,9 +220,10 @@ function NuevaVentaContent() {
 
       setPartners((prev) => [...prev, newP]);
       setSelectedPartner(newP);
-      setNewClientName("");
-      setNewClientRif("");
-      setNewClientPhone("");
+      setNewClientName(name);
+      setNewClientRif(rif);
+      setNewClientPhone(phone);
+      setNewClientAddress(address);
       toast.success("Cliente creado con éxito");
       return true;
     } catch (err: any) {
@@ -369,6 +377,7 @@ function NuevaVentaContent() {
               name: targetPartner.name,
               rif: targetPartner.rif ?? undefined,
               phone: targetPartner.phone ?? undefined,
+              address: targetPartner.address ?? newClientAddress ?? undefined,
             }
           : null,
       });
@@ -384,6 +393,17 @@ function NuevaVentaContent() {
     setPrintModalOpen(false);
     setPendingOrderData(null);
     router.push("/dashboard/ventas");
+  };
+
+  // ── onSuccess: toast + redirigir después de 2s ────────────
+  const handlePrintSuccess = () => {
+    setPrintModalOpen(false);
+    setPendingOrderData(null);
+    toast.success("✅ Venta finalizada con éxito", {
+      description: "Redirigiendo al historial...",
+      duration: 2500,
+    });
+    setTimeout(() => router.push("/dashboard/ventas"), 2000);
   };
 
   // ── Loading ─────────────────────────────────────────────
@@ -460,6 +480,8 @@ function NuevaVentaContent() {
               setNewClientRif={setNewClientRif}
               newClientPhone={newClientPhone}
               setNewClientPhone={setNewClientPhone}
+              newClientAddress={newClientAddress}
+              setNewClientAddress={setNewClientAddress}
               partners={partners}
               onSelectPartner={setSelectedPartner}
               onCreateQuickClient={handleCreateQuickClient}
@@ -476,6 +498,7 @@ function NuevaVentaContent() {
         <ThermalInvoiceModal
           open={printModalOpen}
           onClose={handleClosePrintModal}
+          onSuccess={handlePrintSuccess}
           order={pendingOrderData}
           company={company}
           ivaPercent={ivaPercent}

@@ -26,6 +26,7 @@ export interface InvoiceOrderData {
     name: string;
     rif?: string;
     phone?: string;
+    address?: string;
   } | null;
   invoiceNumber?: string; // pre-existing number when reprinting
 }
@@ -33,6 +34,8 @@ export interface InvoiceOrderData {
 interface ThermalInvoiceModalProps {
   open: boolean;
   onClose: () => void;
+  /** Called after print dialog opens OR after skip — use to show toast + redirect */
+  onSuccess?: () => void;
   order: InvoiceOrderData;
   company: CompanyProfile | null;
   ivaPercent?: number; // default 16
@@ -178,6 +181,7 @@ function TicketRapido({
       {(order.client?.name || order.client?.rif) && (
         <>
           <div>Cliente: {order.client?.name ?? "Consumidor Final"}</div>
+          {order.client?.address && <div>{order.client.address}</div>}
           {order.client?.rif && <div>Cédula:  {order.client.rif}</div>}
           <div>{SEP}</div>
         </>
@@ -278,6 +282,7 @@ function FacturaFormal({
       {/* Datos cliente */}
       <div style={{ fontWeight: "bold" }}>DATOS DEL CLIENTE:</div>
       <div>Nombre: {order.client?.name ?? "Consumidor Final"}</div>
+      {order.client?.address && <div>Dir.: {order.client.address}</div>}
       {order.client?.rif && <div>Cédula/RIF: {order.client.rif}</div>}
       {order.client?.phone && <div>Teléfono: {order.client.phone}</div>}
       <div>{SEP}</div>
@@ -337,6 +342,7 @@ function FacturaFormal({
 export function ThermalInvoiceModal({
   open,
   onClose,
+  onSuccess,
   order,
   company,
   ivaPercent = 16,
@@ -398,9 +404,12 @@ export function ThermalInvoiceModal({
     printWindow.onload = () => {
       printWindow.focus();
       printWindow.print();
-      // Cerramos la ventana después de que el usuario interactúe con el diálogo
       printWindow.addEventListener("afterprint", () => printWindow.close());
     };
+
+    // Cerrar modal y notificar éxito mientras el diálogo de impresión está abierto
+    onClose();
+    onSuccess?.();
   };
 
   if (!open) return null;
@@ -597,7 +606,7 @@ export function ThermalInvoiceModal({
           </button>
 
           <button
-            onClick={onClose}
+            onClick={() => { onClose(); onSuccess?.(); }}
             className="w-full py-3 rounded-2xl font-bold font-outfit text-[11px] uppercase tracking-widest text-[#94A3B8] hover:bg-[#F8FAFC] border border-[#E2E8F0] transition-all flex items-center justify-center gap-2"
           >
             <SkipForward className="w-3.5 h-3.5" />
