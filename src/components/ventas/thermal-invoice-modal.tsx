@@ -404,8 +404,8 @@ export function ThermalInvoiceModal({
       {/* ── PRINT STYLES INJECTED ── */}
       <style dangerouslySetInnerHTML={{ __html: PRINT_STYLES }} />
 
-      {/* ── MODAL CARD ── */}
-      <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+      {/* ── MODAL CARD — flex column with max-height so it scrolls on small screens ── */}
+      <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="px-6 py-5 border-b border-[#F1F5F9] flex items-center justify-between">
           <div>
@@ -422,8 +422,8 @@ export function ThermalInvoiceModal({
           </button>
         </div>
 
-        {/* Body */}
-        <div className="p-6 space-y-4">
+        {/* Body — scrollable, takes all remaining vertical space */}
+        <div className="p-6 space-y-4 overflow-y-auto flex-1">
           {/* ── FORMAT SELECTOR ── */}
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -538,7 +538,7 @@ export function ThermalInvoiceModal({
             </div>
           )}
 
-          {/* ── PREVIEW ON SCREEN (visual preview card) ── */}
+          {/* ── PREVIEW ON SCREEN (visual preview card, fully scrollable) ── */}
           {selected && docNumber && !loadingDoc && (
             <div className="border border-[#E2E8F0] rounded-xl overflow-hidden animate-in slide-in-from-bottom-2 duration-300">
               <div className="bg-[#F8FAFC] px-4 py-2 border-b border-[#E2E8F0]">
@@ -546,7 +546,11 @@ export function ThermalInvoiceModal({
                   Vista previa · 90mm
                 </span>
               </div>
-              <div className="p-3 overflow-x-auto max-h-52 no-scrollbar">
+              {/* max-h + overflow-y scroll: muestra todo el ticket con scroll propio */}
+              <div
+                className="p-3 overflow-x-hidden"
+                style={{ maxHeight: "300px", overflowY: "auto" }}
+              >
                 {selected === "ticket" ? (
                   <TicketRapido
                     order={order}
@@ -569,8 +573,8 @@ export function ThermalInvoiceModal({
           )}
         </div>
 
-        {/* Footer actions */}
-        <div className="px-6 pb-6 flex flex-col gap-2">
+        {/* Footer actions — sticky at the bottom, never scrolls away */}
+        <div className="px-6 pb-6 pt-2 flex flex-col gap-2 border-t border-[#F1F5F9] bg-white flex-shrink-0">
           <button
             onClick={handlePrint}
             disabled={!selected || loadingDoc || !docNumber}
