@@ -154,6 +154,24 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
   const paymentMethod = form.watch("paymentMethod");
   const paymentConfirmed = form.watch("paymentConfirmed");
 
+  const paymentNameWatch = form.watch("paymentName");
+  const paymentEmailOrPhoneWatch = form.watch("paymentEmailOrPhone");
+  const paymentBankOrLast4Watch = form.watch("paymentBankOrLast4");
+
+  const isPaymentFieldsValid = () => {
+    if (!paymentMethod || !receiptFile || !paymentConfirmed) return false;
+    if (paymentMethod === "pago_movil") {
+      return !!paymentEmailOrPhoneWatch && !!paymentBankOrLast4Watch;
+    }
+    if (paymentMethod === "zinli") {
+      return !!paymentNameWatch;
+    }
+    if (paymentMethod === "binance") {
+      return !!paymentEmailOrPhoneWatch;
+    }
+    return false;
+  };
+
   const nextStep = async () => {
     let isValid = false;
     if (step === 1) {
@@ -198,9 +216,13 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
       return;
     }
 
-    if (!values.paymentName || !values.paymentEmailOrPhone) {
-      toast.error("Por favor completa el nombre del titular y correo/teléfono emisor.");
-      return;
+    if (paymentMethod === "pago_movil") {
+      if (!values.paymentEmailOrPhone) { toast.error("Ingresa el teléfono del pago móvil"); return; }
+      if (!values.paymentBankOrLast4) { toast.error("Ingresa los últimos 4 dígitos de la referencia"); return; }
+    } else if (paymentMethod === "zinli") {
+      if (!values.paymentName) { toast.error("Ingresa el nombre y apellido del titular de Zinli"); return; }
+    } else if (paymentMethod === "binance") {
+      if (!values.paymentEmailOrPhone) { toast.error("Ingresa el correo de Binance"); return; }
     }
 
     setIsLoading(true);
@@ -277,8 +299,8 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
         period_start: periodStart, // Original NOT NULL
         period_end: periodEnd,     // Original NOT NULL
         method: paymentMethod,
-        holder_name: values.paymentName,
-        contact_info: values.paymentEmailOrPhone,
+        holder_name: values.paymentName || null,
+        contact_info: values.paymentEmailOrPhone || null,
         last_digits: values.paymentBankOrLast4 || null,
         receipt_url: receiptUrl,
         paid_at: now.toISOString(),
@@ -709,18 +731,30 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
                             </div>
                             
                             <div className="space-y-3">
-                              <div>
-                                <Label className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider ml-1">Nombre del titular (Cuenta Origen) *</Label>
-                                <Input {...form.register("paymentName")} placeholder="Ej. Juan Pérez" className="bg-white border-[#E2E8F0] h-11 rounded-xl text-sm mt-1 focus-visible:ring-brand/20 shadow-sm" />
-                              </div>
-                              <div>
-                                <Label className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider ml-1">Correo o teléfono emisor *</Label>
-                                <Input {...form.register("paymentEmailOrPhone")} placeholder="juan@ejemplo.com o 0414-1234567" className="bg-white border-[#E2E8F0] h-11 rounded-xl text-sm mt-1 focus-visible:ring-brand/20 shadow-sm" />
-                              </div>
-                              <div>
-                                <Label className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider ml-1">Banco Origen / Últimos 4 dígitos (Opcional)</Label>
-                                <Input {...form.register("paymentBankOrLast4")} placeholder="Ej. Mercantil, 1234" className="bg-white border-[#E2E8F0] h-11 rounded-xl text-sm mt-1 focus-visible:ring-brand/20 shadow-sm" />
-                              </div>
+                              {paymentMethod === "pago_movil" && (
+                                <>
+                                  <div>
+                                    <Label className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider ml-1">Teléfono del pago móvil *</Label>
+                                    <Input {...form.register("paymentEmailOrPhone")} placeholder="Ej. 0414-1234567" className="bg-white border-[#E2E8F0] h-11 rounded-xl text-sm mt-1 focus-visible:ring-brand/20 shadow-sm" />
+                                  </div>
+                                  <div>
+                                    <Label className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider ml-1">Últimos 4 dígitos de la referencia *</Label>
+                                    <Input {...form.register("paymentBankOrLast4")} placeholder="Ej. 1234" maxLength={4} className="bg-white border-[#E2E8F0] h-11 rounded-xl text-sm mt-1 focus-visible:ring-brand/20 shadow-sm" />
+                                  </div>
+                                </>
+                              )}
+                              {paymentMethod === "zinli" && (
+                                <div>
+                                  <Label className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider ml-1">Nombre y Apellido del titular *</Label>
+                                  <Input {...form.register("paymentName")} placeholder="Ej. Juan Pérez" className="bg-white border-[#E2E8F0] h-11 rounded-xl text-sm mt-1 focus-visible:ring-brand/20 shadow-sm" />
+                                </div>
+                              )}
+                              {paymentMethod === "binance" && (
+                                <div>
+                                  <Label className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider ml-1">Correo del titular de Binance *</Label>
+                                  <Input type="email" {...form.register("paymentEmailOrPhone")} placeholder="correo@ejemplo.com" className="bg-white border-[#E2E8F0] h-11 rounded-xl text-sm mt-1 focus-visible:ring-brand/20 shadow-sm" />
+                                </div>
+                              )}
                             </div>
 
                             <div className="pt-1">
@@ -795,8 +829,8 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
                 ) : (
                   <Button
                     type="submit"
-                    disabled={isLoading}
-                    className="bg-brand hover:opacity-90 text-white font-bold rounded-xl px-4 sm:px-8 shadow-lg shadow-brand/20 h-10 sm:h-12 transition-all active:scale-95 font-outfit text-xs"
+                    disabled={isLoading || !isPaymentFieldsValid()}
+                    className="bg-brand hover:opacity-90 text-white font-bold rounded-xl px-4 sm:px-8 shadow-lg shadow-brand/20 h-10 sm:h-12 transition-all active:scale-95 font-outfit text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isLoading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
