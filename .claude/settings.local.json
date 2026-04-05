@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -l \"exchange_rates\\\\|recurring_expenses\\\\|transactions\" *.sql)",
+      "Bash(grep -n \"CREATE TABLE.*expenses\\\\|CREATE TABLE.*transactions\" src/lib/sql/*.sql)",
+      "Bash(xargs grep:*)",
+      "Bash(npx next:*)",
+      "Bash(npx tsc:*)",
+      "Bash(sed -i \"s|Hecho con ❤️ en Venezuela 🇻🇪 para emprendedores que no se rinden.|🇻🇪 Hecho por Venezolanos para Venezolanos · Luz para tu negocio.|g\" src/components/landing/footer.tsx)",
+      "Bash(sed -i \"s|wa.me/584240000000|wa.me/584149406419|g\" src/components/landing/footer.tsx)"
+    ]
+  }
+}

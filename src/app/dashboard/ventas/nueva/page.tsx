@@ -7,10 +7,12 @@ import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
 import { useBCV } from "@/hooks/use-bcv";
 import { useTreasuryAccounts, registerTreasuryMovement } from "@/hooks/use-treasury";
+import { useCompanyProfile } from "@/hooks/use-company-profile";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { ProductoGrid } from "@/components/ventas/nueva/producto-grid";
 import { CarritoPanel } from "@/components/ventas/nueva/carrito-panel";
+import { ThermalInvoiceModal, type InvoiceOrderData } from "@/components/ventas/thermal-invoice-modal";
 
 export default function NuevaVentaPage() {
   return (
@@ -34,6 +36,7 @@ function NuevaVentaContent() {
   const { user } = useUser();
   const { rate } = useBCV();
   const { accounts: treasuryAccounts } = useTreasuryAccounts(user?.company_id);
+  const { company } = useCompanyProfile(user?.company_id);
   const supabase = createClient();
 
   // Data State
@@ -49,9 +52,7 @@ function NuevaVentaContent() {
   const [categories, setCategories] = useState<string[]>([]);
 
   // Payment State
-  const [paymentType, setPaymentType] = useState<"contado" | "credito">(
-    "contado",
-  );
+  const [paymentType, setPaymentType] = useState<"contado" | "credito">("contado");
   const [paymentMethod, setPaymentMethod] = useState("Efectivo");
   const [amountPaid, setAmountPaid] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -61,6 +62,17 @@ function NuevaVentaContent() {
   const [newClientName, setNewClientName] = useState("");
   const [newClientRif, setNewClientRif] = useState("");
   const [newClientPhone, setNewClientPhone] = useState("");
+
+  // ── Print Modal State ──────────────────────────────────
+  const [printModalOpen, setPrintModalOpen] = useState(false);
+  const [pendingOrderData, setPendingOrderData] = useState<InvoiceOrderData | null>(null);
+
+  // ── IVA from global settings ───────────────────────────
+  const ivaPercent = useMemo(() => {
+    const settings = company?.settings ?? (user?.companies?.settings ?? {});
+    const stored = settings?.iva_percent ?? settings?.iva ?? 16;
+    return Number(stored);
+  }, [company, user]);
 
   // ── Carga inicial de datos ──────────────────────────────
   useEffect(() => {
@@ -118,7 +130,7 @@ function NuevaVentaContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Cart Logic (idéntica al original) ───────────────────
+  // ── Cart Logic ───────────────────────────────────────────
   const addToCart = (product: any, qty: number = 1) => {
     setCart((prev) => {
       const exists = prev.find((item) => item.id === product.id);
@@ -131,7 +143,6 @@ function NuevaVentaContent() {
     });
     toast.success(`${product.name} añadido`);
 
-    // Feedback háptico en mobile
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate(30);
     }
@@ -170,15 +181,17 @@ function NuevaVentaContent() {
   // ── Crear Cliente Rápido ──
   const handleCreateQuickClient = async (name: string, rif: string, phone: string): Promise<boolean> => {
     if (!user?.company_id) return false;
-    
-    // Check limit
-    const plan = user?.companies?.plan_type?.toLowerCase() || 'starter';
-    if (!plan.includes('pro') && !plan.includes('enterprise')) {
-        const { count } = await supabase.from('partners').select('*', { count: 'exact', head: true }).eq('company_id', user.company_id);
-        if (count !== null && count >= 50) {
-            toast.error('Alcanzaste el límite de tu plan, mejora a Pro Business para clientes ilimitados');
-            return false;
-        }
+
+    const plan = user?.companies?.plan_type?.toLowerCase() || "starter";
+    if (!plan.includes("pro") && !plan.includes("enterprise")) {
+      const { count } = await supabase
+        .from("partners")
+        .select("*", { count: "exact", head: true })
+        .eq("company_id", user.company_id);
+      if (count !== null && count >= 50) {
+        toast.error("Alcanzaste el límite de tu plan, mejora a Pro Business para clientes ilimitados");
+        return false;
+      }
     }
 
     try {
@@ -186,9 +199,9 @@ function NuevaVentaContent() {
         .from("partners")
         .insert({
           company_id: user.company_id,
-          name: name,
-          rif: rif,
-          phone: phone,
+          name,
+          rif,
+          phone,
           status: "active",
           credit_status: "green",
           current_balance: 0,
@@ -197,8 +210,8 @@ function NuevaVentaContent() {
         .single();
 
       if (pErr) throw pErr;
-      
-      setPartners(prev => [...prev, newP]);
+
+      setPartners((prev) => [...prev, newP]);
       setSelectedPartner(newP);
       setNewClientName("");
       setNewClientRif("");
@@ -206,16 +219,13 @@ function NuevaVentaContent() {
       toast.success("Cliente creado con éxito");
       return true;
     } catch (err: any) {
-      toast.error("Error al crear cliente rápido", {
-        description: err.message,
-      });
+      toast.error("Error al crear cliente rápido", { description: err.message });
       return false;
     }
   };
 
-  // ── Crear Pedido (lógica de negocio IDÉNTICA al original) ──
+  // ── Crear Pedido ──────────────────────────────────────────
   const handleCreateOrder = async () => {
-    // Si no hay cliente seleccionado pero hay datos de nuevo cliente, intentamos crearlo
     let targetPartner = selectedPartner;
 
     if (!targetPartner && newClientName && newClientRif) {
@@ -237,11 +247,9 @@ function NuevaVentaContent() {
 
         if (pErr) throw pErr;
         targetPartner = newP;
-        setSelectedPartner(newP); // Actualizar estado local
+        setSelectedPartner(newP);
       } catch (err: any) {
-        toast.error("Error al crear cliente rápido", {
-          description: err.message,
-        });
+        toast.error("Error al crear cliente rápido", { description: err.message });
         setSaving(false);
         return;
       }
@@ -253,10 +261,8 @@ function NuevaVentaContent() {
 
     setSaving(true);
     try {
-      // 1. Crear el Order
       const orderNumber = `PED-${Date.now().toString().slice(-6)}`;
       const status = paymentType === "contado" ? "completed" : "pending";
-      // Si es contado, el monto pagado es el total completo
       const finalAmountPaid = paymentType === "contado" ? total : amountPaid;
       const amountDue = total - finalAmountPaid;
 
@@ -267,7 +273,7 @@ function NuevaVentaContent() {
           partner_id: targetPartner.id,
           user_id: user.id,
           order_number: orderNumber,
-          status: status,
+          status,
           total_usd: total,
           total_bs: total * (rate || 0),
           currency: "USD",
@@ -281,7 +287,7 @@ function NuevaVentaContent() {
 
       if (orderErr) throw orderErr;
 
-      // 2. Crear los Order Items
+      // Order items
       const items = cart.map((item) => ({
         order_id: order.id,
         product_id: item.id,
@@ -289,13 +295,10 @@ function NuevaVentaContent() {
         price_usd: item.price_usd,
         subtotal: item.price_usd * item.qty,
       }));
-
-      const { error: itemsErr } = await supabase
-        .from("order_items")
-        .insert(items as any);
+      const { error: itemsErr } = await supabase.from("order_items").insert(items as any);
       if (itemsErr) throw itemsErr;
 
-      // 3. Descontar stock del inventario
+      // Discount stock
       await Promise.all(
         cart.map((item) =>
           supabase
@@ -305,7 +308,7 @@ function NuevaVentaContent() {
         ),
       );
 
-      // 4. Si es a CRÉDITO o tiene deuda, crear la CxC (Receivable)
+      // CxC if credit or partial payment
       if (paymentType === "credito" || amountDue > 0) {
         const { error: cxcErr } = await supabase.from("receivables").insert({
           company_id: user.company_id,
@@ -316,15 +319,12 @@ function NuevaVentaContent() {
           paid_usd: amountPaid,
           balance_usd: amountDue,
           status: amountPaid > 0 ? "partial" : "open",
-          due_date: new Date(
-            Date.now() + 7 * 24 * 60 * 60 * 1000,
-          ).toISOString(),
+          due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         } as any);
-
         if (cxcErr) console.error("Error creating receivable:", cxcErr);
       }
 
-      // 5. Si hay pago de contado y cuenta seleccionada, registrar en tesorería
+      // Treasury movement
       if (amountPaid > 0 && treasuryAccountId) {
         try {
           const result = await registerTreasuryMovement({
@@ -337,7 +337,7 @@ function NuevaVentaContent() {
             category: "Venta",
             originModule: "ventas",
             referenceId: order.id,
-            bcvRate: rate || undefined,
+            bcvRate: rate ?? undefined,
           });
           if (result.isLowBalance) {
             toast.warning(`${result.accountName} tiene saldo bajo: $${result.newBalance.toFixed(2)}`);
@@ -348,12 +348,42 @@ function NuevaVentaContent() {
       }
 
       toast.success(`Pedido ${orderNumber} creado con éxito`);
-      router.push("/dashboard/ventas");
+
+      // ── Open print modal instead of redirecting immediately ──
+      setPendingOrderData({
+        id: order.id,
+        orderNumber,
+        createdAt: order.created_at ?? new Date().toISOString(),
+        paymentMethod,
+        paymentType,
+        totalUsd: total,
+        totalBs: total * (rate || 0),
+        bcvRate: rate || 0,
+        items: cart.map((item) => ({
+          name: item.name,
+          qty: item.qty,
+          price_usd: item.price_usd,
+        })),
+        client: targetPartner
+          ? {
+              name: targetPartner.name,
+              rif: targetPartner.rif ?? undefined,
+              phone: targetPartner.phone ?? undefined,
+            }
+          : null,
+      });
+      setPrintModalOpen(true);
     } catch (error: any) {
       toast.error("Error al crear pedido", { description: error.message });
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleClosePrintModal = () => {
+    setPrintModalOpen(false);
+    setPendingOrderData(null);
+    router.push("/dashboard/ventas");
   };
 
   // ── Loading ─────────────────────────────────────────────
@@ -371,10 +401,10 @@ function NuevaVentaContent() {
   // ── RENDER ───────────────────────────────────────────────
   return (
     <div className="flex flex-col h-[calc(100vh-48px)] -m-6 bg-surface-base">
-      {/* ── TOPBAR SOBRIO ── */}
+      {/* ── TOPBAR ── */}
       <div className="px-6 py-4 flex-shrink-0 z-20 bg-white border-b border-[#F1F5F9] flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button 
+          <button
             onClick={() => router.push("/dashboard/ventas")}
             className="p-2 hover:bg-[#F8F9FA] rounded-full transition-all text-text-3"
           >
@@ -389,21 +419,21 @@ function NuevaVentaContent() {
         </div>
 
         <div className="flex items-center gap-3 bg-[#F8F9FA] px-4 py-2 rounded-xl border border-[#E2E8F0]">
-            <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest text-right">Tasa BCV del día:</span>
-            <p className="text-[15px] font-bold text-brand font-outfit">
-              Bs. {rate?.toFixed(2)}
-            </p>
+          <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest text-right">Tasa BCV del día:</span>
+          <p className="text-[15px] font-bold text-brand font-outfit">
+            Bs. {rate?.toFixed(2)}
+          </p>
         </div>
       </div>
 
-      {/* ── CUERPO: DIVISIÓN DE TRABAJO (65% CATÁLOGO / 35% SIDEBAR) ── */}
+      {/* ── BODY ── */}
       <div className="flex flex-1 overflow-hidden bg-[#F8FAFC]">
-        {/* CATÁLOGO (ANCHO) */}
+        {/* CATÁLOGO */}
         <div className="flex-[7] flex flex-col overflow-hidden">
           <ProductoGrid productos={products} cart={cart} onAdd={addToCart} categories={categories} />
         </div>
 
-        {/* SIDEBAR DE PAGO (BUBBLE CARD STYLE - ENLARGED) */}
+        {/* SIDEBAR CARRITO */}
         <div className="flex-[4.2] flex flex-col overflow-hidden bg-[#F8FAFC] p-4 xl:p-6 border-l border-[#F1F5F9]">
           <div className="flex-1 bg-white rounded-[40px] shadow-[0_12px_40px_rgba(0,0,0,0.03)] border border-[#EDF2F7] overflow-hidden flex flex-col">
             <CarritoPanel
@@ -424,7 +454,6 @@ function NuevaVentaContent() {
               submitting={saving}
               amountPaid={amountPaid}
               onAmountPaidChange={setAmountPaid}
-              // New Client Props
               newClientName={newClientName}
               setNewClientName={setNewClientName}
               newClientRif={newClientRif}
@@ -441,6 +470,17 @@ function NuevaVentaContent() {
           </div>
         </div>
       </div>
+
+      {/* ── THERMAL INVOICE MODAL ── */}
+      {printModalOpen && pendingOrderData && (
+        <ThermalInvoiceModal
+          open={printModalOpen}
+          onClose={handleClosePrintModal}
+          order={pendingOrderData}
+          company={company}
+          ivaPercent={ivaPercent}
+        />
+      )}
     </div>
   );
 }
