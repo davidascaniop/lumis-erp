@@ -16,7 +16,10 @@ import {
   LineChart,
   PieChart,
   DollarSign,
-  TrendingUp
+  TrendingUp,
+  Banknote,
+  Calculator,
+  ListOrdered
 } from "lucide-react";
 
 import { useState, useEffect } from "react";
@@ -30,6 +33,7 @@ export function SuperAdminSidebar() {
     path.startsWith("/superadmin/clientes") ? "Clientes" 
     : path.startsWith("/superadmin/usuarios") ? "Usuarios" 
     : path.startsWith("/superadmin/reportes") ? "Reportes"
+    : path.startsWith("/superadmin/finanzas") ? "Finanzas"
     : null
   );
 
@@ -40,6 +44,8 @@ export function SuperAdminSidebar() {
       setExpandedSection("Usuarios");
     } else if (path.startsWith("/superadmin/reportes")) {
       setExpandedSection("Reportes");
+    } else if (path.startsWith("/superadmin/finanzas")) {
+      setExpandedSection("Finanzas");
     }
   }, [path]);
 
@@ -59,6 +65,17 @@ export function SuperAdminSidebar() {
 
   const NAV = [
     { label: "Command Center", href: "/superadmin", icon: LayoutDashboard },
+    {
+      label: "Finanzas",
+      icon: Banknote,
+      isDropdown: true,
+      subItems: [
+        { label: "Dashboard", href: "/superadmin/finanzas/dashboard", icon: LineChart },
+        { label: "Costos Fijos", href: "/superadmin/finanzas/costos-fijos", icon: Calculator },
+        { label: "Costos Variables", href: "/superadmin/finanzas/costos-variables", icon: ListOrdered },
+        { label: "Flujo de Caja", href: "/superadmin/finanzas/flujo", icon: DollarSign },
+      ],
+    },
     {
       label: "Reportes",
       icon: LineChart,
