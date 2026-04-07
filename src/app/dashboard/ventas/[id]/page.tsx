@@ -65,7 +65,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
                 *,
                 users ( full_name ),
                 partners ( id, name, rif, credit_status, current_balance, credit_limit ),
-                order_items ( id, qty, price_usd, subtotal, product_id, products (name) )
+                order_items ( id, qty, price_usd, subtotal, product_id, is_kit, kit_name, kit_description, products (name) )
             `,
       )
       .eq("id", resolvedParams.id)
@@ -281,7 +281,19 @@ export default function OrderDetailsPage({ params }: { params: any }) {
                 {order.order_items?.map((item: any) => (
                   <tr key={item.id}>
                     <td className="py-4 text-text-1 font-medium">
-                      {item.products?.name}
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-1.5">
+                          {item.kit_name || item.products?.name}
+                          {item.is_kit && (
+                            <span className="bg-purple-100 text-purple-700 px-1 py-0.5 rounded-[4px] text-[8px] font-bold uppercase leading-none">KIT</span>
+                          )}
+                        </div>
+                        {item.is_kit && item.kit_description && (
+                          <span className="text-[9px] text-[#94A3B8] font-outfit italic mt-0.5 max-w-[200px] leading-tight block">
+                            {item.kit_description}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="py-4 text-center text-text-2">{item.qty}</td>
                     <td className="py-4 text-right text-text-2">

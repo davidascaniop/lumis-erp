@@ -340,6 +340,9 @@ function NuevaVentaContent() {
         subtotal: item.price_usd * item.qty,
         is_kit: !!item.is_kit,
         kit_name: item.is_kit ? item.name : null,
+        kit_description: item.is_kit && item.comps?.length > 0 
+          ? `Incluye: ${item.comps.map((c: any) => `${c.qty_required}x ${c.name}`).join(", ")}` 
+          : null,
       }));
       const { error: itemsErr } = await supabase.from("order_items").insert(items as any);
       if (itemsErr) throw itemsErr;
