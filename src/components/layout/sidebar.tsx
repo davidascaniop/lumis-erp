@@ -252,7 +252,7 @@ export function Sidebar() {
       </div>
 
       {/* Navegación */}
-      <nav className="flex-1 overflow-y-auto no-scrollbar px-3 pt-2 pb-3">
+      <nav className="flex-1 overflow-y-auto sidebar-scroll px-3 pt-2 pb-3">
         {/* HOME */}
         <p className="px-3 pt-3 pb-1.5 text-[10px] font-semibold text-text-3 uppercase tracking-[0.12em]">Home</p>
         <Link
