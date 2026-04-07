@@ -147,14 +147,16 @@ export default function CategoriasPage() {
         company_id: user.company_id,
       };
       if (catForm.id) {
-        await supabase.from("product_categories").update(payload).eq("id", catForm.id);
+        const { error } = await supabase.from("product_categories").update(payload).eq("id", catForm.id);
+        if (error) throw error;
         toast.success("Categoría actualizada");
       } else {
-        await supabase.from("product_categories").insert(payload);
+        const { error } = await supabase.from("product_categories").insert(payload);
+        if (error) throw error;
         toast.success("Categoría creada");
       }
       setOpenCatModal(false);
-      fetchData();
+      await fetchData();
     } catch (error: any) {
       toast.error("Error al guardar categoría", { description: error.message });
     } finally {
@@ -196,14 +198,16 @@ export default function CategoriasPage() {
       const parsedValues = attrForm.values.split(",").map((v) => v.trim()).filter((v) => v);
       const payload = { name: attrForm.name, values: parsedValues, company_id: user.company_id };
       if (attrForm.id) {
-        await supabase.from("product_attributes").update(payload).eq("id", attrForm.id);
+        const { error } = await supabase.from("product_attributes").update(payload).eq("id", attrForm.id);
+        if (error) throw error;
         toast.success("Atributo actualizado");
       } else {
-        await supabase.from("product_attributes").insert(payload);
+        const { error } = await supabase.from("product_attributes").insert(payload);
+        if (error) throw error;
         toast.success("Atributo creado");
       }
       setOpenAttrModal(false);
-      fetchData();
+      await fetchData();
     } catch (error: any) {
       toast.error("Error al guardar atributo", { description: error.message });
     } finally {
