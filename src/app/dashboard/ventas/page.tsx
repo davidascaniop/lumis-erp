@@ -279,6 +279,19 @@ export default function VentasPage() {
                             align="end"
                             className="bg-surface-elevated border border-border w-56 text-sm shadow-brand p-1"
                           >
+                            {(o.status === "draft" || o.status === "pending") && (
+                              <DropdownMenuItem
+                                asChild
+                                className="hover:bg-brand/10 focus:bg-brand/10 cursor-pointer rounded-lg mb-1"
+                              >
+                                <Link
+                                  href={`/dashboard/ventas/nueva?edit=${o.id}`}
+                                  className="flex items-center gap-2 text-text-1 w-full"
+                                >
+                                  <FileText className="w-4 h-4 text-brand" /> Editar Presupuesto
+                                </Link>
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem
                               asChild
                               className="hover:bg-brand/10 focus:bg-brand/10 cursor-pointer rounded-lg mb-1"

@@ -32,6 +32,7 @@ function NuevaVentaContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preSelectedPartnerId = searchParams.get("partner_id");
+  const editOrderId = searchParams.get("edit");
 
   const { user } = useUser();
   const { rate } = useBCV();
@@ -57,6 +58,7 @@ function NuevaVentaContent() {
   const [amountPaid, setAmountPaid] = useState(0);
   const [saving, setSaving] = useState(false);
   const [treasuryAccountId, setTreasuryAccountId] = useState("");
+  const [editingOrder, setEditingOrder] = useState<any>(null);
 
   // New Client State
   const [newClientName, setNewClientName] = useState("");
@@ -155,6 +157,59 @@ function NuevaVentaContent() {
         if (preSelectedPartnerId && pRes.data) {
           const p = pRes.data.find((x) => x.id === preSelectedPartnerId);
           if (p) setSelectedPartner(p);
+        }
+
+        // Si estamos editando, cargar el pedido
+        if (editOrderId && usr.company_id) {
+          const { data: orderToEdit } = await supabase
+            .from("orders")
+            .select(`
+              *,
+              order_items (
+                product_id,
+                qty,
+                price_usd,
+                is_kit,
+                kit_name,
+                products ( name, stock )
+              )
+            `)
+            .eq("id", editOrderId)
+            .eq("company_id", usr.company_id)
+            .single();
+
+          if (orderToEdit) {
+            setEditingOrder(orderToEdit);
+            
+            // Setear el cliente
+            if (pRes.data && orderToEdit.partner_id) {
+              const p = pRes.data.find((x) => x.id === orderToEdit.partner_id);
+              if (p) setSelectedPartner(p);
+            }
+
+            // Setear el carrito mapeando los renglones antiguos con los productos de la base de datos
+            if (orderToEdit.order_items) {
+              const loadedCart = orderToEdit.order_items.map((oi: any) => {
+                // Conseguir metadata del producto cargado para validación de stock
+                const productDbInfo = prRes.data?.find((p:any) => p.id === oi.product_id) || 
+                                      processedKits.find((k:any) => k.id === oi.product_id);
+                return {
+                  id: oi.product_id,
+                  name: oi.products?.name || oi.kit_name || "Producto desconocido",
+                  qty: oi.qty,
+                  price_usd: oi.price_usd,
+                  stock: productDbInfo ? (productDbInfo.availableStock ?? productDbInfo.stock ?? 0) : oi.products?.stock ?? 0,
+                  is_kit: oi.is_kit,
+                  comps: productDbInfo ? productDbInfo.comps : []
+                };
+              });
+              setCart(loadedCart);
+            }
+
+            // Setear condiciones de pago
+            setPaymentType(orderToEdit.payment_type || "contado");
+            setPaymentMethod(orderToEdit.payment_method || "Efectivo");
+          }
         }
       } catch (err) {
         console.error("Error loading data:", err);
@@ -305,31 +360,56 @@ function NuevaVentaContent() {
 
     setSaving(true);
     try {
-      const orderNumber = `PED-${Date.now().toString().slice(-6)}`;
+      const orderNumber = editingOrder ? editingOrder.order_number : `PED-${Date.now().toString().slice(-6)}`;
       const status = paymentType === "contado" ? "completed" : "pending";
       const finalAmountPaid = paymentType === "contado" ? total : amountPaid;
       const amountDue = total - finalAmountPaid;
 
-      const { data: order, error: orderErr } = await supabase
-        .from("orders")
-        .insert({
-          company_id: user.company_id,
-          partner_id: targetPartner.id,
-          user_id: user.id,
-          order_number: orderNumber,
-          status,
-          total_usd: total,
-          total_bs: total * (rate || 0),
-          currency: "USD",
-          payment_type: paymentType,
-          payment_method: paymentMethod,
-          amount_paid: finalAmountPaid,
-          amount_due: amountDue,
-        } as any)
-        .select()
-        .single();
-
-      if (orderErr) throw orderErr;
+      // Update if editing, insert if new
+      let order: any;
+      if (editingOrder) {
+        const { data: updatedOrder, error: orderErr } = await supabase
+          .from("orders")
+          .update({
+            partner_id: targetPartner.id,
+            status,
+            total_usd: total,
+            total_bs: total * (rate || 0),
+            payment_type: paymentType,
+            payment_method: paymentMethod,
+            amount_paid: finalAmountPaid,
+            amount_due: amountDue,
+          })
+          .eq("id", editingOrder.id)
+          .select()
+          .single();
+        if (orderErr) throw orderErr;
+        
+        // Delete old items so we can insert new ones
+        await supabase.from("order_items").delete().eq("order_id", editingOrder.id);
+        order = updatedOrder;
+      } else {
+        const { data: newOrder, error: orderErr } = await supabase
+          .from("orders")
+          .insert({
+            company_id: user.company_id,
+            partner_id: targetPartner.id,
+            user_id: user.id,
+            order_number: orderNumber,
+            status,
+            total_usd: total,
+            total_bs: total * (rate || 0),
+            currency: "USD",
+            payment_type: paymentType,
+            payment_method: paymentMethod,
+            amount_paid: finalAmountPaid,
+            amount_due: amountDue,
+          } as any)
+          .select()
+          .single();
+        if (orderErr) throw orderErr;
+        order = newOrder;
+      }
 
       // Order items
       const items = cart.map((item) => ({
@@ -438,7 +518,64 @@ function NuevaVentaContent() {
       });
       setPrintModalOpen(true);
     } catch (error: any) {
-      toast.error("Error al crear pedido", { description: error.message });
+      toast.error("Error al procesar la venta", { description: error.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (!editingOrder) return;
+    if (!selectedPartner) return toast.error("Selecciona un cliente");
+    if (cart.length === 0) return toast.error("El carrito está vacío");
+
+    setSaving(true);
+    try {
+      // Validar si hay stock pero SIN descontarlo, es solo edición de presupuesto
+      const hasErrors = cart.some(item => item.qty > item.stock);
+      if (hasErrors) {
+        toast.error("Hay items en el presupuesto que exceden el stock disponible.");
+        setSaving(false);
+        return;
+      }
+
+      // Update Order as 'draft' or 'pending' whatever it was
+      const { error: orderErr } = await supabase
+        .from("orders")
+        .update({
+          partner_id: selectedPartner.id,
+          total_usd: total,
+          total_bs: total * (rate || 0),
+          payment_type: paymentType,
+          payment_method: paymentMethod,
+        })
+        .eq("id", editingOrder.id);
+        
+      if (orderErr) throw orderErr;
+
+      // Delete old items and insert current ones
+      await supabase.from("order_items").delete().eq("order_id", editingOrder.id);
+      
+      const items = cart.map((item) => ({
+        order_id: editingOrder.id,
+        product_id: item.id,
+        qty: item.qty,
+        price_usd: item.price_usd,
+        subtotal: item.price_usd * item.qty,
+        is_kit: !!item.is_kit,
+        kit_name: item.is_kit ? item.name : null,
+        kit_description: item.is_kit && item.comps?.length > 0 
+          ? `Incluye: ${item.comps.map((c: any) => `${c.qty_required}x ${c.name}`).join(", ")}` 
+          : null,
+      }));
+      
+      const { error: itemsErr } = await supabase.from("order_items").insert(items as any);
+      if (itemsErr) throw itemsErr;
+
+      toast.success("Presupuesto modificado exitosamente");
+      router.push("/dashboard/ventas");
+    } catch (error: any) {
+      toast.error("Error al guardar cambios", { description: error.message });
     } finally {
       setSaving(false);
     }
@@ -487,9 +624,11 @@ function NuevaVentaContent() {
           </button>
           <div className="flex flex-col">
             <h1 className="text-xl font-bold font-outfit text-[#1A1125]">
-              Nueva Venta
+              {editingOrder ? `Edición de Pedido ${editingOrder.order_number}` : "Nueva Venta"}
             </h1>
-            <p className="text-[11px] font-medium text-text-3 font-outfit uppercase tracking-wider">Facturación POS</p>
+            <p className="text-[11px] font-medium text-text-3 font-outfit uppercase tracking-wider">
+              {editingOrder ? "Formulario de Presupuesto" : "Facturación POS"}
+            </p>
           </div>
         </div>
 
@@ -543,6 +682,8 @@ function NuevaVentaContent() {
               treasuryAccounts={treasuryAccounts}
               treasuryAccountId={treasuryAccountId}
               onTreasuryAccountChange={setTreasuryAccountId}
+              isEditing={!!editingOrder}
+              onSaveDraft={handleSaveDraft}
             />
           </div>
         </div>

@@ -32,9 +32,11 @@ export function CarritoPanel({
   partners,
   onSelectPartner,
   onCreateQuickClient,
-  treasuryAccounts,
-  treasuryAccountId,
+  treasuryAccounts = [],
+  treasuryAccountId = "",
   onTreasuryAccountChange,
+  isEditing = false,
+  onSaveDraft,
 }: {
   cart: any[];
   onUpdateQty: (id: string, delta: number) => void;
@@ -64,6 +66,8 @@ export function CarritoPanel({
   treasuryAccounts?: any[];
   treasuryAccountId?: string;
   onTreasuryAccountChange?: (v: string) => void;
+  isEditing?: boolean;
+  onSaveDraft?: () => void;
 }) {
   // ── Cédula search state ──────────────────────────────────
   const [rifPrefix, setRifPrefix] = useState("V");
@@ -361,25 +365,46 @@ export function CarritoPanel({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <button
-            onClick={onSubmit}
-            disabled={submitting || !canSubmit}
-            className={`w-full py-3 rounded-lg font-bold font-outfit text-[12px] uppercase tracking-widest transition-all shadow-md active:scale-95 ${
-              submitting || !canSubmit
-                ? "bg-[#F4F7FA] text-[#B0BCCB] cursor-not-allowed shadow-none"
-                : "bg-brand text-white shadow-brand/10 hover:opacity-90"
-            }`}
-          >
-            {submitting ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Finalizar Pedido"}
-          </button>
-          <div className="grid grid-cols-2 gap-1.5">
-            <button className="py-2.5 rounded-lg font-bold font-outfit text-[10px] uppercase tracking-widest border border-[#E2E8F0] text-text-2 hover:bg-[#F8FAFC] transition-all">
-              Cotizar
-            </button>
-            <button className="py-2.5 rounded-lg font-bold font-outfit text-[10px] uppercase tracking-widest border border-danger/5 text-danger hover:bg-danger/5 transition-all">
-              Cancelar
-            </button>
-          </div>
+          {isEditing ? (
+            <>
+              <button
+                onClick={onSaveDraft}
+                disabled={submitting || !canSubmit}
+                className="w-full py-2.5 rounded-lg border border-brand text-brand hover:bg-brand/5 shadow-sm font-bold font-outfit text-[12px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Guardar Cambios"}
+              </button>
+              <button
+                onClick={onSubmit}
+                disabled={submitting || !canSubmit}
+                className="w-full py-2.5 rounded-lg bg-brand text-white shadow-brand/10 hover:opacity-90 font-bold font-outfit text-[12px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Procesar como Venta"}
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={onSubmit}
+                disabled={submitting || !canSubmit}
+                className={`w-full py-3 rounded-lg font-bold font-outfit text-[12px] uppercase tracking-widest transition-all shadow-md active:scale-95 ${
+                  submitting || !canSubmit
+                    ? "bg-[#F4F7FA] text-[#B0BCCB] cursor-not-allowed shadow-none"
+                    : "bg-brand text-white shadow-brand/10 hover:opacity-90"
+                }`}
+              >
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Finalizar Pedido"}
+              </button>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button className="py-2.5 rounded-lg font-bold font-outfit text-[10px] uppercase tracking-widest border border-[#E2E8F0] text-text-2 hover:bg-[#F8FAFC] transition-all">
+                  Cotizar
+                </button>
+                <button className="py-2.5 rounded-lg font-bold font-outfit text-[10px] uppercase tracking-widest border border-danger/5 text-danger hover:bg-danger/5 transition-all">
+                  Cancelar
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
