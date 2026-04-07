@@ -56,53 +56,63 @@ export default function KitsPage() {
     if (!user?.company_id) return;
     setLoading(true);
     try {
-      // 1. Get all Kits (which are products where is_kit = true)
+      // 1. Get all Kits (products where is_kit = true) with their components
       const { data: kitsData, error: kError } = await supabase
         .from("products")
         .select(`
           *,
-          product_kit_items (
+          product_kit_items!product_kit_items_kit_id_fkey (
             quantity,
-            products (id, name, sku, stock, price_usd)
+            component:component_id (id, name, sku, stock, price_usd)
           )
         `)
         .eq("company_id", user.company_id)
         .eq("is_kit", true)
         .order("created_at", { ascending: false });
 
-      if (kError && !kError.message.includes("does not exist")) {
+      if (kError) {
         console.error("Kits Fetch Error:", kError);
-      }
-      
-      const processedKits = (kitsData || []).map(k => {
-          const comps = k.product_kit_items?.map((pki: any) => ({
-             ...pki.products,
-             qty_required: pki.quantity
-          })) || [];
+        // If the relation doesn't exist yet, fall back to simple fetch
+        if (kError.message.includes("does not exist") || kError.message.includes("relation")) {
+          const { data: simpleKits } = await supabase
+            .from("products")
+            .select("*")
+            .eq("company_id", user.company_id)
+            .eq("is_kit", true)
+            .order("created_at", { ascending: false });
+          setKits((simpleKits || []).map(k => ({ ...k, comps: [], availableStock: 0 })));
+        }
+      } else {
+        const processedKits = (kitsData || []).map(k => {
+          const comps = (k.product_kit_items || []).map((pki: any) => ({
+            ...(pki.component || {}),
+            qty_required: pki.quantity,
+          })).filter((c: any) => c.id); // filter out nulls
 
-          // Calcula stock disponible = el mínimo posible
-          let availableStock = 999999;
+          // Available stock = minimum assemblable units from all components
+          let availableStock = comps.length > 0 ? 999999 : 0;
           comps.forEach((c: any) => {
-              const maxForThisItem = Math.floor(c.stock / c.qty_required);
+            if (c.qty_required > 0) {
+              const maxForThisItem = Math.floor((c.stock || 0) / c.qty_required);
               if (maxForThisItem < availableStock) availableStock = maxForThisItem;
+            }
           });
-          if (comps.length === 0) availableStock = 0;
 
           return { ...k, comps, availableStock };
-      });
+        });
+        setKits(processedKits);
+      }
 
-      setKits(processedKits);
-
-      // 2. Traer productos normales para el buscador (que NO sean kits)
+      // 2. Fetch regular products for the component search (non-kits)
       const { data: prodData } = await supabase
-         .from("products")
-         .select("id, name, sku, stock, price_usd")
-         .eq("company_id", user.company_id)
-         .is("is_kit", false);
-         
+        .from("products")
+        .select("id, name, sku, stock, price_usd")
+        .eq("company_id", user.company_id)
+        .neq("is_kit", true);
+
       setProducts(prodData || []);
     } catch (e) {
-      console.error(e);
+      console.error("fetchKits error:", e);
     } finally {
       setLoading(false);
     }
@@ -160,69 +170,78 @@ export default function KitsPage() {
   const saveKit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || components.length === 0 || !user?.company_id) {
-        toast.error("Rellena el nombre y añade componentes al kit.");
-        return;
+      toast.error("Rellena el nombre y añade al menos un componente al kit.");
+      return;
     }
     setIsSaving(true);
 
     try {
-        const kitPayload = {
-            company_id: user.company_id,
-            name: form.name,
-            description: form.description,
-            price_usd: Number(form.price_usd),
-            image_url: form.image_url,
-            is_kit: true,
-            status: form.status,
-            stock: 0, // Kit stock is dynamic
-            sku: `KIT-${Date.now().toString().slice(-6)}`
-        };
+      const isEditing = !!form.id;
+      const kitPayload = {
+        company_id: user.company_id,
+        name: form.name,
+        description: form.description,
+        price_usd: Number(form.price_usd),
+        image_url: form.image_url,
+        is_kit: true,
+        status: form.status,
+        stock: 0,
+        sku: isEditing ? undefined : `KIT-${Date.now().toString().slice(-6)}`,
+      };
 
-        let newKitId = form.id;
+      let kitId = form.id;
 
-        if (form.id) {
-            // Update
-            const { error: updErr } = await supabase.from("products").update(kitPayload).eq("id", form.id);
-            if (updErr) throw updErr;
-            // Del old components
-            await supabase.from("product_kit_items").delete().eq("kit_id", form.id);
-        } else {
-            // Insert
-            const { data: newKit, error: insErr } = await supabase.from("products").insert(kitPayload).select("id").single();
-            if (insErr) throw insErr;
-            newKitId = newKit.id;
-        }
+      if (isEditing) {
+        const { error: updErr } = await supabase
+          .from("products")
+          .update(kitPayload)
+          .eq("id", form.id);
+        if (updErr) throw updErr;
+        // Remove old components before reinserting
+        const { error: delErr } = await supabase
+          .from("product_kit_items")
+          .delete()
+          .eq("kit_id", form.id);
+        if (delErr) throw delErr;
+      } else {
+        const { data: newKit, error: insErr } = await supabase
+          .from("products")
+          .insert(kitPayload)
+          .select("id")
+          .single();
+        if (insErr) throw insErr;
+        kitId = newKit.id;
+      }
 
-        // Insert new components
-        const compsPayload = components.map(c => ({
-            kit_id: newKitId,
-            component_id: c.product_id,
-            quantity: c.qty_required
-        }));
-        
-        const { error: cErr } = await supabase.from("product_kit_items").insert(compsPayload);
-        if (cErr) throw cErr;
+      // Insert components
+      const compsPayload = components.map(c => ({
+        kit_id: kitId,
+        component_id: c.product_id,
+        quantity: c.qty_required,
+      }));
+      const { error: cErr } = await supabase.from("product_kit_items").insert(compsPayload);
+      if (cErr) throw cErr;
 
-        toast.success(form.id ? "Kit actualizado correctamente" : "Kit creado exitosamente");
-        setOpenModal(false);
-        fetchKits();
-    } catch(err: any) {
-        toast.error("Error al guardar kit", { description: err.message });
+      toast.success(isEditing ? "Kit actualizado correctamente" : "Kit creado exitosamente");
+      setOpenModal(false);
+      await fetchKits(); // await to ensure table refreshes immediately
+    } catch (err: any) {
+      toast.error("Error al guardar kit", { description: err.message });
     } finally {
-        setIsSaving(false);
+      setIsSaving(false);
     }
   };
 
   const deleteKit = async (id: string) => {
-      if (!confirm("¿Eliminar este kit? Sus componentes originales no se verán afectados.")) return;
-      try {
-          // cascade will delete product_kit_items
-          await supabase.from("products").delete().eq("id", id);
-          toast.success("Kit eliminado");
-          fetchKits();
-      } catch (error: any) {
-          toast.error("Error al eliminar", { description: error.message });
-      }
+    if (!confirm("¿Eliminar este kit? Sus componentes originales no se verán afectados.")) return;
+    try {
+      const { error } = await supabase.from("products").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("Kit eliminado");
+      await fetchKits();
+    } catch (error: any) {
+      toast.error("Error al eliminar", { description: error.message });
+    }
   };
 
   const viewKit = (k: any) => {

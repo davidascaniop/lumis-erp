@@ -112,28 +112,42 @@ function ProductCard({
   justAdded: boolean;
 }) {
   const [qty, setQty] = useState(1);
-  const noStock = product.stock <= 0;
+  const isKit = !!product.is_kit;
+  // For kits use pre-calculated armable stock; for regular products use raw stock
+  const effectiveStock = isKit ? (product.availableStock ?? 0) : (product.stock ?? 0);
+  const noStock = effectiveStock <= 0;
 
   return (
-    <div className={`bg-white rounded-2xl p-4 border border-[#EDF2F7] shadow-sm hover:shadow-md transition-all flex flex-col gap-4 ${noStock ? 'opacity-50' : ''}`}>
+    <div className={`bg-white rounded-2xl p-4 border shadow-sm hover:shadow-md transition-all flex flex-col gap-4 ${noStock ? 'opacity-50' : ''} ${isKit ? 'border-purple-200 ring-1 ring-purple-100' : 'border-[#EDF2F7]'}`}>
        <div className="flex gap-4">
-          <div className="w-24 h-24 rounded-xl bg-[#F8FAFC] flex items-center justify-center overflow-hidden border border-[#F1F5F9] flex-shrink-0">
+          <div className="w-24 h-24 rounded-xl bg-[#F8FAFC] flex items-center justify-center overflow-hidden border border-[#F1F5F9] flex-shrink-0 relative">
             {product.image_url ? (
               <img src={product.image_url} alt={product.name} className="w-full h-full object-contain p-2" />
             ) : (
               <Package className="w-10 h-10 text-text-3 opacity-20" />
+            )}
+            {isKit && (
+              <span className="absolute top-1 left-1 bg-purple-600 text-white text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md leading-none shadow-sm">
+                KIT
+              </span>
             )}
           </div>
           
           <div className="flex-1 min-w-0 py-1">
             <h3 className="text-[15px] font-bold text-[#1A1125] font-outfit line-clamp-2 mb-0.5 leading-tight" title={product.name}>{product.name}</h3>
             <p className="text-[11px] font-bold text-text-3 uppercase tracking-wide mb-2">
-               {product.category || "General"}
+               {isKit ? '🧩 Kit & Ensamble' : (product.category || "General")}
             </p>
             <p className="text-xl font-bold text-brand font-outfit mb-2">$ {Number(product.price_usd).toFixed(2)}</p>
             <div className="space-y-0.5">
                <p className="text-[10px] font-bold text-text-3 uppercase font-outfit tracking-wide">SKU: {product.sku || 'N/A'}</p>
-               <p className="text-[10px] font-bold text-text-3 uppercase font-outfit tracking-wide">Existencia: <span className="text-text-1">{product.stock} {product.unit || 'Uni'}</span></p>
+               {isKit ? (
+                 <p className="text-[10px] font-bold uppercase font-outfit tracking-wide">
+                   Armables: <span className={effectiveStock > 0 ? 'text-emerald-600' : 'text-red-500'}>{effectiveStock} kits</span>
+                 </p>
+               ) : (
+                 <p className="text-[10px] font-bold text-text-3 uppercase font-outfit tracking-wide">Existencia: <span className="text-text-1">{product.stock} {product.unit || 'Uni'}</span></p>
+               )}
             </div>
           </div>
        </div>
@@ -142,17 +156,28 @@ function ProductCard({
           <div className="flex items-center bg-[#F8FAFC] rounded-lg border border-[#E2E8F0] p-1 flex-1">
             <button onClick={() => setQty(Math.max(1, qty - 1))} className="w-8 h-8 flex items-center justify-center text-text-3 hover:text-[#1A1125] transition-colors"><Minus className="w-3.5 h-3.5"/></button>
             <span className="flex-1 text-center text-sm font-bold font-outfit text-[#1A1125]">{qty}</span>
-            <button onClick={() => setQty(qty + 1)} className="w-8 h-8 flex items-center justify-center text-text-3 hover:text-[#1A1125] transition-colors"><Plus className="w-3.5 h-3.5"/></button>
+            <button onClick={() => setQty(Math.min(isKit ? effectiveStock : 9999, qty + 1))} className="w-8 h-8 flex items-center justify-center text-text-3 hover:text-[#1A1125] transition-colors"><Plus className="w-3.5 h-3.5"/></button>
           </div>
           
           <button
             onClick={() => onAdd(qty)}
             disabled={noStock}
             className={`h-10 px-6 rounded-lg font-bold font-outfit text-xs uppercase tracking-widest transition-all ${
-              justAdded ? 'bg-status-ok text-white' : 'bg-brand text-white hover:opacity-90 active:scale-95 shadow-lg shadow-brand/10'
+              noStock
+                ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                : justAdded
+                ? 'bg-status-ok text-white'
+                : isKit
+                ? 'bg-purple-600 text-white hover:opacity-90 active:scale-95 shadow-lg shadow-purple-200'
+                : 'bg-brand text-white hover:opacity-90 active:scale-95 shadow-lg shadow-brand/10'
             }`}
           >
-            {justAdded ? <div className="flex items-center gap-1"><Check className="w-4 h-4"/> OK</div> : "Agregar"}
+            {noStock
+              ? 'Sin stock'
+              : justAdded
+              ? <div className="flex items-center gap-1"><Check className="w-4 h-4"/>OK</div>
+              : 'Agregar'
+            }
           </button>
        </div>
     </div>

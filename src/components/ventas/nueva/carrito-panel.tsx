@@ -320,10 +320,18 @@ export function CarritoPanel({
                   <div className="flex gap-2 min-w-0">
                     <FileText className="w-3.5 h-3.5 text-text-3 mt-0.5 flex-shrink-0" />
                     <div className="flex flex-col min-w-0">
-                      <span className="text-[12px] font-bold text-text-1 truncate font-outfit max-w-[120px]">{item.name}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[12px] font-bold text-text-1 truncate font-outfit max-w-[120px]">{item.name}</span>
+                        {item.is_kit && <span className="bg-purple-100 text-purple-700 px-1 py-0.5 rounded-[4px] text-[8px] font-bold uppercase leading-none">KIT</span>}
+                      </div>
                       <span className="text-[10px] font-medium text-text-3 font-outfit leading-none mt-0.5">
                         {item.qty}x ${Number(item.price_usd).toFixed(2)}
                       </span>
+                      {item.is_kit && item.comps?.length > 0 && (
+                        <div className="mt-1 text-[9px] text-[#94A3B8] font-outfit leading-tight italic truncate max-w-[150px]">
+                          Incluye: {item.comps.map((c: any) => `${c.qty_required}x ${c.name}`).join(", ")}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

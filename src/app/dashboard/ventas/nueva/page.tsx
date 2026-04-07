@@ -92,17 +92,32 @@ function NuevaVentaContent() {
           .single();
         if (!usr) return;
 
-        const [pRes, prRes, catRes] = await Promise.all([
+        const [pRes, prRes, kitsRes, catRes] = await Promise.all([
           supabase
             .from("partners")
             .select("*")
             .eq("company_id", usr.company_id)
             .eq("status", "active"),
+          // Regular products (non-kits)
           supabase
             .from("products")
             .select("*")
             .eq("company_id", usr.company_id)
-            .eq("status", "active"),
+            .eq("status", "active")
+            .neq("is_kit", true),
+          // Kits with their components for stock explosion
+          supabase
+            .from("products")
+            .select(`
+              *,
+              product_kit_items!product_kit_items_kit_id_fkey (
+                quantity,
+                component:component_id (id, name, sku, stock, price_usd)
+              )
+            `)
+            .eq("company_id", usr.company_id)
+            .eq("status", "active")
+            .eq("is_kit", true),
           supabase
             .from("product_categories")
             .select("name")
@@ -111,7 +126,28 @@ function NuevaVentaContent() {
         ]);
 
         setPartners(pRes.data || []);
-        setProducts(prRes.data || []);
+
+        // Process kits: calculate available stock based on component minimums
+        const processedKits = (kitsRes.data || []).map((k: any) => {
+          const comps = (k.product_kit_items || []).map((pki: any) => ({
+            ...(pki.component || {}),
+            qty_required: pki.quantity,
+          })).filter((c: any) => c.id);
+
+          let availableStock = comps.length > 0 ? 999999 : 0;
+          comps.forEach((c: any) => {
+            if (c.qty_required > 0) {
+              const maxForThis = Math.floor((c.stock || 0) / c.qty_required);
+              if (maxForThis < availableStock) availableStock = maxForThis;
+            }
+          });
+
+          return { ...k, comps, availableStock, is_kit: true };
+        });
+
+        // Merge regular products + kits into one list
+        setProducts([...(prRes.data || []), ...processedKits]);
+
         if (catRes.data) {
           setCategories(catRes.data.map((c: any) => c.name));
         }
@@ -302,18 +338,34 @@ function NuevaVentaContent() {
         qty: item.qty,
         price_usd: item.price_usd,
         subtotal: item.price_usd * item.qty,
+        is_kit: !!item.is_kit,
+        kit_name: item.is_kit ? item.name : null,
       }));
       const { error: itemsErr } = await supabase.from("order_items").insert(items as any);
       if (itemsErr) throw itemsErr;
 
-      // Discount stock
+      // Discount stock: regular products directly, kits explode into components
       await Promise.all(
-        cart.map((item) =>
-          supabase
-            .from("products")
-            .update({ stock: Math.max(0, item.stock - item.qty) } as any)
-            .eq("id", item.id),
-        ),
+        cart.map(async (item) => {
+          if (item.is_kit && Array.isArray(item.comps) && item.comps.length > 0) {
+            // Explode kit: decrement each component's stock
+            await Promise.all(
+              item.comps.map(async (comp: any) => {
+                const deduct = comp.qty_required * item.qty;
+                const newStock = Math.max(0, (comp.stock || 0) - deduct);
+                await supabase
+                  .from("products")
+                  .update({ stock: newStock } as any)
+                  .eq("id", comp.id);
+              })
+            );
+          } else if (!item.is_kit) {
+            await supabase
+              .from("products")
+              .update({ stock: Math.max(0, item.stock - item.qty) } as any)
+              .eq("id", item.id);
+          }
+        })
       );
 
       // CxC if credit or partial payment

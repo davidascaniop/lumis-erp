@@ -156,7 +156,7 @@ export function ProductForm({
 }: {
   open: boolean;
   setOpen: (v: boolean) => void;
-  onSuccess?: () => void;
+  onSuccess?: () => void | Promise<void>;
   product?: any;
 }) {
   const { user } = useUser();
@@ -260,8 +260,8 @@ export function ProductForm({
         );
       }
       toast.success(product?.id ? "Producto actualizado" : "Producto creado");
+      if (onSuccess) await onSuccess();
       setOpen(false);
-      onSuccess?.();
     } catch (error: any) {
       toast.error("Error al guardar producto", { description: error.message });
     } finally {

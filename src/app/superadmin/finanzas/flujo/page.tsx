@@ -8,7 +8,7 @@ export default async function FlujoCajaPage() {
   const supabase = await createClient();
 
   const [
-    { data: payRaw }, 
+    { data: payRaw },
     { data: varRaw },
     { data: fixPayRaw }
   ] = await Promise.all([
@@ -20,7 +20,7 @@ export default async function FlujoCajaPage() {
   const payments = payRaw || [];
   const varCosts = varRaw || [];
   const fixPayments = fixPayRaw || [];
-  
+
   const now = new Date();
   const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -30,8 +30,8 @@ export default async function FlujoCajaPage() {
   const saldoActual = totalIngresos - totalEgresos;
 
   const ingresosMes = payments.filter(p => new Date(p.created_at) >= currentMonthStart).reduce((sum, p) => sum + (p.plan_price || p.amount_usd || 0), 0);
-  const egresosMes = varCosts.filter(c => new Date(c.date) >= currentMonthStart).reduce((sum, c) => sum + (c.amount_usd || 0), 0) + 
-                     fixPayments.filter(c => new Date(c.paid_at) >= currentMonthStart).reduce((sum, c) => sum + (c.amount_usd || 0), 0);
+  const egresosMes = varCosts.filter(c => new Date(c.date) >= currentMonthStart).reduce((sum, c) => sum + (c.amount_usd || 0), 0) +
+    fixPayments.filter(c => new Date(c.paid_at) >= currentMonthStart).reduce((sum, c) => sum + (c.amount_usd || 0), 0);
 
   // Build History Chart Data
   const buildFlowHistory = () => {
@@ -39,11 +39,11 @@ export default async function FlujoCajaPage() {
     for (let i = 11; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const nextD = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
-      
+
       const ing = payments.filter(p => new Date(p.created_at) >= d && new Date(p.created_at) < nextD).reduce((sum, p) => sum + (p.plan_price || p.amount_usd || 0), 0);
       const egr = varCosts.filter(c => new Date(c.date) >= d && new Date(c.date) < nextD).reduce((sum, c) => sum + (c.amount_usd || 0), 0) +
-                  fixPayments.filter(c => new Date(c.paid_at) >= d && new Date(c.paid_at) < nextD).reduce((sum, c) => sum + (c.amount_usd || 0), 0);
-      
+        fixPayments.filter(c => new Date(c.paid_at) >= d && new Date(c.paid_at) < nextD).reduce((sum, c) => sum + (c.amount_usd || 0), 0);
+
       months.push({
         month: d.toLocaleDateString("es-VE", { month: "short", year: "2-digit" }),
         ingresos: Number(ing.toFixed(2)),
@@ -57,7 +57,7 @@ export default async function FlujoCajaPage() {
 
   // Build Combined Transactions list
   const tx: any[] = [];
-  
+
   payments.forEach(p => {
     tx.push({ date: new Date(p.created_at), desc: `Pago Suscripción - ${(p.companies as any)?.name || 'Cliente'}`, type: 'ingreso', category: 'Suscripción', amount: (p.plan_price || p.amount_usd || 0) });
   });
@@ -69,12 +69,12 @@ export default async function FlujoCajaPage() {
   });
 
   // Sort ascending to calculate running balance, then reverse for display
-  tx.sort((a,b) => a.date.getTime() - b.date.getTime());
+  tx.sort((a, b) => a.date.getTime() - b.date.getTime());
   let runningBalance = 0;
   tx.forEach(t => {
-     if (t.type === 'ingreso') runningBalance += t.amount;
-     else runningBalance -= t.amount;
-     t.balance = runningBalance;
+    if (t.type === 'ingreso') runningBalance += t.amount;
+    else runningBalance -= t.amount;
+    t.balance = runningBalance;
   });
 
   tx.reverse();
@@ -103,7 +103,7 @@ export default async function FlujoCajaPage() {
           </div>
           <h3 className="text-sm font-bold text-text-3 mb-1 uppercase tracking-widest relative z-10">Saldo Actual</h3>
           <div className={`font-heading text-4xl font-black tracking-tight relative z-10 ${saldoActual >= 0 ? "text-brand" : "text-status-danger"}`}>
-             ${saldoActual.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+            ${saldoActual.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         </div>
 
@@ -116,7 +116,7 @@ export default async function FlujoCajaPage() {
           </div>
           <h3 className="text-sm font-bold text-text-3 mb-1 uppercase tracking-widest relative z-10">Ingresos (Mes)</h3>
           <div className="font-heading text-4xl font-black text-text-1 tracking-tight relative z-10">
-             ${ingresosMes.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+            ${ingresosMes.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         </div>
 
@@ -129,7 +129,7 @@ export default async function FlujoCajaPage() {
           </div>
           <h3 className="text-sm font-bold text-text-3 mb-1 uppercase tracking-widest relative z-10">Egresos (Mes)</h3>
           <div className="font-heading text-4xl font-black text-text-1 tracking-tight relative z-10">
-             ${egresosMes.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+            ${egresosMes.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         </div>
       </div>
@@ -141,7 +141,7 @@ export default async function FlujoCajaPage() {
           <p className="text-xs font-semibold text-text-3 mt-1 uppercase tracking-wider">Entradas vs Salidas (12m)</p>
         </div>
         <div className="flex-1">
-           <AreaFlowChart data={flowChart} />
+          <AreaFlowChart data={flowChart} />
         </div>
       </div>
 
@@ -167,17 +167,17 @@ export default async function FlujoCajaPage() {
                 <tr key={i} className="border-b border-border hover:bg-surface-hover/20 transition-colors">
                   <td className="p-3 text-xs font-medium text-text-2">{format(t.date, "dd MMM, yy HH:mm", { locale: es })}</td>
                   <td className="p-3 text-sm font-bold text-text-1 truncate max-w-[250px]">
-                     <div className="flex items-center gap-2">
-                        {t.type === 'ingreso' ? <TrendingUp className="w-3 h-3 text-status-ok" /> : <TrendingDown className="w-3 h-3 text-status-danger" />}
-                        {t.desc}
-                     </div>
+                    <div className="flex items-center gap-2">
+                      {t.type === 'ingreso' ? <TrendingUp className="w-3 h-3 text-status-ok" /> : <TrendingDown className="w-3 h-3 text-status-danger" />}
+                      {t.desc}
+                    </div>
                   </td>
                   <td className="p-3 text-[10px] font-bold text-text-3 uppercase tracking-wider">{t.category}</td>
                   <td className={`p-3 text-sm font-bold ${t.type === 'ingreso' ? 'text-status-ok' : 'text-status-danger'}`}>
-                     {t.type === 'ingreso' ? '+' : '-'}${Number(t.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}
+                    {t.type === 'ingreso' ? '+' : '-'}${Number(t.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </td>
                   <td className="p-3 text-right text-sm font-bold text-text-1">
-                     ${Number(t.balance).toLocaleString(undefined, {minimumFractionDigits: 2})}
+                    ${Number(t.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </td>
                 </tr>
               ))}
