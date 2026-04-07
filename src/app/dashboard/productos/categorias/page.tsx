@@ -264,9 +264,9 @@ export default function CategoriasPage() {
           </div>
           <div>
             <p className="text-[10px] text-text-3 font-bold uppercase tracking-wider">Total Categorías</p>
-            <p className="text-xl font-bold text-text-1">{loading ? "—" : categories.length}</p>
+            <p className="text-xl font-bold text-text-1">{loading ? "—" : (categories || []).length}</p>
             <p className="text-[10px] text-brand font-bold mt-0.5">
-              {categories.filter(c => !c.parent_id).length} principales · {categories.filter(c => c.parent_id).length} subcategorías
+              {(categories || []).filter(c => !c.parent_id).length} principales · {(categories || []).filter(c => c.parent_id).length} subcategorías
             </p>
           </div>
         </Card>
@@ -276,9 +276,9 @@ export default function CategoriasPage() {
           </div>
           <div>
             <p className="text-[10px] text-text-3 font-bold uppercase tracking-wider">Total Atributos</p>
-            <p className="text-xl font-bold text-text-1">{loading ? "—" : attributes.length}</p>
+            <p className="text-xl font-bold text-text-1">{loading ? "—" : (attributes || []).length}</p>
             <p className="text-[10px] text-emerald-500 font-bold mt-0.5">
-              {attributes.reduce((acc, a) => acc + (a.values?.length || 0), 0)} valores configurados
+              {(attributes || []).reduce((acc, a) => acc + (a?.values?.length || 0), 0)} valores configurados
             </p>
           </div>
         </Card>
@@ -294,7 +294,7 @@ export default function CategoriasPage() {
           )}
         >
           <ListTree className="w-3.5 h-3.5" />
-          Categorías ({categories.length})
+          Categorías ({(categories || []).length})
         </button>
         <button
           onClick={() => setTab("atributos")}
@@ -304,7 +304,7 @@ export default function CategoriasPage() {
           )}
         >
           <Network className="w-3.5 h-3.5" />
-          Atributos ({attributes.length})
+          Atributos ({(attributes || []).length})
         </button>
       </div>
 
@@ -325,7 +325,7 @@ export default function CategoriasPage() {
               <tbody className="divide-y divide-border">
                 {loading ? (
                   <tr><td colSpan={5} className="py-20 text-center"><Loader2 className="w-8 h-8 animate-spin text-brand mx-auto" /></td></tr>
-                ) : categories.length === 0 ? (
+                ) : !categories || categories.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-20 text-center">
                       <FolderOpen className="w-12 h-12 text-text-3 mx-auto mb-3 opacity-20" />
@@ -336,9 +336,9 @@ export default function CategoriasPage() {
                     </td>
                   </tr>
                 ) : (
-                  categories.map((c) => {
-                    const color = c.color || CATEGORY_COLORS[0];
-                    const productCount = productCountMap[c.name] || 0;
+                  (categories || []).map((c) => {
+                    const color = c?.color || CATEGORY_COLORS[0];
+                    const productCount = productCountMap[c?.name] || 0;
                     return (
                       <tr key={c.id} className="hover:bg-surface-hover/20 transition-colors">
                         <td className="px-6 py-4">
@@ -423,7 +423,7 @@ export default function CategoriasPage() {
               <tbody className="divide-y divide-border">
                 {loading ? (
                   <tr><td colSpan={4} className="py-20 text-center"><Loader2 className="w-8 h-8 animate-spin text-brand mx-auto" /></td></tr>
-                ) : attributes.length === 0 ? (
+                ) : !attributes || attributes.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="py-20 text-center">
                       <BoxSelect className="w-12 h-12 text-text-3 mx-auto mb-3 opacity-20" />
@@ -434,7 +434,7 @@ export default function CategoriasPage() {
                     </td>
                   </tr>
                 ) : (
-                  attributes.map((a) => (
+                  (attributes || []).map((a) => (
                     <tr key={a.id} className="hover:bg-surface-hover/20 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
@@ -531,7 +531,7 @@ export default function CategoriasPage() {
                   </SelectTrigger>
                   <SelectContent className="bg-surface-card border-border text-black">
                     <SelectItem value="none">Ninguna (Principal)</SelectItem>
-                    {categories.filter((c) => c.id !== catForm.id).map((c) => (
+                    {(categories || []).filter((c) => c.id !== catForm.id).map((c) => (
                       <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                     ))}
                   </SelectContent>
