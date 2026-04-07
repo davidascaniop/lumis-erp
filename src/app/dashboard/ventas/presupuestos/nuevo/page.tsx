@@ -238,7 +238,6 @@ function NuevoPresupuestoContent() {
         price_usd: i.price_usd,
         product_name: i.name,
         product_sku: i.sku,
-        subtotal: i.qty * i.price_usd
       }));
 
       const { error: iErr } = await supabase.from("quote_items").insert(items as any);
