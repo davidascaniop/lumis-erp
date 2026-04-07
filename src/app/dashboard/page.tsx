@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { KpiCardWithSparkline } from "@/components/dashboard/kpi-card-sparkline";
 import { AgingChart } from "@/components/dashboard/aging-chart";
 import { AlertsPanel } from "@/components/dashboard/alerts-panel";
+import { ActiveAlertsPanel, countActiveAlerts } from "@/components/dashboard/active-alerts-panel";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { DailySeed } from "@/components/dashboard/daily-seed";
 import { PortalPaymentsAlert } from "@/components/dashboard/portal-payments-alert";
@@ -13,7 +14,6 @@ import { useUser } from "@/hooks/use-user";
 import { formatCurrency } from "@/lib/utils";
 import {
   Wallet,
-  TrendingDown,
   CheckCircle,
   ShoppingCart,
   Loader2,
@@ -26,6 +26,7 @@ import {
   Clock,
   AlertTriangle,
   ChevronRight,
+  Bell,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -179,6 +180,8 @@ export default function DashboardPage() {
           topClientsRes,
           topProductsRes,
           recurringRes,
+          inactiveRes,
+          overdueRes,
         ] = await Promise.all([
           // Existentes
           supabase
@@ -264,6 +267,23 @@ export default function DashboardPage() {
             .select("*")
             .eq("company_id", companyId)
             .eq("is_active", true),
+          // Clientes inactivos 30+ días
+          supabase
+            .from("partners")
+            .select("id, name, last_order_at")
+            .eq("company_id", companyId)
+            .lt("last_order_at", thirtyDaysAgo)
+            .order("last_order_at", { ascending: true })
+            .limit(10),
+          // Facturas vencidas
+          supabase
+            .from("receivables")
+            .select("id, invoice_number, balance_usd, due_date, partners(name)")
+            .eq("company_id", companyId)
+            .neq("status", "paid")
+            .lt("due_date", todayStart)
+            .order("due_date", { ascending: true })
+            .limit(10),
         ]);
 
         const recs = (receivablesRes.data as any[]) || [];
@@ -275,6 +295,8 @@ export default function DashboardPage() {
         const topClientsRaw = (topClientsRes.data as any[]) || [];
         const topProductsRaw = (topProductsRes.data as any[]) || [];
         const recurringAlerts = (recurringRes.data as any[]) || [];
+        const inactiveClientsRaw = (inactiveRes.data as any[]) || [];
+        const overdueReceivablesRaw = (overdueRes.data as any[]) || [];
 
         const totalCartera = recs.reduce(
           (s: number, r: any) => s + (r.balance_usd ?? 0),
@@ -393,6 +415,8 @@ export default function DashboardPage() {
           topClients,
           topProducts,
           activeRecurringAlerts,
+          inactiveClients: inactiveClientsRaw,
+          overdueReceivables: overdueReceivablesRaw,
         });
       } catch (err) {
         console.error("Dashboard load error:", err);
@@ -414,6 +438,15 @@ export default function DashboardPage() {
 
   const firstName = user?.full_name?.split(" ")[0] || "Usuario";
 
+  const alertCount = data
+    ? countActiveAlerts({
+        lowStockProducts: data.lowStockProducts,
+        overdueReceivables: data.overdueReceivables,
+        activeRecurringAlerts: data.activeRecurringAlerts,
+        inactiveClients: data.inactiveClients,
+      })
+    : 0;
+
   return (
     <div className="space-y-5 animate-fade-up max-w-7xl mx-auto font-montserrat font-light">
       {/* ═══ ZONA 0: HEADER ═══ */}
@@ -428,21 +461,42 @@ export default function DashboardPage() {
           <p className="text-sm text-text-2">{formatDateEs(new Date())}</p>
         </div>
 
-        {/* Selector de período */}
-        <div className="flex items-center gap-1 p-1 bg-surface-card rounded-xl border border-border shadow-card">
-          {["hoy", "semana", "mes", "año"].map((p) => (
-            <button
-              key={p}
-              onClick={() => setPeriod(p)}
-              className={`px-4 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${
-                period === p
-                  ? "bg-gradient-to-r from-brand to-brand-dark text-white shadow-brand"
-                  : "text-text-2 hover:text-text-1"
-              }`}
+        <div className="flex items-center gap-3">
+          {/* Bell with counter */}
+          <div className="relative">
+            <div
+              className="w-9 h-9 rounded-xl bg-surface-card border border-border flex items-center justify-center
+                         shadow-card hover:border-border-brand/40 transition-colors cursor-default"
             >
-              {p}
-            </button>
-          ))}
+              <Bell className="w-4 h-4 text-text-2" />
+            </div>
+            {alertCount > 0 && (
+              <span
+                className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full bg-[#FF2D55]
+                           text-white text-[9px] font-bold flex items-center justify-center px-1
+                           shadow-[0_0_10px_rgba(255,45,85,0.5)] animate-pulse"
+              >
+                {alertCount > 9 ? "9+" : alertCount}
+              </span>
+            )}
+          </div>
+
+          {/* Selector de período */}
+          <div className="flex items-center gap-1 p-1 bg-surface-card rounded-xl border border-border shadow-card">
+            {["hoy", "semana", "mes", "año"].map((p) => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className={`px-4 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${
+                  period === p
+                    ? "bg-gradient-to-r from-brand to-brand-dark text-white shadow-brand"
+                    : "text-text-2 hover:text-text-1"
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -581,7 +635,7 @@ export default function DashboardPage() {
         {/* Gráfico Ventas por Mes */}
         <SalesChart data={data.salesByMonth} />
 
-        {/* Panel lateral: Acciones + Alertas */}
+        {/* Panel lateral: Acciones Rápidas + Verificar Cobros + Vencen Hoy */}
         <div className="space-y-3">
           {/* Acciones Rápidas */}
           <div className="bg-surface-card border border-border rounded-2xl p-4 shadow-card hover-card-effect">
@@ -696,80 +750,6 @@ export default function DashboardPage() {
                     </p>
                     <span className="font-primary text-xs text-status-warn">
                       {formatCurrency(item.amount)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* GASTOS RECURRENTES PRÓXIMOS (ALERTA) */}
-          {data.activeRecurringAlerts?.length > 0 && (
-            <div
-              className="bg-brand/5 border border-brand/15
-                                        rounded-2xl p-4 shadow-card hover-card-effect"
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle className="w-4 h-4 text-brand flex-shrink-0" />
-                <p className="text-xs font-black text-brand uppercase tracking-wider">
-                  Gastos Proyectos ({data.activeRecurringAlerts.length})
-                </p>
-              </div>
-              <div className="space-y-2">
-                {data.activeRecurringAlerts.slice(0, 3).map((r: any) => (
-                  <div
-                    key={r.id}
-                    className="flex items-center justify-between py-1.5 border-b border-border last:border-0"
-                  >
-                    <div>
-                      <p className="text-[10px] font-black text-text-1 truncate max-w-[140px] uppercase">
-                        {r.name}
-                      </p>
-                      <p className="text-[8px] text-text-3 font-bold uppercase">Día {r.due_day} · {r.frequency}</p>
-                    </div>
-                    <span className="font-primary text-xs text-brand font-black">
-                      ${Number(r.amount_usd).toFixed(2)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <Link
-                href="/dashboard/finanzas/recurrentes"
-                className="mt-3 block w-full py-2 rounded-xl text-center text-[10px] font-black
-                                           bg-brand/10 text-brand border border-brand/20
-                                           hover:bg-brand hover:text-white transition-all uppercase"
-              >
-                Gestionar Pagos
-              </Link>
-            </div>
-          )}
-
-          {/* Alertas Stock Bajo */}
-          {data.lowStockProducts.length > 0 && (
-            <div
-              className="bg-status-danger/5 border border-status-danger/12
-                                        rounded-2xl p-4 shadow-card hover-card-effect"
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <Package className="w-4 h-4 text-status-danger flex-shrink-0" />
-                <p className="text-xs font-semibold text-status-danger">
-                  Stock Bajo ({data.lowStockProducts.length})
-                </p>
-              </div>
-              <div className="space-y-2">
-                {data.lowStockProducts.slice(0, 3).map((p: any) => (
-                  <div
-                    key={p.id}
-                    className="flex items-center justify-between py-1.5 border-b border-border last:border-0"
-                  >
-                    <p className="text-xs font-medium text-text-1 truncate max-w-[140px]">
-                      {p.name}
-                    </p>
-                    <span
-                      className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-md
-                                                         bg-status-danger/10 text-status-danger"
-                    >
-                      {p.stock} {p.unit}
                     </span>
                   </div>
                 ))}
@@ -902,10 +882,18 @@ export default function DashboardPage() {
       {/* ═══ ZONA 6: Aging de Cartera ═══ */}
       <AgingChart data={data.aging} />
 
-      {/* ═══ ZONA 7: Alertas + Actividad Reciente ═══ */}
+      {/* ═══ ZONA 7: Alertas Activas + Actividad Reciente ═══ */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4">
         <RecentActivity companyId={data.companyId} />
-        <AlertsPanel clients={data.mappedRiskClients} />
+        <div className="space-y-3">
+          <ActiveAlertsPanel
+            lowStockProducts={data.lowStockProducts}
+            overdueReceivables={data.overdueReceivables}
+            activeRecurringAlerts={data.activeRecurringAlerts}
+            inactiveClients={data.inactiveClients}
+          />
+          <AlertsPanel clients={data.mappedRiskClients} />
+        </div>
       </div>
     </div>
   );
