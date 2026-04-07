@@ -38,6 +38,7 @@ interface PurchaseItem {
   unit_cost_usd: number;
   subtotal_usd: number;
   _volume_discount?: boolean;
+  _origin?: "catalog" | "manual";
 }
 
 interface Purchase {
@@ -87,6 +88,8 @@ export default function OrdenesCompraPage() {
   const [products, setProducts]       = useState<Product[]>([]);
   const [prodSearch, setProdSearch]   = useState("");
   const [saving, setSaving]           = useState(false);
+  const [productMode, setProductMode] = useState<"catalog" | "manual">("catalog");
+  const [manualForm, setManualForm]   = useState({ name: "", sku: "", qty: 1, unit_cost_usd: 0 });
   const [priceHints, setPriceHints]   = useState<Record<string, { lastPrice: number | null; lastDays: number | null; bestPrice: number | null; bestSupplier: string | null; isFirst: boolean }>>({}); 
   const [form, setForm] = useState({ 
     supplier_id: "", 
@@ -178,6 +181,8 @@ export default function OrdenesCompraPage() {
     });
     setItems([]);
     setProdSearch("");
+    setProductMode("catalog");
+    setManualForm({ name: "", sku: "", qty: 1, unit_cost_usd: 0 });
     setShowQuickSupplier(false);
     await loadMeta();
     if (forceOpen || !newOpen) setNewOpen(true);
@@ -281,6 +286,25 @@ export default function OrdenesCompraPage() {
     setProdSearch("");
   };
 
+  const addManualProduct = () => {
+    if (!manualForm.name) {
+      toast.error("La descripción / nombre del producto es obligatorio");
+      return;
+    }
+    const newItem: PurchaseItem = {
+      product_id: null as any,
+      product_name: manualForm.name,
+      sku: manualForm.sku,
+      qty: manualForm.qty,
+      qty_received: 0,
+      unit_cost_usd: manualForm.unit_cost_usd,
+      subtotal_usd: manualForm.qty * manualForm.unit_cost_usd,
+      _origin: "manual"
+    };
+    setItems(prev => [...prev, newItem]);
+    setManualForm({ name: "", sku: "", qty: 1, unit_cost_usd: 0 });
+  };
+
   const updateItem = (idx: number, field: "qty" | "unit_cost_usd", val: number) => {
     setItems(prev => prev.map((it, i) => {
       if (i !== idx) return it;
@@ -338,7 +362,10 @@ export default function OrdenesCompraPage() {
         qty: it.qty, 
         unit_cost_usd: it.unit_cost_usd, 
         total_unit_cost_usd: it.unit_cost_usd, 
-        subtotal_usd: it.subtotal_usd 
+        subtotal_usd: it.subtotal_usd,
+        description_manual: it._origin === "manual" ? it.product_name : null,
+        sku_manual: it._origin === "manual" ? it.sku : null,
+        is_manual: it._origin === "manual" ? true : false,
       })) as any);
 
       if (itemsError) throw itemsError;
@@ -368,7 +395,8 @@ export default function OrdenesCompraPage() {
           unit_price_bs: it.unit_cost_usd * currentRate,
           bcv_rate: currentRate,
           quantity: it.qty,
-          purchased_at: form.emission_date ? new Date(form.emission_date).toISOString() : new Date().toISOString()
+          purchased_at: form.emission_date ? new Date(form.emission_date).toISOString() : new Date().toISOString(),
+          description_manual: it._origin === "manual" ? it.product_name : null
         })) as any);
       }
 
@@ -636,13 +664,32 @@ export default function OrdenesCompraPage() {
             {/* Sección Productos */}
             <div className="space-y-3">
               <label className="text-xs font-bold font-montserrat text-text-1">Agregar Productos</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
-                <Input placeholder="Buscar por nombre o SKU..." value={prodSearch} onChange={e => setProdSearch(e.target.value)}
-                  className="pl-10 h-11 bg-surface-input" />
+              <div className="flex bg-surface-input p-1 rounded-lg border border-border">
+                <button
+                  type="button"
+                  onClick={() => setProductMode("catalog")}
+                  className={cn("flex-1 py-1.5 text-xs font-bold rounded-md transition-all", productMode === "catalog" ? "bg-surface-elevated shadow-sm text-text-1" : "text-text-3 hover:text-text-2")}
+                >
+                  Buscar en catálogo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setProductMode("manual")}
+                  className={cn("flex-1 py-1.5 text-xs font-bold rounded-md transition-all", productMode === "manual" ? "bg-surface-elevated shadow-sm text-text-1" : "text-text-3 hover:text-text-2")}
+                >
+                  Entrada manual
+                </button>
               </div>
-              {prodSearch && filteredProds.length > 0 && (
-                <div className="border border-border rounded-xl overflow-hidden bg-surface-card shadow-lg">
+
+              {productMode === "catalog" ? (
+                <>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
+                    <Input placeholder="Buscar por nombre o SKU..." value={prodSearch} onChange={e => setProdSearch(e.target.value)}
+                      className="pl-10 h-11 bg-surface-input" />
+                  </div>
+                  {prodSearch && filteredProds.length > 0 && (
+                    <div className="border border-border rounded-xl overflow-hidden bg-surface-card shadow-lg">
                   {filteredProds.map(p => {
                     const hint = priceHints[p.id];
                     return (
@@ -671,6 +718,32 @@ export default function OrdenesCompraPage() {
                   })}
                 </div>
               )}
+            </>
+            ) : (
+                <div className="grid grid-cols-12 gap-3 p-4 bg-surface-base border border-dashed border-border rounded-xl">
+                  <div className="col-span-12 sm:col-span-4 space-y-1.5">
+                    <label className="text-[10px] font-bold text-text-3 uppercase tracking-wider">Descripción</label>
+                    <Input placeholder="Ej: Resma de Papel A4" value={manualForm.name} onChange={e => setManualForm(p => ({ ...p, name: e.target.value }))} className="h-10 text-xs" />
+                  </div>
+                  <div className="col-span-6 sm:col-span-2 space-y-1.5">
+                    <label className="text-[10px] font-bold text-text-3 uppercase tracking-wider">SKU (Opc)*</label>
+                    <Input placeholder="Opcional" value={manualForm.sku} onChange={e => setManualForm(p => ({ ...p, sku: e.target.value }))} className="h-10 text-xs" />
+                  </div>
+                  <div className="col-span-6 sm:col-span-2 space-y-1.5">
+                    <label className="text-[10px] font-bold text-text-3 uppercase tracking-wider">Cant</label>
+                    <Input type="number" min={1} value={manualForm.qty || ""} onChange={e => setManualForm(p => ({ ...p, qty: +e.target.value }))} className="h-10 text-xs" />
+                  </div>
+                  <div className="col-span-6 sm:col-span-2 space-y-1.5">
+                    <label className="text-[10px] font-bold text-text-3 uppercase tracking-wider">P.Unit USD</label>
+                    <Input type="number" step="0.01" value={manualForm.unit_cost_usd || ""} onChange={e => setManualForm(p => ({ ...p, unit_cost_usd: +e.target.value }))} className="h-10 text-xs font-mono" />
+                  </div>
+                  <div className="col-span-6 sm:col-span-2 flex flex-col justify-end">
+                    <button type="button" onClick={addManualProduct} className="h-10 w-full bg-brand text-white rounded-lg text-xs font-bold hover:bg-brand/90 transition-all flex items-center justify-center gap-1 shadow-sm">
+                      <Plus className="w-4 h-4" /> Agregar
+                    </button>
+                  </div>
+                </div>
+            )}
 
               {items.length > 0 && (
                 <div className="border border-border rounded-xl overflow-hidden">
@@ -678,6 +751,7 @@ export default function OrdenesCompraPage() {
                     <thead className="bg-surface-base border-b border-border">
                       <tr>
                         <th className="px-3 py-3 text-left">Producto</th>
+                        <th className="px-3 py-3 text-center">Origen</th>
                         <th className="px-3 py-3 text-center">Cant.</th>
                         <th className="px-3 py-3 text-right">Precio Unit. (USD)</th>
                         <th className="px-3 py-3 text-right">Subtotal</th>
@@ -686,13 +760,20 @@ export default function OrdenesCompraPage() {
                     </thead>
                     <tbody className="divide-y divide-border">
                       {items.map((it, idx) => (
-                        <tr key={it.product_id}>
+                        <tr key={it.product_id || `manual-${idx}`}>
                           <td className="px-3 py-3">
                             <p className="font-bold text-text-1">{it.product_name}</p>
                             <div className="flex items-center gap-2 mt-0.5">
-                               <span className="text-[10px] text-text-3 font-mono border px-1 rounded">{it.sku}</span>
+                               {it.sku && <span className="text-[10px] text-text-3 font-mono border px-1 rounded">{it.sku}</span>}
                                {it._volume_discount && <span className="bg-brand/10 text-brand text-[8px] font-bold px-1.5 py-0.25 rounded uppercase tracking-wider">Desc. Volumen</span>}
                             </div>
+                          </td>
+                          <td className="px-3 py-3 text-center">
+                            {it._origin === "manual" ? (
+                              <span className="bg-surface-elevated border border-border text-text-3 px-2 py-0.5 rounded-md text-[10px] font-bold">Manual</span>
+                            ) : (
+                              <span className="bg-[#6B46C1]/10 border border-[#6B46C1]/20 text-[#6B46C1] px-2 py-0.5 rounded-md text-[10px] font-bold">Catálogo</span>
+                            )}
                           </td>
                           <td className="px-3 py-3 w-20">
                             <input type="number" min={1} value={it.qty} onChange={e => updateItem(idx, "qty", +e.target.value)}
@@ -711,7 +792,7 @@ export default function OrdenesCompraPage() {
                     </tbody>
                     <tfoot className="bg-surface-base border-t-2 border-border">
                       <tr>
-                        <td colSpan={3} className="px-3 py-4 text-right font-bold text-text-1 uppercase text-[10px]">Total de la Orden</td>
+                        <td colSpan={4} className="px-3 py-4 text-right font-bold text-text-1 uppercase text-[10px]">Total de la Orden</td>
                         <td className="px-3 py-4 text-right">
                           <p className="text-lg font-bold text-brand font-mono">${totalUSD.toFixed(2)}</p>
                           <p className="text-[10px] text-text-3 font-mono">≈ Bs. {totalBS.toLocaleString("es-VE", { minimumFractionDigits: 2 })}</p>

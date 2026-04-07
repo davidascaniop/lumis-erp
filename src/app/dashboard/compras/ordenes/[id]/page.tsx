@@ -63,6 +63,7 @@ interface PurchaseItem {
   qty_received: number;
   unit_cost_usd: number;
   subtotal_usd: number;
+  is_manual?: boolean;
 }
 
 interface Purchase {
@@ -166,7 +167,8 @@ export default function PurchaseDetailPage() {
         qty: r.qty,
         qty_received: r.qty_received ?? 0,
         unit_cost_usd: r.unit_cost_usd,
-        subtotal_usd: r.subtotal_usd
+        subtotal_usd: r.subtotal_usd,
+        is_manual: r.is_manual ?? false
       }));
       setItems(mapped);
 
@@ -211,6 +213,8 @@ export default function PurchaseDetailPage() {
       const { data: { user } } = await supabase.auth.getUser();
       const companyId = purchase.suppliers ? (purchase as any).company_id : null; // This is a bit tricky, should better fetch from users table but we have it in purchase
 
+      let manualItemsSkipped = 0;
+
       for (const item of items) {
         const toReceive = Math.min(receiveQtys[item.id] ?? 0, item.qty - item.qty_received);
         if (toReceive <= 0) {
@@ -223,6 +227,11 @@ export default function PurchaseDetailPage() {
 
         // 1. Update received qty in line
         await supabase.from("purchase_items").update({ qty_received: newTotalReceived } as any).eq("id", item.id);
+
+        if (item.is_manual) {
+           manualItemsSkipped += toReceive;
+           continue; // Do not update stock for manual items
+        }
 
         // 2. Update actual stock in inventory
         // Assuming we have a products table and we want to update stock_qty
@@ -249,6 +258,9 @@ export default function PurchaseDetailPage() {
       } as any).eq("id", purchase.id);
 
       toast.success(isFullyReceived ? "Orden recibida por completo" : "Recepción registrada");
+      if (manualItemsSkipped > 0) {
+        toast.warning(`${manualItemsSkipped} productos manuales no actualizaron inventario automáticamente`, { duration: 6000 });
+      }
       setShowReception(false);
       fetchDetail();
     } catch (e: any) {
@@ -460,6 +472,7 @@ export default function PurchaseDetailPage() {
                 <thead className="bg-surface-base text-[11px] font-bold text-text-3 uppercase tracking-wider border-b border-border">
                   <tr>
                     <th className="px-5 py-3">Producto</th>
+                    <th className="px-5 py-3 text-center">Origen</th>
                     <th className="px-5 py-3 text-center">Cant.</th>
                     <th className="px-5 py-3 text-center">Recibido</th>
                     <th className="px-5 py-3 text-right">Unitario (USD)</th>
@@ -471,7 +484,14 @@ export default function PurchaseDetailPage() {
                     <tr key={it.id} className="hover:bg-surface-hover/20">
                       <td className="px-5 py-4">
                         <p className="font-bold text-text-1">{it.product_name}</p>
-                        <p className="text-[10px] text-text-3 font-mono">{it.sku}</p>
+                        {it.sku && <p className="text-[10px] text-text-3 font-mono">{it.sku}</p>}
+                      </td>
+                      <td className="px-5 py-4 text-center">
+                        {it.is_manual ? (
+                          <span className="bg-surface-elevated border border-border text-text-3 px-2 py-0.5 rounded-md text-[10px] font-bold">Manual</span>
+                        ) : (
+                          <span className="bg-[#6B46C1]/10 border border-[#6B46C1]/20 text-[#6B46C1] px-2 py-0.5 rounded-md text-[10px] font-bold">Catálogo</span>
+                        )}
                       </td>
                       <td className="px-5 py-4 text-center font-bold text-text-1">{it.qty}</td>
                       <td className="px-5 py-4 text-center">
@@ -486,7 +506,7 @@ export default function PurchaseDetailPage() {
                 </tbody>
                 <tfoot className="bg-surface-base/50 font-montserrat">
                   <tr>
-                    <td colSpan={4} className="px-5 py-5 text-right font-bold text-text-1 uppercase text-xs">Total Orden:</td>
+                    <td colSpan={5} className="px-5 py-5 text-right font-bold text-text-1 uppercase text-xs">Total Orden:</td>
                     <td className="px-5 py-5 text-right">
                       <p className="text-xl font-bold text-brand font-mono">${purchase.total_usd?.toFixed(2)}</p>
                       <p className="text-[10px] text-text-3 font-mono">Bs. {purchase.total_bs?.toLocaleString("es-VE")}</p>
