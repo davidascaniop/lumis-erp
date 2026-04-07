@@ -464,12 +464,16 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3">
           {/* Bell with counter */}
           <div className="relative">
-            <div
+            <button
+              onClick={() => {
+                document.getElementById('alerts-section')?.scrollIntoView({ behavior: 'smooth' });
+              }}
               className="w-9 h-9 rounded-xl bg-surface-card border border-border flex items-center justify-center
-                         shadow-card hover:border-border-brand/40 transition-colors cursor-default"
+                         shadow-card hover:border-border-brand/40 transition-colors"
+              title="Ir a las alertas activas"
             >
               <Bell className="w-4 h-4 text-text-2" />
-            </div>
+            </button>
             {alertCount > 0 && (
               <span
                 className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full bg-[#FF2D55]
@@ -883,7 +887,7 @@ export default function DashboardPage() {
       <AgingChart data={data.aging} />
 
       {/* ═══ ZONA 7: Alertas Activas + Actividad Reciente ═══ */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4" id="alerts-section">
         <RecentActivity companyId={data.companyId} />
         <div className="space-y-3">
           <ActiveAlertsPanel
