@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
-import { Search, Loader2, Plus, FileText, CheckCircle, Clock, XCircle, Send } from "lucide-react";
+import { Search, Loader2, Plus, FileText, CheckCircle, Clock, XCircle, Send, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
@@ -292,18 +292,28 @@ export default function PresupuestosPage() {
                             <FileText className="w-4 h-4" />
                           </Link>
                           {q.status === "open" && (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, quote: q }); }}
-                              disabled={convertingId !== null}
-                              className="p-1.5 rounded-lg hover:bg-status-ok/10 text-text-3 hover:text-status-ok transition-colors disabled:opacity-50"
-                              title="Convertir en venta"
-                            >
-                              {convertingId === q.id ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                              ) : (
-                                <CheckCircle className="w-4 h-4" />
-                              )}
-                            </button>
+                            <>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, quote: q }); }}
+                                disabled={convertingId !== null}
+                                className="p-1.5 rounded-lg hover:bg-status-ok/10 text-text-3 hover:text-status-ok transition-colors disabled:opacity-50"
+                                title="Convertir en venta"
+                              >
+                                {convertingId === q.id ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <CheckCircle className="w-4 h-4" />
+                                )}
+                              </button>
+                              <Link
+                                href={`/dashboard/ventas/presupuestos/nuevo?edit=${q.id}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="p-1.5 rounded-lg hover:bg-brand/10 text-text-3 hover:text-brand transition-colors"
+                                title="Editar presupuesto"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Link>
+                            </>
                           )}
                           <a
                             href={`https://wa.me/?text=Hola, adjunto su presupuesto ${q.quote_number} por ${formatCurrency(q.total_usd)}. Puedes verlo aquí: ${window.location.origin}/dashboard/ventas/presupuestos/${q.id}/pdf`}

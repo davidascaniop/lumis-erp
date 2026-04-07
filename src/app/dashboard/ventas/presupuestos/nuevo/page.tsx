@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, Suspense } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
 import { useBCV } from "@/hooks/use-bcv";
@@ -23,6 +23,8 @@ export default function NuevoPresupuestoPage() {
 
 function NuevoPresupuestoContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editQuoteId = searchParams.get("edit");
   const { user } = useUser();
   const { rate } = useBCV();
   const supabase = createClient();
@@ -39,6 +41,7 @@ function NuevoPresupuestoContent() {
   const [productQuery, setProductQuery] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [notes, setNotes] = useState("");
+  const [editingQuote, setEditingQuote] = useState<any>(null);
 
   const [showQuickModal, setShowQuickModal] = useState(false);
   const [isSavingQuick, setIsSavingQuick] = useState(false);
@@ -110,8 +113,41 @@ function NuevoPresupuestoContent() {
           supabase.from("partners").select("id, name, rif, phone").eq("company_id", (usr as any).company_id).eq("status", "active"),
           supabase.from("products").select("id, name, sku, price_usd, stock, category, image_url").eq("company_id", (usr as any).company_id).eq("status", "active"),
         ]);
-        setPartners((pRes.data as Partner[]) || []);
-        setProducts((prRes.data as Product[]) || []);
+        const dbPartners = (pRes.data as Partner[]) || [];
+        const dbProducts = (prRes.data as Product[]) || [];
+        setPartners(dbPartners);
+        setProducts(dbProducts);
+
+        if (editQuoteId) {
+          const { data: quoteToEdit } = await supabase
+            .from("quotes")
+            .select(`*, quote_items(*)`)
+            .eq("id", editQuoteId)
+            .eq("company_id", (usr as any).company_id)
+            .single();
+
+          if (quoteToEdit) {
+            setEditingQuote(quoteToEdit);
+            const p = dbPartners.find(x => x.id === quoteToEdit.partner_id);
+            if (p) setSelectedPartner(p);
+            setNotes(quoteToEdit.notes || "");
+            
+            if (quoteToEdit.quote_items) {
+              const loadedCart = quoteToEdit.quote_items.map((qi: any) => {
+                const prod = dbProducts.find((x) => x.id === qi.product_id);
+                return {
+                  id: qi.product_id,
+                  name: qi.product_name || prod?.name || "Desconocido",
+                  sku: qi.product_sku || prod?.sku || "",
+                  price_usd: qi.price_usd,
+                  qty: qi.qty,
+                  stock: prod?.stock ?? 0,
+                };
+              });
+              setCart(loadedCart);
+            }
+          }
+        }
       } finally {
         setLoading(false);
       }
@@ -155,38 +191,60 @@ function NuevoPresupuestoContent() {
 
     setSaving(true);
     try {
-      const quoteNumber = `COT-${Date.now().toString().slice(-6)}`;
+      const quoteNumber = editingQuote ? editingQuote.quote_number : `COT-${Date.now().toString().slice(-6)}`;
+      
+      let finalQuoteId = null;
 
-      const { data: quote, error: qErr } = await supabase
-        .from("quotes")
-        .insert({
-          company_id: user.company_id,
-          partner_id: selectedPartner.id,
-          user_id: user.id,
-          quote_number: quoteNumber,
-          status: "open",
-          total_usd: subtotal,
-          total_bs: subtotalBs,
-          notes,
-        } as any)
-        .select()
-        .single();
-
-      if (qErr) throw qErr;
+      if (editingQuote) {
+        // Actualizar
+        const { error: qErr } = await supabase
+          .from("quotes")
+          .update({
+            partner_id: selectedPartner.id,
+            total_usd: subtotal,
+            total_bs: subtotalBs,
+            notes,
+          })
+          .eq("id", editingQuote.id);
+        if (qErr) throw qErr;
+        finalQuoteId = editingQuote.id;
+        
+        // Limpiar items viejos
+        await supabase.from("quote_items").delete().eq("quote_id", editingQuote.id);
+      } else {
+        // Crear
+        const { data: quote, error: qErr } = await supabase
+          .from("quotes")
+          .insert({
+            company_id: user.company_id,
+            partner_id: selectedPartner.id,
+            user_id: user.id,
+            quote_number: quoteNumber,
+            status: "open",
+            total_usd: subtotal,
+            total_bs: subtotalBs,
+            notes,
+          } as any)
+          .select()
+          .single();
+        if (qErr) throw qErr;
+        finalQuoteId = quote.id;
+      }
 
       const items = cart.map((i) => ({
-        quote_id: quote.id,
+        quote_id: finalQuoteId,
         product_id: i.id,
         qty: i.qty,
         price_usd: i.price_usd,
         product_name: i.name,
         product_sku: i.sku,
+        subtotal: i.qty * i.price_usd
       }));
 
       const { error: iErr } = await supabase.from("quote_items").insert(items as any);
       if (iErr) throw iErr;
 
-      toast.success(`Cotización ${quoteNumber} creada`, { description: `Total: $${subtotal.toFixed(2)}` });
+      toast.success(editingQuote ? `Cotización ${quoteNumber} actualizada` : `Cotización ${quoteNumber} creada`, { description: `Total: $${subtotal.toFixed(2)}` });
       router.push("/dashboard/ventas/presupuestos");
     } catch (err: any) {
       toast.error("Error al guardar cotización", { description: err.message });
@@ -215,7 +273,9 @@ function NuevoPresupuestoContent() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-xl font-bold font-outfit text-text-1">Nueva Cotización</h1>
+            <h1 className="text-xl font-bold font-outfit text-text-1">
+              {editingQuote ? `Editar Cotización ${editingQuote.quote_number}` : "Nueva Cotización"}
+            </h1>
             <p className="text-[11px] font-medium text-text-3 uppercase tracking-wider">Presupuesto Profesional</p>
           </div>
         </div>
@@ -399,7 +459,7 @@ function NuevoPresupuestoContent() {
                   : "bg-brand-gradient text-white shadow-brand hover:opacity-90"
               }`}
             >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><FileText className="w-4 h-4" /> Guardar Cotización</>}
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><FileText className="w-4 h-4" /> {editingQuote ? "Guardar Cambios" : "Guardar Cotización"}</>}
             </button>
 
             <a

@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import {
   ArrowLeft, FileText, CheckCircle, Clock, XCircle,
-  User, Calendar, Package, Send, Loader2
+  User, Calendar, Package, Send, Loader2, Pencil
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -225,6 +225,16 @@ export default function QuoteDetailPage({ params }: { params: any }) {
           <FileText className="w-4 h-4" />
           Ver PDF
         </Link>
+        
+        {quote.status === "open" && (
+          <Link
+            href={`/dashboard/ventas/presupuestos/nuevo?edit=${quote.id}`}
+            className="flex items-center gap-2 px-5 py-2.5 bg-brand/10 border border-brand/20 text-brand rounded-xl text-sm font-semibold hover:bg-brand/20 transition-all"
+          >
+            <Pencil className="w-4 h-4" />
+            Editar Presupuesto
+          </Link>
+        )}
 
         {phoneRaw && (
           <a
