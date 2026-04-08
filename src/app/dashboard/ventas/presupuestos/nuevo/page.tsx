@@ -402,27 +402,39 @@ function NuevoPresupuestoContent() {
               </div>
             ) : (
               <div className="space-y-2">
-                {cart.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between gap-2 p-3 bg-surface-base rounded-xl border border-border">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-bold text-text-1 truncate">{item.name}</p>
-                      <p className="text-[10px] text-text-3">$ {item.price_usd.toFixed(2)} c/u</p>
+                {cart.map((item: any) => {
+                  const priceBs = item.price_usd * (rate || 0);
+                  const subtotalBsRow = (item.price_usd * item.qty) * (rate || 0);
+                  return (
+                    <div key={item.id} className="flex flex-col gap-2 p-3 bg-surface-base rounded-xl border border-border">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-bold text-text-1 truncate">{item.name}</p>
+                          <p className="text-[10px] text-text-3 font-medium">Bs. {priceBs.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="opacity-70">(${item.price_usd.toFixed(2)})</span> c/u</p>
+                        </div>
+                        <div className="flex items-center gap-1.5 bg-white dark:bg-surface-elevated rounded-lg border border-border p-0.5">
+                          <button onClick={() => updateQty(item.id, -1)} className="w-6 h-6 flex items-center justify-center text-text-3 hover:text-text-1">
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="text-sm font-bold text-text-1 w-5 text-center">{item.qty}</span>
+                          <button onClick={() => updateQty(item.id, 1)} className="w-6 h-6 flex items-center justify-center text-text-3 hover:text-text-1">
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                        <button onClick={() => removeFromCart(item.id)} className="text-text-3 hover:text-danger transition-colors p-1 ml-2">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="flex justify-between items-center bg-[#F8FAFC] dark:bg-black/20 p-2 rounded-lg border border-[#E2E8F0] dark:border-[#333]">
+                        <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest">Subtotal Línea</span>
+                        <div className="text-right flex items-center gap-2">
+                          <span className="text-[13px] font-bold text-brand">Bs. {subtotalBsRow.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                          <span className="text-[11px] font-medium text-text-3">${(item.price_usd * item.qty).toFixed(2)}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 bg-white dark:bg-surface-elevated rounded-lg border border-border p-0.5">
-                      <button onClick={() => updateQty(item.id, -1)} className="w-6 h-6 flex items-center justify-center text-text-3 hover:text-text-1">
-                        <Minus className="w-3 h-3" />
-                      </button>
-                      <span className="text-sm font-bold text-text-1 w-5 text-center">{item.qty}</span>
-                      <button onClick={() => updateQty(item.id, 1)} className="w-6 h-6 flex items-center justify-center text-text-3 hover:text-text-1">
-                        <Plus className="w-3 h-3" />
-                      </button>
-                    </div>
-                    <span className="text-[13px] font-bold text-text-1 w-16 text-right">$ {(item.price_usd * item.qty).toFixed(2)}</span>
-                    <button onClick={() => removeFromCart(item.id)} className="text-text-3 hover:text-danger transition-colors p-1">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

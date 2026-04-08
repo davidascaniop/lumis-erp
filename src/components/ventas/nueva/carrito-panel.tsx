@@ -328,9 +328,14 @@ export function CarritoPanel({
                         <span className="text-[12px] font-bold text-text-1 truncate font-outfit max-w-[120px]">{item.name}</span>
                         {item.is_kit && <span className="bg-purple-100 text-purple-700 px-1 py-0.5 rounded-[4px] text-[8px] font-bold uppercase leading-none">KIT</span>}
                       </div>
-                      <span className="text-[10px] font-medium text-text-3 font-outfit leading-none mt-0.5">
-                        {item.qty}x ${Number(item.price_usd).toFixed(2)}
-                      </span>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[12px] font-bold text-brand font-outfit leading-none mt-0.5">
+                          {item.qty}x Bs. {(item.price_usd * bcvRate).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                        <span className="text-[10px] font-medium text-[#94A3B8] font-outfit leading-none mt-0.5">
+                          (${Number(item.price_usd).toFixed(2)})
+                        </span>
+                      </div>
                       {item.is_kit && item.comps?.length > 0 && (
                         <div className="mt-1 text-[9px] text-[#94A3B8] font-outfit leading-tight italic truncate max-w-[150px]">
                           Incluye: {item.comps.map((c: any) => `${c.qty_required}x ${c.name}`).join(", ")}
@@ -339,9 +344,12 @@ export function CarritoPanel({
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[13px] font-bold text-[#1A1125] font-outfit">${(item.price_usd * item.qty).toFixed(2)}</span>
+                    <div className="flex flex-col items-end">
+                      <span className="text-[14px] font-bold text-[#1A1125] font-outfit mt-1">Bs. {(item.price_usd * item.qty * bcvRate).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      <span className="text-[11px] font-medium text-[#94A3B8] font-outfit">${(item.price_usd * item.qty).toFixed(2)}</span>
+                    </div>
                     <button onClick={() => onRemove(item.id)} className="text-danger opacity-0 group-hover:opacity-100 transition-opacity p-0.5">
-                      <Trash2 className="w-3 h-3" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>

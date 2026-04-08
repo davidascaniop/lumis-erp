@@ -188,36 +188,30 @@ function TicketRapido({
       )}
 
       {/* Productos */}
-      <div style={{ fontWeight: "bold" }}>CANT  DESCRIPCIÓN      PRECIO</div>
+      <div style={{ fontWeight: "bold" }}>CANT  DESCRIPCIÓN      PRECIO(Bs)</div>
       {order.items.map((item, i) => {
         const desc = item.name.length > 14 ? item.name.slice(0, 14) : item.name.padEnd(14, " ");
-        const price = `$${(item.price_usd * item.qty).toFixed(2)}`;
+        const priceBsStr = (item.price_usd * item.qty * order.bcvRate).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         const qty = String(item.qty).padStart(2, " ");
         return (
           <div key={i} style={{ display: "flex", justifyContent: "space-between" }}>
             <span>{qty}    {desc}</span>
-            <span>{price}</span>
+            <span>{priceBsStr}</span>
           </div>
         );
       })}
 
       <div>{SEP}</div>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <span>SUBTOTAL:</span><span>${subtotal.toFixed(2)}</span>
+        <span>SUBTOTAL:</span><span>Bs.{totalBs.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
       </div>
-      {includeIva && ivaPercent > 0 && (
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span>IVA ({ivaPercent}%):</span><span>${ivaAmount.toFixed(2)}</span>
-        </div>
-      )}
-      <div style={{ display: "flex", justifyContent: "space-between", fontWeight: "bold" }}>
-        <span>TOTAL USD:</span><span>${total.toFixed(2)}</span>
+      <div style={{ display: "flex", justifyContent: "space-between", fontWeight: "bold", fontSize: "12px", marginTop: "4px", marginBottom: "4px" }}>
+        <span>TOTAL Bs:</span>
+        <span>Bs.{totalBs.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <span>TOTAL Bs:</span>
-        <span>Bs.{totalBs.toLocaleString("es-VE", { maximumFractionDigits: 2 })}</span>
+        <span>TOTAL USD:</span><span>${total.toFixed(2)}</span>
       </div>
-      <div style={{ fontSize: "10px" }}>Tasa BCV: Bs.{order.bcvRate.toFixed(2)}/$</div>
       <div>{SEP}</div>
       <div>Método de pago: {paymentLabel(order.paymentMethod)}</div>
       <div>{SEP}</div>
@@ -293,14 +287,16 @@ function FacturaFormal({
 
       {order.items.map((item, i) => {
         const name = item.name.length > 22 ? item.name.slice(0, 22) : item.name;
+        const priceBs = item.price_usd * order.bcvRate;
+        const subtotalBsRow = (item.price_usd * item.qty) * order.bcvRate;
         return (
           <div key={i} style={{ marginBottom: "4px" }}>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span style={{ fontWeight: "bold" }}>{String(item.qty).padStart(2, " ")}  {name}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", paddingLeft: "4px", fontSize: "10px" }}>
-              <span>P.Unit: ${item.price_usd.toFixed(2)}</span>
-              <span>Total: ${(item.price_usd * item.qty).toFixed(2)}</span>
+              <span>P.Unit: Bs.{priceBs.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <span>Total: Bs.{subtotalBsRow.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
           </div>
         );
@@ -308,22 +304,16 @@ function FacturaFormal({
 
       <div>{SEP}</div>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <span>SUBTOTAL:</span><span>${subtotal.toFixed(2)}</span>
+        <span>SUBTOTAL:</span><span>Bs.{totalBs.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
       </div>
-      {includeIva && ivaPercent > 0 && (
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span>IVA ({ivaPercent}%):</span><span>${ivaAmount.toFixed(2)}</span>
-        </div>
-      )}
       <div>{DOUBLE}</div>
-      <div style={{ display: "flex", justifyContent: "space-between", fontWeight: "bold" }}>
-        <span>TOTAL A PAGAR:</span><span>${total.toFixed(2)}</span>
+      <div style={{ display: "flex", justifyContent: "space-between", fontWeight: "bold", fontSize: "12px", marginTop: "4px", marginBottom: "4px" }}>
+        <span>TOTAL EN Bs:</span>
+        <span>Bs.{totalBs.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <span>TOTAL EN Bs:</span>
-        <span>Bs.{totalBs.toLocaleString("es-VE", { maximumFractionDigits: 2 })}</span>
+        <span>TOTAL A PAGAR (USD):</span><span>${total.toFixed(2)}</span>
       </div>
-      <div style={{ fontSize: "10px" }}>Tasa BCV aplicada: Bs.{order.bcvRate.toFixed(2)}</div>
       <div>{DOUBLE}</div>
       <div>Forma de pago: {paymentLabel(order.paymentMethod)}</div>
       <div>{SEP}</div>
@@ -486,21 +476,17 @@ export function ThermalInvoiceModal({
 
           {/* ── IVA TOGGLE (only when format selected) ── */}
           {selected && (
-            <div className="flex items-center justify-between bg-[#F8FAFC] rounded-xl px-4 py-3 border border-[#E2E8F0] animate-in slide-in-from-top-2 duration-300">
+            <div className="flex items-center justify-between bg-[#F8FAFC] rounded-xl px-4 py-3 border border-[#E2E8F0] opacity-80 animate-in slide-in-from-top-2 duration-300">
               <div>
-                <div className="text-[12px] font-bold font-outfit text-[#1A1125]">Incluir IVA en el documento</div>
-                <div className="text-[10px] text-[#94A3B8] font-outfit">IVA {ivaPercent}% configurado</div>
+                <div className="text-[12px] font-bold font-outfit text-[#94A3B8]">Incluir IVA en el documento <span className="text-[10px] bg-brand/10 text-brand px-1.5 py-0.5 rounded font-bold ml-1">Próximamente</span></div>
+                <div className="text-[10px] text-[#94A3B8] font-outfit">Actualmente desactivado</div>
               </div>
               <button
-                onClick={() => setIncludeIva((v) => !v)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                  includeIva ? "bg-[#7C3AED]" : "bg-[#CBD5E1]"
-                }`}
+                disabled
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none bg-[#CBD5E1] cursor-not-allowed`}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                    includeIva ? "translate-x-6" : "translate-x-1"
-                  }`}
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform translate-x-1`}
                 />
               </button>
             </div>
