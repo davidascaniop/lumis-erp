@@ -11,14 +11,11 @@ import { formatCurrency } from "@/lib/utils";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useUser } from "@/hooks/use-user";
-import { ChevronDown, Loader2, Info, Box, DollarSign, Image as ImageIcon } from "lucide-react";
+import { ChevronDown, Loader2, Info, Box, DollarSign, Image as ImageIcon, PlusCircle } from "lucide-react";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { UnitModal } from "./unit-modal";
 
 // ─── Constantes de estilo ─────────────────────────────────────────────────────
 const INPUT_CLS =
@@ -173,7 +170,9 @@ export function ProductForm({
   const [activeSection, setActiveSection] = useState<string>("general");
   const [warehouses, setWarehouses] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [units, setUnits] = useState<any[]>([]);
   const [attributes, setAttributes] = useState<any[]>([]);
+  const [openUnitModal, setOpenUnitModal] = useState(false);
   const supabase = createClient();
 
   const form = useForm<ProductFormValues>({
@@ -208,15 +207,36 @@ export function ProductForm({
   useEffect(() => {
     async function fetchData() {
       if (!user?.company_id) return;
-      const [whRes, catRes, attrRes] = await Promise.all([
+      const [whRes, catRes, attrRes, unitRes] = await Promise.all([
         supabase.from("warehouses").select("*").eq("company_id", user.company_id).eq("is_active", true),
         supabase.from("product_categories").select("id, name").eq("company_id", user.company_id).order("name"),
-        supabase.from("product_attributes").select("*").eq("company_id", user.company_id).order("name")
+        supabase.from("product_attributes").select("*").eq("company_id", user.company_id).order("name"),
+        supabase.from("product_units").select("name, slug").eq("company_id", user.company_id).order("name")
       ]);
       setWarehouses(whRes.data || []);
       
       if (!catRes.error) setCategories(catRes.data || []);
       if (!attrRes.error) setAttributes(attrRes.data || []);
+
+      if (!unitRes.error && unitRes.data?.length) {
+        setUnits(unitRes.data);
+      } else {
+        setUnits([
+          { name: "Unidad", slug: "und" },
+          { name: "Caja", slug: "cja" },
+          { name: "Paquete", slug: "pqt" },
+          { name: "Set / Juego", slug: "set" },
+          { name: "Kit", slug: "kit" },
+          { name: "Tubo", slug: "tbo" },
+          { name: "Frasco", slug: "frs" },
+          { name: "Rollo", slug: "rlo" },
+          { name: "Blíster", slug: "blis" },
+          { name: "Gramos", slug: "g" },
+          { name: "Kilogramos", slug: "kg" },
+          { name: "Mililitros", slug: "ml" },
+          { name: "Litros", slug: "l" }
+        ].sort((a, b) => a.name.localeCompare(b.name)));
+      }
     }
     fetchData();
   }, [user?.company_id]);
@@ -279,335 +299,365 @@ export function ProductForm({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[800px] p-0 bg-white border-slate-200 overflow-hidden shadow-2xl rounded-2xl">
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col"
-          style={{ maxHeight: "90vh" }}
-        >
-          {/* ── Header ─────────────────────────────────────────────────────── */}
-          <div className="px-8 py-6 border-b border-slate-100 shrink-0">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 font-montserrat">
-              Gestión de Inventario
-            </p>
-            <DialogTitle className="text-2xl text-slate-900 font-bold font-montserrat tracking-tight leading-none">
-              {product?.id ? "Editar Producto" : "Nuevo Producto"}
-            </DialogTitle>
-          </div>
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-[800px] p-0 bg-white border-slate-200 overflow-hidden shadow-2xl rounded-2xl">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col"
+            style={{ maxHeight: "90vh" }}
+          >
+            {/* ── Header ─────────────────────────────────────────────────────── */}
+            <div className="px-8 py-6 border-b border-slate-100 shrink-0">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 font-montserrat">
+                Gestión de Inventario
+              </p>
+              <DialogTitle className="text-2xl text-slate-900 font-bold font-montserrat tracking-tight leading-none">
+                {product?.id ? "Editar Producto" : "Nuevo Producto"}
+              </DialogTitle>
+            </div>
 
-          {/* ── Cuerpo con scroll ───────────────────────────────────────────── */}
-          <div className="flex-1 overflow-y-auto pb-6">
+            {/* ── Cuerpo con scroll ───────────────────────────────────────────── */}
+            <div className="flex-1 overflow-y-auto pb-6">
 
-            {/* SECCIÓN 1 — Información General */}
-            <AccordionSection
-              id="general"
-              title="Información General"
-              icon={Info}
-              isOpen={activeSection === "general"}
-              onToggle={toggleSection}
-              hasError={!!form.formState.errors.name || !!form.formState.errors.sku}
-            >
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Nombre Comercial" className="col-span-1">
-                  <Input
-                    {...form.register("name")}
-                    placeholder="Ej. Harina Pan 1Kg"
-                    className={INPUT_CLS}
-                  />
-                  {form.formState.errors.name && (
-                    <p className="text-[10px] text-red-500 mt-1">
-                      {form.formState.errors.name.message}
-                    </p>
-                  )}
-                </Field>
-                <Field label="SKU / Código de Barra" className="col-span-1">
-                  <Input
-                    {...form.register("sku")}
-                    placeholder="PROD-001"
-                    className={`${INPUT_CLS} uppercase font-mono`}
-                  />
-                  {form.formState.errors.sku && (
-                    <p className="text-[10px] text-red-500 mt-1">
-                      {form.formState.errors.sku.message}
-                    </p>
-                  )}
-                </Field>
-              </div>
-            </AccordionSection>
-
-            {/* SECCIÓN 2 — Clasificación y Logística */}
-            <AccordionSection
-              id="clasificacion"
-              title="Clasificación y Logística"
-              icon={Box}
-              isOpen={activeSection === "clasificacion"}
-              onToggle={toggleSection}
-            >
-              <div className="space-y-4">
-                {/* Fila 1 */}
-                <div className="grid grid-cols-3 gap-4">
-                  <Field label="Tipo de Unidad">
-                    <Select
-                      value={form.watch("unit")}
-                      onValueChange={(v) => form.setValue("unit", v)}
-                    >
-                      <SelectTrigger className={SELECT_CLS}>
-                        <SelectValue placeholder="Seleccionar" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white border-slate-200 rounded-xl">
-                        <SelectItem value="Unidad">Unidad</SelectItem>
-                        <SelectItem value="Caja">Caja</SelectItem>
-                        <SelectItem value="Kg">Kg</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </Field>
-                  <Field label="Categoría">
-                    <Select
-                      value={form.watch("category")}
-                      onValueChange={(v) => form.setValue("category", v)}
-                    >
-                      <SelectTrigger className={SELECT_CLS}>
-                        <SelectValue placeholder="Seleccionar" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white border-slate-200 rounded-xl">
-                        {categories.map((c) => (
-                          <SelectItem key={c.id} value={c.name}>
-                            {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Field>
-                  <Field label="Marca">
-                    <Input {...form.register("brand")} placeholder="Polar" className={INPUT_CLS} />
-                  </Field>
-                </div>
-                {/* Fila 2 */}
-                <div className="grid grid-cols-3 gap-4">
-                  <Field label="Departamento">
-                    <Input {...form.register("department")} placeholder="Alimentos" className={INPUT_CLS} />
-                  </Field>
-                  <Field label="Cód. Proveedor">
+              {/* SECCIÓN 1 — Información General */}
+              <AccordionSection
+                id="general"
+                title="Información General"
+                icon={Info}
+                isOpen={activeSection === "general"}
+                onToggle={toggleSection}
+                hasError={!!form.formState.errors.name || !!form.formState.errors.sku}
+              >
+                <div className="grid grid-cols-2 gap-4">
+                  <Field label="Nombre Comercial" className="col-span-1">
                     <Input
-                      {...form.register("supplier_code")}
-                      placeholder="SUP-123"
+                      {...form.register("name")}
+                      placeholder="Ej. Harina Pan 1Kg"
+                      className={INPUT_CLS}
+                    />
+                    {form.formState.errors.name && (
+                      <p className="text-[10px] text-red-500 mt-1">
+                        {form.formState.errors.name.message}
+                      </p>
+                    )}
+                  </Field>
+                  <Field label="SKU / Código de Barra" className="col-span-1">
+                    <Input
+                      {...form.register("sku")}
+                      placeholder="PROD-001"
                       className={`${INPUT_CLS} uppercase font-mono`}
                     />
-                  </Field>
-                  <Field label="Depósito / Sucursal">
-                    <Select
-                      value={form.watch("warehouse_id")}
-                      onValueChange={(v) => form.setValue("warehouse_id", v)}
-                    >
-                      <SelectTrigger className={SELECT_CLS}>
-                        <SelectValue placeholder="Seleccionar" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white border-slate-200 rounded-xl">
-                        {warehouses.map((w) => (
-                          <SelectItem key={w.id} value={w.id}>
-                            {w.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {form.formState.errors.sku && (
+                      <p className="text-[10px] text-red-500 mt-1">
+                        {form.formState.errors.sku.message}
+                      </p>
+                    )}
                   </Field>
                 </div>
-                {/* Fila 3 — Existencia al 50% */}
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label="Existencia Inicial">
-                    <Input
-                      {...form.register("stock")}
-                      type="number"
-                      min={0}
-                      className={`${INPUT_CLS} font-mono`}
-                    />
-                  </Field>
-                  <div />
-                </div>
-              </div>
-            </AccordionSection>
+              </AccordionSection>
 
-            {/* SECCIÓN 3 — Estructura de Precios y Ganancias */}
-            <AccordionSection
-              id="precios"
-              title="Estructura de Precios y Ganancias"
-              icon={DollarSign}
-              isOpen={activeSection === "precios"}
-              onToggle={toggleSection}
-            >
-              <div className="space-y-6">
-                {/* Fila 1: Inputs numéricos */}
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label="Costo Unitario ($)">
-                    <Input
-                      {...form.register("cost_usd")}
-                      type="number"
-                      step="0.01"
-                      min={0}
-                      className={`${INPUT_CLS} font-mono`}
-                    />
-                  </Field>
-                  <Field label="Precio de Venta ($)">
-                    <Input
-                      {...form.register("price_usd")}
-                      type="number"
-                      step="0.01"
-                      min={0}
-                      className={`${INPUT_CLS} font-mono`}
-                    />
-                  </Field>
-                </div>
-
-                {/* Fila 2: Métricas calculadas */}
-                <div className="grid grid-cols-3 gap-4 border-t border-slate-100 pt-5">
-                  <Metric label="Costo Total Inventario" value={formatCurrency(cost_usd)} />
-                  <Metric
-                    label="Margen de Ganancia"
-                    value={`${profitMarginPct.toFixed(1)}%`}
-                    danger={profitMarginPct < 0}
-                  />
-                  <Metric
-                    label="Utilidad Neta"
-                    value={formatCurrency(profit)}
-                    danger={profit < 0}
-                  />
-                </div>
-
-                {/* Fila 3: Precios especiales */}
-                <div className="border-t border-slate-100 pt-5">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4 font-montserrat">
-                    Precios Especiales
-                  </p>
+              {/* SECCIÓN 2 — Clasificación y Logística */}
+              <AccordionSection
+                id="clasificacion"
+                title="Clasificación y Logística"
+                icon={Box}
+                isOpen={activeSection === "clasificacion"}
+                onToggle={toggleSection}
+              >
+                <div className="space-y-4">
+                  {/* Fila 1 */}
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="flex flex-col gap-2">
-                      <Field label="Precio al Mayor">
-                        <Input
-                          {...form.register("price_usd_2")}
-                          type="number"
-                          step="0.01"
-                          min={0}
-                          className={`${INPUT_CLS} font-mono`}
-                        />
-                      </Field>
-                      <div className="flex items-center justify-between text-[10px] px-1 font-montserrat">
-                        <span className="text-slate-400">Mg: <span className={margin_2 < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{margin_2.toFixed(1)}%</span></span>
-                        <span className="text-slate-400">Ut: <span className={profit_2 < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{formatCurrency(profit_2)}</span></span>
+                    <Field label="Unidad">
+                      <div className="flex gap-2">
+                        <Select
+                          value={form.watch("unit")}
+                          onValueChange={(v) => form.setValue("unit", v)}
+                        >
+                          <SelectTrigger className={SELECT_CLS}>
+                            <SelectValue placeholder="Seleccionar" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border-slate-200 rounded-xl max-h-[300px]">
+                            {units.map((u) => (
+                              <SelectItem key={u.slug} value={u.slug}>
+                                {u.name} ({u.slug})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <button
+                          type="button"
+                          onClick={() => setOpenUnitModal(true)}
+                          className="shrink-0 p-2 text-brand hover:bg-brand/10 rounded-xl transition-colors"
+                          title="Nueva Unidad"
+                        >
+                          <PlusCircle className="w-6 h-6" />
+                        </button>
                       </div>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <Field label="Precio Mínimo">
-                        <Input
-                          {...form.register("price_usd_3")}
-                          type="number"
-                          step="0.01"
-                          min={0}
-                          className={`${INPUT_CLS} font-mono`}
-                        />
-                      </Field>
-                      <div className="flex items-center justify-between text-[10px] px-1 font-montserrat">
-                        <span className="text-slate-400">Mg: <span className={margin_3 < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{margin_3.toFixed(1)}%</span></span>
-                        <span className="text-slate-400">Ut: <span className={profit_3 < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{formatCurrency(profit_3)}</span></span>
+                    </Field>
+                    <Field label="Categoría">
+                      <Select
+                        value={form.watch("category")}
+                        onValueChange={(v) => form.setValue("category", v)}
+                      >
+                        <SelectTrigger className={SELECT_CLS}>
+                          <SelectValue placeholder="Seleccionar" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-slate-200 rounded-xl">
+                          {categories.map((c) => (
+                            <SelectItem key={c.id} value={c.name}>
+                              {c.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                    <Field label="Marca">
+                      <Input {...form.register("brand")} placeholder="Polar" className={INPUT_CLS} />
+                    </Field>
+                  </div>
+                  {/* Fila 2 */}
+                  <div className="grid grid-cols-3 gap-4">
+                    <Field label="Departamento">
+                      <Input {...form.register("department")} placeholder="Alimentos" className={INPUT_CLS} />
+                    </Field>
+                    <Field label="Cód. Proveedor">
+                      <Input
+                        {...form.register("supplier_code")}
+                        placeholder="SUP-123"
+                        className={`${INPUT_CLS} uppercase font-mono`}
+                      />
+                    </Field>
+                    <Field label="Depósito / Sucursal">
+                      <Select
+                        value={form.watch("warehouse_id")}
+                        onValueChange={(v) => form.setValue("warehouse_id", v)}
+                      >
+                        <SelectTrigger className={SELECT_CLS}>
+                          <SelectValue placeholder="Seleccionar" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-slate-200 rounded-xl">
+                          {warehouses.map((w) => (
+                            <SelectItem key={w.id} value={w.id}>
+                              {w.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                  </div>
+                  {/* Fila 3 — Existencia al 50% */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <Field label="Existencia Inicial">
+                      <Input
+                        {...form.register("stock")}
+                        type="number"
+                        min={0}
+                        className={`${INPUT_CLS} font-mono`}
+                      />
+                    </Field>
+                    <div />
+                  </div>
+                </div>
+              </AccordionSection>
+
+              {/* SECCIÓN 3 — Estructura de Precios y Ganancias */}
+              <AccordionSection
+                id="precios"
+                title="Estructura de Precios y Ganancias"
+                icon={DollarSign}
+                isOpen={activeSection === "precios"}
+                onToggle={toggleSection}
+              >
+                <div className="space-y-6">
+                  {/* Fila 1: Inputs numéricos */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <Field label="Costo Unitario ($)">
+                      <Input
+                        {...form.register("cost_usd")}
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        className={`${INPUT_CLS} font-mono`}
+                      />
+                    </Field>
+                    <Field label="Precio de Venta ($)">
+                      <Input
+                        {...form.register("price_usd")}
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        className={`${INPUT_CLS} font-mono`}
+                      />
+                    </Field>
+                  </div>
+
+                  {/* Fila 2: Métricas calculadas */}
+                  <div className="grid grid-cols-3 gap-4 border-t border-slate-100 pt-5">
+                    <Metric label="Costo Total Inventario" value={formatCurrency(cost_usd || 0)} />
+                    <Metric
+                      label="Margen de Ganancia"
+                      value={`${(profitMarginPct || 0).toFixed(1)}%`}
+                      danger={(profitMarginPct || 0) < 0}
+                    />
+                    <Metric
+                      label="Utilidad Neta"
+                      value={formatCurrency(profit || 0)}
+                      danger={(profit || 0) < 0}
+                    />
+                  </div>
+
+                  {/* Fila 3: Precios especiales */}
+                  <div className="border-t border-slate-100 pt-5">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4 font-montserrat">
+                      Precios Especiales
+                    </p>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="flex flex-col gap-2">
+                        <Field label="Precio al Mayor">
+                          <Input
+                            {...form.register("price_usd_2")}
+                            type="number"
+                            step="0.01"
+                            min={0}
+                            className={`${INPUT_CLS} font-mono`}
+                          />
+                        </Field>
+                        <div className="flex items-center justify-between text-[10px] px-1 font-montserrat">
+                          <span className="text-slate-400">Mg: <span className={(margin_2 || 0) < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{(margin_2 || 0).toFixed(1)}%</span></span>
+                          <span className="text-slate-400">Ut: <span className={(profit_2 || 0) < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{formatCurrency(profit_2 || 0)}</span></span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <Field label="Precio Oferta">
-                        <Input
-                          {...form.register("price_usd_4")}
-                          type="number"
-                          step="0.01"
-                          min={0}
-                          className={`${INPUT_CLS} font-mono`}
-                        />
-                      </Field>
-                      <div className="flex items-center justify-between text-[10px] px-1 font-montserrat">
-                        <span className="text-slate-400">Mg: <span className={margin_4 < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{margin_4.toFixed(1)}%</span></span>
-                        <span className="text-slate-400">Ut: <span className={profit_4 < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{formatCurrency(profit_4)}</span></span>
+                      <div className="flex flex-col gap-2">
+                        <Field label="Precio Mínimo">
+                          <Input
+                            {...form.register("price_usd_3")}
+                            type="number"
+                            step="0.01"
+                            min={0}
+                            className={`${INPUT_CLS} font-mono`}
+                          />
+                        </Field>
+                        <div className="flex items-center justify-between text-[10px] px-1 font-montserrat">
+                          <span className="text-slate-400">Mg: <span className={(margin_3 || 0) < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{(margin_3 || 0).toFixed(1)}%</span></span>
+                          <span className="text-slate-400">Ut: <span className={(profit_3 || 0) < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{formatCurrency(profit_3 || 0)}</span></span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Field label="Precio Oferta">
+                          <Input
+                            {...form.register("price_usd_4")}
+                            type="number"
+                            step="0.01"
+                            min={0}
+                            className={`${INPUT_CLS} font-mono`}
+                          />
+                        </Field>
+                        <div className="flex items-center justify-between text-[10px] px-1 font-montserrat">
+                          <span className="text-slate-400">Mg: <span className={(margin_4 || 0) < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{(margin_4 || 0).toFixed(1)}%</span></span>
+                          <span className="text-slate-400">Ut: <span className={(profit_4 || 0) < 0 ? "text-red-500 font-bold" : "text-slate-700 font-bold"}>{formatCurrency(profit_4 || 0)}</span></span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </AccordionSection>
+              </AccordionSection>
 
-            {/* SECCIÓN 4 — Imagen y Descripción */}
-            <AccordionSection
-              id="avanzados"
-              title="Imagen y Descripción"
-              icon={ImageIcon}
-              isOpen={activeSection === "avanzados"}
-              onToggle={toggleSection}
-            >
-              <div className="space-y-4">
-                <Field label="URL de Imagen">
-                  <Input
-                    {...form.register("image_url")}
-                    placeholder="https://..."
-                    className={`${INPUT_CLS} font-mono`}
-                  />
-                </Field>
-                <Field label="Descripción">
-                  <textarea
-                    {...form.register("description")}
-                    placeholder="Escriba aquí los detalles del producto..."
-                    rows={4}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-brand focus:border-brand resize-none font-montserrat"
-                  />
-                </Field>
-              </div>
+              {/* SECCIÓN 4 — Imagen y Descripción */}
+              <AccordionSection
+                id="avanzados"
+                title="Imagen y Descripción"
+                icon={ImageIcon}
+                isOpen={activeSection === "avanzados"}
+                onToggle={toggleSection}
+              >
+                <div className="space-y-4">
+                  <Field label="URL de Imagen">
+                    <Input
+                      {...form.register("image_url")}
+                      placeholder="https://..."
+                      className={`${INPUT_CLS} font-mono`}
+                    />
+                  </Field>
+                  <Field label="Descripción">
+                    <textarea
+                      {...form.register("description")}
+                      placeholder="Escriba aquí los detalles del producto..."
+                      rows={4}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-brand focus:border-brand resize-none font-montserrat"
+                    />
+                  </Field>
+                </div>
 
-              {attributes.length > 0 && (
-                 <div className="mt-6 border-t border-slate-100 pt-5">
-                   <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4 font-montserrat">
-                     Atributos del Producto
-                   </p>
-                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                     {attributes.map(attr => (
-                       <Field key={attr.id} label={attr.name}>
+                {attributes.length > 0 && (
+                  <div className="mt-6 border-t border-slate-100 pt-5">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4 font-montserrat">
+                      Atributos del Producto
+                    </p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {attributes.map(attr => (
+                        <Field key={attr.id} label={attr.name}>
                           <Select 
-                             value={form.watch(`attributes.${attr.name}`)}
-                             onValueChange={(v) => {
-                                const current = form.watch("attributes") || {};
-                                form.setValue("attributes", { ...current, [attr.name]: v });
-                             }}
+                            value={form.watch(`attributes.${attr.name}`)}
+                            onValueChange={(v) => {
+                              const current = form.watch("attributes") || {};
+                              form.setValue("attributes", { ...current, [attr.name]: v });
+                            }}
                           >
-                             <SelectTrigger className={SELECT_CLS}>
-                               <SelectValue placeholder={`Elegir ${attr.name}`} />
-                             </SelectTrigger>
-                             <SelectContent className="bg-white border-slate-200">
-                               {(attr.values || []).map((val: string) => (
-                                  <SelectItem key={val} value={val}>{val}</SelectItem>
-                               ))}
-                             </SelectContent>
+                            <SelectTrigger className={SELECT_CLS}>
+                              <SelectValue placeholder={`Elegir ${attr.name}`} />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white border-slate-200">
+                              {(attr.values || []).map((val: string) => (
+                                <SelectItem key={val} value={val}>{val}</SelectItem>
+                              ))}
+                            </SelectContent>
                           </Select>
-                       </Field>
-                     ))}
-                   </div>
-                 </div>
-              )}
-            </AccordionSection>
-          </div>
+                        </Field>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </AccordionSection>
+            </div>
 
-          {/* ── Footer ─────────────────────────────────────────────────────── */}
-          <div className="px-8 py-5 border-t border-slate-100 flex items-center justify-end gap-6 shrink-0 bg-white">
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="text-[11px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors font-montserrat"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-8 py-2.5 bg-brand text-white text-[11px] font-bold uppercase tracking-widest rounded-full hover:bg-brand/90 transition-all disabled:opacity-50 flex items-center gap-2 font-montserrat shadow-lg shadow-brand/20 active:scale-[0.98]"
-            >
-              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              {loading ? "Guardando..." : product?.id ? "Actualizar" : "Crear Producto"}
-            </button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+            {/* ── Footer ─────────────────────────────────────────────────────── */}
+            <div className="px-8 py-5 border-t border-slate-100 flex items-center justify-end gap-6 shrink-0 bg-white">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="text-[11px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors font-montserrat"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-8 py-2.5 bg-brand text-white text-[11px] font-bold uppercase tracking-widest rounded-full hover:bg-brand/90 transition-all disabled:opacity-50 flex items-center gap-2 font-montserrat shadow-lg shadow-brand/20 active:scale-[0.98]"
+              >
+                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                {loading ? "Guardando..." : product?.id ? "Actualizar" : "Crear Producto"}
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <UnitModal 
+        open={openUnitModal} 
+        onOpenChange={setOpenUnitModal} 
+        onSuccess={() => {
+          if (user?.company_id) {
+            supabase.from("product_units")
+              .select("name, slug")
+              .eq("company_id", user.company_id)
+              .order("name")
+              .then(({ data }) => {
+                if (data) setUnits(data);
+              });
+          }
+        }}
+      />
+    </>
   );
 }
