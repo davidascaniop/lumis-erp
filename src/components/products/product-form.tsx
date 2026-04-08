@@ -24,7 +24,7 @@ import {
 const INPUT_CLS =
   "h-11 bg-white border-slate-200 text-slate-900 placeholder:text-slate-300 text-sm rounded-xl shadow-none focus:ring-1 focus:ring-brand focus:border-brand font-montserrat";
 const LABEL_CLS =
-  "block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 font-montserrat";
+  "block text-[10px] font-bold text-brand uppercase tracking-widest mb-1 font-montserrat";
 const SELECT_CLS =
   "h-11 bg-white border-slate-200 text-slate-900 text-sm rounded-xl shadow-none focus:ring-1 focus:ring-brand font-montserrat";
 
@@ -308,8 +308,8 @@ export function ProductForm({
               onToggle={toggleSection}
               hasError={!!form.formState.errors.name || !!form.formState.errors.sku}
             >
-              <div className="grid grid-cols-12 gap-4">
-                <Field label="Nombre Comercial" className="col-span-9">
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Nombre Comercial" className="col-span-1">
                   <Input
                     {...form.register("name")}
                     placeholder="Ej. Harina Pan 1Kg"
@@ -321,7 +321,7 @@ export function ProductForm({
                     </p>
                   )}
                 </Field>
-                <Field label="SKU / Código de Barra" className="col-span-3">
+                <Field label="SKU / Código de Barra" className="col-span-1">
                   <Input
                     {...form.register("sku")}
                     placeholder="PROD-001"
