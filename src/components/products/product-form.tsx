@@ -22,11 +22,11 @@ import {
 
 // ─── Constantes de estilo ─────────────────────────────────────────────────────
 const INPUT_CLS =
-  "h-11 bg-white border-slate-200 text-slate-900 placeholder:text-slate-300 text-sm rounded-xl shadow-none focus:ring-1 focus:ring-brand focus:border-brand font-montserrat";
+  "w-full h-11 bg-white border-slate-200 text-slate-900 placeholder:text-slate-300 text-sm rounded-xl shadow-none focus:ring-1 focus:ring-brand focus:border-brand font-montserrat";
 const LABEL_CLS =
   "block text-[10px] font-bold text-brand uppercase tracking-widest mb-1 font-montserrat";
 const SELECT_CLS =
-  "h-11 bg-white border-slate-200 text-slate-900 text-sm rounded-xl shadow-none focus:ring-1 focus:ring-brand font-montserrat";
+  "w-full h-11 bg-white border-slate-200 text-slate-900 text-sm rounded-xl shadow-none focus:ring-1 focus:ring-brand font-montserrat flex items-center justify-between";
 
 // ─── Sub-componentes definidos FUERA del componente principal ─────────────────
 // (evita el bug de pérdida de foco por re-renderizado)
