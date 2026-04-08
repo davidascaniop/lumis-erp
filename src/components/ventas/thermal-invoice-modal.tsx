@@ -38,7 +38,6 @@ interface ThermalInvoiceModalProps {
   onSuccess?: () => void;
   order: InvoiceOrderData;
   company: CompanyProfile | null;
-  ivaPercent?: number; // default 16
 }
 
 // ─────────────────────────────────────────────────────────
@@ -136,19 +135,14 @@ function TicketRapido({
   order,
   company,
   docNumber,
-  ivaPercent,
-  includeIva,
 }: {
   order: InvoiceOrderData;
   company: CompanyProfile | null;
   docNumber: string;
-  ivaPercent: number;
-  includeIva: boolean;
 }) {
   const subtotal = order.items.reduce((acc, i) => acc + i.price_usd * i.qty, 0);
-  const ivaAmount = includeIva && ivaPercent > 0 ? subtotal * (ivaPercent / 100) : 0;
-  const total = subtotal + ivaAmount;
-  const totalBs = total * order.bcvRate;
+  const total = order.totalUsd;
+  const totalBs = order.totalBs;
 
   const SEP = "--------------------------------";
 
@@ -228,19 +222,14 @@ function FacturaFormal({
   order,
   company,
   docNumber,
-  ivaPercent,
-  includeIva,
 }: {
   order: InvoiceOrderData;
   company: CompanyProfile | null;
   docNumber: string;
-  ivaPercent: number;
-  includeIva: boolean;
 }) {
   const subtotal = order.items.reduce((acc, i) => acc + i.price_usd * i.qty, 0);
-  const ivaAmount = includeIva && ivaPercent > 0 ? subtotal * (ivaPercent / 100) : 0;
-  const total = subtotal + ivaAmount;
-  const totalBs = total * order.bcvRate;
+  const total = order.totalUsd;
+  const totalBs = order.totalBs;
 
   const SEP = "--------------------------------";
   const DOUBLE = "================================";
@@ -335,10 +324,8 @@ export function ThermalInvoiceModal({
   onSuccess,
   order,
   company,
-  ivaPercent = 16,
 }: ThermalInvoiceModalProps) {
   const [selected, setSelected] = useState<"ticket" | "factura" | null>(null);
-  const [includeIva, setIncludeIva] = useState(ivaPercent > 0);
   const [docNumber, setDocNumber] = useState<string>("");
   const [loadingDoc, setLoadingDoc] = useState(false);
   const printRootRef = useRef<HTMLDivElement>(null);
@@ -474,24 +461,6 @@ export function ThermalInvoiceModal({
             </button>
           </div>
 
-          {/* ── IVA TOGGLE (only when format selected) ── */}
-          {selected && (
-            <div className="flex items-center justify-between bg-[#F8FAFC] rounded-xl px-4 py-3 border border-[#E2E8F0] opacity-80 animate-in slide-in-from-top-2 duration-300">
-              <div>
-                <div className="text-[12px] font-bold font-outfit text-[#94A3B8]">Incluir IVA en el documento <span className="text-[10px] bg-brand/10 text-brand px-1.5 py-0.5 rounded font-bold ml-1">Próximamente</span></div>
-                <div className="text-[10px] text-[#94A3B8] font-outfit">Actualmente desactivado</div>
-              </div>
-              <button
-                disabled
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none bg-[#CBD5E1] cursor-not-allowed`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform translate-x-1`}
-                />
-              </button>
-            </div>
-          )}
-
           {/* ── DOCUMENT NUMBER PREVIEW ── */}
           {selected && (
             <div className="animate-in slide-in-from-top-2 duration-300">
@@ -524,16 +493,12 @@ export function ThermalInvoiceModal({
                   order={order}
                   company={company}
                   docNumber={docNumber}
-                  ivaPercent={ivaPercent}
-                  includeIva={includeIva}
                 />
               ) : (
                 <FacturaFormal
                   order={order}
                   company={company}
                   docNumber={docNumber}
-                  ivaPercent={ivaPercent}
-                  includeIva={includeIva}
                 />
               )}
             </div>
@@ -557,16 +522,12 @@ export function ThermalInvoiceModal({
                     order={order}
                     company={company}
                     docNumber={docNumber}
-                    ivaPercent={ivaPercent}
-                    includeIva={includeIva}
                   />
                 ) : (
                   <FacturaFormal
                     order={order}
                     company={company}
                     docNumber={docNumber}
-                    ivaPercent={ivaPercent}
-                    includeIva={includeIva}
                   />
                 )}
               </div>

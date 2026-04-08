@@ -697,7 +697,6 @@ function NuevaVentaContent() {
           onSuccess={handlePrintSuccess}
           order={pendingOrderData}
           company={company}
-          ivaPercent={ivaPercent}
         />
       )}
     </div>

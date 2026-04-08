@@ -347,7 +347,6 @@ export default function VentasPage() {
           }}
           order={reprintOrder}
           company={company}
-          ivaPercent={ivaPercent}
         />
       )}
     </div>
