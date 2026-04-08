@@ -13,6 +13,10 @@ import { Input } from "@/components/ui/input";
 import { useUser } from "@/hooks/use-user";
 import { ChevronDown, Loader2, Info, Box, DollarSign, Image as ImageIcon, PlusCircle } from "lucide-react";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { UnitModal } from "./unit-modal";
