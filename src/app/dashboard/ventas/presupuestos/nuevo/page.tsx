@@ -444,8 +444,8 @@ function NuevoPresupuestoContent() {
             <div className="flex items-baseline justify-between">
               <span className="text-[13px] font-bold text-text-3 uppercase tracking-wider">Total Cotización:</span>
               <div className="text-right">
-                <p className="text-2xl font-bold text-brand">$ {subtotal.toFixed(2)}</p>
-                <p className="text-[10px] font-bold text-text-3 uppercase">Bs. {(subtotalBs).toLocaleString("es-VE", { maximumFractionDigits: 2 })}</p>
+                <p className="text-2xl font-bold text-brand">Bs. {(subtotalBs).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p className="text-[12px] font-bold text-text-3 uppercase">$ {subtotal.toFixed(2)}</p>
               </div>
             </div>
 

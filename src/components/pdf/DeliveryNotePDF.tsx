@@ -229,21 +229,25 @@ export const DeliveryNotePDF = ({
             <Text style={styles.col5}>Subtotal</Text>
           </View>
 
-          {items.map((item, i) => (
-            <View key={i} style={styles.tableRow}>
-              <Text style={styles.col1}>{item.products?.sku || "N/A"}</Text>
-              <Text style={styles.col2}>
-                {item.products?.name || "Producto"}
-              </Text>
-              <Text style={styles.col3}>{item.qty}</Text>
-              <Text style={styles.col4}>
-                ${Number(item.price_usd).toFixed(2)}
-              </Text>
-              <Text style={styles.col5}>
-                ${Number(item.subtotal).toFixed(2)}
-              </Text>
-            </View>
-          ))}
+          {items.map((item, i) => {
+            const priceBs = (Number(item.price_usd) * Number(order.exchange_rate || 1));
+            const subtotalBs = (Number(item.subtotal) * Number(order.exchange_rate || 1));
+            return (
+              <View key={i} style={styles.tableRow}>
+                <Text style={styles.col1}>{item.products?.sku || "N/A"}</Text>
+                <Text style={styles.col2}>
+                  {item.products?.name || "Producto"}
+                </Text>
+                <Text style={styles.col3}>{item.qty}</Text>
+                <Text style={styles.col4}>
+                  Bs. {priceBs.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </Text>
+                <Text style={styles.col5}>
+                  Bs. {subtotalBs.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </Text>
+              </View>
+            );
+          })}
         </View>
       </View>
 
@@ -251,21 +255,17 @@ export const DeliveryNotePDF = ({
       <View style={styles.totalsContainer}>
         <View style={styles.totalsBox}>
           <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Subtotal:</Text>
-            <Text>${Number(order.subtotal_usd || 0).toFixed(2)}</Text>
+            <Text style={styles.totalLabel}>TOTAL BS:</Text>
+            <Text style={styles.totalValueHigh}>
+              Bs. {Number(order.total_bs || 0).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </Text>
           </View>
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>TOTAL USD:</Text>
-            <Text style={styles.totalValueHigh}>
+            <Text>
               ${Number(order.total_usd || 0).toFixed(2)}
             </Text>
           </View>
-          {order.exchange_rate && (
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>TOTAL BS (BCV):</Text>
-              <Text>Bs. {Number(order.total_bs || 0).toFixed(2)}</Text>
-            </View>
-          )}
         </View>
       </View>
 

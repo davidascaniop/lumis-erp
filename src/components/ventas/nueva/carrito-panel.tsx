@@ -356,11 +356,10 @@ export function CarritoPanel({
         <div className="flex flex-col gap-0.5 items-end">
           <div className="flex items-baseline gap-2">
             <span className="text-[13px] font-bold text-text-3 font-outfit uppercase tracking-wider">Total Venta:</span>
-            <span className="text-xl font-bold text-brand font-outfit">$ {total.toFixed(2)}</span>
+            <span className="text-xl font-bold text-brand font-outfit">Bs. {totalBs.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </div>
-          <p className="text-[10px] font-bold text-[#94A3B8] font-outfit uppercase">
-            Bs. {totalBs.toLocaleString("es-VE", { maximumFractionDigits: 2 })}
-            <span className="text-[8px] font-medium opacity-50"> (BCV: {bcvRate.toFixed(2)})</span>
+          <p className="text-[11px] font-bold text-[#94A3B8] font-outfit uppercase">
+            $ {total.toFixed(2)}
           </p>
         </div>
 
