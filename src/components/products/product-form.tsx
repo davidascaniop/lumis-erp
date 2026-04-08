@@ -11,7 +11,7 @@ import { formatCurrency } from "@/lib/utils";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useUser } from "@/hooks/use-user";
-import { ChevronDown, Loader2 } from "lucide-react";
+import { ChevronDown, Loader2, Info, Box, DollarSign, Image as ImageIcon } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -37,6 +37,7 @@ function AccordionSection({
   isOpen,
   onToggle,
   hasError,
+  icon: Icon,
   children,
 }: {
   id: string;
@@ -44,25 +45,33 @@ function AccordionSection({
   isOpen: boolean;
   onToggle: (id: string) => void;
   hasError?: boolean;
+  icon?: React.ElementType;
   children: React.ReactNode;
 }) {
   return (
-    <div className={`border-b ${hasError ? "border-l-2 border-l-red-400 pl-3" : "border-slate-100"}`}>
+    <div className={`border-b ${hasError ? "border-l-2 border-l-red-500" : "border-slate-100"} ${isOpen ? "bg-brand/5 border-l-2 border-l-brand" : "hover:bg-slate-50"} transition-colors`}>
       <button
         type="button"
         onClick={() => onToggle(id)}
-        className="w-full flex items-center justify-between py-5 text-left group"
+        className="w-full flex items-center justify-between py-4 px-6 text-left group"
       >
-        <span
-          className={`text-[13px] font-bold font-montserrat tracking-wide transition-colors ${
-            isOpen ? "text-slate-900" : "text-slate-400 group-hover:text-slate-700"
-          }`}
-        >
-          {title}
-        </span>
+        <div className="flex items-center gap-3">
+          {Icon && (
+            <div className={`p-2 rounded-xl transition-colors ${isOpen ? "bg-brand/10 text-brand" : "bg-slate-100 text-slate-400 group-hover:text-slate-600 group-hover:bg-slate-200"}`}>
+              <Icon className="w-4 h-4" />
+            </div>
+          )}
+          <span
+            className={`text-[14px] font-bold font-montserrat tracking-wide transition-colors ${
+              isOpen ? "text-slate-900" : "text-slate-600 group-hover:text-slate-900"
+            }`}
+          >
+            {title}
+          </span>
+        </div>
         <ChevronDown
-          className={`w-4 h-4 text-slate-300 transition-transform duration-300 ${
-            isOpen ? "rotate-180 text-brand" : ""
+          className={`w-5 h-5 transition-transform duration-300 ${
+            isOpen ? "rotate-180 text-brand" : "text-slate-400 group-hover:text-slate-600"
           }`}
         />
       </button>
@@ -74,7 +83,7 @@ function AccordionSection({
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
           >
-            <div className="pb-8 pt-1">{children}</div>
+            <div className="pb-8 pt-2 px-6">{children}</div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -288,12 +297,13 @@ export function ProductForm({
           </div>
 
           {/* ── Cuerpo con scroll ───────────────────────────────────────────── */}
-          <div className="flex-1 overflow-y-auto px-8 py-2">
+          <div className="flex-1 overflow-y-auto pb-6">
 
             {/* SECCIÓN 1 — Información General */}
             <AccordionSection
               id="general"
               title="Información General"
+              icon={Info}
               isOpen={activeSection === "general"}
               onToggle={toggleSection}
               hasError={!!form.formState.errors.name || !!form.formState.errors.sku}
@@ -330,6 +340,7 @@ export function ProductForm({
             <AccordionSection
               id="clasificacion"
               title="Clasificación y Logística"
+              icon={Box}
               isOpen={activeSection === "clasificacion"}
               onToggle={toggleSection}
             >
@@ -421,6 +432,7 @@ export function ProductForm({
             <AccordionSection
               id="precios"
               title="Estructura de Precios y Ganancias"
+              icon={DollarSign}
               isOpen={activeSection === "precios"}
               onToggle={toggleSection}
             >
@@ -522,6 +534,7 @@ export function ProductForm({
             <AccordionSection
               id="avanzados"
               title="Imagen y Descripción"
+              icon={ImageIcon}
               isOpen={activeSection === "avanzados"}
               onToggle={toggleSection}
             >
