@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Clock, ChefHat, CheckCircle2 } from "lucide-react";
+import { Clock, ChefHat, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 
 interface KitchenTicketProps {
   order: any;
@@ -37,6 +37,8 @@ export function KitchenTicket({
   onMarkReady,
   onMarkDelivered,
 }: KitchenTicketProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const items = order.restaurant_order_items || [];
   const tableName = order.restaurant_tables?.name || "Mesa";
   const waiterName = order.users?.full_name || "Mesero";
@@ -60,23 +62,40 @@ export function KitchenTicket({
       ? "text-amber-700 bg-amber-100 border-amber-200"
       : "text-emerald-700 bg-emerald-100 border-emerald-200";
 
+  const displayItems = pendingItems.length > 0 ? pendingItems : readyItems;
+  const totalPlates = displayItems.reduce((acc: number, item: any) => acc + item.quantity, 0);
+
   return (
-    <div className="bg-surface-card rounded-2xl border border-border p-4 shadow-[0_2px_8px_-3px_rgba(0,0,0,0.05)]">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3 border-b border-border/50 pb-3">
+    <div className="bg-surface-card rounded-2xl border border-border p-4 shadow-[0_2px_8px_-3px_rgba(0,0,0,0.05)] transition-all">
+      {/* Header (Accordion Toggle) */}
+      <button 
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between mb-3 border-b border-border/50 pb-3 hover:opacity-80 active:scale-[0.98] transition-all text-left"
+      >
         <div>
-          <h3 className="text-base font-bold text-text-1 font-montserrat">{tableName}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-bold text-text-1 font-montserrat">{tableName}</h3>
+            {totalPlates > 0 && (
+              <span className="text-[10px] font-bold text-brand bg-brand/10 px-1.5 py-0.5 rounded-md">
+                {totalPlates} {totalPlates === 1 ? "plato" : "platos"}
+              </span>
+            )}
+          </div>
           <p className="text-[11px] text-text-3 font-medium mt-0.5">Mesero: {waiterName}</p>
         </div>
-        <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold", timerColor)}>
-          <Clock className="w-3.5 h-3.5" />
-          {minutes}m
+        <div className="flex flex-col items-end gap-1.5">
+          <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold", timerColor)}>
+            <Clock className="w-3.5 h-3.5" />
+            {minutes}m
+          </div>
+          {isExpanded ? <ChevronUp className="w-4 h-4 text-text-3" /> : <ChevronDown className="w-4 h-4 text-text-3" />}
         </div>
-      </div>
+      </button>
 
-      {/* Items */}
+      {/* Items (Collapsible) */}
+      {isExpanded && (
       <div className="mb-4 rounded-xl border border-border/50 divide-y divide-border/50 overflow-hidden bg-surface-card">
-        {pendingItems.map((item: any) => (
+        {displayItems.map((item: any) => (
           <div key={item.id} className="flex items-start gap-3 p-3">
             <span className="text-text-1 font-bold text-xs shrink-0 mt-0.5 px-2 py-1 bg-surface-base rounded-md border border-border/50">x{item.quantity}</span>
             <div className="flex-1 min-w-0">
@@ -88,6 +107,7 @@ export function KitchenTicket({
           </div>
         ))}
       </div>
+      )}
 
       {/* Actions based on status */}
       {items.some((i: any) => i.status === "pendiente") && (
