@@ -126,6 +126,7 @@ const RESTAURANT_SECTION: NavSection = {
     { href: "/dashboard/restaurante/mesas", label: "Mesas", icon: LayoutGrid },
     { href: "/dashboard/restaurante/comandas", label: "Comandas", icon: ClipboardList },
     { href: "/dashboard/restaurante/cocina", label: "Cocina (KDS)", icon: CookingPot },
+    { href: "/dashboard/restaurante/reportes", label: "Reportes", icon: BarChart3 },
     { href: "/dashboard/restaurante/config", label: "Configuración", icon: Settings },
   ],
 };
