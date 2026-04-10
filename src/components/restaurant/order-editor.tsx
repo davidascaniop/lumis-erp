@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Minus, Trash2, Send, CreditCard, Search, Pencil } from "lucide-react";
+import { Plus, Minus, Trash2, Send, CreditCard, Search, Pencil, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface OrderEditorProps {
@@ -39,6 +39,7 @@ export function OrderEditor({
 }: OrderEditorProps) {
   const [activeCategory, setActiveCategory] = useState("Todos");
   const [search, setSearch] = useState("");
+  const [editingNoteFor, setEditingNoteFor] = useState<{ id: string; note: string } | null>(null);
 
   const filteredProducts = useMemo(() => {
     let list = products;
@@ -179,12 +180,7 @@ export function OrderEditor({
                   </span>
                   {onUpdateItemNote && (
                     <button
-                      onClick={() => {
-                        const note = window.prompt("Nota de preparación (ej. sin sal, extra queso):", item.modifications || "");
-                        if (note !== null) {
-                          onUpdateItemNote(item.id, note);
-                        }
-                      }}
+                      onClick={() => setEditingNoteFor({ id: item.id, note: item.modifications || "" })}
                       className="p-1.5 rounded-lg hover:bg-amber-100 text-amber-500 hover:text-amber-700 transition-colors"
                       title="Añadir nota"
                     >
@@ -236,6 +232,57 @@ export function OrderEditor({
           </button>
         </div>
       </div>
+
+      {/* Edit Note Modal */}
+      {editingNoteFor && onUpdateItemNote && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setEditingNoteFor(null)} />
+          <div className="relative w-full max-w-sm bg-surface-card rounded-3xl p-6 shadow-elevated border border-border animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-text-1 font-montserrat">Añadir Nota</h2>
+              <button onClick={() => setEditingNoteFor(null)} className="p-2 rounded-xl hover:bg-surface-hover transition-colors">
+                <X className="w-5 h-5 text-text-3" />
+              </button>
+            </div>
+            
+            <p className="text-xs text-text-3 mb-4">Escribe excepciones, extras o modificaciones para la preparación en cocina.</p>
+            
+            <textarea
+              autoFocus
+              value={editingNoteFor.note}
+              onChange={(e) => setEditingNoteFor({ ...editingNoteFor, note: e.target.value })}
+              placeholder="Ej. Sin cebolla, Extra queso, Término 3/4..."
+              className="w-full h-24 p-4 rounded-xl bg-surface-input border border-border/40 text-text-1 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 resize-none mb-6"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  onUpdateItemNote(editingNoteFor.id, editingNoteFor.note);
+                  setEditingNoteFor(null);
+                }
+              }}
+            />
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setEditingNoteFor(null)}
+                className="flex-1 py-3 rounded-xl border border-border text-text-2 font-bold hover:bg-surface-hover transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  onUpdateItemNote(editingNoteFor.id, editingNoteFor.note);
+                  setEditingNoteFor(null);
+                }}
+                className="flex-1 py-3 rounded-xl bg-brand-gradient text-white font-bold shadow-brand hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
+                <Check className="w-4 h-4" />
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
