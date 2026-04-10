@@ -97,7 +97,7 @@ export default function RestaurantReportsPage() {
 
     return {
       totalSalesUSD,
-      totalSalesBS: totalSalesUSD * rate,
+      totalSalesBS: totalSalesUSD * (rate || 0),
       avgTicket,
       avgKitchenTime,
       totalPlates,
