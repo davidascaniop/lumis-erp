@@ -55,18 +55,18 @@ export function KitchenTicket({
 
   const timerColor =
     minutes >= alertRed
-      ? "text-red-400 bg-red-500/20 border-red-500/30"
+      ? "text-red-700 bg-red-100 border-red-200"
       : minutes >= alertYellow
-      ? "text-yellow-400 bg-yellow-500/20 border-yellow-500/30"
-      : "text-emerald-400 bg-emerald-500/20 border-emerald-500/30";
+      ? "text-amber-700 bg-amber-100 border-amber-200"
+      : "text-emerald-700 bg-emerald-100 border-emerald-200";
 
   return (
-    <div className="bg-[#1E1E2E] rounded-2xl border border-[#2A2A3E] p-4 shadow-lg">
+    <div className="bg-surface-card rounded-2xl border border-border p-4 shadow-elevated">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-3 border-b border-border/50 pb-3">
         <div>
-          <h3 className="text-base font-bold text-white font-montserrat">{tableName}</h3>
-          <p className="text-[11px] text-gray-400 mt-0.5">Mesero: {waiterName}</p>
+          <h3 className="text-base font-bold text-text-1 font-montserrat">{tableName}</h3>
+          <p className="text-[11px] text-text-3 font-medium mt-0.5">Mesero: {waiterName}</p>
         </div>
         <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold", timerColor)}>
           <Clock className="w-3.5 h-3.5" />
@@ -75,14 +75,14 @@ export function KitchenTicket({
       </div>
 
       {/* Items */}
-      <div className="space-y-2 mb-3">
+      <div className="space-y-2 mb-4">
         {pendingItems.map((item: any) => (
-          <div key={item.id} className="flex items-start gap-2 p-2 rounded-lg bg-[#262636]">
-            <span className="text-white font-bold text-xs shrink-0 mt-0.5">x{item.quantity}</span>
+          <div key={item.id} className="flex items-start gap-2 p-2.5 rounded-xl bg-surface-base border border-border">
+            <span className="text-text-1 font-bold text-xs shrink-0 mt-0.5 px-1.5 py-0.5 bg-surface-input rounded-md border border-border/50">x{item.quantity}</span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-200 leading-tight">{item.product_name}</p>
+              <p className="text-sm font-bold text-text-1 leading-tight">{item.product_name}</p>
               {item.modifications && (
-                <p className="text-[11px] text-amber-400 italic mt-0.5">⚠ {item.modifications}</p>
+                <p className="text-xs text-amber-600 font-medium italic mt-1 bg-amber-50 rounded px-1.5 py-0.5 inline-block">⚠ {item.modifications}</p>
               )}
             </div>
           </div>
@@ -98,7 +98,7 @@ export function KitchenTicket({
               items.filter((i: any) => i.status === "pendiente").map((i: any) => i.id)
             )
           }
-          className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2"
+          className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2"
         >
           <ChefHat className="w-4 h-4" />
           Iniciar Preparación
@@ -114,7 +114,7 @@ export function KitchenTicket({
               items.filter((i: any) => i.status === "en_preparacion").map((i: any) => i.id)
             )
           }
-          className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2"
+          className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2"
         >
           <CheckCircle2 className="w-4 h-4" />
           Marcar como Listo
@@ -129,7 +129,7 @@ export function KitchenTicket({
               readyItems.map((i: any) => i.id)
             )
           }
-          className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2 mt-2"
+          className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 active:scale-[0.98] text-white font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2 mt-2"
         >
           ✓ Entregado
         </button>

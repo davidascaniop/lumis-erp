@@ -145,25 +145,25 @@ export default function CocinaPage() {
   return (
     <div className={cn(
       "min-h-screen transition-all duration-300",
-      isFullscreen ? "fixed inset-0 z-[9999] p-4" : "",
-      "bg-[#0D0D1A] rounded-2xl"
+      isFullscreen ? "fixed inset-0 z-[9999] p-4 bg-surface-base" : "",
+      "rounded-2xl"
     )}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-[#2A2A3E]">
+      <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-orange-500/20 border border-orange-500/30">
-            <CookingPot className="w-6 h-6 text-orange-400" />
+          <div className="p-2.5 rounded-xl bg-orange-50 border border-orange-200">
+            <CookingPot className="w-6 h-6 text-orange-500" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white font-montserrat">Cocina KDS</h1>
-            <p className="text-xs text-gray-400">
+            <h1 className="text-xl font-bold text-text-1 font-montserrat">Cocina KDS</h1>
+            <p className="text-xs text-text-3">
               {pendingTickets.length + inProgressTickets.length + readyTickets.length} tickets activos
             </p>
           </div>
         </div>
         <button
           onClick={toggleFullscreen}
-          className="p-3 rounded-xl bg-[#1E1E2E] border border-[#2A2A3E] text-gray-400 hover:text-white hover:border-brand/30 transition-all"
+          className="p-3 rounded-xl bg-surface-card border border-border text-text-3 hover:text-text-1 hover:border-brand/30 transition-all shadow-sm"
           title={isFullscreen ? "Salir de pantalla completa" : "Modo Cocina (pantalla completa)"}
         >
           {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
@@ -176,8 +176,8 @@ export default function CocinaPage() {
         <div className="flex flex-col overflow-hidden">
           <div className="flex items-center gap-2 mb-3 px-2">
             <div className="w-3 h-3 rounded-full bg-blue-500" />
-            <h2 className="text-sm font-bold text-blue-400 uppercase tracking-wider">Pendiente</h2>
-            <span className="text-xs font-bold text-blue-400/60 bg-blue-500/10 px-2 py-0.5 rounded-full ml-auto">
+            <h2 className="text-sm font-bold text-blue-700 uppercase tracking-wider">Pendiente</h2>
+            <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full ml-auto">
               {pendingTickets.length}
             </span>
           </div>
@@ -194,7 +194,7 @@ export default function CocinaPage() {
               />
             ))}
             {pendingTickets.length === 0 && (
-              <div className="text-center py-10 text-gray-500 text-sm">Sin tickets</div>
+              <div className="text-center py-10 text-text-3/60 text-sm font-medium">Sin tickets</div>
             )}
           </div>
         </div>
@@ -203,8 +203,8 @@ export default function CocinaPage() {
         <div className="flex flex-col overflow-hidden">
           <div className="flex items-center gap-2 mb-3 px-2">
             <div className="w-3 h-3 rounded-full bg-amber-500" />
-            <h2 className="text-sm font-bold text-amber-400 uppercase tracking-wider">En Preparación</h2>
-            <span className="text-xs font-bold text-amber-400/60 bg-amber-500/10 px-2 py-0.5 rounded-full ml-auto">
+            <h2 className="text-sm font-bold text-amber-700 uppercase tracking-wider">En Preparación</h2>
+            <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full ml-auto">
               {inProgressTickets.length}
             </span>
           </div>
@@ -221,7 +221,7 @@ export default function CocinaPage() {
               />
             ))}
             {inProgressTickets.length === 0 && (
-              <div className="text-center py-10 text-gray-500 text-sm">Sin tickets</div>
+              <div className="text-center py-10 text-text-3/60 text-sm font-medium">Sin tickets</div>
             )}
           </div>
         </div>
@@ -230,8 +230,8 @@ export default function CocinaPage() {
         <div className="flex flex-col overflow-hidden">
           <div className="flex items-center gap-2 mb-3 px-2">
             <div className="w-3 h-3 rounded-full bg-emerald-500" />
-            <h2 className="text-sm font-bold text-emerald-400 uppercase tracking-wider">Listo para Entregar</h2>
-            <span className="text-xs font-bold text-emerald-400/60 bg-emerald-500/10 px-2 py-0.5 rounded-full ml-auto">
+            <h2 className="text-sm font-bold text-emerald-700 uppercase tracking-wider">Listo para Entregar</h2>
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full ml-auto">
               {readyTickets.length}
             </span>
           </div>
@@ -248,7 +248,7 @@ export default function CocinaPage() {
               />
             ))}
             {readyTickets.length === 0 && (
-              <div className="text-center py-10 text-gray-500 text-sm">Sin tickets</div>
+              <div className="text-center py-10 text-text-3/60 text-sm font-medium">Sin tickets</div>
             )}
           </div>
         </div>
