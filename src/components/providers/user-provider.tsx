@@ -20,8 +20,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
-  const fetchUser = useCallback(async () => {
-    setLoading(true);
+  const fetchUser = useCallback(async (isRefresh = false) => {
+    if (!isRefresh) setLoading(true);
     try {
       const {
         data: { user: authUser },
@@ -41,7 +41,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Error fetching user in UserProvider:", error);
     } finally {
-      setLoading(false);
+      if (!isRefresh) setLoading(false);
     }
   }, [supabase]);
 
@@ -50,7 +50,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }, [fetchUser]);
 
   return (
-    <UserContext.Provider value={{ user, loading, refreshUser: fetchUser }}>
+    <UserContext.Provider value={{ user, loading, refreshUser: () => fetchUser(true) }}>
       {children}
     </UserContext.Provider>
   );
