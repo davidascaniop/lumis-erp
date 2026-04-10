@@ -1006,13 +1006,17 @@ function SettingsContent() {
 
                       try {
                         console.log("Ejecutando UPDATE de modules_enabled en la DB para la compañía:", companyId, "Nuevos modulos:", newModules);
-                        const { error } = await supabase
+                        const { data, error } = await supabase
                           .from('companies')
                           .update({ modules_enabled: newModules })
-                          .eq('id', companyId);
+                          .eq('id', companyId)
+                          .select()
+                          .single();
                           
                         if (error) throw error;
-                        console.log("UPDATE de módulos exitoso.");
+                        if (!data) throw new Error("No se pudo actualizar la empresa (posible restricción de seguridad RLS).");
+                        
+                        console.log("UPDATE de módulos exitoso.", data);
 
                         await refreshUser();
 
