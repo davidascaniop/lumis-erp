@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -8,7 +8,7 @@ import {
   DollarSign, AlertTriangle, CheckCircle2, Briefcase, Lock, Wallet,
   FileText, FileClock, TrendingUp, PieChart, Store, ClipboardList,
   Tags, Layers, Receipt, ArrowDownCircle, Gauge, MessageSquare, ShoppingBag, Box, LineChart,
-  Landmark, RefreshCw,
+  Landmark, RefreshCw, UtensilsCrossed, LayoutGrid, CookingPot,
 } from "lucide-react";
 import { cn, formatNumber } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -40,7 +40,7 @@ type NavSection = {
   requiredPlan?: string[];
 };
 
-const NAV_SECTIONS: NavSection[] = [
+const BASE_NAV_SECTIONS: NavSection[] = [
   {
     id: "ventas",
     label: "Ventas",
@@ -118,6 +118,18 @@ const NAV_SECTIONS: NavSection[] = [
   },
 ];
 
+const RESTAURANT_SECTION: NavSection = {
+  id: "restaurante",
+  label: "Restaurante",
+  icon: UtensilsCrossed,
+  children: [
+    { href: "/dashboard/restaurante/mesas", label: "Mesas", icon: LayoutGrid },
+    { href: "/dashboard/restaurante/comandas", label: "Comandas", icon: ClipboardList },
+    { href: "/dashboard/restaurante/cocina", label: "Cocina (KDS)", icon: CookingPot },
+    { href: "/dashboard/restaurante/config", label: "Configuración", icon: Settings },
+  ],
+};
+
 const configItems = [
   { href: "/dashboard/settings", label: "Configuración", icon: Settings },
 ];
@@ -131,6 +143,18 @@ export function Sidebar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [userPlan, setUserPlan] = useState("starter");
+
+  // Build nav sections dynamically based on enabled modules
+  const modulesEnabled: string[] = user?.companies?.modules_enabled || [];
+  const NAV_SECTIONS = useMemo(() => {
+    const sections = [...BASE_NAV_SECTIONS];
+    if (modulesEnabled.includes('restaurante')) {
+      // Insert after "compras" (index 1)
+      const comprasIdx = sections.findIndex(s => s.id === 'compras');
+      sections.splice(comprasIdx + 1, 0, RESTAURANT_SECTION);
+    }
+    return sections;
+  }, [modulesEnabled]);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const { notifications, unreadCount, markAsRead, markAllRead } = useNotifications(

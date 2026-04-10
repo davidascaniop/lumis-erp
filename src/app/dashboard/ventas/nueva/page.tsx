@@ -13,6 +13,8 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { ProductoGrid } from "@/components/ventas/nueva/producto-grid";
 import { CarritoPanel } from "@/components/ventas/nueva/carrito-panel";
 import { ThermalInvoiceModal, type InvoiceOrderData } from "@/components/ventas/thermal-invoice-modal";
+import { PendingTablesBadge } from "@/components/restaurant/pending-tables-badge";
+import { CollectTableModal } from "@/components/restaurant/collect-table-modal";
 
 export default function NuevaVentaPage() {
   return (
@@ -69,6 +71,14 @@ function NuevaVentaContent() {
   // ── Print Modal State ──────────────────────────────────
   const [printModalOpen, setPrintModalOpen] = useState(false);
   const [pendingOrderData, setPendingOrderData] = useState<InvoiceOrderData | null>(null);
+
+  // ── Restaurant Integration State ───────────────────────
+  const [showCollectModal, setShowCollectModal] = useState(false);
+  const [collectingTableId, setCollectingTableId] = useState<string | null>(null);
+  const [collectingOrderId, setCollectingOrderId] = useState<string | null>(null);
+  const [collectingTableName, setCollectingTableName] = useState("");
+  const [collectingWaiterName, setCollectingWaiterName] = useState("");
+  const modulesEnabled: string[] = user?.companies?.modules_enabled || [];
 
   // ── IVA from global settings ───────────────────────────
   const ivaPercent = useMemo(() => {
@@ -490,6 +500,27 @@ function NuevaVentaContent() {
         }
       }
 
+      // ── Restaurant: close table and order after collection ──
+      if (collectingTableId && collectingOrderId) {
+        try {
+          await supabase
+            .from("restaurant_orders")
+            .update({ status: "cobrada", closed_at: new Date().toISOString() })
+            .eq("id", collectingOrderId);
+          await supabase
+            .from("restaurant_tables")
+            .update({ status: "libre", current_order_id: null })
+            .eq("id", collectingTableId);
+          // Reset restaurant state
+          setCollectingTableId(null);
+          setCollectingOrderId(null);
+          setCollectingTableName("");
+          setCollectingWaiterName("");
+        } catch (err) {
+          console.warn("Error closing restaurant table:", err);
+        }
+      }
+
       toast.success(`Pedido ${orderNumber} creado con éxito`);
 
       // ── Open print modal instead of redirecting immediately ──
@@ -632,11 +663,20 @@ function NuevaVentaContent() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-[#F8F9FA] px-4 py-2 rounded-xl border border-[#E2E8F0]">
-          <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest text-right">Tasa BCV del día:</span>
-          <p className="text-[15px] font-bold text-brand font-outfit">
-            Bs. {rate?.toFixed(2)}
-          </p>
+        <div className="flex items-center gap-3">
+          {/* Restaurant: Cobrar Mesa badge */}
+          {modulesEnabled.includes('restaurante') && (
+            <PendingTablesBadge
+              companyId={user?.company_id}
+              onClick={() => setShowCollectModal(true)}
+            />
+          )}
+          <div className="flex items-center gap-3 bg-[#F8F9FA] px-4 py-2 rounded-xl border border-[#E2E8F0]">
+            <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest text-right">Tasa BCV del día:</span>
+            <p className="text-[15px] font-bold text-brand font-outfit">
+              Bs. {rate?.toFixed(2)}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -697,6 +737,35 @@ function NuevaVentaContent() {
           onSuccess={handlePrintSuccess}
           order={pendingOrderData}
           company={company}
+        />
+      )}
+
+      {/* ── RESTAURANT: COLLECT TABLE MODAL ── */}
+      {modulesEnabled.includes('restaurante') && (
+        <CollectTableModal
+          open={showCollectModal}
+          onClose={() => setShowCollectModal(false)}
+          companyId={user?.company_id || ""}
+          onSelectTable={(tableId, orderId, items, tableName, waiterName) => {
+            // Load restaurant items into POS cart
+            setCollectingTableId(tableId);
+            setCollectingOrderId(orderId);
+            setCollectingTableName(tableName);
+            setCollectingWaiterName(waiterName);
+            const cartItems = items.map((i: any) => ({
+              id: i.product_id || i.id,
+              name: i.product_name,
+              price_usd: i.unit_price,
+              qty: i.quantity,
+              stock: 999, // Restaurant items don't track stock
+              is_kit: false,
+              comps: [],
+              _restaurant_item: true,
+              _modifications: i.modifications,
+            }));
+            setCart(cartItems);
+            toast.success(`Mesa "${tableName}" cargada al POS`);
+          }}
         />
       )}
     </div>

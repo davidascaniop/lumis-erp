@@ -22,6 +22,8 @@ import {
   CheckCircle2,
   X,
   Zap,
+  UtensilsCrossed,
+  Puzzle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -83,6 +85,7 @@ function SettingsContent() {
 
   const [showCommissionModal, setShowCommissionModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<any>(null);
+  const [modulesEnabled, setModulesEnabled] = useState<string[]>([]);
 
   useEffect(() => {
     async function loadProfile() {
@@ -111,11 +114,14 @@ function SettingsContent() {
           if (uData.company_id) {
             const { data: companyData } = await supabase
               .from("companies")
-              .select("id, name, name_comercial, rif, plan_type, subscription_status, billing_day")
+              .select("id, name, name_comercial, rif, plan_type, subscription_status, billing_day, modules_enabled")
               .eq("id", uData.company_id)
               .single();
 
-            if (companyData) setCompany(companyData as any);
+            if (companyData) {
+              setCompany(companyData as any);
+              setModulesEnabled((companyData as any).modules_enabled || []);
+            }
 
             // Load team members
             const { data: teamData } = await supabase
@@ -287,6 +293,13 @@ function SettingsContent() {
           >
             <Shield className="w-5 h-5" />
             Seguridad
+          </button>
+          <button
+            onClick={() => setActiveTab("modules")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === "modules" ? "bg-[#E040FB]/10 text-[#E040FB] border border-[#E040FB]/30" : "text-[#B8A0D0] hover:text-[#F5EEFF] hover:bg-[#1A1220] border border-transparent"}`}
+          >
+            <Puzzle className="w-5 h-5" />
+            Módulos
           </button>
         </div>
 
@@ -937,6 +950,121 @@ function SettingsContent() {
                   </div>
                 </>
               )}
+            </motion.div>
+          )}
+          {/* TAB: MODULES */}
+          {activeTab === "modules" && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="space-y-6"
+            >
+              <div>
+                <h2 className="text-xl font-bold text-text-1 font-montserrat">Módulos Opcionales</h2>
+                <p className="text-text-2 text-sm mt-1">Activa o desactiva módulos adicionales para tu empresa.</p>
+              </div>
+
+              {/* Restaurant Module Card */}
+              <div className="bg-surface-card border border-border/50 shadow-card rounded-2xl p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-2xl bg-amber-100 border border-amber-200">
+                      <UtensilsCrossed className="w-7 h-7 text-amber-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-text-1 font-montserrat">Módulo Restaurante</h3>
+                      <p className="text-sm text-text-2 mt-1 max-w-md">
+                        Gestiona mesas, comandas, cocina y caja para tu negocio gastronómico.
+                        Incluye vista KDS para cocina en tiempo real.
+                      </p>
+                      <div className="flex items-center gap-2 mt-3">
+                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full uppercase tracking-wider">Disponible desde Starter</span>
+                        {modulesEnabled.includes('restaurante') && (
+                          <span className="text-[10px] font-bold text-brand bg-brand/10 border border-brand/20 px-2 py-0.5 rounded-full uppercase tracking-wider">Activo</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Toggle */}
+                  <button
+                    onClick={async () => {
+                      if (!profile?.company_id) return;
+                      const isActive = modulesEnabled.includes('restaurante');
+                      const newModules = isActive
+                        ? modulesEnabled.filter(m => m !== 'restaurante')
+                        : [...modulesEnabled, 'restaurante'];
+
+                      try {
+                        const { error } = await supabase
+                          .from('companies')
+                          .update({ modules_enabled: newModules })
+                          .eq('id', profile.company_id);
+                        if (error) throw error;
+
+                        setModulesEnabled(newModules);
+
+                        // Create default zones if activating for first time
+                        if (!isActive) {
+                          const { data: existingZones } = await supabase
+                            .from('restaurant_zones')
+                            .select('id')
+                            .eq('company_id', profile.company_id)
+                            .limit(1);
+
+                          if (!existingZones || existingZones.length === 0) {
+                            await supabase.from('restaurant_zones').insert([
+                              { company_id: profile.company_id, name: 'Salón', color: '#10B981' },
+                              { company_id: profile.company_id, name: 'Terraza', color: '#F59E0B' },
+                              { company_id: profile.company_id, name: 'Barra', color: '#3B82F6' },
+                              { company_id: profile.company_id, name: 'VIP', color: '#8B5CF6' },
+                            ]);
+                          }
+
+                          // Create default config
+                          await supabase.from('restaurant_config').upsert({
+                            company_id: profile.company_id,
+                            alert_minutes_yellow: 10,
+                            alert_minutes_red: 15,
+                            require_guests: true,
+                            allow_multiple_sends: true,
+                            notify_waiter_on_ready: true,
+                          }, { onConflict: 'company_id' });
+                        }
+
+                        toast.success(isActive ? 'Módulo Restaurante desactivado' : '🍽️ Módulo Restaurante activado');
+                      } catch (err: any) {
+                        toast.error('Error al actualizar módulo', { description: err.message });
+                      }
+                    }}
+                    className={`w-14 h-8 rounded-full transition-all duration-200 relative shrink-0 ${modulesEnabled.includes('restaurante') ? 'bg-brand' : 'bg-gray-300'}`}
+                  >
+                    <div className={`absolute top-1.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all duration-200 ${modulesEnabled.includes('restaurante') ? 'left-7.5' : 'left-1.5'}`} />
+                  </button>
+                </div>
+
+                {modulesEnabled.includes('restaurante') && (
+                  <div className="mt-6 p-4 rounded-xl bg-brand/5 border border-brand/15">
+                    <p className="text-xs font-bold text-brand mb-2">Submódulos incluidos:</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { label: 'Mesas del Salón', desc: 'Estado en tiempo real' },
+                        { label: 'Comandas (Mesero)', desc: 'Interfaz táctil optimizada' },
+                        { label: 'Cocina KDS', desc: 'Kanban oscuro para cocina' },
+                        { label: 'Config. Restaurante', desc: 'Zonas, alertas, comportamiento' },
+                      ].map((sub) => (
+                        <div key={sub.label} className="flex items-center gap-2 p-2 rounded-lg bg-white/50">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-brand shrink-0" />
+                          <div>
+                            <p className="text-xs font-bold text-text-1">{sub.label}</p>
+                            <p className="text-[10px] text-text-3">{sub.desc}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </motion.div>
           )}
         </div>
