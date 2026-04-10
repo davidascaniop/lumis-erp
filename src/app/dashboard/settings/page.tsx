@@ -48,10 +48,12 @@ import {
 import { Suspense } from "react";
 import { CommissionRulesEditor } from "@/components/users/commission-rules-editor";
 import { Percent } from "lucide-react";
+import { useUser } from "@/hooks/use-user";
 
 function SettingsContent() {
   const supabase = createClient();
   const searchParams = useSearchParams();
+  const { refreshUser } = useUser();
 
   // Setup initial tab from URL if present
   const initialTab = searchParams.get("tab") || "profile";
@@ -996,13 +998,16 @@ function SettingsContent() {
                         : [...modulesEnabled, 'restaurante'];
 
                       try {
+                        console.log("Ejecutando UPDATE de modules_enabled en la DB para la compañía:", profile.company_id, "Nuevos modulos:", newModules);
                         const { error } = await supabase
                           .from('companies')
                           .update({ modules_enabled: newModules })
                           .eq('id', profile.company_id);
                         if (error) throw error;
+                        console.log("UPDATE de módulos exitoso.");
 
                         setModulesEnabled(newModules);
+                        await refreshUser();
 
                         // Create default zones if activating for first time
                         if (!isActive) {
