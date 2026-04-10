@@ -989,7 +989,10 @@ function SettingsContent() {
 
                   {/* Toggle */}
                   <button
-                    onClick={async () => {
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      
                       const companyId = user?.company_id || profile?.company_id;
                       if (!companyId) {
                         toast.error("Error crítico: company_id no está disponible. Por favor recarga.");
