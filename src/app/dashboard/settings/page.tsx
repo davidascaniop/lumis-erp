@@ -53,7 +53,8 @@ import { useUser } from "@/hooks/use-user";
 function SettingsContent() {
   const supabase = createClient();
   const searchParams = useSearchParams();
-  const { refreshUser } = useUser();
+  const { user, refreshUser } = useUser();
+  const currentModules: string[] = user?.companies?.modules_enabled || [];
 
   // Setup initial tab from URL if present
   const initialTab = searchParams.get("tab") || "profile";
@@ -87,7 +88,6 @@ function SettingsContent() {
 
   const [showCommissionModal, setShowCommissionModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<any>(null);
-  const [modulesEnabled, setModulesEnabled] = useState<string[]>([]);
 
   useEffect(() => {
     async function loadProfile() {
@@ -122,7 +122,6 @@ function SettingsContent() {
 
             if (companyData) {
               setCompany(companyData as any);
-              setModulesEnabled((companyData as any).modules_enabled || []);
             }
 
             // Load team members
@@ -981,7 +980,7 @@ function SettingsContent() {
                       </p>
                       <div className="flex items-center gap-2 mt-3">
                         <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full uppercase tracking-wider">Disponible desde Starter</span>
-                        {modulesEnabled.includes('restaurante') && (
+                        {currentModules.includes('restaurante') && (
                           <span className="text-[10px] font-bold text-brand bg-brand/10 border border-brand/20 px-2 py-0.5 rounded-full uppercase tracking-wider">Activo</span>
                         )}
                       </div>
@@ -992,10 +991,10 @@ function SettingsContent() {
                   <button
                     onClick={async () => {
                       if (!profile?.company_id) return;
-                      const isActive = modulesEnabled.includes('restaurante');
+                      const isActive = currentModules.includes('restaurante');
                       const newModules = isActive
-                        ? modulesEnabled.filter(m => m !== 'restaurante')
-                        : [...modulesEnabled, 'restaurante'];
+                        ? currentModules.filter(m => m !== 'restaurante')
+                        : [...currentModules, 'restaurante'];
 
                       try {
                         console.log("Ejecutando UPDATE de modules_enabled en la DB para la compañía:", profile.company_id, "Nuevos modulos:", newModules);
@@ -1006,7 +1005,6 @@ function SettingsContent() {
                         if (error) throw error;
                         console.log("UPDATE de módulos exitoso.");
 
-                        setModulesEnabled(newModules);
                         await refreshUser();
 
                         // Create default zones if activating for first time
@@ -1042,13 +1040,13 @@ function SettingsContent() {
                         toast.error('Error al actualizar módulo', { description: err.message });
                       }
                     }}
-                    className={`w-14 h-8 rounded-full transition-all duration-200 relative shrink-0 ${modulesEnabled.includes('restaurante') ? 'bg-brand' : 'bg-gray-300'}`}
+                    className={`w-14 h-8 rounded-full transition-all duration-200 relative shrink-0 ${currentModules.includes('restaurante') ? 'bg-brand' : 'bg-gray-300'}`}
                   >
-                    <div className={`absolute top-1.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all duration-200 ${modulesEnabled.includes('restaurante') ? 'left-7.5' : 'left-1.5'}`} />
+                    <div className={`absolute top-1.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all duration-200 ${currentModules.includes('restaurante') ? 'left-7.5' : 'left-1.5'}`} />
                   </button>
                 </div>
 
-                {modulesEnabled.includes('restaurante') && (
+                {currentModules.includes('restaurante') && (
                   <div className="mt-6 p-4 rounded-xl bg-brand/5 border border-brand/15">
                     <p className="text-xs font-bold text-brand mb-2">Submódulos incluidos:</p>
                     <div className="grid grid-cols-2 gap-2">
