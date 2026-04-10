@@ -163,6 +163,9 @@ function ComandasContent() {
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate(30);
     }
+    
+    // Force UI refresh instantly
+    refetchItems();
   };
 
   // Update item quantity
@@ -171,11 +174,19 @@ function ComandasContent() {
     if (!item) return;
     const newQty = Math.max(1, item.quantity + delta);
     await supabase.from("restaurant_order_items").update({ quantity: newQty }).eq("id", itemId);
+    refetchItems();
+  };
+
+  // Update item note (modifications)
+  const handleUpdateItemNote = async (itemId: string, note: string) => {
+    await supabase.from("restaurant_order_items").update({ modifications: note || null }).eq("id", itemId);
+    refetchItems();
   };
 
   // Remove item
   const handleRemoveItem = async (itemId: string) => {
     await supabase.from("restaurant_order_items").delete().eq("id", itemId);
+    refetchItems();
   };
 
   // Send pending items to kitchen
@@ -207,6 +218,7 @@ function ComandasContent() {
       }
 
       toast.success(`${pending.length} item(s) enviados a cocina`);
+      refetchItems();
     } catch (err: any) {
       toast.error("Error al enviar a cocina", { description: err.message });
     } finally {
@@ -324,6 +336,7 @@ function ComandasContent() {
             items={localItems}
             onAddItem={handleAddItem}
             onUpdateItemQty={handleUpdateItemQty}
+            onUpdateItemNote={handleUpdateItemNote}
             onRemoveItem={handleRemoveItem}
             onSendToKitchen={handleSendToKitchen}
             onRequestBill={handleRequestBill}

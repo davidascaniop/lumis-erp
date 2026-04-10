@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Minus, Trash2, Send, CreditCard, Search } from "lucide-react";
+import { Plus, Minus, Trash2, Send, CreditCard, Search, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface OrderEditorProps {
@@ -10,6 +10,7 @@ interface OrderEditorProps {
   items: any[];
   onAddItem: (product: any, modifications?: string) => void;
   onUpdateItemQty: (itemId: string, delta: number) => void;
+  onUpdateItemNote?: (itemId: string, note: string) => void;
   onRemoveItem: (itemId: string) => void;
   onSendToKitchen: () => void;
   onRequestBill: () => void;
@@ -26,6 +27,7 @@ export function OrderEditor({
   items,
   onAddItem,
   onUpdateItemQty,
+  onUpdateItemNote,
   onRemoveItem,
   onSendToKitchen,
   onRequestBill,
@@ -37,7 +39,6 @@ export function OrderEditor({
 }: OrderEditorProps) {
   const [activeCategory, setActiveCategory] = useState("Todos");
   const [search, setSearch] = useState("");
-  const [modificationInput, setModificationInput] = useState<Record<string, string>>({});
 
   const filteredProducts = useMemo(() => {
     let list = products;
@@ -100,24 +101,12 @@ export function OrderEditor({
             <button
               key={product.id}
               onClick={() => {
-                const mods = modificationInput[product.id] || "";
-                onAddItem(product, mods);
-                setModificationInput((prev) => ({ ...prev, [product.id]: "" }));
+                onAddItem(product);
               }}
               className="group p-4 rounded-xl bg-surface-base border border-border hover:border-brand/40 hover:bg-brand/5 transition-all text-left active:scale-[0.97]"
             >
               <p className="text-sm font-bold text-text-1 truncate">{product.name}</p>
               <p className="text-xs text-brand font-bold mt-1">${Number(product.price_usd || 0).toFixed(2)}</p>
-              <input
-                placeholder="Modificaciones..."
-                value={modificationInput[product.id] || ""}
-                onChange={(e) => {
-                  e.stopPropagation();
-                  setModificationInput((prev) => ({ ...prev, [product.id]: e.target.value }));
-                }}
-                onClick={(e) => e.stopPropagation()}
-                className="mt-2 w-full px-2 py-1 rounded-md bg-surface-input border border-border/30 text-[10px] text-text-2 focus:outline-none focus:ring-1 focus:ring-brand/30 placeholder:text-text-3/50"
-              />
             </button>
           ))}
           {filteredProducts.length === 0 && (
@@ -188,11 +177,26 @@ export function OrderEditor({
                   <span className="text-xs font-bold text-text-1 shrink-0 w-14 text-right">
                     ${(item.quantity * item.unit_price).toFixed(2)}
                   </span>
+                  {onUpdateItemNote && (
+                    <button
+                      onClick={() => {
+                        const note = window.prompt("Nota de preparación (ej. sin sal, extra queso):", item.modifications || "");
+                        if (note !== null) {
+                          onUpdateItemNote(item.id, note);
+                        }
+                      }}
+                      className="p-1.5 rounded-lg hover:bg-amber-100 text-amber-500 hover:text-amber-700 transition-colors"
+                      title="Añadir nota"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                   <button
                     onClick={() => onRemoveItem(item.id)}
-                    className="p-1 rounded hover:bg-red-100 text-red-400 hover:text-red-600 transition-colors"
+                    className="p-1.5 rounded-lg hover:bg-red-100 text-red-400 hover:text-red-600 transition-colors"
+                    title="Eliminar"
                   >
-                    <Trash2 className="w-3 h-3" />
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ))}
