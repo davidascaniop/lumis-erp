@@ -990,18 +990,24 @@ function SettingsContent() {
                   {/* Toggle */}
                   <button
                     onClick={async () => {
-                      if (!profile?.company_id) return;
+                      const companyId = user?.company_id || profile?.company_id;
+                      if (!companyId) {
+                        toast.error("Error crítico: company_id no está disponible. Por favor recarga.");
+                        return;
+                      }
+                      
                       const isActive = currentModules.includes('restaurante');
                       const newModules = isActive
-                        ? currentModules.filter(m => m !== 'restaurante')
+                        ? currentModules.filter((m: string) => m !== 'restaurante')
                         : [...currentModules, 'restaurante'];
 
                       try {
-                        console.log("Ejecutando UPDATE de modules_enabled en la DB para la compañía:", profile.company_id, "Nuevos modulos:", newModules);
+                        console.log("Ejecutando UPDATE de modules_enabled en la DB para la compañía:", companyId, "Nuevos modulos:", newModules);
                         const { error } = await supabase
                           .from('companies')
                           .update({ modules_enabled: newModules })
-                          .eq('id', profile.company_id);
+                          .eq('id', companyId);
+                          
                         if (error) throw error;
                         console.log("UPDATE de módulos exitoso.");
 
@@ -1012,21 +1018,21 @@ function SettingsContent() {
                           const { data: existingZones } = await supabase
                             .from('restaurant_zones')
                             .select('id')
-                            .eq('company_id', profile.company_id)
+                            .eq('company_id', companyId)
                             .limit(1);
 
                           if (!existingZones || existingZones.length === 0) {
                             await supabase.from('restaurant_zones').insert([
-                              { company_id: profile.company_id, name: 'Salón', color: '#10B981' },
-                              { company_id: profile.company_id, name: 'Terraza', color: '#F59E0B' },
-                              { company_id: profile.company_id, name: 'Barra', color: '#3B82F6' },
-                              { company_id: profile.company_id, name: 'VIP', color: '#8B5CF6' },
+                              { company_id: companyId, name: 'Salón', color: '#10B981' },
+                              { company_id: companyId, name: 'Terraza', color: '#F59E0B' },
+                              { company_id: companyId, name: 'Barra', color: '#3B82F6' },
+                              { company_id: companyId, name: 'VIP', color: '#8B5CF6' },
                             ]);
                           }
 
                           // Create default config
                           await supabase.from('restaurant_config').upsert({
-                            company_id: profile.company_id,
+                            company_id: companyId,
                             alert_minutes_yellow: 10,
                             alert_minutes_red: 15,
                             require_guests: true,
@@ -1038,6 +1044,8 @@ function SettingsContent() {
                         toast.success(isActive ? 'Módulo Restaurante desactivado' : '🍽️ Módulo Restaurante activado');
                       } catch (err: any) {
                         toast.error('Error al actualizar módulo', { description: err.message });
+                        // Re-fetch to guarantee sync with DB since it failed
+                        refreshUser();
                       }
                     }}
                     className={`w-14 h-8 rounded-full transition-all duration-200 relative shrink-0 ${currentModules.includes('restaurante') ? 'bg-brand' : 'bg-gray-300'}`}
