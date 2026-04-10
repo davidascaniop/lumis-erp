@@ -135,7 +135,7 @@ function ComandasContent() {
 
     // Check if already exists as pending
     const existing = localItems.find(
-      (i) => i.product_id === product.id && i.status === "pendiente" && i.modifications === (modifications || null)
+      (i) => i.product_id === product.id && !i.sent_to_kitchen_at && i.modifications === (modifications || null)
     );
 
     if (existing) {
@@ -191,7 +191,7 @@ function ComandasContent() {
 
   // Send pending items to kitchen
   const handleSendToKitchen = async () => {
-    const pending = localItems.filter((i) => i.status === "pendiente");
+    const pending = localItems.filter((i) => !i.sent_to_kitchen_at);
     if (pending.length === 0) {
       toast.error("No hay items pendientes para enviar");
       return;
@@ -204,7 +204,7 @@ function ComandasContent() {
         pending.map((item) =>
           supabase
             .from("restaurant_order_items")
-            .update({ status: "en_preparacion", sent_to_kitchen_at: now })
+            .update({ sent_to_kitchen_at: now })
             .eq("id", item.id)
         )
       );

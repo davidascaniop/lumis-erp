@@ -61,7 +61,7 @@ export function KitchenTicket({
       : "text-emerald-700 bg-emerald-100 border-emerald-200";
 
   return (
-    <div className="bg-surface-card rounded-2xl border border-border p-4 shadow-elevated">
+    <div className="bg-surface-card rounded-2xl border border-border p-4 shadow-[0_2px_8px_-3px_rgba(0,0,0,0.05)]">
       {/* Header */}
       <div className="flex items-center justify-between mb-3 border-b border-border/50 pb-3">
         <div>
@@ -75,14 +75,14 @@ export function KitchenTicket({
       </div>
 
       {/* Items */}
-      <div className="space-y-2 mb-4">
+      <div className="mb-4 rounded-xl border border-border/50 divide-y divide-border/50 overflow-hidden bg-surface-card">
         {pendingItems.map((item: any) => (
-          <div key={item.id} className="flex items-start gap-2 p-2.5 rounded-xl bg-surface-base border border-border">
-            <span className="text-text-1 font-bold text-xs shrink-0 mt-0.5 px-1.5 py-0.5 bg-surface-input rounded-md border border-border/50">x{item.quantity}</span>
+          <div key={item.id} className="flex items-start gap-3 p-3">
+            <span className="text-text-1 font-bold text-xs shrink-0 mt-0.5 px-2 py-1 bg-surface-base rounded-md border border-border/50">x{item.quantity}</span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-text-1 leading-tight">{item.product_name}</p>
+              <p className="text-sm font-bold text-text-1 leading-tight mt-0.5">{item.product_name}</p>
               {item.modifications && (
-                <p className="text-xs text-amber-600 font-medium italic mt-1 bg-amber-50 rounded px-1.5 py-0.5 inline-block">⚠ {item.modifications}</p>
+                <p className="text-xs text-amber-600 font-medium italic mt-1.5 bg-amber-50 rounded px-2 py-1 inline-block border border-amber-100">⚠ {item.modifications}</p>
               )}
             </div>
           </div>
@@ -98,7 +98,7 @@ export function KitchenTicket({
               items.filter((i: any) => i.status === "pendiente").map((i: any) => i.id)
             )
           }
-          className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2"
+          className="w-full py-2.5 rounded-xl bg-surface-base hover:bg-blue-50 text-blue-600 font-bold text-sm transition-all border border-border hover:border-blue-200 active:scale-[0.98] flex items-center justify-center gap-2"
         >
           <ChefHat className="w-4 h-4" />
           Iniciar Preparación

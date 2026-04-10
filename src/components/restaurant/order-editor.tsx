@@ -58,8 +58,8 @@ export function OrderEditor({
     [items]
   );
 
-  const pendingItems = items.filter((i) => i.status === "pendiente");
-  const sentItems = items.filter((i) => i.status !== "pendiente");
+  const pendingItems = items.filter((i) => !i.sent_to_kitchen_at);
+  const sentItems = items.filter((i) => !!i.sent_to_kitchen_at);
 
   return (
     <div className="flex h-full gap-4">
