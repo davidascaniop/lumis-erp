@@ -172,7 +172,7 @@ export default function RestaurantReportsPage() {
                   ))}
                 </Pie>
                 <Tooltip 
-                  formatter={(value: number) => [`${value}%`, 'Porcentaje']}
+                  formatter={(value: any) => [`${value}%`, 'Porcentaje']}
                   contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0' }}
                 />
               </PieChart>
@@ -210,7 +210,7 @@ export default function RestaurantReportsPage() {
                 <Tooltip 
                   cursor={{ fill: '#F8FAFC' }}
                   contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  formatter={(value: number) => [`$${value}`, 'Ventas']}
+                  formatter={(value: any) => [`$${value}`, 'Ventas']}
                 />
                 <Bar dataKey="sales" fill="#7C4DFF" radius={[4, 4, 0, 0]} maxBarSize={40} />
               </BarChart>
