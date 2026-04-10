@@ -147,6 +147,7 @@ function ComandasContent() {
       if (error) toast.error("Error al actualizar");
     } else {
       const { error } = await supabase.from("restaurant_order_items").insert({
+        company_id: companyId,
         order_id: activeOrderId,
         product_id: product.id,
         product_name: product.name,

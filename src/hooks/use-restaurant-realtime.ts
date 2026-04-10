@@ -223,7 +223,7 @@ export function useRealtimeKitchen(companyId: string | null | undefined) {
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "restaurant_order_items" },
+        { event: "*", schema: "public", table: "restaurant_order_items", filter: `company_id=eq.${companyId}` },
         () => fetchTickets()
       )
       .subscribe();

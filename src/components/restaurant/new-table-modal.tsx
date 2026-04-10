@@ -8,11 +8,12 @@ import { toast } from "sonner";
 interface NewTableModalProps {
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
   companyId: string;
   zones: { id: string; name: string; color: string }[];
 }
 
-export function NewTableModal({ open, onClose, companyId, zones }: NewTableModalProps) {
+export function NewTableModal({ open, onClose, onSuccess, companyId, zones }: NewTableModalProps) {
   const supabase = createClient();
   const [name, setName] = useState("");
   const [zone, setZone] = useState(zones[0]?.name || "Salón");
@@ -39,6 +40,7 @@ export function NewTableModal({ open, onClose, companyId, zones }: NewTableModal
       toast.success(`Mesa "${name}" creada`);
       setName("");
       setCapacity(4);
+      onSuccess?.();
       onClose();
     } catch (err: any) {
       toast.error("Error al crear mesa", { description: err.message });

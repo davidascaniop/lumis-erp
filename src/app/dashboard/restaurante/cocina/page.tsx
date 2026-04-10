@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 export default function CocinaPage() {
   const { user, loading: userLoading } = useUser();
   const companyId = user?.company_id;
-  const { tickets, loading: ticketsLoading } = useRealtimeKitchen(companyId);
+  const { tickets, loading: ticketsLoading, refetch } = useRealtimeKitchen(companyId);
   const supabase = createClient();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [config, setConfig] = useState({ alert_minutes_yellow: 10, alert_minutes_red: 15 });
@@ -64,6 +64,7 @@ export default function CocinaPage() {
             .eq("id", id)
         )
       );
+      refetch();
       toast.success("Preparación iniciada");
     } catch {
       toast.error("Error al actualizar");
@@ -88,6 +89,7 @@ export default function CocinaPage() {
         .update({ status: "lista" })
         .eq("id", orderId);
 
+      refetch();
       toast.success("¡Platos listos! Mesero notificado");
     } catch {
       toast.error("Error al actualizar");
@@ -104,6 +106,7 @@ export default function CocinaPage() {
             .eq("id", id)
         )
       );
+      refetch();
       toast.success("Ticket cerrado — entregado");
     } catch {
       toast.error("Error");

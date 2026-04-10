@@ -20,7 +20,7 @@ const DEFAULT_ZONES = [
 export default function MesasPage() {
   const { user, loading: userLoading } = useUser();
   const companyId = user?.company_id;
-  const { tables, loading: tablesLoading } = useRealtimeTables(companyId);
+  const { tables, loading: tablesLoading, refetch } = useRealtimeTables(companyId);
   const [zones, setZones] = useState<any[]>(DEFAULT_ZONES);
   const [activeZone, setActiveZone] = useState("Todas");
   const [showNewTableModal, setShowNewTableModal] = useState(false);
@@ -214,6 +214,7 @@ export default function MesasPage() {
       <NewTableModal
         open={showNewTableModal}
         onClose={() => setShowNewTableModal(false)}
+        onSuccess={refetch}
         companyId={companyId || ""}
         zones={zones}
       />

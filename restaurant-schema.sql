@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS restaurant_orders (
 -- ============================================
 CREATE TABLE IF NOT EXISTS restaurant_order_items (
   id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  company_id        UUID REFERENCES companies(id) ON DELETE CASCADE,
   order_id          UUID REFERENCES restaurant_orders(id) ON DELETE CASCADE,
   product_id        UUID REFERENCES products(id) ON DELETE SET NULL,
   product_name      VARCHAR(255) NOT NULL,
@@ -61,6 +62,13 @@ CREATE TABLE IF NOT EXISTS restaurant_order_items (
   ready_at          TIMESTAMPTZ,
   created_at        TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- ============================================
+-- REPLICA IDENTITY FULL (Para mejorar Realtime)
+-- ============================================
+ALTER TABLE restaurant_tables REPLICA IDENTITY FULL;
+ALTER TABLE restaurant_orders REPLICA IDENTITY FULL;
+ALTER TABLE restaurant_order_items REPLICA IDENTITY FULL;
 
 -- ============================================
 -- TABLA: CONFIGURACIÓN DE RESTAURANTE
@@ -104,9 +112,7 @@ CREATE POLICY "tenant_isolation_restaurant_orders" ON restaurant_orders
   FOR ALL USING (company_id = get_auth_company_id());
 
 CREATE POLICY "tenant_isolation_restaurant_order_items" ON restaurant_order_items
-  FOR ALL USING (
-    order_id IN (SELECT id FROM restaurant_orders WHERE company_id = get_auth_company_id())
-  );
+  FOR ALL USING (company_id = get_auth_company_id());
 
 CREATE POLICY "tenant_isolation_restaurant_config" ON restaurant_config
   FOR ALL USING (company_id = get_auth_company_id());
