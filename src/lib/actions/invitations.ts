@@ -70,7 +70,7 @@ export async function inviteAdminUser(data: { name: string; email: string; permi
     const { error: userError } = await supabase.from("users").upsert({
       full_name: data.name,
       email: email,
-      role: "admin",
+      role: "superadmin",
       status: "pending_invite",
       permissions: data.permissions,
       is_active: false,
@@ -102,38 +102,46 @@ export async function inviteAdminUser(data: { name: string; email: string; permi
 }
 
 export async function processSetupPassword(token: string, password: string, fullName?: string) {
-    try {
-      const supabase = await createClient();
-      
-      const { data: invite, error: inviteError } = await supabase
-        .from("user_invitations")
-        .select("*")
-        .eq("token", token)
-        .eq("status", "pending")
-        .single();
+  try {
+    const supabase = await createClient();
 
-      if (inviteError || !invite) {
-          return { success: false, error: "Este enlace ya no es válido, contacta al administrador principal." };
-      }
+    // Verify token validity
+    const { data: invite, error: inviteError } = await supabase
+      .from("user_invitations")
+      .select("id, email, status, permissions, expires_at")
+      .eq("token", token)
+      .single();
 
-      if (new Date(invite.expires_at) < new Date()) {
-          return { success: false, error: "Este enlace ya no es válido, contacta al administrador principal." };
-      }
+    if (inviteError || !invite || invite.status !== "pending") {
+      return { success: false, error: "El enlace es inválido o ha expirado." };
+    }
 
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: invite.email,
-          password: password
-      });
+    if (new Date(invite.expires_at) < new Date()) {
+      return { success: false, error: "El enlace ha expirado." };
+    }
 
-      if (authError || !authData.user) {
-          return { success: false, error: "Error en autenticación: " + authError?.message };
-      }
+    // Attempt to register the user via Supabase Auth
+    const { data: authData, error: signupError } = await supabase.auth.signUp({
+      email: invite.email,
+      password: password,
+      options: {
+        data: {
+          full_name: fullName || invite.email,
+        },
+      },
+    });
 
+    if (signupError) {
+      return { success: false, error: signupError.message };
+    }
+
+    if (authData.user) {
       // Build update payload with optional fullName
       const updatePayload: Record<string, unknown> = {
         auth_id: authData.user.id,
         status: "active",
         is_active: true,
+        role: "superadmin" // Force role to superadmin to gain panel access
       };
       if (fullName) {
         updatePayload.full_name = fullName;
