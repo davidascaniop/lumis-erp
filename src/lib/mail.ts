@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 
 export async function sendInvitationEmail(email: string, name: string, token: string) {
-  const setupUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://uselumisapp.com'}/setup-password?token=${token}`;
+  const setupUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://uselumisapp.com'}/login-admin?token=${token}`;
 
   try {
     const apiKey = process.env.RESEND_API_KEY;

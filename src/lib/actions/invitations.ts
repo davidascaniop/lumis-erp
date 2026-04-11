@@ -96,7 +96,7 @@ export async function inviteAdminUser(data: { name: string; email: string; permi
   }
 }
 
-export async function processSetupPassword(token: string, password: string) {
+export async function processSetupPassword(token: string, password: string, fullName?: string) {
     try {
       const supabase = await createClient();
       
@@ -108,11 +108,11 @@ export async function processSetupPassword(token: string, password: string) {
         .single();
 
       if (inviteError || !invite) {
-          return { success: false, error: "El token es inválido o ya ha caducado." };
+          return { success: false, error: "Este enlace ya no es válido, contacta al administrador principal." };
       }
 
       if (new Date(invite.expires_at) < new Date()) {
-          return { success: false, error: "El enlace de invitación ha expirado." };
+          return { success: false, error: "Este enlace ya no es válido, contacta al administrador principal." };
       }
 
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -124,13 +124,19 @@ export async function processSetupPassword(token: string, password: string) {
           return { success: false, error: "Error en autenticación: " + authError?.message };
       }
 
+      // Build update payload with optional fullName
+      const updatePayload: Record<string, unknown> = {
+        auth_id: authData.user.id,
+        status: "active",
+        is_active: true,
+      };
+      if (fullName) {
+        updatePayload.full_name = fullName;
+      }
+
       const { error: updateError } = await supabase
         .from("users")
-        .update({
-            auth_id: authData.user.id,
-            status: "active",
-            is_active: true,
-        })
+        .update(updatePayload)
         .eq("email", invite.email);
 
       if (updateError) return { success: false, error: "Error al activar el perfil: " + updateError.message };
@@ -140,10 +146,49 @@ export async function processSetupPassword(token: string, password: string) {
         .update({ status: "accepted" })
         .eq("id", invite.id);
 
-      return { success: true };
+      return { success: true, email: invite.email };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
+}
+
+export async function validateInvitationToken(token: string) {
+  try {
+    const supabase = await createClient();
+
+    const { data: invite, error } = await supabase
+      .from("user_invitations")
+      .select("email, permissions, status, expires_at")
+      .eq("token", token)
+      .single();
+
+    if (error || !invite) {
+      return { valid: false, error: "Este enlace ya no es válido, contacta al administrador principal." };
+    }
+
+    if (invite.status !== "pending") {
+      return { valid: false, error: "Este enlace ya no es válido, contacta al administrador principal." };
+    }
+
+    if (new Date(invite.expires_at) < new Date()) {
+      return { valid: false, error: "Este enlace ya no es válido, contacta al administrador principal." };
+    }
+
+    // Fetch the pre-created user profile to get the name
+    const { data: userProfile } = await supabase
+      .from("users")
+      .select("full_name")
+      .eq("email", invite.email)
+      .single();
+
+    return {
+      valid: true,
+      email: invite.email,
+      fullName: userProfile?.full_name || "",
+    };
+  } catch (error: any) {
+    return { valid: false, error: "Error al validar el enlace: " + error.message };
+  }
 }
 
 export async function updateUserPermissions(userId: string, permissions: any) {
@@ -168,4 +213,3 @@ export async function updateUserPermissions(userId: string, permissions: any) {
     return { success: false, error: error.message };
   }
 }
-
