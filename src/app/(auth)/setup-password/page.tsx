@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { processSetupPassword } from "@/lib/actions/invitations";
 import { Shield, Lock, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 
-export default function SetupPasswordPage() {
+function SetupPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -147,5 +147,17 @@ export default function SetupPasswordPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SetupPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#F8F9FE] flex items-center justify-center p-4">
+        <Loader2 className="w-8 h-8 animate-spin text-brand" />
+      </div>
+    }>
+      <SetupPasswordForm />
+    </Suspense>
   );
 }
