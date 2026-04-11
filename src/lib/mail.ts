@@ -1,11 +1,15 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function sendInvitationEmail(email: string, name: string, token: string) {
   const setupUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://uselumisapp.com'}/setup-password?token=${token}`;
 
   try {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      return { success: false, error: "Variables de entorno incompletas: Falta configurar RESEND_API_KEY en Vercel." };
+    }
+    
+    const resend = new Resend(apiKey);
     const { data, error } = await resend.emails.send({
       from: 'Lumis <info@uselumisapp.com>',
       to: [email],
