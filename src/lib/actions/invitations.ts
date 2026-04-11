@@ -17,9 +17,14 @@ export async function inviteAdminUser(data: { name: string; email: string; permi
     const email = data.email.trim().toLowerCase();
 
     // Verifica si el usuario ya existe en Supabase public.users
-    const { data: existingUser } = await supabase.from("users").select("id").eq("email", email).single();
-    if (existingUser) {
-      return { success: false, error: "Este correo ya está registrado en el sistema." };
+    const { data: existingUser } = await supabase
+      .from("users")
+      .select("id, status")
+      .eq("email", email)
+      .single();
+
+    if (existingUser && existingUser.status !== "pending_invite") {
+      return { success: false, error: "Este correo ya está registrado y activo en el sistema." };
     }
 
     // Verifica si ya hay una invitación pendiente
@@ -61,19 +66,19 @@ export async function inviteAdminUser(data: { name: string; email: string; permi
       inviteToken = newInvite.token;
     }
 
-    // Registro visual en `users`
-    const { error: userError } = await supabase.from("users").insert({
-      company_id: null,
+    // Registro visual en `users` (Upsert para permitir re-invitación)
+    const { error: userError } = await supabase.from("users").upsert({
       full_name: data.name,
       email: email,
       role: "admin",
       status: "pending_invite",
       permissions: data.permissions,
-      is_active: false
-    });
+      is_active: false,
+      company_id: null
+    }, { onConflict: 'email' });
 
-    if (userError && userError.code !== '23505') { 
-      return { success: false, error: "Error al crear perfil visual: " + userError.message };
+    if (userError) { 
+      return { success: false, error: "Error al registrar perfil: " + userError.message };
     }
 
     // ENVÍO DE EMAIL REAL vía Resend
