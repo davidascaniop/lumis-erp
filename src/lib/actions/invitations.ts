@@ -135,34 +135,37 @@ export async function processSetupPassword(token: string, password: string, full
       return { success: false, error: signupError.message };
     }
 
-    if (authData.user) {
-      // Build update payload with optional fullName
-      const updatePayload: Record<string, unknown> = {
-        auth_id: authData.user.id,
-        status: "active",
-        is_active: true,
-        role: "superadmin" // Force role to superadmin to gain panel access
-      };
-      if (fullName) {
-        updatePayload.full_name = fullName;
-      }
-
-      const { error: updateError } = await supabase
-        .from("users")
-        .update(updatePayload)
-        .eq("email", invite.email);
-
-      if (updateError) return { success: false, error: "Error al activar el perfil: " + updateError.message };
-
-      await supabase
-        .from("user_invitations")
-        .update({ status: "accepted" })
-        .eq("id", invite.id);
-
-      return { success: true, email: invite.email };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    if (!authData?.user) {
+      return { success: false, error: "Error al crear cuenta: no se devolvió el usuario." };
     }
+
+    // Build update payload with optional fullName
+    const updatePayload: Record<string, unknown> = {
+      auth_id: authData.user.id,
+      status: "active",
+      is_active: true,
+      role: "superadmin" // Force role to superadmin to gain panel access
+    };
+    if (fullName) {
+      updatePayload.full_name = fullName;
+    }
+
+    const { error: updateError } = await supabase
+      .from("users")
+      .update(updatePayload)
+      .eq("email", invite.email);
+
+    if (updateError) return { success: false, error: "Error al activar el perfil: " + updateError.message };
+
+    await supabase
+      .from("user_invitations")
+      .update({ status: "accepted" })
+      .eq("id", invite.id);
+
+    return { success: true, email: invite.email };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
 }
 
 export async function validateInvitationToken(token: string) {
