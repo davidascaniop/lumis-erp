@@ -131,13 +131,15 @@ export default function EquipoAdminPage() {
       });
 
       if (res.success) {
-        toast.success("Invitación enviada", { description: `Se ha generado el acceso para ${inviteEmail}. Token: ${res.token}` });
-        await fetchTeam(); // render new
+        toast.success("Invitación enviada", { description: `Se ha enviado el acceso a ${inviteEmail}.` });
+        await fetchTeam();
         setIsInviteModalOpen(false);
         resetForm();
+      } else {
+        toast.error("Error al invitar", { description: res.error || "Ocurrió un fallo inesperado." });
       }
     } catch (error: any) {
-      toast.error("Error al invitar", { description: error.message });
+      toast.error("Error crítico", { description: error.message });
     } finally {
       setIsProcessing(false);
     }
@@ -153,9 +155,11 @@ export default function EquipoAdminPage() {
          await fetchTeam();
          setIsInviteModalOpen(false);
          resetForm();
+      } else {
+         toast.error("No se pudieron actualizar los permisos", { description: res.error });
       }
     } catch (error: any){
-      toast.error("Error al actualizar permisos", { description: error.message });
+      toast.error("Error crítico", { description: error.message });
     } finally {
       setIsProcessing(false);
     }
