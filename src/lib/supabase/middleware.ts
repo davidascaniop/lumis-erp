@@ -70,23 +70,44 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Rutas de superadmin — verificar rol (excepto registro)
+  // Rutas de superadmin — verificar rol o permisos (excepto registro/login de admin)
   if (
     user &&
     request.nextUrl.pathname.startsWith("/superadmin") &&
     !request.nextUrl.pathname.startsWith("/register-admin") &&
-    !request.nextUrl.pathname.startsWith("/login-admin")
+    !request.nextUrl.pathname.startsWith("/login-admin") &&
+    !request.nextUrl.pathname.startsWith("/superadmin/usuarios/equipo") // Usually restricted to root, handled inside or allow base
   ) {
     const { data: userData } = await supabase
       .from("users")
-      .select("role")
+      .select("role, permissions")
       .eq("auth_id", user.id)
       .single();
 
     if (userData?.role !== "superadmin") {
-      const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
-      return NextResponse.redirect(url);
+      let isAllowed = false;
+      const p = typeof userData?.permissions === 'string' ? JSON.parse(userData?.permissions || '{}') : (userData?.permissions || {});
+      const path = request.nextUrl.pathname;
+
+      if (path.startsWith("/superadmin/comunicacion") && p.communication) isAllowed = true;
+      if (path.startsWith("/superadmin/semillas") && p.daily_seed) isAllowed = true;
+      if (path.startsWith("/superadmin/usuarios/empresas") && p.platform_settings) isAllowed = true; // or view_companies
+      if (path.startsWith("/superadmin/clientes") && (p.platform_settings || p.sales_pos)) isAllowed = true;
+      if (path.startsWith("/superadmin/finanzas") && p.finances) isAllowed = true;
+      if (path.startsWith("/superadmin/reportes") && p.finances) isAllowed = true; // example
+      if (path.startsWith("/superadmin/config") && p.platform_settings) isAllowed = true;
+      
+      // Permitir acceso base al layout y dashboard vacío del superadmin si tiene ALGÚN permiso
+      if (path === "/superadmin" && Object.values(p).some(Boolean)) isAllowed = true;
+      
+      // La pestaña /equipo solo dejemosla para superadmin
+      if (path.startsWith("/superadmin/usuarios/equipo") && userData?.role !== "superadmin") isAllowed = false;
+
+      if (!isAllowed) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/dashboard"; // Consider changing to a /blocked route in the future
+        return NextResponse.redirect(url);
+      }
     }
   }
 

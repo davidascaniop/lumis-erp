@@ -8,12 +8,10 @@ import {
   Mail, 
   Loader2, 
   Plus, 
-  Edit2, 
   Trash2, 
   Check, 
-  UserCheck, 
-  UserX,
-  X
+  Settings2,
+  X 
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -21,6 +19,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { inviteAdminUser, updateUserPermissions } from "@/lib/actions/invitations";
 
 export default function EquipoAdminPage() {
   const supabase = createClient();
@@ -33,22 +32,26 @@ export default function EquipoAdminPage() {
   // Formulario de Invitación
   const [inviteName, setInviteName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState("soporte");
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
   
-  // Permisos
+  // Permisos Específicos
   const [permissions, setPermissions] = useState({
-    view_companies: false,
-    manage_payments: false,
-    toggle_accounts: false,
-    view_reports: false
+    communication: false,
+    daily_seed: false,
+    inventory: false,
+    sales_pos: false,
+    finances: false,
+    platform_settings: false
   });
 
   const toggleAllPermissions = (val: boolean) => {
     setPermissions({
-      view_companies: val,
-      manage_payments: val,
-      toggle_accounts: val,
-      view_reports: val
+      communication: val,
+      daily_seed: val,
+      inventory: val,
+      sales_pos: val,
+      finances: val,
+      platform_settings: val
     });
   };
 
@@ -89,6 +92,10 @@ export default function EquipoAdminPage() {
   };
 
   const handleInvite = async () => {
+    if (editingUserId) {
+      return handleUpdatePermissions();
+    }
+
     if (!inviteName || !inviteEmail) {
       toast.error("Completa el nombre y correo del invitado");
       return;
@@ -96,58 +103,67 @@ export default function EquipoAdminPage() {
     
     setIsProcessing(true);
     try {
-      // 1. Inserción directa en public.users para que aparezca funcional en el panel.
-      let { data, error } = await supabase
-        .from("users")
-        .insert({
-          company_id: null, // Usuarios de sistema no pertenecen a una empresa cliente
-          full_name: inviteName,
-          email: inviteEmail.toLowerCase(),
-          role: inviteRole,
-          status: "pending_invite",
-          is_active: true,
-          permissions: permissions // Requiere que la DB tenga columna permissions (JSONB)
-        })
-        .select()
-        .single();
-        
-      if (error) {
-        // En caso de que no exista la columna permissions (Fallback)
-        if (error.code === '42703') {
-           const { data: d2, error: e2 } = await supabase
-            .from("users")
-            .insert({
-              company_id: null,
-              full_name: inviteName,
-              email: inviteEmail.toLowerCase(),
-              role: inviteRole,
-              status: "pending_invite",
-              is_active: true
-            })
-            .select()
-            .single();
-           if (e2) throw e2;
-           data = d2;
-        } else {
-           throw error;
-        }
-      }
+      const res = await inviteAdminUser({
+        name: inviteName,
+        email: inviteEmail,
+        permissions: permissions
+      });
 
-      toast.success("Invitación enviada", { description: `Se ha enviado el acceso a ${inviteEmail}` });
-      setTeam([...team, { ...data, permissions_json: permissions }]);
-      setIsInviteModalOpen(false);
-      
-      // Clear form
-      setInviteName("");
-      setInviteEmail("");
-      setInviteRole("soporte");
-      toggleAllPermissions(false);
-      
+      if (res.success) {
+        toast.success("Invitación enviada", { description: `Se ha generado el acceso para ${inviteEmail}. Token: ${res.token}` });
+        await fetchTeam(); // render new
+        setIsInviteModalOpen(false);
+        resetForm();
+      }
     } catch (error: any) {
       toast.error("Error al invitar", { description: error.message });
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleUpdatePermissions = async () => {
+    if (!editingUserId) return;
+    setIsProcessing(true);
+    try {
+      const res = await updateUserPermissions(editingUserId, permissions);
+      if (res.success) {
+         toast.success("Permisos actualizados correctamente");
+         await fetchTeam();
+         setIsInviteModalOpen(false);
+         resetForm();
+      }
+    } catch (error: any){
+      toast.error("Error al actualizar permisos", { description: error.message });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const resetForm = () => {
+    setInviteName("");
+    setInviteEmail("");
+    setEditingUserId(null);
+    toggleAllPermissions(false);
+  };
+
+  const openEditModal = (member: any) => {
+    setInviteName(member.full_name || "");
+    setInviteEmail(member.email);
+    setEditingUserId(member.id);
+    if (member.permissions_json) {
+       setPermissions({
+         communication: !!member.permissions_json.communication,
+         daily_seed: !!member.permissions_json.daily_seed,
+         inventory: !!member.permissions_json.inventory,
+         sales_pos: !!member.permissions_json.sales_pos,
+         finances: !!member.permissions_json.finances,
+         platform_settings: !!member.permissions_json.platform_settings,
+       });
+    } else {
+       toggleAllPermissions(false);
+    }
+    setIsInviteModalOpen(true);
   };
 
   const handleDelete = async (userId: string, email: string) => {
@@ -192,11 +208,11 @@ export default function EquipoAdminPage() {
             />
           </div>
           <button
-            onClick={() => setIsInviteModalOpen(true)}
+            onClick={() => { resetForm(); setIsInviteModalOpen(true); }}
             className="h-9 px-4 rounded-xl text-sm font-bold bg-brand text-white hover:opacity-90 flex items-center justify-center gap-2 transition-opacity whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Invitar al equipo</span>
+            <span className="hidden sm:inline">Invitar Especialista</span>
           </button>
         </div>
       </div>
@@ -253,27 +269,29 @@ export default function EquipoAdminPage() {
                               ? 'bg-brand/10 text-brand border-brand/20' 
                               : 'bg-surface-base text-text-2 border-border'}`}
                           >
-                            {isSuperadminOwner ? 'Superadmin' : (member.role === 'system_admin' ? 'Admin' : member.role || 'Admin')}
+                            {isSuperadminOwner ? 'Root' : 'Colaborador'}
                           </Badge>
                           {member.status === "pending_invite" && (
                             <div className="mt-1 text-[9px] text-status-warn font-bold uppercase flex items-center gap-1">
-                              Invitado
+                              Pendiente
                             </div>
                           )}
                         </td>
                         <td className="px-5 py-4 min-w-[200px]">
                           {isSuperadminOwner ? (
                              <span className="text-[10px] font-bold text-[#E040FB] flex items-center gap-1.5 bg-[#E040FB]/10 px-2 py-1 rounded w-max border border-[#E040FB]/20">
-                               <Shield className="w-3 h-3" /> Acceso Total Ilimitado
+                               <Shield className="w-3 h-3" /> Acceso Total
                              </span>
                           ) : (
                              <div className="flex flex-wrap gap-1">
-                               {member.permissions_json?.view_companies && <span className="text-[9px] px-1.5 py-0.5 bg-surface-base border border-border rounded text-text-2">Ver Empresas</span>}
-                               {member.permissions_json?.manage_payments && <span className="text-[9px] px-1.5 py-0.5 bg-surface-base border border-border rounded text-text-2">Pagos</span>}
-                               {member.permissions_json?.toggle_accounts && <span className="text-[9px] px-1.5 py-0.5 bg-surface-base border border-border rounded text-text-2">Estados</span>}
-                               {member.permissions_json?.view_reports && <span className="text-[9px] px-1.5 py-0.5 bg-surface-base border border-border rounded text-text-2">Reportes</span>}
+                               {member.permissions_json?.communication && <span className="text-[9px] px-1.5 py-0.5 bg-brand text-white rounded font-bold">Comunicación</span>}
+                               {member.permissions_json?.daily_seed && <span className="text-[9px] px-1.5 py-0.5 bg-green-500 text-white rounded font-bold">Semilla Diaria</span>}
+                               {member.permissions_json?.inventory && <span className="text-[9px] px-1.5 py-0.5 bg-blue-500 text-white rounded font-bold">Inventario</span>}
+                               {member.permissions_json?.sales_pos && <span className="text-[9px] px-1.5 py-0.5 bg-purple-500 text-white rounded font-bold">Ventas/Caja</span>}
+                               {member.permissions_json?.finances && <span className="text-[9px] px-1.5 py-0.5 bg-yellow-500 text-white rounded font-bold">Finanzas</span>}
+                               {member.permissions_json?.platform_settings && <span className="text-[9px] px-1.5 py-0.5 bg-gray-700 text-white rounded font-bold">Configuración</span>}
                                {!Object.values(member.permissions_json || {}).some(Boolean) && (
-                                 <span className="text-[9px] text-text-3 italic">Sin permisos esp.</span>
+                                 <span className="text-[9px] text-text-3 italic border border-border px-1.5 py-0.5 rounded bg-surface-base">Sin Accesos</span>
                                )}
                              </div>
                           )}
@@ -286,7 +304,13 @@ export default function EquipoAdminPage() {
                         <td className="px-5 py-4 text-right">
                           {!isSuperadminOwner && (
                             <div className="flex items-center justify-end gap-2">
-                              {/* Ocultamos edición visual por simplicidad, pero mostramos el botón gris inactivo/activo si se requiere o borrar */}
+                              <button
+                                onClick={() => openEditModal(member)}
+                                title="Editar Permisos"
+                                className="h-8 w-8 flex items-center justify-center bg-surface-base border border-border text-text-2 hover:text-brand hover:border-brand/40 rounded-lg transition-all"
+                              >
+                                <Settings2 className="w-4 h-4" />
+                              </button>
                               <button
                                 onClick={() => handleDelete(member.id, member.email)}
                                 title="Eliminar del equipo"
@@ -311,9 +335,11 @@ export default function EquipoAdminPage() {
       <Dialog open={isInviteModalOpen} onOpenChange={setIsInviteModalOpen}>
         <DialogContent className="bg-surface-base border-border rounded-2xl sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Invitar Miembro del Equipo</DialogTitle>
+            <DialogTitle>{editingUserId ? 'Editar Permisos' : 'Invitar Miembro al Equipo'}</DialogTitle>
             <DialogDescription>
-              El usuario recibirá un email para crear su contraseña y acceder al panel Superadmin.
+              {editingUserId 
+                ? 'Actualiza el acceso granular a los módulos para este colaborador.'
+                : 'El usuario recibirá un correo con un enlace seguro para establecer su propia contraseña y cuenta.'}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-3">
@@ -322,8 +348,9 @@ export default function EquipoAdminPage() {
               <Input 
                 value={inviteName}
                 onChange={(e) => setInviteName(e.target.value)}
-                placeholder="Ej. Yessica Tovar"
+                placeholder="Ej. Juan Pérez"
                 className="bg-surface-card border-border"
+                disabled={!!editingUserId}
               />
             </div>
             
@@ -333,65 +360,69 @@ export default function EquipoAdminPage() {
                 type="email"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="yessica@empresa.com"
+                placeholder="juan.perez@empresa.com"
                 className="bg-surface-card border-border"
+                disabled={!!editingUserId}
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-text-2 uppercase tracking-wider">Rol Administrativo</label>
-              <select
-                value={inviteRole}
-                onChange={(e) => setInviteRole(e.target.value)}
-                className="w-full px-4 py-2.5 bg-surface-card border border-border rounded-xl text-sm focus:outline-none focus:border-brand/40 text-text-1"
-              >
-                <option value="system_admin">Administrador General</option>
-                <option value="soporte">Agente de Soporte</option>
-                <option value="finanzas">Analista de Finanzas</option>
-              </select>
-            </div>
-
-            <div className="mt-2 p-4 bg-surface-card border border-border rounded-xl space-y-3">
-               <div className="flex items-center justify-between mb-2">
-                 <label className="text-xs font-bold text-text-2 uppercase tracking-wider flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-brand" /> Permisos Específicos</label>
+            <div className="mt-2 p-4 bg-surface-card border border-border rounded-xl space-y-4">
+               <div className="flex items-center justify-between mb-2 pb-2 border-b border-border/50">
+                 <label className="text-xs font-bold text-text-2 uppercase tracking-wider flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-brand" /> Matriz de Permisos</label>
                  <button 
-                   onClick={() => toggleAllPermissions(!permissions.view_companies)}
+                   onClick={() => toggleAllPermissions(!permissions.communication)}
                    className="text-[10px] font-bold uppercase tracking-wider text-brand hover:underline"
                  >
-                    {permissions.view_companies ? "Desactivar Todo" : "Acceso Total"}
+                    {permissions.communication ? "Desactivar Todo" : "Activar Todo"}
                  </button>
                </div>
                
-               <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className={`w-4 h-4 rounded flex items-center justify-center border transition-colors ${permissions.view_companies ? 'bg-brand border-brand' : 'bg-surface-base border-text-3'}`}>
-                    {permissions.view_companies && <Check className="w-3 h-3 text-white" />}
-                  </div>
-                  <span className="text-sm font-medium text-text-1 group-hover:text-brand transition-colors">Ver empresas y usuarios</span>
-               </label>
+               <div className="grid grid-cols-2 gap-4">
+                 <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${permissions.communication ? 'bg-brand border-brand' : 'bg-surface-base border-text-3'}`}>
+                      {permissions.communication && <Check className="w-3 h-3 text-white" />}
+                    </div>
+                    <span className="text-sm font-medium text-text-1 group-hover:text-brand transition-colors">Comunicación</span>
+                 </label>
 
-               <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className={`w-4 h-4 rounded flex items-center justify-center border transition-colors ${permissions.manage_payments ? 'bg-brand border-brand' : 'bg-surface-base border-text-3'}`}>
-                    {permissions.manage_payments && <Check className="w-3 h-3 text-white" />}
-                  </div>
-                  <span className="text-sm font-medium text-text-1 group-hover:text-brand transition-colors">Gestionar pagos y suscripciones</span>
-               </label>
-               
-               <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className={`w-4 h-4 rounded flex items-center justify-center border transition-colors ${permissions.toggle_accounts ? 'bg-brand border-brand' : 'bg-surface-base border-text-3'}`}>
-                    {permissions.toggle_accounts && <Check className="w-3 h-3 text-white" />}
-                  </div>
-                  <span className="text-sm font-medium text-text-1 group-hover:text-brand transition-colors">Suspender / activar cuentas</span>
-               </label>
+                 <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${permissions.daily_seed ? 'bg-green-500 border-green-500' : 'bg-surface-base border-text-3'}`}>
+                      {permissions.daily_seed && <Check className="w-3 h-3 text-white" />}
+                    </div>
+                    <span className="text-sm font-medium text-text-1 group-hover:text-green-500 transition-colors">Semilla Diaria</span>
+                 </label>
+                 
+                 <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${permissions.inventory ? 'bg-blue-500 border-blue-500' : 'bg-surface-base border-text-3'}`}>
+                      {permissions.inventory && <Check className="w-3 h-3 text-white" />}
+                    </div>
+                    <span className="text-sm font-medium text-text-1 group-hover:text-blue-500 transition-colors">Inventario</span>
+                 </label>
 
-               <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className={`w-4 h-4 rounded flex items-center justify-center border transition-colors ${permissions.view_reports ? 'bg-brand border-brand' : 'bg-surface-base border-text-3'}`}>
-                    {permissions.view_reports && <Check className="w-3 h-3 text-white" />}
-                  </div>
-                  <span className="text-sm font-medium text-text-1 group-hover:text-brand transition-colors">Ver reportes del Command Center</span>
-               </label>
+                 <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${permissions.sales_pos ? 'bg-purple-500 border-purple-500' : 'bg-surface-base border-text-3'}`}>
+                      {permissions.sales_pos && <Check className="w-3 h-3 text-white" />}
+                    </div>
+                    <span className="text-sm font-medium text-text-1 group-hover:text-purple-500 transition-colors">Ventas y Caja</span>
+                 </label>
+
+                 <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${permissions.finances ? 'bg-yellow-500 border-yellow-500' : 'bg-surface-base border-text-3'}`}>
+                      {permissions.finances && <Check className="w-3 h-3 text-white" />}
+                    </div>
+                    <span className="text-sm font-medium text-text-1 group-hover:text-yellow-500 transition-colors">Finanzas</span>
+                 </label>
+
+                 <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${permissions.platform_settings ? 'bg-gray-700 border-gray-700' : 'bg-surface-base border-text-3'}`}>
+                      {permissions.platform_settings && <Check className="w-3 h-3 text-white" />}
+                    </div>
+                    <span className="text-sm font-medium text-text-1 group-hover:text-gray-700 transition-colors">Configuración</span>
+                 </label>
+               </div>
             </div>
           </div>
-          <DialogFooter className="mt-2">
+          <DialogFooter className="mt-4">
             <button
               onClick={() => setIsInviteModalOpen(false)}
               className="px-4 py-2.5 rounded-xl text-sm font-medium text-text-2 hover:bg-surface-hover transition-colors"
@@ -401,10 +432,10 @@ export default function EquipoAdminPage() {
             <button
               onClick={handleInvite}
               disabled={isProcessing}
-              className="px-5 py-2.5 rounded-xl text-sm font-bold bg-brand text-white hover:opacity-90 flex items-center gap-2 transition-all disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl text-sm font-bold bg-brand text-white hover:opacity-90 flex items-center gap-2 transition-all disabled:opacity-50"
             >
-              {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
-              Enviar Invitación
+              {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : (editingUserId ? <Shield className="w-4 h-4"/> : <Mail className="w-4 h-4" />)}
+              {editingUserId ? 'Guardar Permisos' : 'Crear y Enviar Accesos'}
             </button>
           </DialogFooter>
         </DialogContent>
