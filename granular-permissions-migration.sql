@@ -1,5 +1,6 @@
 -- ==========================================
 -- MIGRATION: GRANULAR PERMISSIONS & INVITES
+-- (Alineado con módulos reales del Super Admin Sidebar)
 -- ==========================================
 
 -- 1. Actualizar tabla usuarios (si no tienen las columnas)
@@ -25,19 +26,19 @@ CREATE TABLE IF NOT EXISTS public.user_invitations (
     status VARCHAR(20) DEFAULT 'pending'
 );
 
--- Asegurarse de que el status coincida con la lógica
 CREATE INDEX IF NOT EXISTS idx_invitations_token ON public.user_invitations(token);
 CREATE INDEX IF NOT EXISTS idx_invitations_email ON public.user_invitations(email);
 
--- Migrar permisos antiguos basados en "role" para asegurar el acceso a los existentes
+-- 3. Migrar permisos: dar acceso total a superadmins existentes con las NUEVAS claves
 UPDATE public.users 
 SET permissions = jsonb_build_object(
-    'communication', true,
-    'daily_seed', true,
-    'inventory', true,
-    'sales_pos', true,
+    'command_center', true,
     'finances', true,
-    'platform_settings', true
+    'reports', true,
+    'clients', true,
+    'daily_seed', true,
+    'communication', true,
+    'users', true,
+    'configuration', true
 )
 WHERE role IN ('superadmin', 'system_admin', 'admin') AND (permissions IS NULL OR permissions = '{}'::jsonb);
-

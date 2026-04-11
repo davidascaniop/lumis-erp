@@ -34,24 +34,45 @@ export default function EquipoAdminPage() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   
-  // Permisos Específicos
+  // Permisos Específicos (alineados con el Sidebar del Super Admin)
   const [permissions, setPermissions] = useState({
-    communication: false,
-    daily_seed: false,
-    inventory: false,
-    sales_pos: false,
+    command_center: false,
     finances: false,
-    platform_settings: false
+    reports: false,
+    clients: false,
+    daily_seed: false,
+    communication: false,
+    users: false,
+    configuration: false
   });
+
+  const PERMISSION_CONFIG = [
+    { key: 'command_center', label: 'Command Center', color: 'bg-indigo-500 border-indigo-500', textHover: 'group-hover:text-indigo-500', badgeColor: 'bg-indigo-500' },
+    { key: 'finances', label: 'Finanzas', color: 'bg-emerald-500 border-emerald-500', textHover: 'group-hover:text-emerald-500', badgeColor: 'bg-emerald-500' },
+    { key: 'reports', label: 'Reportes', color: 'bg-sky-500 border-sky-500', textHover: 'group-hover:text-sky-500', badgeColor: 'bg-sky-500' },
+    { key: 'clients', label: 'Clientes', color: 'bg-amber-500 border-amber-500', textHover: 'group-hover:text-amber-500', badgeColor: 'bg-amber-500' },
+    { key: 'daily_seed', label: 'Semillas', color: 'bg-fuchsia-500 border-fuchsia-500', textHover: 'group-hover:text-fuchsia-500', badgeColor: 'bg-fuchsia-500' },
+    { key: 'communication', label: 'Comunicación', color: 'bg-brand border-brand', textHover: 'group-hover:text-brand', badgeColor: 'bg-brand' },
+    { key: 'users', label: 'Usuarios', color: 'bg-violet-500 border-violet-500', textHover: 'group-hover:text-violet-500', badgeColor: 'bg-violet-500' },
+    { key: 'configuration', label: 'Config', color: 'bg-gray-600 border-gray-600', textHover: 'group-hover:text-gray-600', badgeColor: 'bg-gray-600' },
+  ] as const;
+
+  type PermissionKey = typeof PERMISSION_CONFIG[number]['key'];
+
+  const togglePermission = (key: PermissionKey) => {
+    setPermissions(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const toggleAllPermissions = (val: boolean) => {
     setPermissions({
-      communication: val,
-      daily_seed: val,
-      inventory: val,
-      sales_pos: val,
+      command_center: val,
       finances: val,
-      platform_settings: val
+      reports: val,
+      clients: val,
+      daily_seed: val,
+      communication: val,
+      users: val,
+      configuration: val
     });
   };
 
@@ -153,12 +174,14 @@ export default function EquipoAdminPage() {
     setEditingUserId(member.id);
     if (member.permissions_json) {
        setPermissions({
-         communication: !!member.permissions_json.communication,
-         daily_seed: !!member.permissions_json.daily_seed,
-         inventory: !!member.permissions_json.inventory,
-         sales_pos: !!member.permissions_json.sales_pos,
+         command_center: !!member.permissions_json.command_center,
          finances: !!member.permissions_json.finances,
-         platform_settings: !!member.permissions_json.platform_settings,
+         reports: !!member.permissions_json.reports,
+         clients: !!member.permissions_json.clients,
+         daily_seed: !!member.permissions_json.daily_seed,
+         communication: !!member.permissions_json.communication,
+         users: !!member.permissions_json.users,
+         configuration: !!member.permissions_json.configuration,
        });
     } else {
        toggleAllPermissions(false);
@@ -284,12 +307,11 @@ export default function EquipoAdminPage() {
                              </span>
                           ) : (
                              <div className="flex flex-wrap gap-1">
-                               {member.permissions_json?.communication && <span className="text-[9px] px-1.5 py-0.5 bg-brand text-white rounded font-bold">Comunicación</span>}
-                               {member.permissions_json?.daily_seed && <span className="text-[9px] px-1.5 py-0.5 bg-green-500 text-white rounded font-bold">Semilla Diaria</span>}
-                               {member.permissions_json?.inventory && <span className="text-[9px] px-1.5 py-0.5 bg-blue-500 text-white rounded font-bold">Inventario</span>}
-                               {member.permissions_json?.sales_pos && <span className="text-[9px] px-1.5 py-0.5 bg-purple-500 text-white rounded font-bold">Ventas/Caja</span>}
-                               {member.permissions_json?.finances && <span className="text-[9px] px-1.5 py-0.5 bg-yellow-500 text-white rounded font-bold">Finanzas</span>}
-                               {member.permissions_json?.platform_settings && <span className="text-[9px] px-1.5 py-0.5 bg-gray-700 text-white rounded font-bold">Configuración</span>}
+                               {PERMISSION_CONFIG.map(p => (
+                                 member.permissions_json?.[p.key] && (
+                                   <span key={p.key} className={`text-[9px] px-1.5 py-0.5 ${p.badgeColor} text-white rounded font-bold`}>{p.label}</span>
+                                 )
+                               ))}
                                {!Object.values(member.permissions_json || {}).some(Boolean) && (
                                  <span className="text-[9px] text-text-3 italic border border-border px-1.5 py-0.5 rounded bg-surface-base">Sin Accesos</span>
                                )}
@@ -370,55 +392,28 @@ export default function EquipoAdminPage() {
                <div className="flex items-center justify-between mb-2 pb-2 border-b border-border/50">
                  <label className="text-xs font-bold text-text-2 uppercase tracking-wider flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-brand" /> Matriz de Permisos</label>
                  <button 
-                   onClick={() => toggleAllPermissions(!permissions.communication)}
+                   type="button"
+                   onClick={() => toggleAllPermissions(!Object.values(permissions).every(Boolean))}
                    className="text-[10px] font-bold uppercase tracking-wider text-brand hover:underline"
                  >
-                    {permissions.communication ? "Desactivar Todo" : "Activar Todo"}
+                    {Object.values(permissions).every(Boolean) ? "Desactivar Todo" : "Activar Todo"}
                  </button>
                </div>
                
-               <div className="grid grid-cols-2 gap-4">
-                 <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${permissions.communication ? 'bg-brand border-brand' : 'bg-surface-base border-text-3'}`}>
-                      {permissions.communication && <Check className="w-3 h-3 text-white" />}
-                    </div>
-                    <span className="text-sm font-medium text-text-1 group-hover:text-brand transition-colors">Comunicación</span>
-                 </label>
-
-                 <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${permissions.daily_seed ? 'bg-green-500 border-green-500' : 'bg-surface-base border-text-3'}`}>
-                      {permissions.daily_seed && <Check className="w-3 h-3 text-white" />}
-                    </div>
-                    <span className="text-sm font-medium text-text-1 group-hover:text-green-500 transition-colors">Semilla Diaria</span>
-                 </label>
-                 
-                 <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${permissions.inventory ? 'bg-blue-500 border-blue-500' : 'bg-surface-base border-text-3'}`}>
-                      {permissions.inventory && <Check className="w-3 h-3 text-white" />}
-                    </div>
-                    <span className="text-sm font-medium text-text-1 group-hover:text-blue-500 transition-colors">Inventario</span>
-                 </label>
-
-                 <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${permissions.sales_pos ? 'bg-purple-500 border-purple-500' : 'bg-surface-base border-text-3'}`}>
-                      {permissions.sales_pos && <Check className="w-3 h-3 text-white" />}
-                    </div>
-                    <span className="text-sm font-medium text-text-1 group-hover:text-purple-500 transition-colors">Ventas y Caja</span>
-                 </label>
-
-                 <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${permissions.finances ? 'bg-yellow-500 border-yellow-500' : 'bg-surface-base border-text-3'}`}>
-                      {permissions.finances && <Check className="w-3 h-3 text-white" />}
-                    </div>
-                    <span className="text-sm font-medium text-text-1 group-hover:text-yellow-500 transition-colors">Finanzas</span>
-                 </label>
-
-                 <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${permissions.platform_settings ? 'bg-gray-700 border-gray-700' : 'bg-surface-base border-text-3'}`}>
-                      {permissions.platform_settings && <Check className="w-3 h-3 text-white" />}
-                    </div>
-                    <span className="text-sm font-medium text-text-1 group-hover:text-gray-700 transition-colors">Configuración</span>
-                 </label>
+               <div className="grid grid-cols-2 gap-3">
+                 {PERMISSION_CONFIG.map(p => (
+                   <button
+                     key={p.key}
+                     type="button"
+                     onClick={() => togglePermission(p.key)}
+                     className="flex items-center gap-3 cursor-pointer group text-left p-1 rounded-lg hover:bg-surface-base/50 transition-colors"
+                   >
+                      <div className={`w-5 h-5 rounded flex items-center justify-center border transition-all duration-200 ${permissions[p.key] ? p.color : 'bg-surface-base border-text-3'}`}>
+                        {permissions[p.key] && <Check className="w-3 h-3 text-white" />}
+                      </div>
+                      <span className={`text-sm font-medium text-text-1 ${p.textHover} transition-colors`}>{p.label}</span>
+                   </button>
+                 ))}
                </div>
             </div>
           </div>
