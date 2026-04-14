@@ -49,6 +49,7 @@ import { Suspense } from "react";
 import { CommissionRulesEditor } from "@/components/users/commission-rules-editor";
 import { Percent } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
+import { updateUserFullName } from "@/lib/actions/profile";
 
 function SettingsContent() {
   const supabase = createClient();
@@ -142,16 +143,12 @@ function SettingsContent() {
   const handleSaveProfile = async () => {
     setIsLoading(true);
     try {
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-
-      // 1. Update full_name in users table so sidebar reflects change immediately
-      if (authUser && profile?.full_name) {
-        const { error: userError } = await supabase
-          .from("users")
-          .update({ full_name: profile.full_name })
-          .eq("auth_id", authUser.id);
-
-        if (userError) throw userError;
+      // 1. Update full_name via server action (bypasses client-side RLS restrictions)
+      if (profile?.full_name) {
+        const result = await updateUserFullName(profile.full_name);
+        if (!result.success) {
+          throw new Error(result.error ?? "No se pudo actualizar el nombre");
+        }
       }
 
       // 2. Update Company name fields if changed
