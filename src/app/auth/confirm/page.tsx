@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Shield, Lock, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
@@ -16,6 +16,26 @@ function SetupPasswordForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [sessionError, setSessionError] = useState("");
+
+  useEffect(() => {
+    const setupSession = async () => {
+      const hash = window.location.hash;
+      if (hash && hash.includes("access_token")) {
+        const params = new URLSearchParams(hash.substring(1));
+        const access_token = params.get("access_token");
+        const refresh_token = params.get("refresh_token");
+
+        if (access_token && refresh_token) {
+          const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+          if (error) {
+            setSessionError("Este enlace ha expirado. Pide al administrador una nueva invitación.");
+          }
+        }
+      }
+    };
+    setupSession();
+  }, [supabase.auth]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,7 +103,12 @@ function SetupPasswordForm() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        {sessionError ? (
+          <div className="mt-6 p-4 bg-status-danger/10 border border-status-danger/20 rounded-xl text-center">
+            <p className="text-xs font-bold text-status-danger">{sessionError}</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-5">
            <div className="space-y-1.5 relative">
               <label className="text-[11px] font-bold text-text-2 uppercase tracking-wider pl-1">Nueva Contraseña</label>
               <div className="relative">
@@ -136,6 +161,7 @@ function SetupPasswordForm() {
               )}
            </button>
         </form>
+        )}
 
       </div>
     </div>
