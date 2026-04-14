@@ -8,7 +8,8 @@ export async function inviteCompanyUser(
   fullName: string,
   role: string,
   companyId: string,
-  invitedByAuthId: string
+  invitedByAuthId: string,
+  permissions: string[] = []
 ) {
   try {
     // 1. Usar el cliente admin para tener permisos de enviar invitaciones (bypass RLS)
@@ -25,6 +26,7 @@ export async function inviteCompanyUser(
           full_name: fullName.trim(),
           role: role,
           company_id: companyId,
+          permissions: permissions,
         },
         // Opcional: Redirigir a una página específica tras aceptar
         redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard`
@@ -46,6 +48,7 @@ export async function inviteCompanyUser(
         full_name: fullName.trim(),
         role: role,
         company_id: companyId,
+        permissions: permissions,
       });
 
     // Si el usuario ya estaba invitado o existe, esto podría dar error por llave duplicada (auth_id)
@@ -57,7 +60,8 @@ export async function inviteCompanyUser(
          await supabaseAdmin.from("users").update({
              role: role,
              company_id: companyId,
-             full_name: fullName.trim()
+             full_name: fullName.trim(),
+             permissions: permissions
          }).eq("auth_id", authData.user.id);
       } else {
         console.error("[inviteCompanyUser] Insert error:", insertError);

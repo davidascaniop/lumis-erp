@@ -13,7 +13,8 @@ export type AppRole =
   | "logistico"
   | "mesero"
   | "cocinero"
-  | "readonly";
+  | "readonly"
+  | "custom";
 
 /** Nav section IDs that match BASE_NAV_SECTIONS and special sections */
 export type NavSectionId =
@@ -39,6 +40,7 @@ export const ROLE_SECTION_ACCESS: Record<AppRole, NavSectionId[]> = {
   mesero: ["restaurante"],
   cocinero: ["restaurante"],
   readonly: ["ventas", "compras", "clientes", "productos", "finanzas", "operaciones", "reportes", "restaurante"],
+  custom: [],
 };
 
 export interface RoleDefinition {
@@ -96,8 +98,13 @@ export const ROLE_DEFINITIONS: Record<AppRole, RoleDefinition> = {
   },
   readonly: {
     label: "Solo Lectura",
-    description: "Puede ver todos los módulos pero no puede crear ni editar ningún registro.",
+    description: "Puede visualizar todos los módulos pero no crear ni editar nada.",
     badgeClass: "bg-gray-100 text-gray-600 border-gray-200",
+  },
+  custom: {
+    label: "Personalizado",
+    description: "Permisos configurados manualmente por el administrador.",
+    badgeClass: "bg-slate-100 text-slate-700 border-slate-300",
   },
 };
 
@@ -113,4 +120,5 @@ export const INVITE_ROLES: AppRole[] = [
   "mesero",
   "cocinero",
   "readonly",
+  "custom",
 ];

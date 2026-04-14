@@ -230,7 +230,8 @@ function SettingsContent() {
       inviteData.name,
       inviteData.role,
       profile.company_id,
-      user?.id || ""
+      user?.id || "",
+      inviteData.permissions
     );
 
     setIsLoading(false);
@@ -578,7 +579,7 @@ function SettingsContent() {
                             type="button" 
                             onClick={() => {
                               const allPerms = ["ventas", "compras", "clientes", "productos", "finanzas", "operaciones", "reportes", "settings"];
-                              setInviteData({ ...inviteData, permissions: allPerms });
+                              setInviteData({ ...inviteData, role: "admin", permissions: allPerms });
                             }}
                             className="text-[10px] font-bold uppercase tracking-widest text-[#8B5CF6] hover:opacity-80 transition-opacity"
                           >
@@ -604,9 +605,9 @@ function SettingsContent() {
                                 onCheckedChange={(checked) => {
                                   const current = inviteData.permissions || [];
                                   if (checked) {
-                                    setInviteData({ ...inviteData, permissions: [...current, mod.id] });
+                                    setInviteData({ ...inviteData, role: "custom", permissions: [...current, mod.id] });
                                   } else {
-                                    setInviteData({ ...inviteData, permissions: current.filter(p => p !== mod.id) });
+                                    setInviteData({ ...inviteData, role: "custom", permissions: current.filter(p => p !== mod.id) });
                                   }
                                 }}
                                 className="border-[#8B5CF6]/50 data-[state=checked]:bg-[#8B5CF6] data-[state=checked]:border-[#8B5CF6]"

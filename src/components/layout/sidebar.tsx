@@ -165,9 +165,14 @@ export function Sidebar() {
       sections.splice(comprasIdx + 1, 0, RESTAURANT_SECTION);
     }
     
-    // Filtramos según el rol del usuario
+    // Filtramos según los permisos granulares o el rol
     const currentRole = (user?.role || 'admin') as AppRole;
-    const allowedSectionIds = ROLE_SECTION_ACCESS[currentRole] || ROLE_SECTION_ACCESS['vendedor'];
+    let allowedSectionIds = ROLE_SECTION_ACCESS[currentRole] || ROLE_SECTION_ACCESS['vendedor'];
+    
+    // Si el usuario tiene permisos JSON configurados y no están vacíos orgánicamente
+    if (user?.permissions && Array.isArray(user.permissions) && user.permissions.length > 0) {
+      allowedSectionIds = user.permissions as any;
+    }
     
     return sections.filter(section => allowedSectionIds.includes(section.id as any));
   }, [modulesEnabled, user?.role]);
