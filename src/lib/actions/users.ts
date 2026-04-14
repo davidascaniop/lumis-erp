@@ -177,7 +177,7 @@ export async function activateCompanyUser(email: string, authId: string) {
         company_id: pendingInvite.company_id,
         permissions: pendingInvite.permissions,
         status: "activo"
-      }, { onConflict: "auth_id" });
+      }, { onConflict: "email", ignoreDuplicates: false });
 
     if (userUpsertError) {
       console.error("[activateCompanyUser] Error al trasladar a users:", userUpsertError);
