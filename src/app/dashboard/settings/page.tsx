@@ -45,6 +45,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Suspense } from "react";
 import { CommissionRulesEditor } from "@/components/users/commission-rules-editor";
 import { Percent } from "lucide-react";
@@ -83,10 +84,16 @@ function SettingsContent() {
 
   // Create use modal states
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [inviteData, setInviteData] = useState({
+  const [inviteData, setInviteData] = useState<{
+    name: string;
+    email: string;
+    role: string;
+    permissions: string[];
+  }>({
     name: "",
     email: "",
     role: "vendedor",
+    permissions: [],
   });
 
   const [showCommissionModal, setShowCommissionModal] = useState(false);
@@ -240,7 +247,7 @@ function SettingsContent() {
         isPending: true, // Flag local
       };
       setTeamMembers([...teamMembers, newUser]);
-      setInviteData({ name: "", email: "", role: "vendedor" });
+      setInviteData({ name: "", email: "", role: "vendedor", permissions: [] });
       
       toast.success(`Invitación oficial enviada a ${inviteData.email}`);
     } else {
@@ -493,79 +500,151 @@ function SettingsContent() {
                       Invitar Usuario
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="bg-surface-base border-border text-text-1 rounded-2xl">
+                  <DialogContent className="bg-surface-base border-border text-text-1 rounded-2xl max-w-lg max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                      <DialogTitle className="text-xl font-montserrat font-bold text-text-1">Invitar al equipo</DialogTitle>
+                      <DialogTitle className="text-xl font-bold font-heading text-text-1">Invitar Miembro al Equipo</DialogTitle>
+                      <p className="text-sm text-text-3 font-medium">
+                        El usuario recibirá un correo con un enlace seguro para establecer su propia contraseña y cuenta.
+                      </p>
                     </DialogHeader>
-                    <div className="space-y-4 pt-4">
+                    
+                    <div className="space-y-6 pt-4">
+                      {/* Name */}
                       <div className="space-y-2">
-                        <Label className="text-xs font-bold font-montserrat text-text-1">Nombre del empleado</Label>
+                        <Label className="text-[10px] font-bold uppercase tracking-widest text-[#8B5CF6]">
+                          Nombre Completo
+                        </Label>
                         <Input
                           value={inviteData.name}
-                          onChange={(e) =>
-                            setInviteData({
-                              ...inviteData,
-                              name: e.target.value,
-                            })
-                          }
-                          placeholder="Ej. Ana Pérez"
-                          className="bg-surface-input border border-border/40 text-text-1 rounded-xl h-11"
+                          onChange={(e) => setInviteData({ ...inviteData, name: e.target.value })}
+                          placeholder="Ej. Juan Pérez"
+                          className="bg-surface-base border-2 border-border/40 focus-visible:border-[#8B5CF6] focus-visible:ring-0 text-text-1 rounded-xl h-12 font-medium transition-colors"
                         />
                       </div>
+                      
+                      {/* Email */}
                       <div className="space-y-2">
-                        <Label className="text-xs font-bold font-montserrat text-text-1">Correo Electrónico</Label>
+                        <Label className="text-[10px] font-bold uppercase tracking-widest text-[#8B5CF6]">
+                          Correo Electrónico
+                        </Label>
                         <Input
                           value={inviteData.email}
-                          onChange={(e) =>
-                            setInviteData({
-                              ...inviteData,
-                              email: e.target.value,
-                            })
-                          }
+                          onChange={(e) => setInviteData({ ...inviteData, email: e.target.value })}
                           type="email"
-                          placeholder="ana@empresa.com"
-                          className="bg-surface-input border border-border/40 text-text-1 rounded-xl h-11"
+                          placeholder="juan.perez@empresa.com"
+                          className="bg-surface-base border-2 border-border/40 focus-visible:border-[#8B5CF6] focus-visible:ring-0 text-text-1 rounded-xl h-12 font-medium transition-colors"
                         />
                       </div>
+                      
+                      {/* Role Preset */}
                       <div className="space-y-2">
-                        <Label className="text-xs font-bold font-montserrat text-text-1">Rol en el Sistema</Label>
+                        <Label className="text-[10px] font-bold uppercase tracking-widest text-[#8B5CF6]">
+                          Rol Predefinido
+                        </Label>
                         <Select
                           value={inviteData.role}
-                          onValueChange={(val) =>
-                            setInviteData({ ...inviteData, role: val })
-                          }
+                          onValueChange={(val) => {
+                            setInviteData({ 
+                              ...inviteData, 
+                              role: val,
+                              permissions: ROLE_SECTION_ACCESS[val as AppRole] || []
+                            });
+                          }}
                         >
-                          <SelectTrigger className="w-full h-11 px-3 py-2 rounded-xl bg-surface-input border border-border/40 text-text-1 outline-none">
-                            <SelectValue />
+                          <SelectTrigger className="w-full h-12 px-4 rounded-xl bg-surface-base border-2 border-border/40 focus-visible:border-[#8B5CF6] focus:ring-0 text-text-1 font-medium transition-colors">
+                            <SelectValue placeholder="Selecciona un rol predefinido" />
                           </SelectTrigger>
                           <SelectContent className="bg-surface-elevated border-border text-text-1 z-[9999]" position="popper">
                             {INVITE_ROLES.map((r) => (
-                              <SelectItem
-                                key={r}
-                                value={r}
-                                className="focus:bg-surface-hover focus:text-text-1 cursor-pointer"
-                              >
+                              <SelectItem key={r} value={r} className="focus:bg-surface-hover focus:text-text-1 cursor-pointer font-medium">
                                 {ROLE_DEFINITIONS[r].label}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                        <p className="text-[10px] text-text-3 mt-1 h-8">
-                          {ROLE_DEFINITIONS[inviteData.role as AppRole]?.description || "Selecciona un rol"}
+                        <p className="text-xs text-text-3 font-medium mt-1">
+                          {ROLE_DEFINITIONS[inviteData.role as AppRole]?.description}
                         </p>
                       </div>
-                      <Button
-                        className="w-full bg-brand-gradient hover:opacity-90 text-white font-bold shadow-brand rounded-xl h-11"
-                        onClick={handleInviteUser}
-                        disabled={isLoading}
-                      >
-                        {isLoading ? (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ) : (
-                          <Mail className="w-4 h-4 mr-2" />
-                        )}
-                        Enviar Invitación
-                      </Button>
+
+                      {/* Permissions Matrix */}
+                      <div className="bg-surface-input border border-border/40 rounded-2xl p-5 space-y-5">
+                        <div className="flex items-center justify-between border-b border-border/40 pb-3">
+                          <h4 className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#8B5CF6]">
+                            <Shield className="w-3.5 h-3.5" />
+                            Matriz de Permisos
+                          </h4>
+                          <button 
+                            type="button" 
+                            onClick={() => {
+                              const allPerms = ["ventas", "compras", "clientes", "productos", "finanzas", "operaciones", "reportes", "settings"];
+                              setInviteData({ ...inviteData, permissions: allPerms });
+                            }}
+                            className="text-[10px] font-bold uppercase tracking-widest text-[#8B5CF6] hover:opacity-80 transition-opacity"
+                          >
+                            Activar Todo
+                          </button>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          {[
+                            { id: "ventas", label: "Ventas" },
+                            { id: "compras", label: "Compras" },
+                            { id: "clientes", label: "Clientes & CRM" },
+                            { id: "productos", label: "Inventario" },
+                            { id: "finanzas", label: "Finanzas" },
+                            { id: "operaciones", label: "Logística" },
+                            { id: "reportes", label: "Reportes" },
+                            { id: "settings", label: "Configuración" },
+                          ].map((mod) => (
+                            <div key={mod.id} className="flex items-center space-x-3">
+                              <Checkbox 
+                                id={`perm-${mod.id}`}
+                                checked={(inviteData.permissions || []).includes(mod.id)}
+                                onCheckedChange={(checked) => {
+                                  const current = inviteData.permissions || [];
+                                  if (checked) {
+                                    setInviteData({ ...inviteData, permissions: [...current, mod.id] });
+                                  } else {
+                                    setInviteData({ ...inviteData, permissions: current.filter(p => p !== mod.id) });
+                                  }
+                                }}
+                                className="border-[#8B5CF6]/50 data-[state=checked]:bg-[#8B5CF6] data-[state=checked]:border-[#8B5CF6]"
+                              />
+                              <Label 
+                                htmlFor={`perm-${mod.id}`}
+                                className="text-sm font-medium text-text-1 cursor-pointer"
+                              >
+                                {mod.label}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center justify-end gap-3 pt-2">
+                        <Button
+                          variant="ghost"
+                          className="hover:bg-transparent text-text-3 hover:text-text-1 font-medium px-4 h-11"
+                          onClick={() => setShowInviteModal(false)}
+                          disabled={isLoading}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          className="bg-[#D946EF] hover:bg-[#C026D3] text-white shadow-brand rounded-xl h-11 font-bold px-6"
+                          onClick={handleInviteUser}
+                          disabled={isLoading}
+                        >
+                          {isLoading ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Mail className="w-4 h-4 mr-2" />
+                          )}
+                          Crear y Enviar Accesos
+                        </Button>
+                      </div>
                     </div>
                   </DialogContent>
                 </Dialog>
