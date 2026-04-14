@@ -142,20 +142,37 @@ function SettingsContent() {
   const handleSaveProfile = async () => {
     setIsLoading(true);
     try {
-      // 1. Update Company if changed
-      if (company && profile?.company_id) {
-        await supabase
-          .from("companies")
-          .update({ 
-            name: company.name,
-            name_comercial: company.name_comercial 
-          })
-          .eq("id", profile.company_id);
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+
+      // 1. Update full_name in users table so sidebar reflects change immediately
+      if (authUser && profile?.full_name) {
+        const { error: userError } = await supabase
+          .from("users")
+          .update({ full_name: profile.full_name })
+          .eq("auth_id", authUser.id);
+
+        if (userError) throw userError;
       }
 
+      // 2. Update Company name fields if changed
+      if (company && profile?.company_id) {
+        const { error: companyError } = await supabase
+          .from("companies")
+          .update({
+            name: company.name,
+            name_comercial: company.name_comercial,
+          })
+          .eq("id", profile.company_id);
+
+        if (companyError) throw companyError;
+      }
+
+      // 3. Refresh user context so sidebar name updates instantly
+      await refreshUser();
+
       toast.success("Perfil y Empresa actualizados correctamente");
-    } catch (err) {
-      toast.error("Error al guardar cambios");
+    } catch (err: any) {
+      toast.error("Error al guardar cambios", { description: err?.message });
     } finally {
       setIsLoading(false);
     }
@@ -351,7 +368,10 @@ function SettingsContent() {
                   <div className="space-y-2">
                     <Label className="text-xs font-bold font-montserrat text-text-1">Nombre Completo</Label>
                     <Input
-                      defaultValue={profile?.full_name || ""}
+                      value={profile?.full_name || ""}
+                      onChange={(e) =>
+                        setProfile((prev) => prev ? { ...prev, full_name: e.target.value } : null)
+                      }
                       placeholder={isFetching ? "Cargando..." : "Juan Pérez"}
                       className="bg-surface-input border border-border/40 text-text-1 focus-visible:ring-brand/50 rounded-xl h-11 font-medium shadow-sm"
                     />
@@ -383,7 +403,7 @@ function SettingsContent() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold font-montserrat text-brand flex items-center gap-1.5">
+                    <Label className="text-xs font-bold font-montserrat text-text-1">
                       Nombre Comercial (Marca Blanca WhatsApp)
                     </Label>
                     <Input
