@@ -100,14 +100,28 @@ export async function deleteCompanyUser(
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    // 1. Verificar que el solicitante sea Administrador de esta empresa
+    // 1. Verificar que el solicitante sea Administrador de esta empresa (o superadmin)
     const { data: requester, error: requesterError } = await supabaseAdmin
       .from("users")
       .select("role, company_id")
       .eq("auth_id", requesterAuthId)
       .single();
 
-    if (requesterError || !requester || requester.company_id !== companyId || (requester.role !== "admin" && requester.role !== "gerente")) {
+    const isSuperAdmin = requester?.role === "superadmin";
+    const isAdmin = requester?.role === "admin";
+    const isGerente = requester?.role === "gerente";
+
+    if (requesterError || !requester) {
+      console.error("[deleteCompanyUser] Requester not found or error:", requesterError);
+      return { success: false, error: "No tienes permisos para eliminar usuarios (perfil no encontrado)." };
+    }
+
+    if (!isSuperAdmin && (requester.company_id !== companyId || (!isAdmin && !isGerente))) {
+      console.warn("[deleteCompanyUser] Permission denied for:", { 
+          role: requester.role, 
+          reqCo: requester.company_id, 
+          targetCo: companyId 
+      });
       return { success: false, error: "No tienes permisos para eliminar usuarios." };
     }
 
