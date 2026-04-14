@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -43,6 +43,13 @@ export function LoginForm() {
       password: "",
     },
   });
+
+  // Detect Supabase Auth implicit flow (e.g. from email invitation)
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash.includes("access_token") && window.location.hash.includes("type=invite")) {
+      router.replace(`/setup-password`);
+    }
+  }, [router]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);

@@ -2,15 +2,14 @@
 
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { processSetupPassword } from "@/lib/actions/invitations";
 import { Shield, Lock, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 function SetupPasswordForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const supabase = createClient();
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -20,11 +19,6 @@ function SetupPasswordForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!token) {
-      toast.error("Token de acceso inválido o faltante.");
-      return;
-    }
 
     if (password.length < 8) {
       toast.error("La contraseña debe tener al menos 8 caracteres.");
@@ -38,13 +32,16 @@ function SetupPasswordForm() {
 
     setIsProcessing(true);
     try {
-      const res = await processSetupPassword(token, password);
-      if (res.success) {
-        setIsSuccess(true);
-        toast.success("Cuenta configurada correctamente.");
-      }
+      const { data, error } = await supabase.auth.updateUser({
+        password: password
+      });
+
+      if (error) throw error;
+
+      toast.success("Contraseña creada correctamente.");
+      router.push("/dashboard");
     } catch (error: any) {
-      toast.error("Error al configurar la cuenta", { description: error.message });
+      toast.error("Error al configurar tu contraseña", { description: error.message });
     } finally {
       setIsProcessing(false);
     }
@@ -80,9 +77,9 @@ function SetupPasswordForm() {
           <div className="w-14 h-14 bg-brand/10 border border-brand/20 rounded-2xl flex items-center justify-center shadow-inner mb-4">
             <Shield className="w-7 h-7 text-brand" />
           </div>
-          <h1 className="text-2xl font-heading font-bold text-text-1 tracking-tight">Establecer Contraseña</h1>
+          <h1 className="text-2xl font-heading font-bold text-text-1 tracking-tight">Bienvenido a LUMIS</h1>
           <p className="text-sm font-medium text-text-2 mt-2 leading-relaxed">
-            Crea una clave segura para proteger tu cuenta y acceder al panel de administración.
+            Crea tu contraseña para comenzar
           </p>
         </div>
 
@@ -126,25 +123,20 @@ function SetupPasswordForm() {
 
            <button 
               type="submit" 
-              disabled={isProcessing || !token}
+              disabled={isProcessing}
               className="w-full h-12 mt-2 rounded-xl text-sm font-bold bg-brand text-white hover:opacity-90 flex items-center justify-center gap-2 transition-all disabled:opacity-50 relative overflow-hidden group"
             >
               {isProcessing ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
                 <>
-                  <span className="relative z-10">Activar y Continuar</span>
+                  <span className="relative z-10">Activar mi cuenta</span>
                   <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
                 </>
               )}
            </button>
         </form>
 
-        {!token && (
-          <div className="mt-6 p-4 bg-status-danger/10 border border-status-danger/20 rounded-xl text-center">
-            <p className="text-xs font-bold text-status-danger">El enlace es inválido o no incluye un token de seguridad válido.</p>
-          </div>
-        )}
       </div>
     </div>
   );
