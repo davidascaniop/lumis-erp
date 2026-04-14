@@ -143,7 +143,16 @@ export function Sidebar() {
   const { rate } = useBCV();
   const [showNotifications, setShowNotifications] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [userPlan, setUserPlan] = useState("starter");
+  // Derive effective plan directly — DEMO status always wins before any plan check
+  const userPlan = useMemo(() => {
+    if (!user?.companies) return "starter";
+    // DEMO accounts get full Enterprise access — checked FIRST, before plan_type
+    if (user.companies.subscription_status === 'demo') return 'enterprise';
+    const plan = (user.companies.plan_type || "starter").toLowerCase();
+    if (plan.includes("enterprise")) return "enterprise";
+    if (plan.includes("pro")) return "pro";
+    return "starter";
+  }, [user]);
 
   // Build nav sections dynamically based on enabled modules
   const modulesEnabled: string[] = user?.companies?.modules_enabled || [];
@@ -194,18 +203,7 @@ export function Sidebar() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
-  useEffect(() => {
-    if (user?.companies) {
-      if (user.companies.subscription_status === 'demo') {
-        setUserPlan('enterprise');
-        return;
-      }
-      const plan = (user.companies.plan_type || "starter").toLowerCase();
-      setUserPlan(plan.includes("pro") ? "pro" : plan.includes("enterprise") ? "enterprise" : "starter");
-    } else {
-      setUserPlan("starter");
-    }
-  }, [user]);
+  // userPlan is now derived via useMemo above — no useEffect needed
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();

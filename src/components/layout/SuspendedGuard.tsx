@@ -15,6 +15,11 @@ export function SuspendedGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // DEMO accounts bypass all suspension checks — full access granted
+  if (user?.companies?.subscription_status === "demo") {
+    return <>{children}</>;
+  }
+
   // If the company is loaded and marked as inactive (suspended)
   if (user?.companies && (user.companies.is_active === false || user.companies.subscription_status === "suspended")) {
     return (
