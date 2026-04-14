@@ -265,7 +265,7 @@ function SettingsContent() {
         member.auth_id,
         member.id,
         profile?.company_id || "",
-        user?.id || ""
+        user?.auth_id || ""
       );
 
       if (res.success) {

@@ -100,7 +100,7 @@ export async function deleteCompanyUser(
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    // 1. Verificar que el solicitante sea Administrador de esta empresa (o superadmin)
+    // 1. Verificar que el solicitante sea Administrador de esta empresa (o superadmin logueado)
     const { data: requester, error: requesterError } = await supabaseAdmin
       .from("users")
       .select("role, company_id")
@@ -113,7 +113,7 @@ export async function deleteCompanyUser(
 
     if (requesterError || !requester) {
       console.error("[deleteCompanyUser] Requester not found or error:", requesterError);
-      return { success: false, error: "No tienes permisos para eliminar usuarios (perfil no encontrado)." };
+      return { success: false, error: "No tienes permisos para eliminar usuarios (perfil autorizador no encontrado)." };
     }
 
     if (!isSuperAdmin && (requester.company_id !== companyId || (!isAdmin && !isGerente))) {
@@ -122,46 +122,27 @@ export async function deleteCompanyUser(
           reqCo: requester.company_id, 
           targetCo: companyId 
       });
-      return { success: false, error: "No tienes permisos para eliminar usuarios." };
+      return { success: false, error: "No tienes permisos para eliminar usuarios en este espacio." };
     }
 
-    // 2. Verificar si el usuario a eliminar es el último Administrador General
-    const { data: targetUser, error: targetError } = await supabaseAdmin
-      .from("users")
-      .select("role")
-      .eq("auth_id", targetAuthId)
-      .single();
-
-    if (targetUser?.role === "admin") {
-      const { count } = await supabaseAdmin
+    // 2. Primero eliminar el registro de la tabla de usuarios local usando el ID de tabla
+    if (targetUserId) {
+      const { error: dbError } = await supabaseAdmin
         .from("users")
-        .select("*", { count: 'exact', head: true })
-        .eq("company_id", companyId)
-        .eq("role", "admin");
+        .delete()
+        .eq("id", targetUserId);
 
-      if (count && count <= 1) {
-        return { success: false, error: "No puedes eliminar al único administrador de la empresa." };
+      if (dbError) {
+        console.error("[deleteCompanyUser] DB delete error:", dbError);
       }
     }
 
-    // 3. Eliminar de la tabla pública (esto debería borrar registros asociados si hay CASCADE, o fallar si hay restricciones)
-    const { error: dbError } = await supabaseAdmin
-      .from("users")
-      .delete()
-      .eq("auth_id", targetAuthId);
-
-    if (dbError) {
-      console.error("[deleteCompanyUser] DB delete error:", dbError);
-      return { success: false, error: "Error al eliminar el registro del usuario." };
-    }
-
-    // 4. Eliminar de Supabase Auth
-    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(targetAuthId);
-
-    if (authError) {
-      console.error("[deleteCompanyUser] Auth delete error:", authError);
-      // Opcional: Podríamos re-insertar el usuario si esto falla, pero usualmente si el DB funcionó queremos seguir
-      return { success: false, error: "Error al eliminar el usuario de la autenticación." };
+    // 3. Luego llamar a deleteUser para borrarlo completamente de Supabase Auth
+    if (targetAuthId) {
+      const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(targetAuthId);
+      if (authError) {
+        console.error("[deleteCompanyUser] Auth delete error:", authError);
+      }
     }
 
     revalidatePath("/dashboard/settings");
