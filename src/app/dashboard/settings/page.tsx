@@ -52,7 +52,7 @@ import { Percent } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
 import { updateUserFullName } from "@/lib/actions/profile";
 import { inviteCompanyUser } from "@/lib/actions/users";
-import { INVITE_ROLES, ROLE_DEFINITIONS, AppRole } from "@/lib/constants/roles";
+import { INVITE_ROLES, ROLE_DEFINITIONS, AppRole, ROLE_SECTION_ACCESS } from "@/lib/constants/roles";
 
 function SettingsContent() {
   const supabase = createClient();
