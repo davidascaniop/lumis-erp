@@ -45,16 +45,39 @@ export async function inviteCompanyUser(
       return { success: false, error: authError?.message || "Error al enviar la invitación de Supabase" };
     }
 
-    // 3. Crear el registro en la tabla dedicada de invitaciones
-    const { error: inviteDbError } = await supabaseAdmin
+    // 3. Crear o actualizar el registro en la tabla dedicada de invitaciones
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    const { data: existingInvite } = await supabaseAdmin
       .from("company_invitations")
-      .upsert({
-        email: email.toLowerCase().trim(),
-        company_id: companyId,
-        role: role,
-        permissions: permissions,
-        status: "pendiente",
-      }, { onConflict: "email" });
+      .select("id")
+      .eq("email", normalizedEmail)
+      .eq("company_id", companyId)
+      .single();
+
+    let inviteDbError;
+    if (existingInvite) {
+      const { error } = await supabaseAdmin
+        .from("company_invitations")
+        .update({
+          role: role,
+          permissions: permissions,
+          status: "pendiente",
+        })
+        .eq("id", existingInvite.id);
+      inviteDbError = error;
+    } else {
+      const { error } = await supabaseAdmin
+        .from("company_invitations")
+        .insert({
+          email: normalizedEmail,
+          company_id: companyId,
+          role: role,
+          permissions: permissions,
+          status: "pendiente",
+        });
+      inviteDbError = error;
+    }
 
     if (inviteDbError) {
       console.error("[inviteCompanyUser] Error guardando invitación:", inviteDbError);
