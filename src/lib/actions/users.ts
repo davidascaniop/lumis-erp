@@ -56,6 +56,7 @@ export async function inviteCompanyUser(
         role: role,
         company_id: companyId,
         permissions: permissions,
+        status: "pendiente",
       });
 
     // Si el usuario ya estaba invitado o existe, esto podría dar error por llave duplicada (auth_id)
@@ -68,7 +69,8 @@ export async function inviteCompanyUser(
              role: role,
              company_id: companyId,
              full_name: fullName.trim(),
-             permissions: permissions
+             permissions: permissions,
+             status: "pendiente"
          }).eq("auth_id", authData.user.id);
       } else {
         console.error("[inviteCompanyUser] Insert error:", insertError);
@@ -152,3 +154,49 @@ export async function deleteCompanyUser(
     return { success: false, error: error.message || "Error interno del servidor" };
   }
 }
+
+export async function activateCompanyUser(email: string, authId: string) {
+  try {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error("Missing Supabase admin configuration");
+    }
+
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    // Buscar si existe un perfil pendiente y obtener la empresa correcta
+    const { data: pendingProfile, error: searchError } = await supabaseAdmin
+      .from("users")
+      .select("id, company_id, status")
+      .eq("email", email)
+      .eq("status", "pendiente")
+      .single();
+
+    if (searchError || !pendingProfile) {
+      return { success: false, error: "Esta invitación no es válida o ya fue usada" };
+    }
+
+    // Actualizamos el status a activo y aseguramos el company_id original del invite
+    const { error: updateError } = await supabaseAdmin
+      .from("users")
+      .update({
+        status: "activo",
+        company_id: pendingProfile.company_id, // Forzamos el ID original
+        auth_id: authId // Confirmamos que el auth_id coincide con el de la sesión actual
+      })
+      .eq("id", pendingProfile.id);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    return { success: true };
+
+  } catch (error: any) {
+    console.error("[activateCompanyUser] Unexpected error:", error);
+    return { success: false, error: error.message || "Error al activar la cuenta" };
+  }
+}
+

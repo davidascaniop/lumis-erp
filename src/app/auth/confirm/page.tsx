@@ -6,6 +6,7 @@ import { Shield, Lock, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { activateCompanyUser } from "@/lib/actions/users";
 
 function SetupPasswordForm() {
   const router = useRouter();
@@ -57,6 +58,17 @@ function SetupPasswordForm() {
       });
 
       if (error) throw error;
+      
+      if (!data.user?.email || !data.user?.id) {
+        throw new Error("No se pudo identificar la sesión activa tras el cambio de clave.");
+      }
+
+      // Llamada obligatoria para reasignar el company_id original del invite y quitar "pendiente"
+      const activationRes = await activateCompanyUser(data.user.email, data.user.id);
+
+      if (!activationRes.success) {
+        throw new Error(activationRes.error || "Esta invitación no es válida o ya fue usada");
+      }
 
       toast.success("Contraseña creada correctamente.");
       router.push("/dashboard");
