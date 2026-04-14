@@ -82,6 +82,13 @@ function SettingsContent() {
   const [bcvRate, setBcvRate] = useState("56.42");
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
 
+  // Force active tab for non-admins
+  useEffect(() => {
+    if (user && user.role !== "admin" && activeTab !== "variables") {
+      setActiveTab("variables");
+    }
+  }, [user, activeTab]);
+
   // Create use modal states
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteData, setInviteData] = useState<{
@@ -351,20 +358,25 @@ function SettingsContent() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Navigation Sidebar para Settings */}
         <div className="space-y-2">
-          <button
-            onClick={() => setActiveTab("profile")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === "profile" ? "bg-[#E040FB]/10 text-[#E040FB] border border-[#E040FB]/30" : "text-[#B8A0D0] hover:text-[#F5EEFF] hover:bg-[#1A1220] border border-transparent"}`}
-          >
-            <User className="w-5 h-5" />
-            Perfil y Empresa
-          </button>
-          <button
-            onClick={() => setActiveTab("users")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === "users" ? "bg-[#E040FB]/10 text-[#E040FB] border border-[#E040FB]/30" : "text-[#B8A0D0] hover:text-[#F5EEFF] hover:bg-[#1A1220] border border-transparent"}`}
-          >
-            <Users className="w-5 h-5" />
-            Usuarios y Roles
-          </button>
+          {user?.role === "admin" && (
+            <>
+              <button
+                onClick={() => setActiveTab("profile")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === "profile" ? "bg-[#E040FB]/10 text-[#E040FB] border border-[#E040FB]/30" : "text-[#B8A0D0] hover:text-[#F5EEFF] hover:bg-[#1A1220] border border-transparent"}`}
+              >
+                <User className="w-5 h-5" />
+                Perfil y Empresa
+              </button>
+              <button
+                onClick={() => setActiveTab("users")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === "users" ? "bg-[#E040FB]/10 text-[#E040FB] border border-[#E040FB]/30" : "text-[#B8A0D0] hover:text-[#F5EEFF] hover:bg-[#1A1220] border border-transparent"}`}
+              >
+                <Users className="w-5 h-5" />
+                Usuarios y Roles
+              </button>
+            </>
+          )}
+          
           <button
             onClick={() => setActiveTab("variables")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === "variables" ? "bg-[#E040FB]/10 text-[#E040FB] border border-[#E040FB]/30" : "text-[#B8A0D0] hover:text-[#F5EEFF] hover:bg-[#1A1220] border border-transparent"}`}
@@ -372,34 +384,39 @@ function SettingsContent() {
             <Building2 className="w-5 h-5" />
             Variables Globales
           </button>
-          <button
-            onClick={() => setActiveTab("subscription")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === "subscription" ? "bg-[#E040FB]/10 text-[#E040FB] border border-[#E040FB]/30" : "text-[#B8A0D0] hover:text-[#F5EEFF] hover:bg-[#1A1220] border border-transparent"}`}
-          >
-            <CreditCard className="w-5 h-5" />
-            Suscripción y Planes
-          </button>
-          <button
-            onClick={handleComingSoon}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#B8A0D0] hover:text-[#F5EEFF] hover:bg-[#1A1220] transition-colors font-medium border border-transparent"
-          >
-            <Bell className="w-5 h-5" />
-            Notificaciones
-          </button>
-          <button
-            onClick={handleComingSoon}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#B8A0D0] hover:text-[#F5EEFF] hover:bg-[#1A1220] transition-colors font-medium border border-transparent"
-          >
-            <Shield className="w-5 h-5" />
-            Seguridad
-          </button>
-          <button
-            onClick={() => setActiveTab("modules")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === "modules" ? "bg-[#E040FB]/10 text-[#E040FB] border border-[#E040FB]/30" : "text-[#B8A0D0] hover:text-[#F5EEFF] hover:bg-[#1A1220] border border-transparent"}`}
-          >
-            <Puzzle className="w-5 h-5" />
-            Módulos
-          </button>
+
+          {user?.role === "admin" && (
+            <>
+              <button
+                onClick={() => setActiveTab("subscription")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === "subscription" ? "bg-[#E040FB]/10 text-[#E040FB] border border-[#E040FB]/30" : "text-[#B8A0D0] hover:text-[#F5EEFF] hover:bg-[#1A1220] border border-transparent"}`}
+              >
+                <CreditCard className="w-5 h-5" />
+                Suscripción y Planes
+              </button>
+              <button
+                onClick={handleComingSoon}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#B8A0D0] hover:text-[#F5EEFF] hover:bg-[#1A1220] transition-colors font-medium border border-transparent"
+              >
+                <Bell className="w-5 h-5" />
+                Notificaciones
+              </button>
+              <button
+                onClick={handleComingSoon}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#B8A0D0] hover:text-[#F5EEFF] hover:bg-[#1A1220] transition-colors font-medium border border-transparent"
+              >
+                <Shield className="w-5 h-5" />
+                Seguridad
+              </button>
+              <button
+                onClick={() => setActiveTab("modules")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === "modules" ? "bg-[#E040FB]/10 text-[#E040FB] border border-[#E040FB]/30" : "text-[#B8A0D0] hover:text-[#F5EEFF] hover:bg-[#1A1220] border border-transparent"}`}
+              >
+                <Puzzle className="w-5 h-5" />
+                Módulos
+              </button>
+            </>
+          )}
         </div>
 
         {/* Content Area */}
@@ -843,26 +860,28 @@ function SettingsContent() {
                 </div>
               </div>
 
-              <div className="bg-surface-card border border-border/50 shadow-card rounded-2xl p-6">
-                <h2 className="text-xl font-bold font-montserrat text-text-1 mb-2">
-                  Impuestos
-                </h2>
-                <p className="text-text-2 text-sm mb-6">
-                  Configura el porcentaje de IVA base para las transacciones.
-                </p>
-
-                <div className="max-w-xs space-y-2">
-                  <Label className="text-xs font-bold font-montserrat text-text-1">IVA Nacional (%)</Label>
-                  <Input
-                    defaultValue="16"
-                    disabled
-                    className="bg-surface-input border border-border/60 text-text-1 opacity-60 font-bold font-mono rounded-xl h-11 shadow-inner"
-                  />
-                  <p className="text-[10px] text-text-3 font-semibold">
-                    Configuración avanzada bloqueada en plan actual.
+              {user?.role === "admin" && (
+                <div className="bg-surface-card border border-border/50 shadow-card rounded-2xl p-6">
+                  <h2 className="text-xl font-bold font-montserrat text-text-1 mb-2">
+                    Impuestos
+                  </h2>
+                  <p className="text-text-2 text-sm mb-6">
+                    Configura el porcentaje de IVA base para las transacciones.
                   </p>
+
+                  <div className="max-w-xs space-y-2">
+                    <Label className="text-xs font-bold font-montserrat text-text-1">IVA Nacional (%)</Label>
+                    <Input
+                      defaultValue="16"
+                      disabled
+                      className="bg-surface-input border border-border/60 text-text-1 opacity-60 font-bold font-mono rounded-xl h-11 shadow-inner"
+                    />
+                    <p className="text-[10px] text-text-3 font-semibold">
+                      Configuración avanzada bloqueada en plan actual.
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
             </motion.div>
           )}
 
