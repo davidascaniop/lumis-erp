@@ -12,8 +12,19 @@ import { Pricing } from '@/components/landing/pricing'
 import { FAQ } from '@/components/landing/faq'
 import { CTAFinal } from '@/components/landing/cta-final'
 import { Footer } from '@/components/landing/footer'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function LandingPage() {
+  const router = useRouter()
+
+  useEffect(() => {
+    // Si Supabase hizo un fallback al Site URL por falta de configuración de Redirect URLs en el backend,
+    // interceptamos el hash (que se arrastró desde root `page.tsx`)
+    if (typeof window !== "undefined" && window.location.hash.includes("access_token") && window.location.hash.includes("type=invite")) {
+      router.replace(`/auth/confirm`);
+    }
+  }, [router]);
   return (
     <main className="min-h-screen bg-white selection:bg-[#E040FB]/30 selection:text-slate-900 overflow-x-hidden">
       <Nav />
