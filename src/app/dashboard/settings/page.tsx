@@ -140,7 +140,26 @@ function SettingsContent() {
               .select("id, auth_id, full_name, email, role")
               .eq("company_id", uData.company_id);
 
-            if (teamData) setTeamMembers(teamData);
+            const { data: pendingData } = await supabase
+              .from("company_invitations")
+              .select("id, email, role, status, permissions")
+              .eq("company_id", uData.company_id)
+              .eq("status", "pendiente");
+
+            const combined = [
+              ...(teamData || []).map((m: any) => ({ ...m, isPending: false })),
+              ...(pendingData || []).map((m: any) => ({
+                id: m.id,
+                full_name: m.email.split("@")[0],
+                email: m.email,
+                role: m.role,
+                isPending: true,
+                auth_id: null,
+                permissions: m.permissions || []
+              }))
+            ];
+
+            setTeamMembers(combined as any);
           }
         }
       }
@@ -253,6 +272,25 @@ function SettingsContent() {
       toast.success(`Invitación oficial enviada a ${inviteData.email}`);
     } else {
       toast.error(res.error || "Error al invitar usuario");
+    }
+  };
+
+  const handleResendInvite = async (member: any) => {
+    setIsLoading(true);
+    const res = await inviteCompanyUser(
+      member.email,
+      member.full_name,
+      member.role,
+      profile?.company_id || "",
+      user?.id || "",
+      member.permissions || []
+    );
+    setIsLoading(false);
+
+    if (res.success) {
+      toast.success(`Reenviada la invitación a ${member.email}`);
+    } else {
+      toast.error(res.error || "Error al reenviar invitación");
     }
   };
 
@@ -717,13 +755,22 @@ function SettingsContent() {
                           >
                             {ROLE_DEFINITIONS[member.role as AppRole]?.label || member.role || "USUARIO"}
                           </Badge>
-                          {(member.role === "vendedor" || member.role === "admin") && (
+                          {(member.role === "vendedor" || member.role === "admin") && !member.isPending && (
                             <button
                               onClick={() => { setSelectedMember(member); setShowCommissionModal(true); }}
                               className="text-brand hover:bg-brand/10 p-2 rounded-lg transition-colors border border-transparent hover:border-brand/20"
                               title="Configurar Comisiones"
                             >
                               <Percent className="w-4 h-4" />
+                            </button>
+                          )}
+                          {member.isPending && (
+                            <button
+                              onClick={() => handleResendInvite(member)}
+                              disabled={isLoading}
+                              className="text-brand hover:bg-brand/10 px-3 py-1.5 rounded-lg transition-colors border border-brand/20 text-xs font-bold uppercase tracking-wider"
+                            >
+                              Reenviar
                             </button>
                           )}
                           {profile?.email !== member.email && (

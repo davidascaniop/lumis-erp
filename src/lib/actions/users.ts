@@ -45,37 +45,20 @@ export async function inviteCompanyUser(
       return { success: false, error: authError?.message || "Error al enviar la invitación de Supabase" };
     }
 
-    // 3. Crear el registro en la tabla pública "users" inmediatamente
-    // Así el usuario ya aparece en la lista de "Usuarios y Roles"
-    const { error: insertError } = await supabaseAdmin
-      .from("users")
-      .insert({
-        auth_id: authData.user.id,
+    // 3. Crear el registro en la tabla dedicada de invitaciones
+    const { error: inviteDbError } = await supabaseAdmin
+      .from("company_invitations")
+      .upsert({
         email: email.toLowerCase().trim(),
-        full_name: fullName.trim(),
-        role: role,
         company_id: companyId,
+        role: role,
         permissions: permissions,
         status: "pendiente",
-      });
+      }, { onConflict: "email" });
 
-    // Si el usuario ya estaba invitado o existe, esto podría dar error por llave duplicada (auth_id)
-    // En ese caso, podríamos simplemente actualizar su rol/company_id
-    if (insertError) {
-      // Ignoramos si es un error de unicidad (el usuario ya estaba registrado en esta app)
-      // pero actualizamos su rol y compañía
-      if (insertError.code === '23505') {
-         await supabaseAdmin.from("users").update({
-             role: role,
-             company_id: companyId,
-             full_name: fullName.trim(),
-             permissions: permissions,
-             status: "pendiente"
-         }).eq("auth_id", authData.user.id);
-      } else {
-        console.error("[inviteCompanyUser] Insert error:", insertError);
-        return { success: false, error: "Error al registrar el perfil del usuario" };
-      }
+    if (inviteDbError) {
+      console.error("[inviteCompanyUser] Error guardando invitación:", inviteDbError);
+      return { success: false, error: "Error al registrar la invitación." };
     }
 
     revalidatePath("/dashboard/settings");
@@ -166,30 +149,39 @@ export async function activateCompanyUser(email: string, authId: string) {
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    // Buscar si existe un perfil pendiente y obtener la empresa correcta
-    const { data: pendingProfile, error: searchError } = await supabaseAdmin
-      .from("users")
-      .select("id, company_id, status")
+    // Buscar si existe un perfil pendiente en company_invitations
+    const { data: pendingInvite, error: searchError } = await supabaseAdmin
+      .from("company_invitations")
+      .select("id, company_id, role, permissions, status")
       .eq("email", email)
       .eq("status", "pendiente")
       .single();
 
-    if (searchError || !pendingProfile) {
-      return { success: false, error: "Esta invitación no es válida o ya fue usada" };
+    if (searchError || !pendingInvite) {
+      return { success: false, error: "Esta invitación no es válida o ya fue usada. Pide al administrador una nueva." };
     }
 
-    // Actualizamos el status a activo y aseguramos el company_id original del invite
-    const { error: updateError } = await supabaseAdmin
-      .from("users")
-      .update({
-        status: "activo",
-        company_id: pendingProfile.company_id, // Forzamos el ID original
-        auth_id: authId // Confirmamos que el auth_id coincide con el de la sesión actual
-      })
-      .eq("id", pendingProfile.id);
+    // Actualizamos el status a aceptada en la tabla de invitaciones
+    await supabaseAdmin
+      .from("company_invitations")
+      .update({ status: "aceptada" })
+      .eq("id", pendingInvite.id);
 
-    if (updateError) {
-      throw updateError;
+    // Creamos/Actualizamos el perfil real en "users" para esta empresa
+    const { error: userUpsertError } = await supabaseAdmin
+      .from("users")
+      .upsert({
+        auth_id: authId,
+        email: email.toLowerCase().trim(),
+        role: pendingInvite.role,
+        company_id: pendingInvite.company_id,
+        permissions: pendingInvite.permissions,
+        status: "activo"
+      }, { onConflict: "auth_id" });
+
+    if (userUpsertError) {
+      console.error("[activateCompanyUser] Error al trasladar a users:", userUpsertError);
+      throw userUpsertError;
     }
 
     return { success: true };
