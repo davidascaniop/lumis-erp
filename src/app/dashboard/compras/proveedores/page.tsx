@@ -529,7 +529,7 @@ export default function ProveedoresPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-2">
+          <div className="space-y-4 py-2 px-6 flex-1 overflow-y-auto">
             {/* Nombre */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold font-montserrat text-text-1">
@@ -646,7 +646,7 @@ export default function ProveedoresPage() {
             </div>
           </div>
 
-          <DialogFooter className="gap-2">
+          <DialogFooter className="gap-2 px-6 pb-6 pt-2">
             <button
               onClick={() => setModalOpen(false)}
               className="px-5 py-2 text-text-3 font-montserrat font-bold text-sm hover:text-text-1 transition-colors"
@@ -683,7 +683,7 @@ export default function ProveedoresPage() {
           </DialogHeader>
 
           {selectedSupplier && (
-            <div className="space-y-6 py-2">
+            <div className="space-y-6 py-2 px-6 flex-1 overflow-y-auto">
               {/* Info General */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {[

@@ -614,7 +614,7 @@ export default function OrdenesCompraPage() {
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-6 py-4">
+          <div className="space-y-6 px-6 py-4 overflow-y-auto flex-1">
             {/* Sección Proveedor */}
             <div className="bg-surface-card border border-border rounded-2xl p-4 space-y-4">
               <div className="flex items-center justify-between">
@@ -813,7 +813,7 @@ export default function OrdenesCompraPage() {
             </div>
           </div>
 
-          <DialogFooter className="gap-3 sm:gap-0 mt-4">
+          <DialogFooter className="gap-3 sm:gap-0 mt-4 px-6 py-4">
             <button onClick={() => setNewOpen(false)} className="px-5 py-2 text-text-3 font-bold text-sm">Cancelar</button>
             <div className="flex gap-2">
               <button disabled={saving} onClick={() => handleSave(false)} className="px-6 py-2.5 bg-surface-elevated border border-border text-text-1 font-bold text-sm rounded-xl hover:bg-surface-hover/30 transition-all">

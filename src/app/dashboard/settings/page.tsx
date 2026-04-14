@@ -583,7 +583,7 @@ function SettingsContent() {
                       </p>
                     </DialogHeader>
                     
-                    <div className="space-y-6 pt-4">
+                    <div className="space-y-6 pt-4 px-6 overflow-y-auto flex-1 pb-4">
                       {/* Name */}
                       <div className="space-y-2">
                         <Label className="text-[10px] font-bold uppercase tracking-widest text-[#8B5CF6]">
