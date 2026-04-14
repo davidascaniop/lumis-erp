@@ -83,3 +83,77 @@ export async function inviteCompanyUser(
     return { success: false, error: error?.message || "Error del servidor al invitar" };
   }
 }
+
+export async function deleteCompanyUser(
+  targetAuthId: string,
+  targetUserId: string,
+  companyId: string,
+  requesterAuthId: string
+) {
+  try {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      throw new Error("Missing Supabase admin configuration");
+    }
+
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    // 1. Verificar que el solicitante sea Administrador de esta empresa
+    const { data: requester, error: requesterError } = await supabaseAdmin
+      .from("users")
+      .select("role, company_id")
+      .eq("auth_id", requesterAuthId)
+      .single();
+
+    if (requesterError || !requester || requester.company_id !== companyId || (requester.role !== "admin" && requester.role !== "gerente")) {
+      return { success: false, error: "No tienes permisos para eliminar usuarios." };
+    }
+
+    // 2. Verificar si el usuario a eliminar es el último Administrador General
+    const { data: targetUser, error: targetError } = await supabaseAdmin
+      .from("users")
+      .select("role")
+      .eq("auth_id", targetAuthId)
+      .single();
+
+    if (targetUser?.role === "admin") {
+      const { count } = await supabaseAdmin
+        .from("users")
+        .select("*", { count: 'exact', head: true })
+        .eq("company_id", companyId)
+        .eq("role", "admin");
+
+      if (count && count <= 1) {
+        return { success: false, error: "No puedes eliminar al único administrador de la empresa." };
+      }
+    }
+
+    // 3. Eliminar de la tabla pública (esto debería borrar registros asociados si hay CASCADE, o fallar si hay restricciones)
+    const { error: dbError } = await supabaseAdmin
+      .from("users")
+      .delete()
+      .eq("auth_id", targetAuthId);
+
+    if (dbError) {
+      console.error("[deleteCompanyUser] DB delete error:", dbError);
+      return { success: false, error: "Error al eliminar el registro del usuario." };
+    }
+
+    // 4. Eliminar de Supabase Auth
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(targetAuthId);
+
+    if (authError) {
+      console.error("[deleteCompanyUser] Auth delete error:", authError);
+      // Opcional: Podríamos re-insertar el usuario si esto falla, pero usualmente si el DB funcionó queremos seguir
+      return { success: false, error: "Error al eliminar el usuario de la autenticación." };
+    }
+
+    revalidatePath("/dashboard/settings");
+    return { success: true };
+  } catch (error: any) {
+    console.error("[deleteCompanyUser] Unexpected error:", error);
+    return { success: false, error: error.message || "Error interno del servidor" };
+  }
+}

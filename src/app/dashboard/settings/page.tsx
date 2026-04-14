@@ -51,7 +51,7 @@ import { CommissionRulesEditor } from "@/components/users/commission-rules-edito
 import { Percent } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
 import { updateUserFullName } from "@/lib/actions/profile";
-import { inviteCompanyUser } from "@/lib/actions/users";
+import { inviteCompanyUser, deleteCompanyUser } from "@/lib/actions/users";
 import { INVITE_ROLES, ROLE_DEFINITIONS, AppRole, ROLE_SECTION_ACCESS } from "@/lib/constants/roles";
 
 function SettingsContent() {
@@ -137,7 +137,7 @@ function SettingsContent() {
             // Load team members
             const { data: teamData } = await supabase
               .from("users")
-              .select("id, full_name, email, role")
+              .select("id, auth_id, full_name, email, role")
               .eq("company_id", uData.company_id);
 
             if (teamData) setTeamMembers(teamData);
@@ -256,10 +256,29 @@ function SettingsContent() {
     }
   };
 
-  const handleRemoveUser = (email: string) => {
-    // En una app real esto llamaría a Supabase DELETE
-    setTeamMembers(teamMembers.filter((m) => m.email !== email));
-    toast.success("Usuario removido del equipo");
+  const handleRemoveUser = async (member: any) => {
+    if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente a ${member.full_name}?`)) return;
+    
+    setIsLoading(true);
+    try {
+      const res = await deleteCompanyUser(
+        member.auth_id,
+        member.id,
+        profile?.company_id || "",
+        user?.id || ""
+      );
+
+      if (res.success) {
+        setTeamMembers(teamMembers.filter((m) => m.id !== member.id));
+        toast.success("Usuario eliminado correctamente");
+      } else {
+        toast.error(res.error || "Error al eliminar usuario");
+      }
+    } catch (error: any) {
+      toast.error("Error inesperado: " + error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleComingSoon = () => {
@@ -709,8 +728,9 @@ function SettingsContent() {
                           )}
                           {profile?.email !== member.email && (
                             <button
-                              onClick={() => handleRemoveUser(member.email)}
-                              className="text-status-danger hover:bg-status-danger/10 p-2 rounded-lg transition-colors border border-transparent hover:border-status-danger/20"
+                              onClick={() => handleRemoveUser(member)}
+                              disabled={isLoading}
+                              className="text-status-danger hover:bg-status-danger/10 p-2 rounded-lg transition-colors border border-transparent hover:border-status-danger/20 disabled:opacity-50"
                               title="Eliminar usuario"
                             >
                               <Trash2 className="w-4 h-4" />
