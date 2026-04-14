@@ -23,11 +23,11 @@ export async function updateUserFullName(fullName: string): Promise<{ success: b
     }
 
     // Update full_name — server client has broader write permissions
-    const { error: updateError, count } = await supabase
+    const { error: updateError } = await supabase
       .from("users")
       .update({ full_name: fullName.trim() })
       .eq("auth_id", user.id)
-      .select("id", { count: "exact", head: true });
+      .select("id");
 
     if (updateError) {
       console.error("[updateUserFullName] Supabase error:", updateError);
