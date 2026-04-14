@@ -13,6 +13,7 @@ import {
 import { cn, formatNumber } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { ROLE_SECTION_ACCESS, AppRole } from "@/lib/constants/roles";
 import { useUser } from "@/hooks/use-user";
 import { useBCV } from "@/hooks/use-bcv";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -157,14 +158,19 @@ export function Sidebar() {
   // Build nav sections dynamically based on enabled modules
   const modulesEnabled: string[] = user?.companies?.modules_enabled || [];
   const NAV_SECTIONS = useMemo(() => {
-    const sections = [...BASE_NAV_SECTIONS];
+    let sections = [...BASE_NAV_SECTIONS];
     if (modulesEnabled.includes('restaurante')) {
       // Insert after "compras" (index 1)
       const comprasIdx = sections.findIndex(s => s.id === 'compras');
       sections.splice(comprasIdx + 1, 0, RESTAURANT_SECTION);
     }
-    return sections;
-  }, [modulesEnabled]);
+    
+    // Filtramos según el rol del usuario
+    const currentRole = (user?.role || 'admin') as AppRole;
+    const allowedSectionIds = ROLE_SECTION_ACCESS[currentRole] || ROLE_SECTION_ACCESS['vendedor'];
+    
+    return sections.filter(section => allowedSectionIds.includes(section.id as any));
+  }, [modulesEnabled, user?.role]);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const { notifications, unreadCount, markAsRead, markAllRead } = useNotifications(

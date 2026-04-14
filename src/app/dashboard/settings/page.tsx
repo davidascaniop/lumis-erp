@@ -50,6 +50,8 @@ import { CommissionRulesEditor } from "@/components/users/commission-rules-edito
 import { Percent } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
 import { updateUserFullName } from "@/lib/actions/profile";
+import { inviteCompanyUser } from "@/lib/actions/users";
+import { INVITE_ROLES, ROLE_DEFINITIONS, AppRole } from "@/lib/constants/roles";
 
 function SettingsContent() {
   const supabase = createClient();
@@ -209,24 +211,41 @@ function SettingsContent() {
       return;
     }
 
+    if (!profile?.company_id) {
+      toast.error("No tienes una compañía asociada para invitar usuarios");
+      return;
+    }
+
     setIsLoading(true);
 
-    // Simular invitación (en un entorno real requeriría enviar un magic link o crearlo en Supabase Auth Admin)
-    setTimeout(() => {
+    const res = await inviteCompanyUser(
+      inviteData.email,
+      inviteData.name,
+      inviteData.role,
+      profile.company_id,
+      user?.id || ""
+    );
+
+    setIsLoading(false);
+
+    if (res.success) {
+      setShowInviteModal(false);
+      
+      // Añadimos al estado local para evitar recargar toda la página (optimistic UI)
       const newUser = {
-        id: Math.random().toString(), // fake ID
+        id: Math.random().toString(), 
         full_name: inviteData.name,
         email: inviteData.email,
         role: inviteData.role,
         isPending: true, // Flag local
       };
-
       setTeamMembers([...teamMembers, newUser]);
-      setShowInviteModal(false);
       setInviteData({ name: "", email: "", role: "vendedor" });
-      setIsLoading(false);
-      toast.success(`Invitación enviada a ${inviteData.email}`);
-    }, 1500);
+      
+      toast.success(`Invitación oficial enviada a ${inviteData.email}`);
+    } else {
+      toast.error(res.error || "Error al invitar usuario");
+    }
   };
 
   const handleRemoveUser = (email: string) => {
@@ -520,33 +539,19 @@ function SettingsContent() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="bg-surface-elevated border-border text-text-1 z-[9999]" position="popper">
-                            <SelectItem
-                              value="vendedor"
-                              className="focus:bg-surface-hover focus:text-text-1 cursor-pointer"
-                            >
-                              Representante de Ventas
-                            </SelectItem>
-                            <SelectItem
-                              value="cobranza"
-                              className="focus:bg-surface-hover focus:text-text-1 cursor-pointer"
-                            >
-                              Analista de Cobranza (CxC)
-                            </SelectItem>
-                            <SelectItem
-                              value="admin"
-                              className="focus:bg-surface-hover focus:text-text-1 cursor-pointer"
-                            >
-                              Administrador General
-                            </SelectItem>
+                            {INVITE_ROLES.map((r) => (
+                              <SelectItem
+                                key={r}
+                                value={r}
+                                className="focus:bg-surface-hover focus:text-text-1 cursor-pointer"
+                              >
+                                {ROLE_DEFINITIONS[r].label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
-                        <p className="text-[10px] text-text-3 mt-1">
-                          {inviteData.role === "admin" &&
-                            "Control total sobre configuración y roles."}
-                          {inviteData.role === "vendedor" &&
-                            "Solo visualiza y crea clientes, y registrar notas de entrega."}
-                          {inviteData.role === "cobranza" &&
-                            "Accede a modulo de cuentas por cobrar y registra pagos."}
+                        <p className="text-[10px] text-text-3 mt-1 h-8">
+                          {ROLE_DEFINITIONS[inviteData.role as AppRole]?.description || "Selecciona un rol"}
                         </p>
                       </div>
                       <Button
@@ -606,8 +611,12 @@ function SettingsContent() {
                           </div>
                         </div>
                         <div className="flex items-center gap-4">
-                          <Badge className="bg-brand/10 text-brand border border-brand/20 uppercase font-bold tracking-widest text-[10px] hover:bg-brand/20 transition-colors">
-                            {member.role || "USUARIO"}
+                          <Badge 
+                            className={`uppercase font-bold tracking-widest text-[10px] ${
+                              ROLE_DEFINITIONS[member.role as AppRole]?.badgeClass || "bg-brand/10 text-brand border border-brand/20 hover:bg-brand/20"
+                            }`}
+                          >
+                            {ROLE_DEFINITIONS[member.role as AppRole]?.label || member.role || "USUARIO"}
                           </Badge>
                           {(member.role === "vendedor" || member.role === "admin") && (
                             <button
