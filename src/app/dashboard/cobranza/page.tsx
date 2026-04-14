@@ -536,7 +536,7 @@ function CobranzaContent() {
 
       {/* DIALOGO: REGISTRAR COBRO */}
       <Dialog open={payOpen} onOpenChange={setPayOpen}>
-        <DialogContent className="bg-surface-base border-border text-white">
+        <DialogContent className="bg-surface-base border-border text-white max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-syne text-xl">
               Registrar Abono/Pago
@@ -625,7 +625,7 @@ function CobranzaContent() {
 
       {/* DIALOGO: VERIFICACIONES PENDIENTES */}
       <Dialog open={verifOpen} onOpenChange={setVerifOpen}>
-        <DialogContent className="bg-surface-base border-border text-white sm:max-w-2xl">
+        <DialogContent className="bg-surface-base border-border text-white sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-syne text-xl flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-brand" /> Verificaciones de

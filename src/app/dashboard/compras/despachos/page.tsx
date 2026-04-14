@@ -870,7 +870,7 @@ export default function DespachosPage() {
 
       {/* ── MODAL: Nuevo Despacho ── */}
       <Dialog open={newOpen} onOpenChange={setNewOpen}>
-        <DialogContent className="bg-surface-base border-border text-text-1 sm:max-w-lg">
+        <DialogContent className="bg-surface-base border-border text-text-1 sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-montserrat font-bold text-xl text-text-1 flex items-center gap-2">
               <Plus className="w-5 h-5 text-brand" />
@@ -1013,7 +1013,7 @@ export default function DespachosPage() {
 
       {/* ── MODAL: Actualizar Estado ── */}
       <Dialog open={updateOpen} onOpenChange={setUpdateOpen}>
-        <DialogContent className="bg-surface-base border-border text-text-1 sm:max-w-md">
+        <DialogContent className="bg-surface-base border-border text-text-1 sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-montserrat font-bold text-lg text-text-1 flex items-center gap-2">
               <RefreshCw className="w-4 h-4 text-brand" />

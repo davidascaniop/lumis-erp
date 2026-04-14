@@ -410,14 +410,14 @@ function RecurrentesContent() {
         </div>
       )}
 
-      {/* DIALOG: NUEVO GASTO RECURRENTE */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="bg-surface-card border-border sm:max-w-xl text-text-1">
-          <DialogHeader>
+        <DialogContent className="bg-surface-card border-border sm:max-w-xl text-text-1 flex flex-col max-h-[90vh] p-0 gap-0">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b border-border flex-shrink-0">
              <DialogTitle className="text-xl font-bold font-montserrat tracking-tight">Programar Gasto Recurrente</DialogTitle>
              <DialogDescription className="text-text-3 text-xs">Define el ciclo de pago y los montos base.</DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
+          <div className="overflow-y-auto flex-1 px-6 py-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
              <div className="space-y-1.5 sm:col-span-2">
                 <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Nombre del Gasto</label>
                 <Input placeholder="Ej: Alquiler Local Central" value={formData.name} onChange={e => setFormData(p=>({...p, name: e.target.value}))} className="h-11 bg-surface-input" />
@@ -469,13 +469,14 @@ function RecurrentesContent() {
                 <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Fecha de Fin (Opcional)</label>
                 <Input type="date" value={formData.end_date} onChange={e => setFormData(p=>({...p, end_date: e.target.value}))} className="h-11 bg-surface-input" />
              </div>
+            </div>
           </div>
-          <DialogFooter>
+          <div className="px-6 py-4 border-t border-border flex-shrink-0 flex justify-end gap-3 bg-surface-card sticky bottom-0">
              <button onClick={() => setCreateOpen(false)} className="px-6 py-2 text-text-3 font-bold">Cancelar</button>
              <button disabled={saving} onClick={handleSave} className="px-8 py-3 bg-brand-gradient text-white rounded-xl font-bold shadow-brand flex items-center gap-2">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Guardar Programación"}
              </button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 

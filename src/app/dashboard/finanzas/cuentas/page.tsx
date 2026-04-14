@@ -498,7 +498,7 @@ function CuentasContent() {
 
       {/* ─── DIALOG: NUEVA CUENTA ─── */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="bg-surface-card border-border sm:max-w-2xl text-text-1">
+        <DialogContent className="bg-surface-card border-border sm:max-w-2xl text-text-1 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold font-montserrat">Nueva Cuenta</DialogTitle>
             <DialogDescription className="text-text-3 text-xs">Registra una nueva cuenta bancaria, efectivo o plataforma digital.</DialogDescription>
@@ -572,7 +572,7 @@ function CuentasContent() {
 
       {/* ─── DIALOG: EDITAR CUENTA ─── */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="bg-surface-card border-border sm:max-w-2xl text-text-1">
+        <DialogContent className="bg-surface-card border-border sm:max-w-2xl text-text-1 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold font-montserrat">Editar Cuenta</DialogTitle>
             <DialogDescription className="text-text-3 text-xs">Modifica los datos de la cuenta. El saldo actual no se puede editar directamente.</DialogDescription>
@@ -631,7 +631,7 @@ function CuentasContent() {
 
       {/* ─── DIALOG: TRANSFERENCIA ENTRE CUENTAS ─── */}
       <Dialog open={transferOpen} onOpenChange={setTransferOpen}>
-        <DialogContent className="bg-surface-card border-border sm:max-w-xl text-text-1">
+        <DialogContent className="bg-surface-card border-border sm:max-w-xl text-text-1 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold font-montserrat flex items-center gap-2"><ArrowLeftRight className="w-5 h-5 text-brand" /> Transferencia entre Cuentas</DialogTitle>
             <DialogDescription className="text-text-3 text-xs">Mueve fondos entre tus cuentas registradas.</DialogDescription>

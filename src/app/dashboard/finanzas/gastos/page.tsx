@@ -466,14 +466,14 @@ function GastosContent() {
         </div>
       </div>
 
-      {/* DIALOG: REGISTRAR GASTO */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="bg-surface-card border-border sm:max-w-2xl text-text-1">
-          <DialogHeader>
+        <DialogContent className="bg-surface-card border-border sm:max-w-2xl text-text-1 flex flex-col max-h-[90vh] p-0 gap-0">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b border-border flex-shrink-0">
              <DialogTitle className="text-xl font-montserrat font-bold">Registrar Nuevo Gasto</DialogTitle>
              <DialogDescription className="text-text-3 text-xs">Carga un nuevo comprobante de salida o compromiso de pago.</DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
+          <div className="overflow-y-auto flex-1 px-6 py-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
              <div className="space-y-1.5 sm:col-span-2">
                 <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Categoría</label>
                 <Select value={formData.category} onValueChange={val => setFormData(p=>({...p, category: val}))}>
@@ -539,13 +539,14 @@ function GastosContent() {
                 <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Notas / Concepto</label>
                 <textarea rows={2} value={formData.notes} onChange={(e: any) => setFormData(p=>({...p, notes: e.target.value}))} className="w-full bg-surface-input border border-border/50 rounded-xl p-3 text-sm resize-none focus:ring-2 focus:ring-brand" />
              </div>
+            </div>
           </div>
-          <DialogFooter>
+          <div className="px-6 py-4 border-t border-border flex-shrink-0 flex justify-end gap-3 bg-surface-card sticky bottom-0">
              <button onClick={() => setCreateOpen(false)} className="px-6 py-2 text-text-3 font-bold">Cancelar</button>
              <button disabled={saving} onClick={handleSaveExpense} className="px-8 py-3 bg-brand-gradient text-white rounded-xl font-bold shadow-brand flex items-center gap-2">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CheckCircle2 className="w-4 h-4" /> Guardar Gasto</>}
              </button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 
