@@ -35,8 +35,8 @@ export async function inviteCompanyUser(
           company_id: companyId,
           permissions: permissions,
         },
-        // Opcional: Redirigir a una página específica tras aceptar
-        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard`
+        // Redirigir a la página donde el usuario creará su contraseña
+        redirectTo: 'https://uselumisapp.com/auth/confirm'
       }
     );
 

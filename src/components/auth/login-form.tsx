@@ -47,7 +47,7 @@ export function LoginForm() {
   // Detect Supabase Auth implicit flow (e.g. from email invitation)
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash.includes("access_token") && window.location.hash.includes("type=invite")) {
-      router.replace(`/setup-password`);
+      router.replace(`/auth/confirm`);
     }
   }, [router]);
 
