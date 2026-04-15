@@ -18,6 +18,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useTreasuryAccounts, registerTreasuryMovement } from "@/hooks/use-treasury";
+import { useUser } from "@/hooks/use-user";
 
 // ─── Price Comparison Badge ────────────────────────────────────────────────────
 function PriceCompareBadge({ current, previous }: { current: number; previous: number | null }) {
@@ -110,6 +111,7 @@ export default function PurchaseDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const supabase = createClient();
+  const { user: currentUser } = useUser();
 
   const [purchase, setPurchase] = useState<Purchase | null>(null);
   const [items, setItems] = useState<PurchaseItem[]>([]);
@@ -245,7 +247,7 @@ export default function PurchaseDetailPage() {
           type: "IN",
           qty: toReceive,
           reason: `Recepción de Orden ${purchase.purchase_number}`,
-          user_id: user?.id,
+          user_id: currentUser?.id,
           entity_type: "purchase",
           entity_id: purchase.id
         } as any);
