@@ -115,6 +115,7 @@ export default function PresupuestosPage() {
           total_bs: fullQuote.total_bs,
           subtotal_usd: fullQuote.total_usd,
           tax_usd: 0,
+          tax_bs: 0,
           currency: "USD",
           payment_type: "contado",
           payment_method: "Efectivo",
