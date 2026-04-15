@@ -158,7 +158,7 @@ function NuevaVentaContent() {
         }
 
         // Si estamos editando, cargar el pedido
-        if (editOrderId && usr.company_id) {
+        if (editOrderId && companyId) {
           const { data: orderToEdit } = await supabase
             .from("orders")
             .select(`
@@ -173,7 +173,7 @@ function NuevaVentaContent() {
               )
             `)
             .eq("id", editOrderId)
-            .eq("company_id", usr.company_id)
+            .eq("company_id", companyId)
             .single();
 
           if (orderToEdit) {
