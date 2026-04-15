@@ -178,7 +178,7 @@ export function Sidebar() {
   }, [modulesEnabled, user?.role]);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
-  const { notifications, unreadCount, markAsRead, markAllRead } = useNotifications(
+  const { notifications, unreadCount, markAsRead, markAllRead, triggerFetch } = useNotifications(
     user?.company_id,
     user?.companies,
   );
@@ -419,7 +419,10 @@ export function Sidebar() {
       <div className="p-3 border-t border-border space-y-2">
         <div className="relative" ref={dropdownRef}>
           <button
-            onClick={() => setShowNotifications(!showNotifications)}
+            onClick={() => {
+              if (!showNotifications) triggerFetch();
+              setShowNotifications(!showNotifications);
+            }}
             className={cn(
               "w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-150",
               showNotifications ? "bg-surface-hover/20 text-text-1" : "text-text-2 hover:bg-surface-hover/10 hover:text-text-1",

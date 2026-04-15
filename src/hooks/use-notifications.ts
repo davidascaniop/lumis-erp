@@ -364,11 +364,20 @@ export function useNotifications(companyId?: string, userCompanies?: any) {
     }
   }, [companyId, userCompanies]);
 
+  // Lazy init: don't fetch on mount, only on demand
+  const [hasFetched, setHasFetched] = useState(false);
+
   useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 5 * 60 * 1000); // cada 5 min
+    if (!hasFetched) return;
+    // Only start polling AFTER the first manual fetch
+    const interval = setInterval(fetchNotifications, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [fetchNotifications]);
+  }, [hasFetched, fetchNotifications]);
+
+  const triggerFetch = useCallback(() => {
+    if (!hasFetched) setHasFetched(true);
+    fetchNotifications();
+  }, [hasFetched, fetchNotifications]);
 
   const markAsRead = (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
@@ -380,5 +389,5 @@ export function useNotifications(companyId?: string, userCompanies?: any) {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  return { notifications, loading, unreadCount, markAsRead, markAllRead, refetch: fetchNotifications };
+  return { notifications, loading, unreadCount, markAsRead, markAllRead, refetch: fetchNotifications, triggerFetch };
 }

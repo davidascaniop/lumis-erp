@@ -126,17 +126,7 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       try {
-        const {
-          data: { user: authUser },
-        } = await supabase.auth.getUser();
-        if (!authUser) return;
-
-        const { data: rawUserData } = await supabase
-          .from("users")
-          .select("company_id")
-          .eq("auth_id", authUser.id)
-          .single();
-        const companyId = (rawUserData as any)?.company_id;
+        const companyId = user?.company_id;
         if (!companyId) {
           setLoading(false);
           return;
@@ -425,7 +415,7 @@ export default function DashboardPage() {
       }
     }
     load();
-  }, []);
+  }, [user?.company_id]);
 
   if (loading)
     return (

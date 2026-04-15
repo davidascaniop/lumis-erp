@@ -29,36 +29,19 @@ export function useBCV() {
 
     fetchBcv();
 
-    // Suscribirse a cambios en tiempo real
-    const channel = supabase
-      .channel("db-exchange-rates")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "exchange_rates",
-        },
-        () => {
-          fetchBcv();
-        },
-      )
-      .subscribe();
+    // Polling cada 30 min es suficiente para una tasa que cambia 1x al día
+    const interval = setInterval(fetchBcv, 1000 * 60 * 30);
 
-    const interval = setInterval(fetchBcv, 1000 * 60 * 30); // cada 30 min
-
-    // Listener para actualizaciones manuales desde la misma pestaña
+    // Listener para actualizaciones manuales desde settings
     const handleCustomUpdate = () => fetchBcv();
-    window.addEventListener("storage", handleCustomUpdate);
     window.addEventListener("bcv-update", handleCustomUpdate);
 
     return () => {
       clearInterval(interval);
-      supabase.removeChannel(channel);
-      window.removeEventListener("storage", handleCustomUpdate);
       window.removeEventListener("bcv-update", handleCustomUpdate);
     };
   }, []);
 
   return { rate, updatedAt };
 }
+
