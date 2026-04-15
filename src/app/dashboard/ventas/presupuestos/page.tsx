@@ -97,11 +97,20 @@ export default function PresupuestosPage() {
 
       if (iError) throw iError;
 
-      // 3. Crear el Pedido (Order)
-      const orderNumber = `PED-${Date.now().toString().slice(-6)}`;
+      // 3. Obtener el usuario autenticado y su ID interno en la tabla users
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) throw new Error("Usuario no autenticado");
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuario no autenticado");
+      const { data: internalUser, error: userErr } = await supabase
+        .from("users")
+        .select("id")
+        .eq("auth_id", authUser.id)
+        .single();
+
+      if (userErr || !internalUser) throw new Error("No se encontró el perfil del usuario");
+
+      // 4. Crear el Pedido (Order)
+      const orderNumber = `PED-${Date.now().toString().slice(-6)}`;
 
       const { data: newOrder, error: oError } = await supabase
         .from("orders")
@@ -109,7 +118,7 @@ export default function PresupuestosPage() {
           order_number: orderNumber,
           partner_id: fullQuote.partner_id,
           company_id: fullQuote.company_id,
-          user_id: user.id,
+          user_id: internalUser.id,
           status: "pending",
           total_usd: fullQuote.total_usd,
           total_bs: fullQuote.total_bs,
@@ -121,13 +130,16 @@ export default function PresupuestosPage() {
           payment_method: "Efectivo",
           amount_paid: 0,
           amount_due: fullQuote.total_usd,
-          exchange_rate: fullQuote.total_bs / fullQuote.total_usd,
+          exchange_rate: fullQuote.total_bs > 0 && fullQuote.total_usd > 0
+            ? fullQuote.total_bs / fullQuote.total_usd
+            : 1,
           notes: `Convertido del presupuesto ${fullQuote.quote_number}. ${fullQuote.notes || ""}`
         })
         .select()
         .single();
 
       if (oError) throw oError;
+
 
       // 4. Crear los items del pedido y actualizar stock
       for (const item of items) {
