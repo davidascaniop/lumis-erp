@@ -6,13 +6,13 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
-  --font-syne: 'Syne', sans-serif;
-  --font-dm: 'DM Sans', sans-serif;
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+  --font-syne: var(--font-montserrat), sans-serif;
+  --font-dm: var(--font-montserrat), sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --font-outfit: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
-  --font-zilla: var(--font-zilla), serif;
+  --font-outfit: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+  --font-zilla: var(--font-montserrat), serif;
   --font-montserrat: var(--font-montserrat), sans-serif;
 
   --color-background: var(--bg-base);
