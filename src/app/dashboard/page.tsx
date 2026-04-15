@@ -841,7 +841,7 @@ function SalesChart({ data }: { data: { month: string; total: number }[] }) {
         <h2 className="font-primary text-base text-text-1 mb-2">
           Ventas por Mes
         </h2>
-        <div className="flex items-center justify-center w-full min-h-[300px]">
+        <div className="flex items-center justify-center w-full h-[300px]">
           <p className="text-xs text-text-2">Sin datos de ventas aún</p>
         </div>
       </div>
@@ -900,7 +900,7 @@ function SalesChart({ data }: { data: { month: string; total: number }[] }) {
       </div>
 
       {/* Bar chart */}
-      <div className="flex items-end gap-3 w-full min-h-[300px]">
+      <div className="flex items-end gap-3 w-full h-[300px]">
         {filledData.map((d, i) => {
           const heightPct =
             d.total > 0 ? Math.max(12, (d.total / maxVal) * 100) : 4;
