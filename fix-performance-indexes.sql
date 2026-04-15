@@ -1,13 +1,10 @@
--- =====================================================
--- PERFORMANCE: Índices para acelerar queries pesadas
--- Ejecutar en SQL Editor de Supabase
--- =====================================================
+-- PERFORMANCE: Indices para acelerar queries pesadas
 
 -- Dashboard: receivables filtradas por company + status
 CREATE INDEX IF NOT EXISTS idx_receivables_company_status
   ON public.receivables (company_id, status);
 
--- Dashboard: receivables por due_date (créditos vencidos)
+-- Dashboard: receivables por due_date (creditos vencidos)
 CREATE INDEX IF NOT EXISTS idx_receivables_company_due
   ON public.receivables (company_id, due_date)
   WHERE status != 'paid';
@@ -41,7 +38,7 @@ CREATE INDEX IF NOT EXISTS idx_order_items_order
 CREATE INDEX IF NOT EXISTS idx_activity_company_created
   ON public.activity_log (company_id, created_at DESC);
 
--- Users: búsqueda por auth_id (usado en CADA request)
+-- Users: busqueda por auth_id (usado en CADA request)
 CREATE INDEX IF NOT EXISTS idx_users_auth_id
   ON public.users (auth_id);
 
@@ -63,8 +60,7 @@ CREATE INDEX IF NOT EXISTS idx_recurring_expenses_active
   ON public.recurring_expenses (company_id, is_active)
   WHERE is_active = true;
 
--- Función get_my_company_id: asegurar que sea STABLE
--- (ya fue creada antes, pero por si acaso)
+-- Funcion get_my_company_id: asegurar que sea STABLE
 CREATE OR REPLACE FUNCTION public.get_my_company_id()
 RETURNS uuid
 LANGUAGE sql
@@ -75,5 +71,4 @@ AS $$
   SELECT company_id FROM users WHERE auth_id = auth.uid() LIMIT 1;
 $$;
 
--- Recargar schema de PostgREST
 NOTIFY pgrst, 'reload schema';
