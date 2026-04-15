@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
+import { useUser } from "@/hooks/use-user";
 
 const supabase = createClient();
 
@@ -26,25 +27,23 @@ export default function ProductosReportePage() {
   const [products, setProducts] = useState<any[]>([]);
   const [orderItems, setOrderItems] = useState<any[]>([]);
   const [companyId, setCompanyId] = useState<string | null>(null);
+  const { user: currentUser } = useUser();
 
   const [topMetric, setTopMetric] = useState<TopMetric>("qty");
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
 
   const fetchData = useCallback(async () => {
+    const cid = currentUser?.company_id;
+    if (!cid) return;
+    setCompanyId(cid);
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data: ud } = await supabase.from("users").select("company_id").eq("auth_id", user.id).single();
-      if (!ud) return;
-      setCompanyId(ud.company_id);
-
       const oneYearAgo = subYears(new Date(), 1).toISOString();
       const [prodRes, itemRes] = await Promise.all([
         supabase.from("products")
           .select("*")
-          .eq("company_id", ud.company_id)
+          .eq("company_id", cid)
           .eq("is_active", true),
         supabase.from("order_items")
           .select("id, product_id, qty, subtotal, created_at, orders!inner(status)")
@@ -53,12 +52,11 @@ export default function ProductosReportePage() {
       ]);
 
       setProducts(prodRes.data || []);
-      // Filter out canceled orders if any slipped through, but we used inner join
       setOrderItems(itemRes.data || []);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentUser?.company_id]);
 
   useEffect(() => {
     fetchData();

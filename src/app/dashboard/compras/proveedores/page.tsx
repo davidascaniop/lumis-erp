@@ -43,6 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useUser } from "@/hooks/use-user";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface Supplier {
@@ -111,6 +112,7 @@ const INITIAL_FORM = {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ProveedoresPage() {
   const supabase = createClient();
+  const { user: currentUser } = useUser();
 
   // ── State ──────────────────────────────────────────────────────────────────
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -138,32 +140,18 @@ export default function ProveedoresPage() {
 
   // ── Fetch Suppliers ────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
+    const cid = currentUser?.company_id;
+    if (!cid) return;
+    setCompanyId(cid);
+    setUserId(currentUser?.id || null);
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const [{ data }, { data: ordersData }, { data: monthPurchases }] = await Promise.all([
+        supabase.from("suppliers").select("*").eq("company_id", cid).order("name", { ascending: true }),
+        supabase.from("purchases").select("supplier_id").eq("company_id", cid),
+        supabase.from("purchases").select("id, total_usd").eq("company_id", cid).gte("created_at", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
+      ]);
 
-      const { data: userData } = await supabase
-        .from("users")
-        .select("id, company_id")
-        .eq("auth_id", user.id)
-        .single();
-      if (!userData) return;
-
-      setCompanyId(userData.company_id);
-      setUserId(userData.id);
-
-      const { data } = await supabase
-        .from("suppliers")
-        .select("*")
-        .eq("company_id", userData.company_id)
-        .order("name", { ascending: true });
-
-      const { data: ordersData } = await supabase
-        .from("purchases")
-        .select("supplier_id")
-        .eq("company_id", userData.company_id);
-      
       const orderCounts: Record<string, number> = {};
       (ordersData ?? []).forEach(o => {
         if (o.supplier_id) orderCounts[o.supplier_id] = (orderCounts[o.supplier_id] ?? 0) + 1;
@@ -173,15 +161,6 @@ export default function ProveedoresPage() {
         ...s,
         _total_orders: orderCounts[s.id] ?? 0
       })));
-
-      // Purchases stats this month
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-      const { data: monthPurchases } = await supabase
-        .from("purchases")
-        .select("id, total_usd")
-        .eq("company_id", userData.company_id)
-        .gte("created_at", startOfMonth);
 
       setPurchasesThisMonth(monthPurchases?.length ?? 0);
       setTotalThisMonth(
@@ -193,7 +172,7 @@ export default function ProveedoresPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, [currentUser?.company_id]);
 
   useEffect(() => {
     fetchData();

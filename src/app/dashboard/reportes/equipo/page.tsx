@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
+import { useUser } from "@/hooks/use-user";
 
 const supabase = createClient();
 
@@ -27,6 +28,7 @@ const seededRandom = (seed: number) => {
 export default function EquipoVentasPage() {
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<Period>("month");
+  const { user: currentUser } = useUser();
   
   // Data State
   const [users, setUsers] = useState<any[]>([]);
@@ -38,24 +40,21 @@ export default function EquipoVentasPage() {
   const [selectedSeller, setSelectedSeller] = useState<any>(null);
 
   const fetchData = useCallback(async () => {
+    const cid = currentUser?.company_id;
+    if (!cid) return;
+    setCompanyId(cid);
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data: ud } = await supabase.from("users").select("company_id").eq("auth_id", user.id).single();
-      if (!ud) return;
-      setCompanyId(ud.company_id);
-
       const oneYearAgo = subYears(new Date(), 1).toISOString();
       const [usrRes, ordRes, ptnRes] = await Promise.all([
-        supabase.from("users").select("id, role, raw_user_meta_data").eq("company_id", ud.company_id),
+        supabase.from("users").select("id, role, raw_user_meta_data").eq("company_id", cid),
         supabase.from("orders")
           .select("id, user_id, partner_id, total_usd, created_at, status")
           .in("status", ["confirmed", "dispatched", "delivered"])
           .gte("created_at", oneYearAgo),
         supabase.from("partners")
           .select("id, created_at")
-          .eq("company_id", ud.company_id)
+          .eq("company_id", cid)
       ]);
 
       setUsers(usrRes.data || []);
@@ -64,7 +63,7 @@ export default function EquipoVentasPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentUser?.company_id]);
 
   useEffect(() => {
     fetchData();

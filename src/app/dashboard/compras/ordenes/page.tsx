@@ -24,6 +24,7 @@ import {
 import { useBCV } from "@/hooks/use-bcv";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/hooks/use-user";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type PurchaseStatus = "draft" | "confirmed" | "partial" | "received" | "cancelled";
@@ -105,20 +106,19 @@ export default function OrdenesCompraPage() {
 
   const [volumeRules, setVolumeRules] = useState<any[]>([]);
 
+  const { user: currentUser } = useUser();
+
   // ── Fetch ──────────────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
+    const cid = currentUser?.company_id;
+    if (!cid) return;
+    setCompanyId(cid);
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data: ud } = await supabase.from("users").select("company_id").eq("auth_id", user.id).single();
-      if (!ud) return;
-      setCompanyId(ud.company_id);
-
       const { data } = await supabase
         .from("purchases")
         .select("*, suppliers(name,rif,phone)")
-        .eq("company_id", ud.company_id)
+        .eq("company_id", cid)
         .order("created_at", { ascending: false });
 
       const ids = (data ?? []).map((p: any) => p.id);
@@ -136,14 +136,14 @@ export default function OrdenesCompraPage() {
         subtotal_usd: Number(p.subtotal_usd || 0)
       })));
 
-      const { data: alerts } = await supabase.from("price_alerts").select("*, products(name), suppliers(name)").eq("company_id", ud.company_id).eq("is_read", false).order("created_at", { ascending: false }).limit(3);
+      const { data: alerts } = await supabase.from("price_alerts").select("*, products(name), suppliers(name)").eq("company_id", cid).eq("is_read", false).order("created_at", { ascending: false }).limit(3);
       if (alerts) setTopAlerts(alerts);
     } catch (e: any) { 
       console.error("Error fetching purchases:", e);
       toast.error("Error al cargar órdenes"); 
     }
     finally { setLoading(false); }
-  }, [supabase]);
+  }, [currentUser?.company_id]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 

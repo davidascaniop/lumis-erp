@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import Papa from "papaparse";
+import { useUser } from "@/hooks/use-user";
 
 type PeriodKey = "week" | "month" | "quarter" | "year";
 
@@ -82,6 +83,7 @@ function Delta({ pct }: { pct: number }) {
 export default function ResumenEjecutivoPage() {
   const supabase = createClient();
   const { rate: bcv } = useBCV();
+  const { user: currentUser } = useUser();
   const [period, setPeriod] = useState<PeriodKey>("month");
   const [loading, setLoading] = useState(true);
 
@@ -101,14 +103,10 @@ export default function ResumenEjecutivoPage() {
 
   useEffect(() => {
     async function load() {
+      const cid = currentUser?.company_id;
+      if (!cid) return;
       setLoading(true);
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-        const { data: ud } = await supabase.from("users").select("company_id").eq("auth_id", user.id).single();
-        if (!ud) return;
-        const cid = ud.company_id;
-
         const oneYearAgo = subYears(new Date(), 1).toISOString();
 
         const [
@@ -146,7 +144,7 @@ export default function ResumenEjecutivoPage() {
       }
     }
     load();
-  }, []);
+  }, [currentUser?.company_id]);
 
   const range     = useMemo(() => getPeriodRange(period), [period]);
   const prevRange = useMemo(() => getPrevPeriodRange(period), [period]);

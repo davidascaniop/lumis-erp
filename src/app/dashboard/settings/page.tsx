@@ -108,6 +108,9 @@ function SettingsContent() {
 
   useEffect(() => {
     async function loadProfile() {
+      const companyId = user?.company_id;
+      if (!companyId) return;
+
       // Fetch Global BCV
       const { data: bcvData } = await supabase
         .from("exchange_rates")
@@ -116,64 +119,55 @@ function SettingsContent() {
         .limit(1)
         .single();
       if (bcvData) setBcvRate(bcvData.rate_bs.toString());
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        const { data: userData } = await supabase
-          .from("users")
-          .select("full_name, email, role, company_id")
-          .eq("auth_id", user.id)
-          .single();
 
-        if (userData) {
-          const uData = userData as any;
-          setProfile(uData);
+      setProfile({
+        full_name: user.full_name || "",
+        email: user.email || "",
+        role: user.role || "",
+        company_id: companyId,
+      });
 
-          if (uData.company_id) {
-            const { data: companyData } = await supabase
-              .from("companies")
-              .select("id, name, name_comercial, rif, plan_type, subscription_status, billing_day, modules_enabled")
-              .eq("id", uData.company_id)
-              .single();
+      const { data: companyData } = await supabase
+        .from("companies")
+        .select("id, name, name_comercial, rif, plan_type, subscription_status, billing_day, modules_enabled")
+        .eq("id", companyId)
+        .single();
 
-            if (companyData) {
-              setCompany(companyData as any);
-            }
-
-            // Load team members
-            const { data: teamData } = await supabase
-              .from("users")
-              .select("id, auth_id, full_name, email, role")
-              .eq("company_id", uData.company_id);
-
-            const { data: pendingData } = await supabase
-              .from("company_invitations")
-              .select("id, email, role, status, permissions")
-              .eq("company_id", uData.company_id)
-              .eq("status", "pendiente");
-
-            const combined = [
-              ...(teamData || []).map((m: any) => ({ ...m, isPending: false })),
-              ...(pendingData || []).map((m: any) => ({
-                id: m.id,
-                full_name: m.email.split("@")[0],
-                email: m.email,
-                role: m.role,
-                isPending: true,
-                auth_id: null,
-                permissions: m.permissions || []
-              }))
-            ];
-
-            setTeamMembers(combined as any);
-          }
-        }
+      if (companyData) {
+        setCompany(companyData as any);
       }
+
+      // Load team members
+      const [{ data: teamData }, { data: pendingData }] = await Promise.all([
+        supabase
+          .from("users")
+          .select("id, auth_id, full_name, email, role")
+          .eq("company_id", companyId),
+        supabase
+          .from("company_invitations")
+          .select("id, email, role, status, permissions")
+          .eq("company_id", companyId)
+          .eq("status", "pendiente"),
+      ]);
+
+      const combined = [
+        ...(teamData || []).map((m: any) => ({ ...m, isPending: false })),
+        ...(pendingData || []).map((m: any) => ({
+          id: m.id,
+          full_name: m.email.split("@")[0],
+          email: m.email,
+          role: m.role,
+          isPending: true,
+          auth_id: null,
+          permissions: m.permissions || []
+        }))
+      ];
+
+      setTeamMembers(combined as any);
       setIsFetching(false);
     }
     loadProfile();
-  }, [supabase]);
+  }, [user?.company_id]);
 
   const handleSaveProfile = async () => {
     setIsLoading(true);

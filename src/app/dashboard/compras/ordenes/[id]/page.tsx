@@ -210,8 +210,7 @@ export default function PurchaseDetailPage() {
     setIsProcessing(true);
     try {
       let isFullyReceived = true;
-      const { data: { user } } = await supabase.auth.getUser();
-      const companyId = purchase.suppliers ? (purchase as any).company_id : null; // This is a bit tricky, should better fetch from users table but we have it in purchase
+      const companyId = (purchase as any).company_id ?? null;
 
       let manualItemsSkipped = 0;
 

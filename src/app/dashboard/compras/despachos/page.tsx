@@ -39,6 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useUser } from "@/hooks/use-user";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface Dispatch {
@@ -154,6 +155,7 @@ function DispatchBadge({ status }: { status: DispatchStatus }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function DespachosPage() {
   const supabase = createClient();
+  const { user: currentUser } = useUser();
 
   // ── State ──────────────────────────────────────────────────────────────────
   const [dispatches, setDispatches] = useState<Dispatch[]>([]);
@@ -193,29 +195,18 @@ export default function DespachosPage() {
 
   // ── Fetch Data ─────────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
+    const cid = currentUser?.company_id;
+    if (!cid) return;
+    setCompanyId(cid);
+    setUserId(currentUser?.id || null);
     setLoading(true);
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: userData } = await supabase
-        .from("users")
-        .select("id, company_id")
-        .eq("auth_id", user.id)
-        .single();
-      if (!userData) return;
-
-      setCompanyId(userData.company_id);
-      setUserId(userData.id);
-
       const { data } = await supabase
         .from("dispatches")
         .select(
           `*, orders(order_number, total_usd), partners(name, rif)`
         )
-        .eq("company_id", userData.company_id)
+        .eq("company_id", cid)
         .order("created_at", { ascending: false });
 
       setDispatches((data as Dispatch[]) || []);
@@ -225,7 +216,7 @@ export default function DespachosPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, [currentUser?.company_id]);
 
   useEffect(() => {
     fetchData();

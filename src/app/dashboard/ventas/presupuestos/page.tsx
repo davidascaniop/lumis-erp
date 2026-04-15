@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/utils";
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 import { toast } from "sonner";
+import { useUser } from "@/hooks/use-user";
 
 type Quote = {
   id: string;
@@ -36,6 +37,7 @@ const STATUS_CONFIG = {
 export default function PresupuestosPage() {
   const supabase = createClient();
   const router = useRouter();
+  const { user: currentUser } = useUser();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -48,21 +50,14 @@ export default function PresupuestosPage() {
   });
 
   async function fetchQuotes() {
+    const companyId = currentUser?.company_id;
+    if (!companyId) return;
     setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: userData } = await supabase
-      .from("users")
-      .select("company_id")
-      .eq("auth_id", user.id)
-      .single();
-    if (!userData) return;
 
     const { data } = await supabase
       .from("quotes")
       .select("*, partners(name, rif)")
-      .eq("company_id", (userData as any).company_id)
+      .eq("company_id", companyId)
       .order("created_at", { ascending: false });
 
     setQuotes((data as Quote[]) || []);
@@ -71,7 +66,7 @@ export default function PresupuestosPage() {
 
   useEffect(() => {
     fetchQuotes();
-  }, []);
+  }, [currentUser?.company_id]);
 
   const handleConvertToSale = async (quote: Quote) => {
     setConfirmModal({ isOpen: false, quote: null });
@@ -97,17 +92,9 @@ export default function PresupuestosPage() {
 
       if (iError) throw iError;
 
-      // 3. Obtener el usuario autenticado y su ID interno en la tabla users
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser) throw new Error("Usuario no autenticado");
-
-      const { data: internalUser, error: userErr } = await supabase
-        .from("users")
-        .select("id")
-        .eq("auth_id", authUser.id)
-        .single();
-
-      if (userErr || !internalUser) throw new Error("No se encontró el perfil del usuario");
+      // 3. Obtener el usuario ID interno desde contexto
+      const userId = currentUser?.id;
+      if (!userId) throw new Error("Usuario no autenticado");
 
       // 4. Crear el Pedido (Order)
       const orderNumber = `PED-${Date.now().toString().slice(-6)}`;
@@ -118,7 +105,7 @@ export default function PresupuestosPage() {
           order_number: orderNumber,
           partner_id: fullQuote.partner_id,
           company_id: fullQuote.company_id,
-          user_id: internalUser.id,
+          user_id: userId,
           status: "pending",
           total_usd: fullQuote.total_usd,
           total_bs: fullQuote.total_bs,

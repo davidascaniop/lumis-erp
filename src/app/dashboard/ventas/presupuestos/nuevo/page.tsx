@@ -102,16 +102,13 @@ function NuevoPresupuestoContent() {
 
   useEffect(() => {
     async function load() {
+      const companyId = user?.company_id;
+      if (!companyId) return;
       setLoading(true);
       try {
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        if (!authUser) return;
-        const { data: usr } = await supabase.from("users").select("company_id").eq("auth_id", authUser.id).single();
-        if (!usr) return;
-
         const [pRes, prRes] = await Promise.all([
-          supabase.from("partners").select("id, name, rif, phone").eq("company_id", (usr as any).company_id).eq("status", "active"),
-          supabase.from("products").select("id, name, sku, price_usd, stock, category, image_url").eq("company_id", (usr as any).company_id).eq("status", "active"),
+          supabase.from("partners").select("id, name, rif, phone").eq("company_id", companyId).eq("status", "active"),
+          supabase.from("products").select("id, name, sku, price_usd, stock, category, image_url").eq("company_id", companyId).eq("status", "active"),
         ]);
         const dbPartners = (pRes.data as Partner[]) || [];
         const dbProducts = (prRes.data as Product[]) || [];
@@ -123,7 +120,7 @@ function NuevoPresupuestoContent() {
             .from("quotes")
             .select(`*, quote_items(*)`)
             .eq("id", editQuoteId)
-            .eq("company_id", (usr as any).company_id)
+            .eq("company_id", companyId)
             .single();
 
           if (quoteToEdit) {
@@ -153,7 +150,7 @@ function NuevoPresupuestoContent() {
       }
     }
     load();
-  }, []);
+  }, [user?.company_id]);
 
   const partnerSuggestions = useMemo(() => {
     if (!partnerQuery || partnerQuery.length < 1 || selectedPartner) return [];
