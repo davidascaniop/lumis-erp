@@ -29,6 +29,7 @@ import { ThermalInvoiceModal, type InvoiceOrderData } from "@/components/ventas/
 import { useCompanyProfile } from "@/hooks/use-company-profile";
 
 import { useUser } from "@/hooks/use-user";
+import { TableSkeleton } from "@/components/ui/skeletons";
 
 export default function VentasPage() {
   const supabase = createClient();
@@ -168,8 +169,20 @@ export default function VentasPage() {
             <tbody className="divide-y divide-border">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-20">
-                    <Loader2 className="w-8 h-8 text-brand animate-spin mx-auto" />
+                  <td colSpan={7} className="p-0">
+                    <div className="space-y-0">
+                      {Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="px-6 py-4 border-b border-border/30 flex items-center gap-6">
+                          <div className="skeleton h-4 w-24 rounded" />
+                          <div className="flex items-center gap-2 flex-1"><div className="skeleton w-3 h-3 rounded-full" /><div className="skeleton h-4 w-32 rounded" /></div>
+                          <div className="skeleton h-4 w-20 rounded" />
+                          <div className="skeleton h-4 w-16 rounded" />
+                          <div className="skeleton h-4 w-16 rounded" />
+                          <div className="skeleton h-6 w-20 rounded-full" />
+                          <div className="skeleton h-8 w-8 rounded-lg" />
+                        </div>
+                      ))}
+                    </div>
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (

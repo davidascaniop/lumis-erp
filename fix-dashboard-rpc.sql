@@ -1,6 +1,3 @@
--- RPC: Dashboard data en 1 sola llamada
--- Ejecutar en SQL Editor de Supabase
-
 CREATE OR REPLACE FUNCTION public.get_dashboard_data(p_company_id uuid)
 RETURNS json
 LANGUAGE plpgsql
@@ -180,5 +177,4 @@ BEGIN
 END;
 $$;
 
--- Dar acceso al rol autenticado
 GRANT EXECUTE ON FUNCTION public.get_dashboard_data(uuid) TO authenticated;

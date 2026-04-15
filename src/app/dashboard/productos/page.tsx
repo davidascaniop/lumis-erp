@@ -212,11 +212,20 @@ function ProductosContent() {
 
       {/* PRODUCTS GRID */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-brand" />
-          <p className="text-text-3 animate-pulse">
-            Sincronizando existencias...
-          </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="bg-surface-card border border-border rounded-xl overflow-hidden">
+              <div className="skeleton h-40 w-full" />
+              <div className="p-5 space-y-3">
+                <div className="skeleton h-4 w-32 rounded" />
+                <div className="skeleton h-3 w-20 rounded" />
+                <div className="flex justify-between pt-3 border-t border-border">
+                  <div className="skeleton h-6 w-16 rounded" />
+                  <div className="skeleton h-4 w-12 rounded" />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       ) : filteredProducts.length === 0 ? (
         <div className="text-center py-20 bg-surface-card/50 border-2 border-dashed border-border rounded-3xl">

@@ -11,6 +11,7 @@ import { DailySeed } from "@/components/dashboard/daily-seed";
 import { PortalPaymentsAlert } from "@/components/dashboard/portal-payments-alert";
 import { BroadcastBanner } from "@/components/dashboard/broadcast-banner";
 import { useUser } from "@/hooks/use-user";
+import { DashboardSkeleton } from "@/components/ui/skeletons";
 import { formatCurrency } from "@/lib/utils";
 import {
   Wallet,
@@ -356,12 +357,7 @@ export default function DashboardPage() {
     load();
   }, [user?.company_id]);
 
-  if (loading)
-    return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <Loader2 className="w-10 h-10 text-[#E040FB] animate-spin" />
-      </div>
-    );
+  if (loading) return <DashboardSkeleton />;
   if (!data)
     return <div className="p-8 text-[#9585B8]">Falta configurar empresa.</div>;
 
