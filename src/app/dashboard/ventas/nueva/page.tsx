@@ -90,34 +90,22 @@ function NuevaVentaContent() {
   // ── Carga inicial de datos ──────────────────────────────
   useEffect(() => {
     async function loadInitialData() {
+      const companyId = user?.company_id;
+      if (!companyId) return;
       setLoading(true);
       try {
-        const {
-          data: { user: authUser },
-        } = await supabase.auth.getUser();
-        if (!authUser) return;
-
-        const { data: usr } = await supabase
-          .from("users")
-          .select("company_id")
-          .eq("auth_id", authUser.id)
-          .single();
-        if (!usr) return;
-
         const [pRes, prRes, kitsRes, catRes] = await Promise.all([
           supabase
             .from("partners")
             .select("*")
-            .eq("company_id", usr.company_id)
+            .eq("company_id", companyId)
             .eq("status", "active"),
-          // Regular products (non-kits)
           supabase
             .from("products")
             .select("*")
-            .eq("company_id", usr.company_id)
+            .eq("company_id", companyId)
             .eq("status", "active")
             .neq("is_kit", true),
-          // Kits with their components for stock explosion
           supabase
             .from("products")
             .select(`
@@ -127,13 +115,13 @@ function NuevaVentaContent() {
                 component:component_id (id, name, sku, stock, price_usd)
               )
             `)
-            .eq("company_id", usr.company_id)
+            .eq("company_id", companyId)
             .eq("status", "active")
             .eq("is_kit", true),
           supabase
             .from("product_categories")
             .select("name")
-            .eq("company_id", usr.company_id)
+            .eq("company_id", companyId)
             .order("name"),
         ]);
 
@@ -229,8 +217,7 @@ function NuevaVentaContent() {
       }
     }
     loadInitialData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user?.company_id]);
 
   // ── Cart Logic ───────────────────────────────────────────
   const addToCart = (product: any, qty: number = 1) => {
