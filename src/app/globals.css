@@ -326,3 +326,25 @@
     box-shadow: 0 0 40px rgba(224, 64, 251, 0.70);
   }
 }
+
+/* ── Skeleton shimmer animation ── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-card-hover, #2a2040) 25%,
+    var(--bg-elevated, #3a2d5c) 50%,
+    var(--bg-card-hover, #2a2040) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
