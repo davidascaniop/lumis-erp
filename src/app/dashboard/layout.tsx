@@ -1,12 +1,19 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/layout/sidebar";
 import { SuspendedGuard } from "@/components/layout/SuspendedGuard";
 import { Toaster } from "sonner";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Server-side auth guard — no depender solo del middleware
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
   return (
     <div className="flex h-screen overflow-hidden bg-surface-base font-montserrat">
       <Sidebar />

@@ -557,7 +557,7 @@ function GastosContent() {
              <DialogTitle className="text-xl font-bold font-montserrat">Confirmar Pago</DialogTitle>
              <DialogDescription className="text-text-3 text-xs">Registrando pago para: <span className="text-text-1 font-bold">{selectedExpense?.reference}</span></DialogDescription>
           </DialogHeader>
-          <div className="space-y-5 py-4">
+          <div className="space-y-5 px-6 py-4 overflow-y-auto flex-1">
              <div className="p-4 bg-surface-base border border-border rounded-xl">
                 <div className="flex justify-between items-center mb-1">
                    <p className="text-[10px] text-text-3 font-bold uppercase tracking-widest">Saldo Pendiente</p>

@@ -55,7 +55,8 @@ export default function UpgradePage() {
 
   const handleContact = (planName: string) => {
     const msg = encodeURIComponent(`Hola equipo Lumis, estoy interesado en mejorar mi cuenta al plan ${planName}.`);
-    return `https://wa.me/584120000000?text=${msg}`; // Replace with actual support number
+    const supportNumber = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || '584120000000';
+    return `https://wa.me/${supportNumber}?text=${msg}`;
   };
 
   return (

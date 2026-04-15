@@ -63,6 +63,42 @@ export async function confirmOrder(orderId: string) {
     } as any)
     .eq("id", order.partner_id);
 
+  // 4b. Descontar stock de productos vendidos
+  const { data: orderItems } = await supabase
+    .from("order_items")
+    .select("product_id, qty")
+    .eq("order_id", order.id);
+
+  if (orderItems && orderItems.length > 0) {
+    for (const item of orderItems) {
+      if (!item.product_id) continue;
+
+      // Descontar stock
+      const { data: prod } = await supabase
+        .from("products")
+        .select("stock_qty")
+        .eq("id", item.product_id)
+        .single();
+
+      const currentStock = Number(prod?.stock_qty ?? 0);
+      await supabase
+        .from("products")
+        .update({ stock_qty: Math.max(0, currentStock - item.qty) } as any)
+        .eq("id", item.product_id);
+
+      // Registrar movimiento de inventario
+      await supabase.from("stock_movements").insert({
+        company_id: order.company_id,
+        product_id: item.product_id,
+        type: "OUT",
+        qty: item.qty,
+        reason: `Venta confirmada — Pedido ${order.order_number || order.id}`,
+        entity_type: "order",
+        entity_id: order.id,
+      } as any);
+    }
+  }
+
   // 5. Actualizar orden
   await supabase
     .from("orders")

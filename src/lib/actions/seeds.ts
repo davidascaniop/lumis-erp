@@ -3,6 +3,19 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
+// ─── Helper: verificar que el usuario es superadmin ─────────
+async function assertSuperAdmin(supabase: any) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("No autenticado");
+  const { data } = await supabase
+    .from("users")
+    .select("id, role")
+    .eq("auth_id", user.id)
+    .single();
+  if (data?.role !== "superadmin") throw new Error("No autorizado");
+  return { id: data.id, authId: user.id };
+}
+
 export async function createDailySeed(formData: {
   verse: string;
   verse_reference: string;
@@ -13,15 +26,7 @@ export async function createDailySeed(formData: {
   status: "draft" | "scheduled" | "published";
 }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { data: dbUser } = await supabase
-    .from("users")
-    .select("id")
-    .eq("auth_id", user?.id)
-    .single();
+  const dbUser = await assertSuperAdmin(supabase);
 
   const { error } = await supabase.from("daily_seeds").insert({
     ...formData,
@@ -44,6 +49,7 @@ export async function updateSeedStatus(
   status: "draft" | "scheduled" | "published",
 ) {
   const supabase = await createClient();
+  await assertSuperAdmin(supabase);
 
   const { error } = await supabase
     .from("daily_seeds")
@@ -61,6 +67,7 @@ export async function updateSeedStatus(
 
 export async function deleteSeed(id: string) {
   const supabase = await createClient();
+  await assertSuperAdmin(supabase);
   const { error } = await supabase.from("daily_seeds").delete().eq("id", id);
   if (error) throw new Error("Error eliminando la semilla");
   revalidatePath("/superadmin/semillas");

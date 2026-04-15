@@ -187,8 +187,10 @@ export async function registerSuperAdmin(data: {
   password:   string
   secretCode: string
 }) {
-  // En producción, esto debe estar en .env.local
-  const adminSecret = process.env.SUPERADMIN_SECRET || 'lumis_admin_root_2024'
+  const adminSecret = process.env.SUPERADMIN_SECRET
+  if (!adminSecret) {
+    throw new Error('SUPERADMIN_SECRET no está configurado en las variables de entorno')
+  }
 
   if (data.secretCode !== adminSecret) {
     throw new Error('Código de secreto administrativo inválido')

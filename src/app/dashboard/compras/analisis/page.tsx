@@ -165,7 +165,6 @@ export default function AnalisisPreciosPage() {
        return a.name.localeCompare(b.name);
     }).slice(0, 20);
 
-    console.log("Search query:", q, "Results:", filtered.length);
     setSearchResults(filtered);
   }, [searchQuery, allProducts, rawData]);
 
