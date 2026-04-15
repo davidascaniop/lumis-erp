@@ -12,6 +12,7 @@ import { PortalPaymentsAlert } from "@/components/dashboard/portal-payments-aler
 import { BroadcastBanner } from "@/components/dashboard/broadcast-banner";
 import { useUser } from "@/hooks/use-user";
 import { DashboardSkeleton } from "@/components/ui/skeletons";
+import { useDataCache } from "@/lib/data-cache";
 import { formatCurrency } from "@/lib/utils";
 import {
   Wallet,
@@ -131,6 +132,14 @@ export default function DashboardPage() {
         if (!companyId) {
           setLoading(false);
           return;
+        }
+
+        // Check cache for instant display
+        const cacheKey = `dashboard_${companyId}`;
+        const cached = useDataCache.getState().get(cacheKey);
+        if (cached) {
+          setData(cached);
+          setLoading(false);
         }
 
         const today = new Date();
@@ -321,7 +330,7 @@ export default function DashboardPage() {
           .sort((a, b) => b.revenue - a.revenue)
           .slice(0, 5);
 
-        setData({
+        const dashboardResult = {
           companyId,
           totalCartera,
           totalMora,
@@ -347,7 +356,9 @@ export default function DashboardPage() {
           activeRecurringAlerts,
           inactiveClients: inactiveClientsRaw,
           overdueReceivables: overdueReceivablesRaw,
-        });
+        };
+        setData(dashboardResult);
+        useDataCache.getState().set(cacheKey, dashboardResult);
       } catch (err) {
         console.error("Dashboard load error:", err);
       } finally {

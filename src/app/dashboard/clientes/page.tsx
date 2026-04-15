@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ClientForm } from "@/components/clients/client-form";
 import { formatCurrency } from "@/lib/utils";
 import { useUser } from "@/hooks/use-user";
+import { useDataCache } from "@/lib/data-cache";
 
 export default function ClientesPage() {
   const supabase = createClient();
@@ -22,7 +23,14 @@ export default function ClientesPage() {
   const fetchPartners = async () => {
     const companyId = user?.company_id;
     if (!companyId) return;
-    setLoading(true);
+
+    const cacheKey = `clientes_${companyId}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setPartners(cached);
+      setLoading(false);
+    }
+    if (!cached) setLoading(true);
 
     const { data } = await supabase
       .from("partners")
@@ -46,6 +54,7 @@ export default function ClientesPage() {
     }));
 
     setPartners(partnersWithBalance);
+    useDataCache.getState().set(cacheKey, partnersWithBalance);
     setLoading(false);
   };
 

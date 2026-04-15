@@ -57,6 +57,7 @@ export default function CobranzaPage() {
 }
 
 import { useUser } from "@/hooks/use-user";
+import { useDataCache } from "@/lib/data-cache";
 
 function CobranzaContent() {
   const supabase = createClient();
@@ -81,7 +82,16 @@ function CobranzaContent() {
 
   const fetchData = async () => {
     if (!companyId) return;
-    setLoading(true);
+
+    const cacheKey = `cobranza_${companyId}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setReceivables(cached.receivables);
+      setPendingVerifications(cached.pending);
+      setLoading(false);
+    }
+    if (!cached) setLoading(true);
+
     try {
       const [recesRes, paymentsRes] = await Promise.all([
         supabase
@@ -99,6 +109,10 @@ function CobranzaContent() {
 
       setReceivables(recesRes.data || []);
       setPendingVerifications(paymentsRes.data || []);
+      useDataCache.getState().set(cacheKey, {
+        receivables: recesRes.data || [],
+        pending: paymentsRes.data || [],
+      });
     } catch (error) {
       console.error("Error fetching collections data:", error);
     } finally {

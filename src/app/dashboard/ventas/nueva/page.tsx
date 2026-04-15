@@ -8,6 +8,7 @@ import { useUser } from "@/hooks/use-user";
 import { useBCV } from "@/hooks/use-bcv";
 import { useTreasuryAccounts, registerTreasuryMovement } from "@/hooks/use-treasury";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
+import { useDataCache } from "@/lib/data-cache";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { ProductoGrid } from "@/components/ventas/nueva/producto-grid";
@@ -87,12 +88,29 @@ function NuevaVentaContent() {
     return Number(stored);
   }, [company, user]);
 
-  // ── Carga inicial de datos ──────────────────────────────
+  // ── Carga inicial con cache para navegación instantánea ──
   useEffect(() => {
-    async function loadInitialData() {
-      const companyId = user?.company_id;
-      if (!companyId) return;
-      setLoading(true);
+    const companyId = user?.company_id;
+    if (!companyId) return;
+
+    const cacheKey = `nueva_venta_${companyId}`;
+    const cached = useDataCache.getState().get(cacheKey);
+
+    // If cached data exists, show it IMMEDIATELY (no loading spinner)
+    if (cached) {
+      setPartners(cached.partners);
+      setProducts(cached.products);
+      setCategories(cached.categories);
+      if (preSelectedPartnerId && cached.partners) {
+        const p = cached.partners.find((x: any) => x.id === preSelectedPartnerId);
+        if (p) setSelectedPartner(p);
+      }
+      setLoading(false);
+    }
+
+    async function loadData() {
+      // Only show loading spinner on FIRST visit (no cache)
+      if (!cached) setLoading(true);
       try {
         const [pRes, prRes, kitsRes, catRes] = await Promise.all([
           supabase
@@ -125,9 +143,9 @@ function NuevaVentaContent() {
             .order("name"),
         ]);
 
-        setPartners(pRes.data || []);
+        const partnersData = pRes.data || [];
+        setPartners(partnersData);
 
-        // Process kits: calculate available stock based on component minimums
         const processedKits = (kitsRes.data || []).map((k: any) => {
           const comps = (k.product_kit_items || []).map((pki: any) => ({
             ...(pki.component || {}),
@@ -145,19 +163,25 @@ function NuevaVentaContent() {
           return { ...k, comps, availableStock, is_kit: true };
         });
 
-        // Merge regular products + kits into one list
-        setProducts([...(prRes.data || []), ...processedKits]);
+        const allProducts = [...(prRes.data || []), ...processedKits];
+        setProducts(allProducts);
 
-        if (catRes.data) {
-          setCategories(catRes.data.map((c: any) => c.name));
-        }
+        const categoriesData = catRes.data ? catRes.data.map((c: any) => c.name) : [];
+        setCategories(categoriesData);
 
-        if (preSelectedPartnerId && pRes.data) {
-          const p = pRes.data.find((x) => x.id === preSelectedPartnerId);
+        // Save to cache for instant load next time
+        useDataCache.getState().set(cacheKey, {
+          partners: partnersData,
+          products: allProducts,
+          categories: categoriesData,
+        });
+
+        if (preSelectedPartnerId && partnersData) {
+          const p = partnersData.find((x: any) => x.id === preSelectedPartnerId);
           if (p) setSelectedPartner(p);
         }
 
-        // Si estamos editando, cargar el pedido
+        // Edit order handling
         if (editOrderId && companyId) {
           const { data: orderToEdit } = await supabase
             .from("orders")
@@ -178,19 +202,14 @@ function NuevaVentaContent() {
 
           if (orderToEdit) {
             setEditingOrder(orderToEdit);
-            
-            // Setear el cliente
-            if (pRes.data && orderToEdit.partner_id) {
-              const p = pRes.data.find((x) => x.id === orderToEdit.partner_id);
+            if (partnersData && orderToEdit.partner_id) {
+              const p = partnersData.find((x: any) => x.id === orderToEdit.partner_id);
               if (p) setSelectedPartner(p);
             }
-
-            // Setear el carrito mapeando los renglones antiguos con los productos de la base de datos
             if (orderToEdit.order_items) {
               const loadedCart = orderToEdit.order_items.map((oi: any) => {
-                // Conseguir metadata del producto cargado para validación de stock
-                const productDbInfo = prRes.data?.find((p:any) => p.id === oi.product_id) || 
-                                      processedKits.find((k:any) => k.id === oi.product_id);
+                const productDbInfo = prRes.data?.find((p: any) => p.id === oi.product_id) ||
+                                      processedKits.find((k: any) => k.id === oi.product_id);
                 return {
                   id: oi.product_id,
                   name: oi.products?.name || oi.kit_name || "Producto desconocido",
@@ -203,8 +222,6 @@ function NuevaVentaContent() {
               });
               setCart(loadedCart);
             }
-
-            // Setear condiciones de pago
             setPaymentType(orderToEdit.payment_type || "contado");
             setPaymentMethod(orderToEdit.payment_method || "Efectivo");
           }
@@ -216,7 +233,7 @@ function NuevaVentaContent() {
         setLoading(false);
       }
     }
-    loadInitialData();
+    loadData();
   }, [user?.company_id]);
 
   // ── Cart Logic ───────────────────────────────────────────

@@ -36,6 +36,7 @@ export default function ProductosPage() {
 }
 
 import { useUser } from "@/hooks/use-user";
+import { useDataCache } from "@/lib/data-cache";
 
 function ProductosContent() {
   const searchParams = useSearchParams();
@@ -53,7 +54,14 @@ function ProductosContent() {
   const fetchProducts = async () => {
     const companyId = user?.company_id;
     if (!companyId) return;
-    setLoading(true);
+
+    const cacheKey = `productos_${companyId}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setProducts(cached);
+      setLoading(false);
+    }
+    if (!cached) setLoading(true);
 
     const { data, error } = await supabase
       .from("products")
@@ -65,6 +73,7 @@ function ProductosContent() {
       toast.error("Error al cargar inventario");
     } else {
       setProducts(data || []);
+      useDataCache.getState().set(cacheKey, data || []);
     }
     setLoading(false);
   };

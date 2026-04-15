@@ -30,6 +30,7 @@ import { useCompanyProfile } from "@/hooks/use-company-profile";
 
 import { useUser } from "@/hooks/use-user";
 import { TableSkeleton } from "@/components/ui/skeletons";
+import { useDataCache } from "@/lib/data-cache";
 
 export default function VentasPage() {
   const supabase = createClient();
@@ -48,9 +49,17 @@ export default function VentasPage() {
 
   const fetchOrders = useCallback(async () => {
     if (!companyId) return;
-    setLoading(true);
 
-    // Fetch company settings for IVA
+    const cacheKey = `ventas_${companyId}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setOrders(cached.orders);
+      if (cached.ivaPercent !== undefined) setIvaPercent(cached.ivaPercent);
+      setLoading(false);
+    }
+
+    if (!cached) setLoading(true);
+
     const { data: companyData } = await supabase
       .from("companies")
       .select("settings")
@@ -73,6 +82,7 @@ export default function VentasPage() {
       .order("created_at", { ascending: false });
 
     setOrders(data || []);
+    useDataCache.getState().set(cacheKey, { orders: data || [], ivaPercent: companyData?.settings?.iva_percent });
     setLoading(false);
   }, [companyId]);
 
