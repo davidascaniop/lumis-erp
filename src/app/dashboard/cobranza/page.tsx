@@ -56,8 +56,11 @@ export default function CobranzaPage() {
   );
 }
 
+import { useUser } from "@/hooks/use-user";
+
 function CobranzaContent() {
   const supabase = createClient();
+  const { user } = useUser();
   const searchParams = useSearchParams();
   const initialFilter = searchParams.get("filter") as "all" | "overdue" | null;
 
@@ -65,7 +68,7 @@ function CobranzaContent() {
   const [pendingVerifications, setPendingVerifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [companyId, setCompanyId] = useState<string>("");
+  const companyId = user?.company_id || "";
   const { accounts: treasuryAccounts } = useTreasuryAccounts(companyId);
   const [filterType, setFilterType] = useState<"all" | "overdue">(
     initialFilter || "all",
@@ -77,32 +80,20 @@ function CobranzaContent() {
   }, [initialFilter]);
 
   const fetchData = async () => {
+    if (!companyId) return;
     setLoading(true);
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: userData } = await supabase
-        .from("users")
-        .select("company_id")
-        .eq("auth_id", user.id)
-        .single();
-      if (!userData) return;
-      setCompanyId(userData.company_id);
-
       const [recesRes, paymentsRes] = await Promise.all([
         supabase
           .from("receivables")
           .select("*, partners(name, credit_status, rif)")
-          .eq("company_id", userData.company_id)
+          .eq("company_id", companyId)
           .neq("status", "paid")
           .order("due_date", { ascending: true }),
         supabase
           .from("payments")
           .select("*")
-          .eq("company_id", userData.company_id)
+          .eq("company_id", companyId)
           .eq("status", "pending"),
       ]);
 
@@ -117,7 +108,7 @@ function CobranzaContent() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [companyId]);
 
   const today = new Date();
   const totalReceivable = receivables.reduce(
@@ -143,23 +134,14 @@ function CobranzaContent() {
   const [paymentAccountId, setPaymentAccountId] = useState("");
 
   const handleRegisterPayment = async () => {
-    if (!selectedReceivable) return;
+    if (!selectedReceivable || !user) return;
     setSaving(true);
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      const { data: userData } = await supabase
-        .from("users")
-        .select("id, company_id")
-        .eq("auth_id", user?.id)
-        .single();
-
       const { error: payErr } = await supabase.from("payments").insert({
-        company_id: userData?.company_id,
+        company_id: companyId,
         receivable_id: selectedReceivable.id,
         partner_id: selectedReceivable.partner_id,
-        collected_by: userData?.id,
+        collected_by: user.id,
         amount_usd: paymentAmount,
         payment_method: paymentMethod,
         reference: paymentRef,
@@ -182,23 +164,15 @@ function CobranzaContent() {
     paymentId: string,
     status: "verified" | "rejected",
   ) => {
+    if (!user) return;
     setSaving(true);
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      const { data: userData } = await supabase
-        .from("users")
-        .select("id")
-        .eq("auth_id", user?.id)
-        .single();
-
       // 1. Actualizar el pago
       const { error: payErr } = await supabase
         .from("payments")
         .update({
           status,
-          verified_by: userData?.id,
+          verified_by: user.id,
           verified_at: new Date().toISOString(),
         } as any)
         .eq("id", paymentId);

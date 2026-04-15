@@ -28,12 +28,15 @@ import {
 import { ThermalInvoiceModal, type InvoiceOrderData } from "@/components/ventas/thermal-invoice-modal";
 import { useCompanyProfile } from "@/hooks/use-company-profile";
 
+import { useUser } from "@/hooks/use-user";
+
 export default function VentasPage() {
   const supabase = createClient();
+  const { user } = useUser();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [companyId, setCompanyId] = useState<string | null>(null);
+  const companyId = user?.company_id || null;
 
   // ── Print Modal State ──────────────────────────────────
   const [printModalOpen, setPrintModalOpen] = useState(false);
@@ -43,26 +46,14 @@ export default function VentasPage() {
   const { company } = useCompanyProfile(companyId);
 
   const fetchOrders = useCallback(async () => {
+    if (!companyId) return;
     setLoading(true);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: rawUserData } = await supabase
-      .from("users")
-      .select("company_id")
-      .eq("auth_id", user.id)
-      .single();
-    if (!rawUserData) return;
-    const userData = rawUserData as any;
-    setCompanyId(userData.company_id);
 
     // Fetch company settings for IVA
     const { data: companyData } = await supabase
       .from("companies")
       .select("settings")
-      .eq("id", userData.company_id)
+      .eq("id", companyId)
       .single();
     if (companyData?.settings?.iva_percent !== undefined) {
       setIvaPercent(Number(companyData.settings.iva_percent));
@@ -77,12 +68,12 @@ export default function VentasPage() {
         order_items (qty, price_usd, products(name))
         `,
       )
-      .eq("company_id", userData.company_id)
+      .eq("company_id", companyId)
       .order("created_at", { ascending: false });
 
     setOrders(data || []);
     setLoading(false);
-  }, []);
+  }, [companyId]);
 
   useEffect(() => {
     fetchOrders();

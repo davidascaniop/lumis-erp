@@ -9,28 +9,20 @@ import Link from "next/link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ClientForm } from "@/components/clients/client-form";
 import { formatCurrency } from "@/lib/utils";
+import { useUser } from "@/hooks/use-user";
 
 export default function ClientesPage() {
   const supabase = createClient();
+  const { user } = useUser();
   const [partners, setPartners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [formOpen, setFormOpen] = useState(false);
 
   const fetchPartners = async () => {
+    const companyId = user?.company_id;
+    if (!companyId) return;
     setLoading(true);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: rawUserData } = await supabase
-      .from("users")
-      .select("company_id")
-      .eq("auth_id", user.id)
-      .single();
-    if (!rawUserData) return;
-    const userData = rawUserData as any;
 
     const { data } = await supabase
       .from("partners")
@@ -41,7 +33,7 @@ export default function ClientesPage() {
                 receivables (balance_usd)
             `,
       )
-      .eq("company_id", userData.company_id)
+      .eq("company_id", companyId)
       .order("name", { ascending: true });
 
     const partnersWithBalance = (data || []).map((p: any) => ({
@@ -59,7 +51,7 @@ export default function ClientesPage() {
 
   useEffect(() => {
     fetchPartners();
-  }, []);
+  }, [user?.company_id]);
 
   const filtered = partners.filter(
     (p) =>

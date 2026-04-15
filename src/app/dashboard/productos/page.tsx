@@ -35,9 +35,12 @@ export default function ProductosPage() {
   );
 }
 
+import { useUser } from "@/hooks/use-user";
+
 function ProductosContent() {
   const searchParams = useSearchParams();
   const filterParam = searchParams.get("filter");
+  const { user } = useUser();
 
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,24 +51,14 @@ function ProductosContent() {
   const supabase = createClient();
 
   const fetchProducts = async () => {
+    const companyId = user?.company_id;
+    if (!companyId) return;
     setLoading(true);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: userData } = await supabase
-      .from("users")
-      .select("company_id")
-      .eq("auth_id", user.id)
-      .single();
-
-    if (!userData) return;
 
     const { data, error } = await supabase
       .from("products")
       .select("*")
-      .eq("company_id", userData.company_id)
+      .eq("company_id", companyId)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -78,7 +71,7 @@ function ProductosContent() {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [user?.company_id]);
 
   const filteredProducts = products.filter((p) => {
     const matchesSearch =

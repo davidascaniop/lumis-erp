@@ -12,6 +12,7 @@ import {
   DollarSign, ShoppingCart, TrendingUp, ArrowUpRight, ArrowDownRight,
   Download, Calendar as CalendarIcon, Loader2
 } from "lucide-react";
+import { useUser } from "@/hooks/use-user";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Helper for fetching data
@@ -20,27 +21,22 @@ const supabase = createClient();
 type Period = "today" | "week" | "month" | "year" | "custom";
 
 export default function ReporteVentasPage() {
+  const { user } = useUser();
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<Period>("month");
   const [orders, setOrders] = useState<any[]>([]);
   const [orderItems, setOrderItems] = useState<any[]>([]);
-  const [companyId, setCompanyId] = useState<string | null>(null);
+  const companyId = user?.company_id;
 
   const fetchData = useCallback(async () => {
+    if (!companyId) return;
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data: ud } = await supabase.from("users").select("company_id").eq("auth_id", user.id).single();
-      if (!ud) return;
-      setCompanyId(ud.company_id);
-
-      // Fetch all confirmed/delivered orders to process locally (for real-time filtering without refetching if dataset isn't huge, or just fetch all for the year)
-      // Since it's a SaaS, usually we'd pass dates to DB, but for real-time quick toggles we fetch a reasonable window.
       const oneYearAgo = subYears(new Date(), 1).toISOString();
       const [ordRes, itemRes] = await Promise.all([
         supabase.from("orders")
           .select("id, total_usd, created_at, status")
+          .eq("company_id", companyId)
           .in("status", ["confirmed", "dispatched", "delivered"])
           .gte("created_at", oneYearAgo),
         supabase.from("order_items")
@@ -53,7 +49,7 @@ export default function ReporteVentasPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [companyId]);
 
   useEffect(() => {
     fetchData();
