@@ -64,9 +64,8 @@ export function UserProvider({ children, initialUser }: UserProviderProps) {
       if (event === 'SIGNED_OUT') {
         setUser(null);
       } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        setUser(null);
-        setLoading(true);
-        fetchUser();
+        // Do not wipe out state. Just refresh profile silently if needed.
+        fetchUser(true);
       }
     });
 
