@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 interface UserContextType {
@@ -15,25 +15,17 @@ const UserContext = createContext<UserContextType>({
   refreshUser: async () => {},
 });
 
-export function UserProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any | null>(() => {
-    // Hydrate from sessionStorage to avoid loading flash on navigation
-    if (typeof window !== "undefined") {
-      try {
-        const cached = sessionStorage.getItem("lumis_user_profile");
-        return cached ? JSON.parse(cached) : null;
-      } catch { return null; }
-    }
-    return null;
-  });
-  const [loading, setLoading] = useState(() => {
-    // If we have cached data, skip initial loading state
-    if (typeof window !== "undefined") {
-      return !sessionStorage.getItem("lumis_user_profile");
-    }
-    return true;
-  });
+interface UserProviderProps {
+  children: React.ReactNode;
+  initialUser?: any | null;
+}
+
+export function UserProvider({ children, initialUser }: UserProviderProps) {
+  // If server provided the user, use it immediately (zero loading time)
+  const [user, setUser] = useState<any | null>(initialUser ?? null);
+  const [loading, setLoading] = useState(!initialUser);
   const supabase = createClient();
+  const hasInitialUser = useRef(!!initialUser);
 
   const fetchUser = useCallback(async (isRefresh = false) => {
     if (!isRefresh) setLoading(true);
@@ -50,11 +42,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           .single();
 
         setUser(profile);
-        // Cache for instant hydration on next navigation
-        try { sessionStorage.setItem("lumis_user_profile", JSON.stringify(profile)); } catch {}
       } else {
         setUser(null);
-        try { sessionStorage.removeItem("lumis_user_profile"); } catch {}
       }
     } catch (error) {
       console.error("Error fetching user in UserProvider:", error);
@@ -65,16 +54,16 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }, [supabase]);
 
   useEffect(() => {
-    fetchUser();
+    // If server already provided the user, skip initial fetch entirely
+    if (!hasInitialUser.current) {
+      fetchUser();
+    }
 
-    // Listen for auth state changes to prevent cross-tenant data leakage
+    // Listen for auth state changes (account switch, logout, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
-        // Immediately clear user data to prevent stale data flash
         setUser(null);
-        try { sessionStorage.removeItem("lumis_user_profile"); } catch {}
       } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        // Clear stale user first, then fetch fresh profile
         setUser(null);
         setLoading(true);
         fetchUser();

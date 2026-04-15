@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Montserrat, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { UserProvider } from "@/components/providers/user-provider";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -49,10 +48,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <UserProvider>
-            {children}
-            <Toaster richColors position="top-right" />
-          </UserProvider>
+          {children}
+          <Toaster richColors position="top-right" />
         </ThemeProvider>
       </body>
     </html>
