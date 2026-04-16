@@ -25,6 +25,7 @@ export function DashboardSkeleton() {
           <div
             key={i}
             className="bg-surface-card border border-border rounded-2xl p-5 space-y-3"
+          >
             <div className="flex items-center gap-2">
               <div className="skeleton w-8 h-8 rounded-lg" />
               <div className="skeleton h-3 w-16 rounded" />
@@ -118,6 +119,7 @@ export function TableSkeleton({ columns = 5, rows = 8 }: { columns?: number; row
         <div
           key={i}
           className="px-6 py-4 border-b border-border/30 flex items-center gap-6"
+        >
           {Array.from({ length: columns }).map((_, j) => (
             <div key={j} className="flex-1" style={{ maxWidth: j === 0 ? 120 : j === columns - 1 ? 60 : 100 }}>
               <div className="skeleton h-4 w-full rounded" />
