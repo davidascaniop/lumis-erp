@@ -35,7 +35,10 @@ export default async function SuperAdminHome() {
     supabase.from("companies").select("id", { count: "exact", head: true }),
     supabase.from("companies").select("id, name, created_at, subscription_status, plan_type, logo_url"),
     supabase.from("users").select("id", { count: "exact", head: true }),
-    supabase.from("subscription_payments").select("id, amount_usd, status, created_at, companies(name)").order("created_at", { ascending: false }),
+    supabase.from("subscription_payments")
+      .select("id, amount_usd, status, created_at, companies!inner(name, subscription_status)")
+      .neq("companies.subscription_status", "demo")
+      .order("created_at", { ascending: false }),
     supabase.from("orders").select("company_id, created_at").gte("created_at", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
     supabase.from("recurring_expenses").select("id, name, amount, due_day, alert_days, is_active, companies(name)").eq("is_active", true),
   ]);
@@ -139,8 +142,10 @@ export default async function SuperAdminHome() {
     return acc;
   }, {});
 
-  const growthChart = buildMonthlyGrowth(allCompanies);
-  const mrrChart = buildMrrGrowth(allCompanies, PLAN_PRICES);
+  // Excluir demos de los gráficos de crecimiento y MRR — no son ingresos reales
+  const payingCompanies = allCompanies.filter(c => c.subscription_status !== "demo");
+  const growthChart = buildMonthlyGrowth(payingCompanies);
+  const mrrChart = buildMrrGrowth(payingCompanies, PLAN_PRICES);
   const retentionChart = buildRetention(allPayments);
 
   return (
