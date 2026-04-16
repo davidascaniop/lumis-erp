@@ -6,16 +6,29 @@ import { Share2, Heart } from "lucide-react";
 import Link from "next/link";
 import { recordSeedView, recordSeedBlessing } from "@/lib/actions/seeds";
 
-export function DailySeed({ companyId }: { companyId: string }) {
-  const [seed, setSeed] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+export function DailySeed({ companyId, initialSeed }: { companyId: string; initialSeed?: any }) {
+  const [seed, setSeed] = useState<any>(initialSeed ?? null);
+  const [loading, setLoading] = useState(!initialSeed);
   const [blessed, setBlessed] = useState(false);
-  const [blessCount, setBlessCount] = useState(0);
+  const [blessCount, setBlessCount] = useState(initialSeed?.blessings_count || 0);
 
   useEffect(() => {
+    // FIX #1: Si ya tenemos datos SSR, solo manejar localStorage y recordView
+    if (initialSeed) {
+      const saved = localStorage.getItem("lumis_blessed_seeds");
+      if (saved) {
+        try {
+          const arr: string[] = JSON.parse(saved);
+          if (arr.includes(initialSeed.id)) setBlessed(true);
+        } catch { /* ignore */ }
+      }
+      recordSeedView(initialSeed.id, companyId).catch(() => {});
+      return;
+    }
+
+    // Fallback: fetch desde cliente si no hay datos SSR
     const supabase = createClient();
     const today = new Date().toISOString().split("T")[0];
-
     supabase
       .from("daily_seeds")
       .select("*")
@@ -37,12 +50,12 @@ export function DailySeed({ companyId }: { companyId: string }) {
           await recordSeedView(data.id, companyId).catch(() => {});
         }
       });
-  }, [companyId]);
+  }, [companyId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleBless = async () => {
     if (blessed || !seed) return;
     setBlessed(true);
-    setBlessCount(c => c + 1);
+    setBlessCount((c: number) => c + 1);
     const saved = localStorage.getItem("lumis_blessed_seeds");
     const arr: string[] = saved ? JSON.parse(saved) : [];
     if (!arr.includes(seed.id)) {

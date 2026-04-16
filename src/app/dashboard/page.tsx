@@ -12,6 +12,7 @@ export default async function DashboardPage() {
   if (!companyId) return <div className="p-8 text-[#9585B8]">Falta configurar empresa.</div>;
 
   const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
   const startMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString();
   const thirtyDaysAgo = new Date(today.getTime() - 30 * 86400000).toISOString();
   const eightMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 7, 1).toISOString();
@@ -27,6 +28,10 @@ export default async function DashboardPage() {
     lowStockRes,
     topProductsRes,
     recurringRes,
+    portalPaymentsRes,
+    dailySeedRes,
+    broadcastsRes,
+    broadcastReadsRes,
   ] = await Promise.all([
     supabase.from("receivables").select("id, invoice_number, partner_id, balance_usd, amount_usd, due_date, status, created_at, partners(name)").eq("company_id", companyId).neq("status", "paid"),
     supabase.from("payments").select("id, amount_usd, status, verified_at, created_at").eq("company_id", companyId).in("status", ["verified", "pending"]),
@@ -36,6 +41,11 @@ export default async function DashboardPage() {
     supabase.from("products").select("id, name, stock, unit, min_stock").eq("company_id", companyId).not("min_stock", "is", null).order("stock", { ascending: true }).limit(5),
     supabase.from("order_items").select("product_id, qty, subtotal, products(name, unit), orders!inner(company_id, created_at)").eq("orders.company_id", companyId).gte("orders.created_at", startMonth),
     supabase.from("recurring_expenses").select("*").eq("company_id", companyId).eq("is_active", true),
+    // FIX #1: Mover re-fetches de cliente a SSR
+    supabase.from("activity_log").select("id, content, created_at, entity_id, metadata").eq("company_id", companyId).eq("type", "client_payment").order("created_at", { ascending: false }).limit(10),
+    supabase.from("daily_seeds").select("id, verse, verse_reference, reflection, scheduled_date, blessings_count, status").eq("scheduled_date", todayStr).eq("status", "published").maybeSingle(),
+    supabase.from("broadcasts").select("id, title, message, type, is_active, expires_at, created_at").eq("is_active", true).order("created_at", { ascending: false }),
+    supabase.from("broadcast_reads").select("broadcast_id").eq("user_id", user.id),
   ]);
 
   const allReceivables = allReceivablesRes.data || [];
@@ -84,6 +94,16 @@ export default async function DashboardPage() {
 
   const firstName = userData?.full_name?.split(" ")[0] || "Usuario";
 
+  // FIX #1: Procesar datos SSR para componentes de cliente
+  const portalPayments = portalPaymentsRes.data || [];
+  const dailySeed = dailySeedRes.data ?? null;
+  const broadcastReadIds = new Set((broadcastReadsRes.data || []).map((r: any) => r.broadcast_id));
+  const initialBroadcasts = (broadcastsRes.data || []).filter((b: any) => {
+    if (broadcastReadIds.has(b.id)) return false;
+    if (b.expires_at && new Date(b.expires_at) <= new Date()) return false;
+    return true;
+  });
+
   const data = {
     companyId, totalCartera, totalMora, recaudadoMes, porcentajeMora, pendingOrders: pendingOrdersCount,
     pendingVerifications: pendingVerifCount, newClients: newClientsCount, collectionRate,
@@ -94,7 +114,14 @@ export default async function DashboardPage() {
 
   return (
     <Suspense fallback={<div className="p-8 text-center text-[#9585B8]">Cargando dashboard...</div>}>
-      <DashboardView data={data} firstName={firstName} user={user} />
+      <DashboardView
+        data={data}
+        firstName={firstName}
+        user={user}
+        portalPayments={portalPayments}
+        dailySeed={dailySeed}
+        broadcasts={initialBroadcasts}
+      />
     </Suspense>
   );
 }

@@ -31,12 +31,13 @@ export default async function SuperAdminHome() {
     { data: monthlyOrdersData },
     { data: recurrentesData },
   ] = await Promise.all([
-    supabase.from("companies").select("*", { count: "exact", head: true }),
+    // FIX #2: Reemplazar SELECT * con campos específicos
+    supabase.from("companies").select("id", { count: "exact", head: true }),
     supabase.from("companies").select("id, name, created_at, subscription_status, plan_type, logo_url"),
-    supabase.from("users").select("*", { count: "exact", head: true }),
-    supabase.from("subscription_payments").select("*, companies(name)").order("created_at", { ascending: false }),
+    supabase.from("users").select("id", { count: "exact", head: true }),
+    supabase.from("subscription_payments").select("id, amount_usd, status, created_at, companies(name)").order("created_at", { ascending: false }),
     supabase.from("orders").select("company_id, created_at").gte("created_at", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
-    supabase.from("recurring_expenses").select("*, companies(name)").eq("is_active", true),
+    supabase.from("recurring_expenses").select("id, name, amount, due_day, alert_days, is_active, companies(name)").eq("is_active", true),
   ]);
 
   const allCompanies = allCompaniesData || [];
@@ -104,20 +105,20 @@ export default async function SuperAdminHome() {
     };
   });
 
-  // PASO 7: Centro de Acción (Mapeo de Actividades)
+  // PASO 7: Centro de Acción — FIX #5: limitar antes de mapear para evitar procesamiento de 1000+ objetos
   const activities = [
-    ...(allPayments.map(p => ({
+    ...allPayments.slice(0, 30).map(p => ({
       id: `pay-${p.id}`,
       type: p.status,
       category: p.status === 'pending' ? 'payment' : 'alert',
       date: new Date(p.created_at),
       message: p.status === 'pending' ? 'Pago pendiente de revisión' : (p.status === 'approved' ? 'Cuenta activada correctamente' : 'Pago rechazado o vencido'),
-      company: p.companies?.name || 'Empresa Desconocida',
+      company: (p.companies as any)?.name || 'Empresa Desconocida',
       icon: p.status === 'pending' ? "clock" : (p.status === 'approved' ? "check" : "alert"),
       color: p.status === 'pending' ? 'text-[#FACC15] bg-[#FACC15]/10' : (p.status === 'approved' ? 'text-[#10B981] bg-[#10B981]/10' : 'text-[#F43F5E] bg-[#F43F5E]/10'),
       link: '/superadmin/clientes/suscripciones'
-    }))),
-    ...(allCompanies.map(c => ({
+    })),
+    ...allCompanies.slice(0, 30).map(c => ({
       id: `comp-${c.id}`,
       type: 'registration',
       category: 'registration',
@@ -127,8 +128,8 @@ export default async function SuperAdminHome() {
       icon: "building",
       color: 'text-[#E040FB] bg-[#E040FB]/10',
       link: `/superadmin/clientes/empresas/${c.id}`
-    })))
-  ].sort((a, b) => b.date.getTime() - a.date.getTime());
+    }))
+  ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 50);
 
   // Calcular distribución por plan
   const planCounts = allCompanies.reduce((acc: any, c) => {
@@ -162,7 +163,7 @@ export default async function SuperAdminHome() {
           {/* FILA 1: FINANZAS DESTACADAS (2 CARDS GRANDES) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* MRR */}
-            <Link href="/superadmin/clientes/suscripciones" className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-visible group hover:border-brand/30 transition-all cursor-pointer">
+            <Link href="/superadmin/clientes/suscripciones" className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-visible group hover:border-brand/30 transition-colors cursor-pointer">
               <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
               <div className="flex items-start justify-between mb-4 relative z-10">
                 <div className="p-3 rounded-2xl bg-brand/10 border border-brand/20 relative group-hover:bg-brand/15 transition-colors">
@@ -183,7 +184,7 @@ export default async function SuperAdminHome() {
             </Link>
 
             {/* ARR */}
-            <Link href="/superadmin/clientes/suscripciones" className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group hover:border-[#00AF9C]/30 transition-all cursor-pointer">
+            <Link href="/superadmin/clientes/suscripciones" className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group hover:border-[#00AF9C]/30 transition-colors cursor-pointer">
                <div className="absolute top-0 right-0 w-32 h-32 bg-[#00E5CC]/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
               <div className="flex items-start justify-between mb-4 relative z-10">
                 <div className="p-3 rounded-2xl bg-[#00E5CC]/10 border border-[#00E5CC]/20 group-hover:bg-[#00E5CC]/15 transition-colors">
@@ -204,7 +205,7 @@ export default async function SuperAdminHome() {
             </Link>
 
             {/* Churn Rate */}
-            <div className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group hover:border-brand/30 transition-all">
+            <div className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group hover:border-brand/30 transition-colors">
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#F43F5E]/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
               <div className="flex items-start justify-between mb-4 relative z-10">
                 <div className="p-3 rounded-2xl bg-surface-base border border-border group-hover:bg-[#F43F5E]/10 transition-colors">
@@ -225,7 +226,7 @@ export default async function SuperAdminHome() {
             </div>
 
             {/* LTV */}
-            <div className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group hover:border-[#10B981]/30 transition-all">
+            <div className="bg-surface-card border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group hover:border-[#10B981]/30 transition-colors">
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#10B981]/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
               <div className="flex items-start justify-between mb-4 relative z-10">
                 <div className="p-3 rounded-2xl bg-surface-base border border-border group-hover:bg-[#10B981]/10 transition-colors">
@@ -249,7 +250,7 @@ export default async function SuperAdminHome() {
           {/* FILA 2: OPERACIONES (7 CARDS PEQUEÑAS) */}
           <div className="flex flex-wrap gap-3">
              {/* Empresas Activas */}
-             <Link href="/superadmin/clientes/empresas" className="flex-1 min-w-[140px] bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-brand/30 transition-all group cursor-pointer">
+             <Link href="/superadmin/clientes/empresas" className="flex-1 min-w-[140px] bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-brand/30 transition-colors group cursor-pointer">
                 <div className="flex justify-between items-start mb-2">
                    <div className="p-2 bg-brand/10 rounded-lg text-brand">
                      <Building2 className="w-4 h-4" />
@@ -263,7 +264,7 @@ export default async function SuperAdminHome() {
              </Link>
 
              {/* Users */}
-             <Link href="/superadmin/usuarios" className="flex-1 min-w-[140px] bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-[#0288D1]/30 transition-all group cursor-pointer">
+             <Link href="/superadmin/usuarios" className="flex-1 min-w-[140px] bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-[#0288D1]/30 transition-colors group cursor-pointer">
                 <div className="flex justify-between items-start mb-2">
                    <div className="p-2 bg-[#4FC3F7]/10 rounded-lg text-[#0288D1]">
                      <Users className="w-4 h-4" />
@@ -274,7 +275,7 @@ export default async function SuperAdminHome() {
              </Link>
 
              {/* Conversión Trial -> Pago */}
-             <div className="flex-1 min-w-[140px] bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-[#E040FB]/30 transition-all group cursor-pointer">
+             <div className="flex-1 min-w-[140px] bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-[#E040FB]/30 transition-colors group cursor-pointer">
                 <div className="flex justify-between items-start mb-2">
                    <div className="p-2 bg-[#E040FB]/10 rounded-lg text-[#E040FB]">
                      <TrendingUp className="w-4 h-4" />
@@ -285,7 +286,7 @@ export default async function SuperAdminHome() {
              </div>
 
              {/* Nuevos registros hoy */}
-             <div className="flex-1 min-w-[140px] bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-[#00E5CC]/30 transition-all group cursor-pointer">
+             <div className="flex-1 min-w-[140px] bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-[#00E5CC]/30 transition-colors group cursor-pointer">
                 <div className="flex justify-between items-start mb-2">
                    <div className="p-2 bg-[#00E5CC]/10 rounded-lg text-[#00AF9C]">
                      <Building2 className="w-4 h-4" />
@@ -296,7 +297,7 @@ export default async function SuperAdminHome() {
              </div>
 
              {/* Trial */}
-             <Link href="/superadmin/clientes/empresas?filter=trial" className="flex-1 min-w-[140px] bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-status-warn/30 transition-all group cursor-pointer">
+             <Link href="/superadmin/clientes/empresas?filter=trial" className="flex-1 min-w-[140px] bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-status-warn/30 transition-colors group cursor-pointer">
                 <div className="flex justify-between items-start mb-2">
                    <div className="p-2 bg-status-warn/10 rounded-lg text-status-warn">
                      <Clock className="w-4 h-4" />
@@ -307,7 +308,7 @@ export default async function SuperAdminHome() {
              </Link>
 
              {/* Demo */}
-             <Link href="/superadmin/clientes/empresas?filter=demo" className="flex-1 min-w-[140px] bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-[#1E88E5]/30 transition-all group cursor-pointer">
+             <Link href="/superadmin/clientes/empresas?filter=demo" className="flex-1 min-w-[140px] bg-surface-card border border-border rounded-2xl p-4 shadow-sm hover:border-[#1E88E5]/30 transition-colors group cursor-pointer">
                 <div className="flex justify-between items-start mb-2">
                    <div className="p-2 bg-[#1E88E5]/10 rounded-lg text-[#1E88E5]">
                      <Sparkles className="w-4 h-4" />
@@ -318,7 +319,7 @@ export default async function SuperAdminHome() {
              </Link>
 
              {/* Pagos Vencidos (ALERTA) */}
-             <Link href="/superadmin/clientes/suscripciones?filter=vencidos" className="flex-1 min-w-[140px] bg-[#FFF5F7] border border-[#FFE4E8] rounded-2xl p-4 shadow-sm hover:bg-[#FFEBF0] transition-all group relative overflow-hidden cursor-pointer">
+             <Link href="/superadmin/clientes/suscripciones?filter=vencidos" className="flex-1 min-w-[140px] bg-[#FFF5F7] border border-[#FFE4E8] rounded-2xl p-4 shadow-sm hover:bg-[#FFEBF0] transition-colors group relative overflow-hidden cursor-pointer">
                 <div className="flex justify-between items-start mb-2 relative z-10">
                    <div className="p-2 bg-[#D22B4A]/10 rounded-lg text-[#D22B4A] shadow-sm">
                      <AlertTriangle className="w-4 h-4" />
@@ -409,7 +410,7 @@ export default async function SuperAdminHome() {
                   {topCompanies.length === 0 ? (
                       <p className="text-xs text-text-3 italic text-center py-4">No hay actividad suficiente</p>
                   ) : topCompanies.map((c, i) => (
-                    <Link href={`/superadmin/clientes/empresas/${c.id}`} key={i} className="flex items-center gap-3 p-3 rounded-2xl bg-surface-base/50 hover:bg-surface-hover border border-transparent hover:border-border transition-all">
+                    <Link href={`/superadmin/clientes/empresas/${c.id}`} key={i} className="flex items-center gap-3 p-3 rounded-2xl bg-surface-base/50 hover:bg-surface-hover border border-transparent hover:border-border transition-colors">
                        <div className="w-10 h-10 rounded-xl bg-surface-card border border-border overflow-hidden flex items-center justify-center shrink-0">
                           {c.logo ? <img src={c.logo} alt={c.name} className="w-full h-full object-cover" /> : <Building2 className="w-5 h-5 text-text-3" />}
                        </div>

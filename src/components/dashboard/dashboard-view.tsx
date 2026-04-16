@@ -10,15 +10,27 @@ import { KpiCardWithSparkline } from '@/components/dashboard/kpi-card-sparkline'
 import { formatCurrency } from '@/lib/utils';
 import { countActiveAlerts } from '@/components/dashboard/active-alerts-panel';
 
-const AgingChart = dynamic(() => import('@/components/dashboard/aging-chart').then(m => ({ default: m.AgingChart })), { ssr: false });
-const AlertsPanel = dynamic(() => import('@/components/dashboard/alerts-panel').then(m => ({ default: m.AlertsPanel })), { ssr: false });
-const ActiveAlertsPanel = dynamic(() => import('@/components/dashboard/active-alerts-panel').then(m => ({ default: m.ActiveAlertsPanel })), { ssr: false });
-const RecentActivity = dynamic(() => import('@/components/dashboard/recent-activity').then(m => ({ default: m.RecentActivity })), { ssr: false });
+// FIX #3: Fallbacks en dynamic imports para evitar espacios en blanco
+const Skeleton = ({ h = "h-48" }: { h?: string }) => (
+  <div className={`${h} rounded-2xl bg-surface-card border border-border animate-pulse`} />
+);
+
+const AgingChart = dynamic(() => import('@/components/dashboard/aging-chart').then(m => ({ default: m.AgingChart })), { ssr: false, loading: () => <Skeleton h="h-48" /> });
+const AlertsPanel = dynamic(() => import('@/components/dashboard/alerts-panel').then(m => ({ default: m.AlertsPanel })), { ssr: false, loading: () => <Skeleton h="h-32" /> });
+const ActiveAlertsPanel = dynamic(() => import('@/components/dashboard/active-alerts-panel').then(m => ({ default: m.ActiveAlertsPanel })), { ssr: false, loading: () => <Skeleton h="h-32" /> });
+const RecentActivity = dynamic(() => import('@/components/dashboard/recent-activity').then(m => ({ default: m.RecentActivity })), { ssr: false, loading: () => <Skeleton h="h-48" /> });
 const PortalPaymentsAlert = dynamic(() => import('@/components/dashboard/portal-payments-alert').then(m => ({ default: m.PortalPaymentsAlert })), { ssr: false });
 const BroadcastBanner = dynamic(() => import('@/components/dashboard/broadcast-banner').then(m => ({ default: m.BroadcastBanner })), { ssr: false });
 const DailySeed = dynamic(() => import('@/components/dashboard/daily-seed').then(m => ({ default: m.DailySeed })), { ssr: false });
 
-export function DashboardView({ data, firstName, user }: { data: any; firstName: string; user: any }) {
+export function DashboardView({ data, firstName, user, portalPayments, dailySeed, broadcasts }: {
+  data: any;
+  firstName: string;
+  user: any;
+  portalPayments?: any[];
+  dailySeed?: any;
+  broadcasts?: any[];
+}) {
   const [period, setPeriod] = useState('mes');
 
   const getGreetingEmoji = () => { const h = new Date().getHours(); return h < 12 ? '🌅' : h < 18 ? '☀️' : '🌙'; };
@@ -94,10 +106,10 @@ export function DashboardView({ data, firstName, user }: { data: any; firstName:
       </div>
 
       {/* ═══ SEMILLA + ALERTAS PORTAL ═══ */}
-      {user && <BroadcastBanner companyId={data.companyId} userId={user.id} />}
-      {user && <DailySeed companyId={data.companyId} />}
+      {user && <BroadcastBanner companyId={data.companyId} userId={user.id} initialBroadcasts={broadcasts} />}
+      {user && <DailySeed companyId={data.companyId} initialSeed={dailySeed} />}
 
-      <PortalPaymentsAlert companyId={data.companyId} />
+      <PortalPaymentsAlert companyId={data.companyId} initialPayments={portalPayments} />
 
       {/* ═══ ZONA 1: 6 KPIs con Sparklines ═══ */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 stagger">

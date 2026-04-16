@@ -22,17 +22,20 @@ const STYLES = {
 export function BroadcastBanner({
   companyId,
   userId,
+  initialBroadcasts,
 }: {
   companyId: string;
   userId: string;
+  initialBroadcasts?: any[];
 }) {
-  const supabase = createClient();
-  const [broadcasts, setBroadcasts] = useState<any[]>([]);
+  const [broadcasts, setBroadcasts] = useState<any[]>(initialBroadcasts ?? []);
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
+    // FIX #1: Si ya tenemos datos SSR, no hacer re-fetch en cliente
+    if (initialBroadcasts) return;
+    const supabase = createClient();
     const load = async () => {
-      // Traer broadcasts activos no leídos por este usuario
       const { data: readIds } = await supabase
         .from("broadcast_reads")
         .select("broadcast_id")
@@ -42,11 +45,10 @@ export function BroadcastBanner({
 
       const { data } = await supabase
         .from("broadcasts")
-        .select("*")
+        .select("id, title, message, type, is_active, expires_at, created_at")
         .eq("is_active", true)
         .order("created_at", { ascending: false });
 
-      // Also filter by expires_at here directly in JS since PostgREST OR logic can be tricky sometimes
       const unread = (data ?? []).filter((b: any) => {
         if (readSet.has(b.id)) return false;
         if (b.expires_at && new Date(b.expires_at) <= new Date()) return false;
@@ -55,7 +57,7 @@ export function BroadcastBanner({
       setBroadcasts(unread);
     };
     load();
-  }, [userId, companyId]);
+  }, [userId, companyId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (broadcasts.length === 0) return null;
 
