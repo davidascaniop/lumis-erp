@@ -1,15 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { motion, AnimatePresence } from "framer-motion";
 import {
-  ChevronLeft, Printer, MessageSquare, Truck, 
-  CheckCircle2, Clock, FileText, AlertCircle,
+  ChevronLeft, Printer, MessageSquare, Truck,
+  CheckCircle2, Clock, FileText,
   Building2, Calendar, Package, DollarSign,
-  Loader2, ArrowRight, ShieldCheck, Camera,
-  X, TrendingUp, TrendingDown, History,
+  Loader2, ShieldCheck,
+  TrendingUp, TrendingDown, History,
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -180,20 +179,27 @@ export default function PurchaseDetailPage() {
       setReceiveQtys(init);
 
       // Load price comparisons vs previous purchase per product
-      if (data?.supplier_id) {
-        const comparisons: Record<string, number | null> = {};
-        await Promise.all(mapped.map(async (it) => {
-          const { data: prevHistory } = await supabase
-            .from("purchase_price_history")
-            .select("unit_price_usd, purchased_at")
-            .eq("product_id", it.product_id)
-            .eq("supplier_id", data.supplier_id)
-            .lt("purchase_order_id", id as string)
-            .order("purchased_at", { ascending: false })
-            .limit(1);
-          comparisons[it.product_id] = (prevHistory as any[])?.[0]?.unit_price_usd ?? null;
-        }));
-        setPriceComparisons(comparisons);
+      // Wrapped in its own try/catch — if the table doesn't exist or errors,
+      // it fails silently without breaking the whole page.
+      if (data?.supplier_id && mapped.length > 0) {
+        try {
+          const comparisons: Record<string, number | null> = {};
+          await Promise.all(mapped.map(async (it) => {
+            const { data: prevHistory } = await supabase
+              .from("purchase_price_history")
+              .select("unit_price_usd, purchased_at")
+              .eq("product_id", it.product_id)
+              .eq("supplier_id", data.supplier_id)
+              .neq("purchase_order_id", id as string)   // excluir la orden actual (no comparar UUIDs con <)
+              .order("purchased_at", { ascending: false })
+              .limit(1);
+            comparisons[it.product_id] = (prevHistory as any[])?.[0]?.unit_price_usd ?? null;
+          }));
+          setPriceComparisons(comparisons);
+        } catch {
+          // La tabla purchase_price_history puede no existir aún — ignorar silenciosamente
+          setPriceComparisons({});
+        }
       }
 
     } catch (e: any) {
