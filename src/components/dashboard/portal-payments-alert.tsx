@@ -31,32 +31,7 @@ export function PortalPaymentsAlert({ companyId }: { companyId: string }) {
       if (data) setPayments(data as PortalPayment[]);
     };
     load();
-
-    // Realtime — escucha nuevos pagos del portal
-    const channel = supabase
-      .channel(`portal-payments-${companyId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "activity_log",
-          filter: `company_id=eq.${companyId}`,
-        },
-        (payload) => {
-          if ((payload.new as any).type === "client_payment") {
-            setPayments((prev) => [payload.new as PortalPayment, ...prev]);
-            try {
-              new Audio("/notification.mp3").play();
-            } catch {}
-          }
-        },
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    // Suscripción removida para optimizar velocidad (evitar re-renders en dashboard).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companyId]);
 

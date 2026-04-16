@@ -4,6 +4,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { SuspendedGuard } from "@/components/layout/SuspendedGuard";
 import { Toaster } from "sonner";
 import { UserProvider } from "@/components/providers/user-provider";
+import { PortalPaymentsAlert } from "@/components/dashboard/portal-payments-alert";
 
 export default async function DashboardLayout({
   children,
@@ -27,7 +28,12 @@ export default async function DashboardLayout({
       <div className="flex h-screen overflow-hidden bg-surface-base font-montserrat">
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden">
-          <main className="flex-1 overflow-y-auto p-6">
+          <main className="flex-1 overflow-y-auto p-6 relative">
+            {serverProfile?.company_id && (
+                <div className="absolute top-6 right-6 z-50 max-w-sm">
+                    <PortalPaymentsAlert companyId={serverProfile.company_id} />
+                </div>
+            )}
             <SuspendedGuard>{children}</SuspendedGuard>
           </main>
         </div>
