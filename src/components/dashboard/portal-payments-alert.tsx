@@ -13,27 +13,26 @@ interface PortalPayment {
   metadata?: string;
 }
 
-export function PortalPaymentsAlert({ companyId }: { companyId: string }) {
-  const [payments, setPayments] = useState<PortalPayment[]>([]);
+export function PortalPaymentsAlert({ companyId, initialPayments }: { companyId: string; initialPayments?: PortalPayment[] }) {
+  const [payments, setPayments] = useState<PortalPayment[]>(initialPayments ?? []);
   const [dismissed, setDismiss] = useState<Set<string>>(new Set());
-  const supabase = createClient();
 
   useEffect(() => {
+    // FIX #1: Si ya tenemos datos SSR, no hacer re-fetch en cliente
+    if (initialPayments) return;
+    const supabase = createClient();
     const load = async () => {
       const { data } = await supabase
         .from("activity_log")
-        .select("*")
+        .select("id, content, created_at, entity_id, metadata")
         .eq("company_id", companyId)
         .eq("type", "client_payment")
         .order("created_at", { ascending: false })
         .limit(10);
-
       if (data) setPayments(data as PortalPayment[]);
     };
     load();
-    // Suscripción removida para optimizar velocidad (evitar re-renders en dashboard).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [companyId]);
+  }, [companyId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const visible = payments.filter((p) => !dismissed.has(p.id));
   if (visible.length === 0) return null;
