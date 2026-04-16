@@ -28,14 +28,19 @@ export default function CRMPage() {
     async function init() {
       if (!user?.company_id) return;
       
-      // Verify Plan
+      // Verify Plan — cualquier plan activo tiene acceso al CRM
       const { data: org } = await supabase
         .from("companies")
-        .select("plan_type")
+        .select("plan_type, subscription_status")
         .eq("id", user.company_id)
         .single();
-        
-      if (org?.plan_type !== "pro" && org?.plan_type !== "enterprise") {
+
+      const PLANS_WITH_CRM = ["pro", "enterprise", "basic", "starter", "full"];
+      const hasCRM =
+        PLANS_WITH_CRM.includes(org?.plan_type ?? "") ||
+        org?.subscription_status === "active";
+
+      if (!hasCRM) {
         router.push("/dashboard/upgrade");
         return;
       }
