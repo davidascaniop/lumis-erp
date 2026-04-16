@@ -3,9 +3,6 @@ import { DashboardView } from '@/components/dashboard/dashboard-view';
 import { Suspense } from 'react';
 
 export default async function DashboardPage() {
-  const [period, setPeriod] = ["mes", () => {}];
-
-  
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user?.id) return <div className="p-8 text-[#9585B8]">Falta configurar empresa.</div>;
@@ -75,15 +72,17 @@ export default async function DashboardPage() {
   const salesByMonth = groupByMonth(ordersTrend, "created_at", "total_usd");
 
   const lowStockProducts = lowStockRaw.filter((p) => p.min_stock && p.stock <= p.min_stock);
-  const creditsDueToday = creditsDueRaw.map((r) => ({ id: r.id, client_name: r.partners?.name ?? "Sin nombre", amount: r.balance_usd ?? 0 }));
+  const creditsDueToday = creditsDueRaw.map((r) => ({ id: r.id, client_name: (r.partners as any)?.name ?? "Sin nombre", amount: r.balance_usd ?? 0 }));
 
   const clientMap = new Map();
-  topClientsRaw.forEach((r) => { const id = r.partner_id; const existing = clientMap.get(id); if (existing) { existing.total += r.balance_usd ?? 0; } else { clientMap.set(id, { name: r.partners?.name ?? "Sin nombre", total: r.balance_usd ?? 0 }); } });
+  topClientsRaw.forEach((r) => { const id = r.partner_id; const existing = clientMap.get(id); if (existing) { existing.total += r.balance_usd ?? 0; } else { clientMap.set(id, { name: (r.partners as any)?.name ?? "Sin nombre", total: r.balance_usd ?? 0 }); } });
   const topClients = [...clientMap.entries()].map(([id, v]) => ({ partner_id: id, ...v })).sort((a, b) => b.total - a.total).slice(0, 5);
 
   const productMap = new Map();
-  topProductsRaw.forEach((r) => { const id = r.product_id; const existing = productMap.get(id); if (existing) { existing.qty += r.qty ?? 0; existing.revenue += r.subtotal ?? 0; } else { productMap.set(id, { name: r.products?.name ?? "Sin nombre", unit: r.products?.unit ?? "und", qty: r.qty ?? 0, revenue: r.subtotal ?? 0 }); } });
+  topProductsRaw.forEach((r) => { const id = r.product_id; const existing = productMap.get(id); if (existing) { existing.qty += r.qty ?? 0; existing.revenue += r.subtotal ?? 0; } else { productMap.set(id, { name: (r.products as any)?.name ?? "Sin nombre", unit: (r.products as any)?.unit ?? "und", qty: r.qty ?? 0, revenue: r.subtotal ?? 0 }); } });
   const topProducts = [...productMap.entries()].map(([id, v]) => ({ product_id: id, ...v })).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+
+  const firstName = userData?.full_name?.split(" ")[0] || "Usuario";
 
   const data = {
     companyId, totalCartera, totalMora, recaudadoMes, porcentajeMora, pendingOrders: pendingOrdersCount,
@@ -92,3 +91,55 @@ export default async function DashboardPage() {
     receivableSpark, collectedSpark, ordersSpark, salesByMonth, lowStockProducts, creditsDueToday,
     topClients, topProducts, activeRecurringAlerts, inactiveClients: inactiveClientsRaw, overdueReceivables: overdueReceivablesRaw
   };
+
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-[#9585B8]">Cargando dashboard...</div>}>
+      <DashboardView data={data} firstName={firstName} user={user} />
+    </Suspense>
+  );
+}
+
+function calcAging(receivables: any[], today: Date) {
+  const r = { corriente: 0, d1_7: 0, d8_15: 0, d16_30: 0, mas30: 0 };
+  receivables.forEach(({ balance_usd, due_date }) => {
+    const days = Math.ceil((today.getTime() - new Date(due_date).getTime()) / 86400000);
+    if (days <= 0) r.corriente += balance_usd ?? 0;
+    else if (days <= 7) r.d1_7 += balance_usd ?? 0;
+    else if (days <= 15) r.d8_15 += balance_usd ?? 0;
+    else if (days <= 30) r.d16_30 += balance_usd ?? 0;
+    else r.mas30 += balance_usd ?? 0;
+  });
+  return [
+    { name: "Corriente", value: r.corriente, color: "#00E5CC" },
+    { name: "1–7d", value: r.d1_7, color: "#7C4DFF" },
+    { name: "8–15d", value: r.d8_15, color: "#FFB800" },
+    { name: "16–30d", value: r.d16_30, color: "#FF8C00" },
+    { name: "+30d", value: r.mas30, color: "#FF2D55" },
+  ];
+}
+
+function groupByDay(rows: any[], dateField: string, valueField: string): { v: number }[] {
+  const map = new Map<string, number>();
+  rows.forEach((r) => {
+    const day = r[dateField]?.substring(0, 10) ?? "";
+    map.set(day, (map.get(day) ?? 0) + (Number(r[valueField]) || 0));
+  });
+  const sorted = [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
+  return sorted.map(([, v]) => ({ v: Math.round(v * 100) / 100 }));
+}
+
+function groupByMonth(rows: any[], dateField: string, valueField: string) {
+  const map = new Map<string, number>();
+  rows.forEach((r) => {
+    const d = new Date(r[dateField]);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    map.set(key, (map.get(key) ?? 0) + (Number(r[valueField]) || 0));
+  });
+  const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+  return [...map.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, total]) => ({
+      month: months[parseInt(key.split("-")[1]) - 1],
+      total: Math.round(total * 100) / 100,
+    }));
+}
