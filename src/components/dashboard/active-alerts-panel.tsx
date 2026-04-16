@@ -254,8 +254,8 @@ function AlertRow({ alert }: { alert: ActiveAlert }) {
   return (
     <Link href={alert.href} className="block group">
       <div
-        className="flex items-center gap-3 p-3 rounded-xl border transition-all duration-150
-                   hover:scale-[1.01] hover:shadow-md"
+        className="flex items-center gap-3 p-3 rounded-xl border transition-shadow duration-150
+                   hover:shadow-md"
         style={{
           background: alert.bgColorStyle,
           borderColor: alert.borderColorStyle,

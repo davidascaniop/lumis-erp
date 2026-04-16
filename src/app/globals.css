@@ -249,7 +249,7 @@
 .dot-pulse     { animation: glowPulse 2s infinite; }
 
 .hover-card-effect {
-  @apply transition-all duration-200 hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98] hover:shadow-brand-lg;
+  @apply transition-shadow duration-200 hover:shadow-brand-lg;
 }
 
 .skeleton {

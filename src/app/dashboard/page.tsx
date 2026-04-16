@@ -7,7 +7,7 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user?.id) return <div className="p-8 text-[#9585B8]">Falta configurar empresa.</div>;
 
-  const { data: userData } = await supabase.from('users').select('company_id, full_name').eq('auth_id', user.id).single();
+  const { data: userData } = await supabase.from('users').select('id, company_id, full_name').eq('auth_id', user.id).single();
   const companyId = userData?.company_id;
   if (!companyId) return <div className="p-8 text-[#9585B8]">Falta configurar empresa.</div>;
 
@@ -45,7 +45,7 @@ export default async function DashboardPage() {
     supabase.from("activity_log").select("id, content, created_at, entity_id, metadata").eq("company_id", companyId).eq("type", "client_payment").order("created_at", { ascending: false }).limit(10),
     supabase.from("daily_seeds").select("id, verse, verse_reference, reflection, scheduled_date, blessings_count, status").eq("scheduled_date", todayStr).eq("status", "published").maybeSingle(),
     supabase.from("broadcasts").select("id, title, message, type, is_active, expires_at, created_at").eq("is_active", true).order("created_at", { ascending: false }),
-    supabase.from("broadcast_reads").select("broadcast_id").eq("user_id", user.id),
+    supabase.from("broadcast_reads").select("broadcast_id").eq("user_id", userData?.id ?? ""),
   ]);
 
   const allReceivables = allReceivablesRes.data || [];
