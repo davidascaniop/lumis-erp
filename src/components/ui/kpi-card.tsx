@@ -64,7 +64,7 @@ export function KpiCard({
       {/* Glow fondo en hover */}
       <div
         className="absolute -top-10 -right-10 w-28 h-28 rounded-full
-                           opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl pointer-events-none"
+                           opacity-0 group-hover:opacity-100 transition-opacity duration-200 blur-2xl pointer-events-none"
         style={{ background: v.glowColor }}
       />
 

@@ -100,7 +100,7 @@ export function Pricing() {
                initial={{ opacity: 0, y: 40 }}
                animate={isInView ? { opacity: 1, y: 0 } : {}}
                transition={{ delay: 0.2 + (i * 0.2), duration: 0.8 }}
-               className={`relative flex flex-col p-10 rounded-[2.5rem] border transition-all duration-500 overflow-hidden group
+               className={`relative flex flex-col p-10 rounded-[2.5rem] border transition-all duration-200 overflow-hidden group
                   ${plan.popular
                     ? 'bg-white border-[#E040FB]/50 shadow-[0_0_40px_rgba(224,64,251,0.08)]'
                     : 'bg-white border-slate-200 shadow-md hover:border-slate-300'

@@ -242,39 +242,21 @@
   50%       { box-shadow: 0 0 12px currentColor, 0 0 24px currentColor; }
 }
 
-.page-enter    { animation: fadeUp 0.35s cubic-bezier(0.16,1,0.3,1) both; }
-.card-enter    { animation: fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
-.animate-fade-up  { animation: fadeUp 0.35s cubic-bezier(0.16,1,0.3,1) both; }
-.animate-fade-in  { animation: fadeIn 0.3s ease both; }
+.page-enter    { animation: fadeUp 0.15s cubic-bezier(0.16,1,0.3,1) both; }
+.card-enter    { animation: fadeUp 0.15s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-fade-up  { animation: fadeUp 0.15s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-fade-in  { animation: fadeIn 0.15s ease both; }
 .dot-pulse     { animation: glowPulse 2s infinite; }
 
 .hover-card-effect {
-  @apply transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98] hover:shadow-brand-lg;
+  @apply transition-all duration-200 hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98] hover:shadow-brand-lg;
 }
 
 .skeleton {
-  background: linear-gradient(
-    90deg, 
-    var(--bg-card) 25%, 
-    var(--bg-card-hover) 50%, 
-    var(--bg-card) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  @apply bg-surface-base animate-pulse rounded-lg;
 }
 
-/* Stagger para listas */
-.stagger > *:nth-child(1) { animation-delay: 0.05s; }
-.stagger > *:nth-child(2) { animation-delay: 0.10s; }
-.stagger > *:nth-child(3) { animation-delay: 0.15s; }
-.stagger > *:nth-child(4) { animation-delay: 0.20s; }
-.stagger > *:nth-child(5) { animation-delay: 0.25s; }
-
-.stagger-1 { animation-delay: 0.05s; }
-.stagger-2 { animation-delay: 0.10s; }
-.stagger-3 { animation-delay: 0.15s; }
-.stagger-4 { animation-delay: 0.20s; }
-
+/* Eliminados stagger para agilizar renderizado: "solo contenedor puede tener fadeIn" */
 /* No scrollbar */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

@@ -38,7 +38,7 @@ export function KpiCardWithSparkline({
       {/* Glow en hover */}
       <div
         className="absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl pointer-events-none
-                            opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                            opacity-0 group-hover:opacity-100 transition-opacity duration-200"
         style={{ background: glowColor }}
       />
 

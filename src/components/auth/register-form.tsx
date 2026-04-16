@@ -386,7 +386,7 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
               <div key={s.id} className="flex flex-col items-center gap-2">
                 <motion.div
                   animate={{ scale: isProcessing ? 1.15 : 1 }}
-                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-500 shadow-sm border ${
+                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm border ${
                     isActive
                       ? "bg-brand text-white border-brand shadow-brand/20"
                       : "bg-[#F8FAFC] text-[#94A3B8] border-[#EDF2F7]"

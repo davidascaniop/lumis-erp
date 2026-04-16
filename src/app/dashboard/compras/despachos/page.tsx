@@ -680,7 +680,7 @@ export default function DespachosPage() {
                   {/* Line */}
                   <div className="absolute top-4 left-0 right-0 h-0.5 bg-border" />
                   <div
-                    className="absolute top-4 left-0 h-0.5 bg-brand-gradient transition-all duration-700"
+                    className="absolute top-4 left-0 h-0.5 bg-brand-gradient transition-all duration-200"
                     style={{
                       width: `${
                         (getStepIndex(selectedDispatch?.status || "pending_dispatch") /

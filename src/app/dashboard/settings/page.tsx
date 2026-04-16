@@ -328,7 +328,7 @@ function SettingsContent() {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-200">
       <div>
         <h1 className="text-3xl font-heading font-bold text-text-1 mb-2">
           Configuración

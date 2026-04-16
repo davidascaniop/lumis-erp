@@ -77,7 +77,7 @@ export function FAQ() {
                   {faq.q}
                 </span>
                 
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200
                    ${open === i
                      ? 'bg-[#E040FB] text-white'
                      : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'

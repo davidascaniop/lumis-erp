@@ -203,11 +203,8 @@ export default function VentasPage() {
                 </tr>
               ) : (
                 filtered.map((o, idx) => (
-                  <motion.tr
+                  <tr
                     key={o.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.03 }}
                     className="hover:bg-surface-hover/50 transition-colors group cursor-pointer"
                   >
                     <td className="px-6 py-4">
@@ -343,7 +340,7 @@ export default function VentasPage() {
                         </DropdownMenu>
                       </div>
                     </td>
-                  </motion.tr>
+                  </tr>
                 ))
               )}
             </tbody>

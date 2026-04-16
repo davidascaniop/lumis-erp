@@ -509,7 +509,7 @@ export default function DashboardPage() {
         >
           <div
             className="absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl pointer-events-none
-                                    opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                                    opacity-0 group-hover:opacity-100 transition-opacity duration-200"
             style={{ background: "var(--brand-glow)" }}
           />
           <div className="flex items-start justify-between mb-2 relative">
@@ -528,7 +528,7 @@ export default function DashboardPage() {
           </p>
           <div className="h-1 bg-surface-card/10 rounded-full overflow-hidden relative">
             <div
-              className="h-full rounded-full transition-all duration-700"
+              className="h-full rounded-full transition-all duration-200"
               style={{
                 width: `${Math.min(data.collectionRate, 100)}%`,
                 background:
@@ -736,7 +736,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="h-1 bg-surface-card/10 rounded-full overflow-hidden ml-6">
                       <div
-                        className="h-full rounded-full transition-all duration-700"
+                        className="h-full rounded-full transition-all duration-200"
                         style={{
                           width: `${pct}%`,
                           background:
@@ -922,7 +922,7 @@ function SalesChart({ data }: { data: { month: string; total: number }[] }) {
                 {hasValue ? formatCurrency(d.total) : "$0"}
               </span>
               <div
-                className={`w-full relative rounded-t-lg transition-all duration-500
+                className={`w-full relative rounded-t-lg transition-all duration-200
                                             group-hover:opacity-80 cursor-default`}
                 style={{
                   height: `${heightPct}%`,

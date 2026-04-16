@@ -27,7 +27,7 @@ export function Nav() {
         fixed top-0 left-0 right-0 z-[100]
         flex items-center justify-between
         px-6 md:px-12 h-[72px]
-        transition-all duration-500
+        transition-all duration-200
         ${scrolled
           ? 'bg-white/90 backdrop-blur-xl border-b border-slate-200 py-4 shadow-sm'
           : 'bg-transparent py-6'

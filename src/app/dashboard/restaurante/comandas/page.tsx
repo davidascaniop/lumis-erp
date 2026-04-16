@@ -252,7 +252,7 @@ function ComandasContent() {
   // New order form (when clicking free table)
   if (showNewOrderForm && !activeOrderId) {
     return (
-      <div className="max-w-lg mx-auto py-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="max-w-lg mx-auto py-12 animate-in fade-in slide-in-from-bottom-4 duration-200">
         <button onClick={() => router.back()} className="flex items-center gap-2 text-text-3 hover:text-text-1 mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Volver a Mesas
         </button>
@@ -353,7 +353,7 @@ function ComandasContent() {
 
   // Default: List of active orders
   return (
-    <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-200">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-brand/10 border border-brand/20">

@@ -56,7 +56,7 @@ export function HowItWorks() {
                className="relative z-10 flex flex-col items-center group"
             >
                <div className="w-20 h-20 rounded-2xl bg-white border border-[#E040FB]/30 flex items-center justify-center mb-10
-                               shadow-sm group-hover:border-[#E040FB] transition-colors duration-500">
+                               shadow-sm group-hover:border-[#E040FB] transition-colors duration-200">
                   <span className="font-display text-3xl font-bold bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] bg-clip-text text-transparent">
                      {step.num}
                   </span>

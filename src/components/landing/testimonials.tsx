@@ -59,7 +59,7 @@ export function Testimonials() {
                className="relative flex flex-col p-10 rounded-[2.5rem] bg-white border border-slate-200 shadow-md overflow-hidden group hover:shadow-lg transition-shadow"
             >
                {/* Decorative Quote Mark */}
-               <Quote className="absolute top-8 right-8 w-16 h-16 text-[#E040FB] opacity-[0.03] rotate-12 transition-transform duration-700 group-hover:rotate-0" />
+               <Quote className="absolute top-8 right-8 w-16 h-16 text-[#E040FB] opacity-[0.03] rotate-12 transition-transform duration-200 group-hover:rotate-0" />
                
                <div className="flex gap-1 mb-8">
                   {[...Array(5)].map((_, idx) => (

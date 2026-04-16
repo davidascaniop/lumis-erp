@@ -383,7 +383,7 @@ export default function PurchaseDetailPage() {
             <div className="flex items-center justify-between relative">
               <div className="absolute top-4 left-6 right-6 h-0.5 bg-border" />
               <div 
-                className="absolute top-4 left-6 h-0.5 bg-brand-gradient transition-all duration-1000 ease-out" 
+                className="absolute top-4 left-6 h-0.5 bg-brand-gradient transition-all duration-200 ease-out" 
                 style={{ width: `${(Math.max(0, TIMELINE.findIndex(t => t.status === purchase.status)) / (TIMELINE.length - 1)) * 100}%` }}
               />
               {TIMELINE.map((item, idx) => {
