@@ -19,6 +19,19 @@ import { cn } from "@/lib/utils";
 import { useTreasuryAccounts, registerTreasuryMovement } from "@/hooks/use-treasury";
 import { useUser } from "@/hooks/use-user";
 
+// Formateo de fechas robusto — acepta "YYYY-MM-DD" o ISO timestamp sin crashear
+function safeDateFormat(input: string | Date, pattern: string): string {
+  try {
+    const s = typeof input === "string" ? input : input.toISOString();
+    // Si es solo fecha (YYYY-MM-DD), agregar hora para parseo local consistente
+    const d = /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Date(s + "T00:00:00") : new Date(s);
+    if (isNaN(d.getTime())) return "—";
+    return format(d, pattern, { locale: es });
+  } catch {
+    return "—";
+  }
+}
+
 // ─── Price Comparison Badge ────────────────────────────────────────────────────
 function PriceCompareBadge({ current, previous }: { current: number; previous: number | null }) {
   if (previous === null) {
@@ -241,10 +254,9 @@ export default function PurchaseDetailPage() {
         }
 
         // 2. Update actual stock in inventory
-        // Assuming we have a products table and we want to update stock_qty
-        const { data: prod } = await supabase.from("products").select("stock_qty").eq("id", item.product_id).single();
-        const currentStock = prod?.stock_qty ?? 0;
-        await supabase.from("products").update({ stock_qty: currentStock + toReceive } as any).eq("id", item.product_id);
+        const { data: prod } = await supabase.from("products").select("stock").eq("id", item.product_id).single();
+        const currentStock = prod?.stock ?? 0;
+        await supabase.from("products").update({ stock: currentStock + toReceive } as any).eq("id", item.product_id);
 
         // 3. Register movement
         await supabase.from("stock_movements").insert({
@@ -385,7 +397,7 @@ export default function PurchaseDetailPage() {
                 {purchase.status}
               </span>
             </div>
-            <p className="text-xs text-text-3 font-medium">Emitida el {format(new Date(purchase.created_at), "dd 'de' MMM, yyyy", { locale: es })}</p>
+            <p className="text-xs text-text-3 font-medium">Emitida el {safeDateFormat(purchase.created_at, "dd 'de' MMM, yyyy")}</p>
           </div>
         </div>
 
@@ -469,7 +481,7 @@ export default function PurchaseDetailPage() {
                   <div>
                     <p className="text-[10px] font-bold text-text-3 uppercase">Programado para</p>
                     <p className="text-sm font-bold text-text-1">
-                      {purchase.expected_date ? format(new Date(purchase.expected_date + "T00:00:00"), "dd/MM/yyyy") : "No definida"}
+                      {purchase.expected_date ? safeDateFormat(purchase.expected_date, "dd/MM/yyyy") : "No definida"}
                     </p>
                   </div>
                 </div>
@@ -480,7 +492,7 @@ export default function PurchaseDetailPage() {
                   <div>
                     <p className="text-[10px] font-bold text-text-3 uppercase">Entregado el</p>
                     <p className="text-sm font-bold text-text-1">
-                      {purchase.received_at ? format(new Date(purchase.received_at), "dd/MM/yyyy HH:mm") : "Pendiente"}
+                      {purchase.received_at ? safeDateFormat(purchase.received_at, "dd/MM/yyyy HH:mm") : "Pendiente"}
                     </p>
                   </div>
                 </div>
@@ -525,8 +537,8 @@ export default function PurchaseDetailPage() {
                           {it.qty_received}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-right font-mono text-text-2">${it.unit_cost_usd.toFixed(2)}</td>
-                      <td className="px-5 py-4 text-right font-bold text-text-1 font-mono">${it.subtotal_usd.toFixed(2)}</td>
+                      <td className="px-5 py-4 text-right font-mono text-text-2">${(it.unit_cost_usd ?? 0).toFixed(2)}</td>
+                      <td className="px-5 py-4 text-right font-bold text-text-1 font-mono">${(it.subtotal_usd ?? 0).toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -570,7 +582,7 @@ export default function PurchaseDetailPage() {
                       )}
                       <div className="text-right">
                         <p className="text-[10px] text-text-3">Esta compra</p>
-                        <p className="text-sm font-bold font-mono text-text-1">${it.unit_cost_usd.toFixed(4)}</p>
+                        <p className="text-sm font-bold font-mono text-text-1">${(it.unit_cost_usd ?? 0).toFixed(4)}</p>
                       </div>
                       <PriceCompareBadge
                         current={it.unit_cost_usd}
@@ -734,7 +746,7 @@ export default function PurchaseDetailPage() {
                  </div>
                  <div className="flex justify-between items-center text-xs">
                     <span className="text-text-3">Fecha:</span>
-                    <span className="text-text-2">{purchase.invoice_date && format(new Date(purchase.invoice_date + "T00:00:00"), "dd/MM/yyyy")}</span>
+                    <span className="text-text-2">{purchase.invoice_date && safeDateFormat(purchase.invoice_date, "dd/MM/yyyy")}</span>
                  </div>
                  <div className="flex justify-between items-center text-xs border-t border-border mt-2 pt-2">
                     <span className="text-text-3 font-bold uppercase text-[9px]">Monto Registrado</span>
