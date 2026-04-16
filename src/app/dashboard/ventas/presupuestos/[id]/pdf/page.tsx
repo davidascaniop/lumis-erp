@@ -27,8 +27,18 @@ export default function QuotePDFPage() {
           .select("*")
           .eq("quote_id", id);
 
+        // Traer empresa por company_id (la FK a companies puede no estar definida en Supabase)
+        let company = quote.companies ?? null;
+        if (!company && quote.company_id) {
+          const { data: companyData } = await supabase
+            .from("companies")
+            .select("*")
+            .eq("id", quote.company_id)
+            .single();
+          company = companyData;
+        }
+
         // Convertir logo a base64 via proxy server-side para evitar CORS en react-pdf
-        let company = quote.companies;
         if (company?.logo_url) {
           try {
             const res = await fetch(`/api/image-proxy?url=${encodeURIComponent(company.logo_url)}`);

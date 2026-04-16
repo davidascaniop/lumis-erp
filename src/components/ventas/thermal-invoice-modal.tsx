@@ -149,9 +149,6 @@ function TicketRapido({
   return (
     <div className="thermal-doc" style={{ padding: "4px 0" }}>
       {/* Header empresa */}
-      {company?.logo_url && (
-        <img src={company.logo_url} alt="Logo" className="company-logo" />
-      )}
       <div style={{ textAlign: "center", fontWeight: "bold", fontSize: "13px", marginBottom: "2px" }}>
         {company?.name ?? ""}
       </div>
@@ -237,9 +234,6 @@ function FacturaFormal({
   return (
     <div className="thermal-doc" style={{ padding: "4px 0" }}>
       {/* Header empresa */}
-      {company?.logo_url && (
-        <img src={company.logo_url} alt="Logo" className="company-logo" />
-      )}
       <div style={{ textAlign: "center", fontWeight: "bold", fontSize: "13px", marginBottom: "2px" }}>
         {company?.name ?? ""}
       </div>
