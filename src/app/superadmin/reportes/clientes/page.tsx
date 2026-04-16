@@ -15,11 +15,13 @@ export default async function ClientesReporte() {
     { data: ordersRaw }
   ] = await Promise.all([
     supabase.from("companies").select("id, name, created_at, subscription_status, plan_type"),
-    supabase.from("subscription_payments").select("id, created_at, status, method, plan_price, amount_usd").order("created_at", { ascending: false }),
+    supabase.from("subscription_payments").select("id, created_at, status, method, plan_price, amount_usd, companies!inner(subscription_status)").neq("companies.subscription_status", "demo").order("created_at", { ascending: false }),
     supabase.from("orders").select("company_id, created_at").order("created_at", { ascending: false })
   ]);
 
   const allCompanies = allCompaniesRaw || [];
+  // Excluir demos de métricas financieras y de riesgo
+  const payingCompanies = allCompanies.filter(c => c.subscription_status !== 'demo');
   const allPayments = allPaymentsRaw || [];
   const orders = ordersRaw || [];
 
@@ -29,8 +31,8 @@ export default async function ClientesReporte() {
   const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
   // Cards
-  const activeNow = allCompanies.filter(c => c.subscription_status === 'active');
-  const activeLastMonth = allCompanies.filter(c => c.subscription_status === 'active' && new Date(c.created_at) < currentMonthStart);
+  const activeNow = payingCompanies.filter(c => c.subscription_status === 'active');
+  const activeLastMonth = payingCompanies.filter(c => c.subscription_status === 'active' && new Date(c.created_at) < currentMonthStart);
   
   // Renovaron & Cancelaron this month
   const paymentsThisMonth = allPayments.filter(p => new Date(p.created_at) >= currentMonthStart);
@@ -83,7 +85,7 @@ export default async function ClientesReporte() {
     if (!companiesLastOrder[o.company_id]) companiesLastOrder[o.company_id] = new Date(o.created_at);
   });
 
-  const atRisk = allCompanies.map(c => {
+  const atRisk = payingCompanies.map(c => {
     const lastOrder = companiesLastOrder[c.id];
     let riskLevel = 0;
     let reason = "";

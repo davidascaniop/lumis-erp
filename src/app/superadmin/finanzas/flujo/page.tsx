@@ -12,7 +12,7 @@ export default async function FlujoCajaPage() {
     { data: varRaw },
     { data: fixPayRaw }
   ] = await Promise.all([
-    supabase.from("subscription_payments").select("amount_usd, plan_price, created_at, status, companies(name)").eq("status", "approved"),
+    supabase.from("subscription_payments").select("amount_usd, plan_price, created_at, status, companies!inner(name, subscription_status)").eq("status", "approved").neq("companies.subscription_status", "demo"),
     supabase.from("admin_variable_costs").select("amount_usd, category, date, description"),
     supabase.from("admin_fixed_cost_payments").select("amount_usd, paid_at, admin_fixed_costs(name, category)")
   ]);

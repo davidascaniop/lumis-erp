@@ -12,29 +12,31 @@ export default async function CrecimientoReporte() {
   ]);
 
   const allCompanies = allCompaniesRaw || [];
-  
+  // Excluir demos de todos los cálculos de crecimiento
+  const payingCompanies = allCompanies.filter(c => c.subscription_status !== 'demo');
+
   const now = new Date();
   const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const lastYearStart = new Date(now.getFullYear() - 1, now.getMonth(), 1);
 
   // Growth MoM and YoY
-  const activeNow = allCompanies.filter(c => c.subscription_status === 'active').length;
-  const activeLastMonth = allCompanies.filter(c => c.subscription_status === 'active' && new Date(c.created_at) < currentMonthStart).length;
-  const activeLastYear = allCompanies.filter(c => c.subscription_status === 'active' && new Date(c.created_at) < lastYearStart).length;
+  const activeNow = payingCompanies.filter(c => c.subscription_status === 'active').length;
+  const activeLastMonth = payingCompanies.filter(c => c.subscription_status === 'active' && new Date(c.created_at) < currentMonthStart).length;
+  const activeLastYear = payingCompanies.filter(c => c.subscription_status === 'active' && new Date(c.created_at) < lastYearStart).length;
 
   const momGrowth = activeLastMonth ? ((activeNow - activeLastMonth) / activeLastMonth) * 100 : 0;
   const yoyGrowth = activeLastYear ? ((activeNow - activeLastYear) / activeLastYear) * 100 : 0;
 
   // Proyección MRR
   const PLAN_PRICES = { basic: 19.99, pro: 79.99, enterprise: 119.99 };
-  const currentMrr = allCompanies.filter(c => c.subscription_status === 'active').reduce((sum, c) => sum + ((PLAN_PRICES as any)[c.plan_type || 'basic'] || 0), 0);
+  const currentMrr = payingCompanies.filter(c => c.subscription_status === 'active').reduce((sum, c) => sum + ((PLAN_PRICES as any)[c.plan_type || 'basic'] || 0), 0);
   const projectedMrr = currentMrr * Math.pow(1 + (Math.max(0, momGrowth) / 100), 3); // Compounding MoM growth for 3 months
 
   // Gráfica 1: Histórico acumulado
   const buildCumulativeGrowth = () => {
     const months: Record<string, number> = {};
-    const sorted = [...allCompanies].sort((a,b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    const sorted = [...payingCompanies].sort((a,b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
     let sum = 0;
     sorted.forEach((c) => {
       const key = new Date(c.created_at).toLocaleDateString("es-VE", {
@@ -52,9 +54,9 @@ export default async function CrecimientoReporte() {
 
   // Gráfica 2: Conversion Trial -> Pago (using IncomeBarChart styled for simplicity)
   const buildConversion = () => {
-    // We mock the trial vs pago conversion over time using allCompanies
+    // We mock the trial vs pago conversion over time using payingCompanies
     const months: Record<string, { month: string; cobrados: number; proyectados: number }> = {};
-    const sorted = [...allCompanies].sort((a,b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    const sorted = [...payingCompanies].sort((a,b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
     
     sorted.forEach((c) => {
       const key = new Date(c.created_at).toLocaleDateString("es-VE", {
@@ -80,7 +82,7 @@ export default async function CrecimientoReporte() {
   const buildDayOfWeek = () => {
     const days = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
     const counts = [0,0,0,0,0,0,0];
-    allCompanies.forEach(c => {
+    payingCompanies.forEach(c => {
        counts[new Date(c.created_at).getDay()]++;
     });
     return days.map((name, i) => ({ name, meses: counts[i] })); // 'meses' because HorizontalBarChart expects it under 'meses' property
@@ -90,7 +92,7 @@ export default async function CrecimientoReporte() {
   // Tabla Cohortes
   const buildCohorts = () => {
     const cohorts: Record<string, { total: number; active: number }> = {};
-    allCompanies.forEach(c => {
+    payingCompanies.forEach(c => {
       const key = new Date(c.created_at).toLocaleDateString("es-VE", { month: "long", year: "numeric" });
       if (!cohorts[key]) cohorts[key] = { total: 0, active: 0 };
       cohorts[key].total++;

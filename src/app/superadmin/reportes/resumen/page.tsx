@@ -20,19 +20,21 @@ export default async function ResumenReporte() {
   ]);
 
   const allCompanies = allCompaniesRaw || [];
-  
+  // Excluir demos de todos los cálculos financieros
+  const payingCompanies = allCompanies.filter(c => c.subscription_status !== 'demo');
+
   // Base Variables
   const PLAN_PRICES = { basic: 19.99, pro: 79.99, enterprise: 119.99 };
   const now = new Date();
-  
+
   // Meses para comparar
   const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
   // Clientes Actuales VS Mes Anterior
-  const activeNow = allCompanies.filter(c => c.subscription_status === 'active');
-  const activeLastMonth = allCompanies.filter(c => c.subscription_status === 'active' && new Date(c.created_at) < currentMonthStart);
+  const activeNow = payingCompanies.filter(c => c.subscription_status === 'active');
+  const activeLastMonth = payingCompanies.filter(c => c.subscription_status === 'active' && new Date(c.created_at) < currentMonthStart);
   
   const mrrNow = activeNow.reduce((sum, c) => sum + ((PLAN_PRICES as any)[c.plan_type || 'basic'] || 0), 0);
   const mrrLastMonth = activeLastMonth.reduce((sum, c) => sum + ((PLAN_PRICES as any)[c.plan_type || 'basic'] || 0), 0);
@@ -42,8 +44,8 @@ export default async function ResumenReporte() {
   const activeGrowthPerc = activeLastMonth.length ? ((activeNow.length - activeLastMonth.length) / activeLastMonth.length) * 100 : 0;
 
   // Nuevos y Perdidos Este Mes
-  const newThisMonth = allCompanies.filter(c => new Date(c.created_at) >= currentMonthStart);
-  const churnedThisMonth = allCompanies.filter(c => ['suspended', 'canceled'].includes(c.subscription_status || '') && new Date(c.created_at) >= currentMonthStart); // Simplified for "churned recently" without updated_at
+  const newThisMonth = payingCompanies.filter(c => new Date(c.created_at) >= currentMonthStart);
+  const churnedThisMonth = payingCompanies.filter(c => ['suspended', 'canceled'].includes(c.subscription_status || '') && new Date(c.created_at) >= currentMonthStart); // Simplified for "churned recently" without updated_at
   const churnRate = activeLastMonth.length ? (churnedThisMonth.length / activeLastMonth.length) * 100 : 0;
 
   // ARPU
@@ -64,8 +66,8 @@ export default async function ResumenReporte() {
     let cumulativeCount = 0;
     let cumulativeMrr = 0;
     
-    // Sort companies by creation ascending
-    const sorted = [...allCompanies].sort((a,b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    // Sort companies by creation ascending (demos excluded)
+    const sorted = [...payingCompanies].sort((a,b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
     
     for (let i = 11; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);

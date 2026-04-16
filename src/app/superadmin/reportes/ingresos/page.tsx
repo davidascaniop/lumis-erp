@@ -12,7 +12,7 @@ export default async function IngresosReporte() {
   // Queries
   const [{ data: allCompaniesRaw }, { data: allPaymentsRaw }] = await Promise.all([
     supabase.from("companies").select("id, name, created_at, subscription_status, plan_type"),
-    supabase.from("subscription_payments").select("*, companies(name)").order("created_at", { ascending: false }),
+    supabase.from("subscription_payments").select("*, companies!inner(name, subscription_status)").neq("companies.subscription_status", "demo").order("created_at", { ascending: false }),
   ]);
 
   const allCompanies = allCompaniesRaw || [];
