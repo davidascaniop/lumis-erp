@@ -300,7 +300,8 @@ function NuevaVentaContent() {
     if (!user?.company_id) return false;
 
     const plan = user?.companies?.plan_type?.toLowerCase() || "starter";
-    if (!plan.includes("pro") && !plan.includes("enterprise")) {
+    const isDemo = user?.companies?.subscription_status === "demo";
+    if (!isDemo && !plan.includes("pro") && !plan.includes("enterprise")) {
       const { count } = await supabase
         .from("partners")
         .select("*", { count: "exact", head: true })

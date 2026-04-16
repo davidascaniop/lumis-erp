@@ -179,7 +179,7 @@ export default function EmpresasPage() {
                     </td>
                     <td className="px-5 py-4">
                       <Badge variant="outline" className="bg-brand/5 text-brand border-brand/20 uppercase font-black text-[9px] tracking-widest px-2">
-                        {c.plan_type || 'Básico'}
+                        {c.subscription_status === "demo" ? "Enterprise" : (c.plan_type || "Básico")}
                       </Badge>
                     </td>
                     <td className="px-5 py-4">

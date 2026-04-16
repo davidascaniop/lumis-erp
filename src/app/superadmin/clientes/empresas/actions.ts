@@ -27,13 +27,33 @@ export async function fetchCompaniesAction(
 
   const { data, error } = await query;
   if (error) throw new Error(error.message);
-  return data || [];
+
+  const companies = data || [];
+
+  // Auto-normalizar: demos sin plan_type=enterprise los corregimos silenciosamente
+  const demosToFix = companies.filter(
+    (c) => c.subscription_status === "demo" && c.plan_type !== "enterprise",
+  );
+  if (demosToFix.length > 0) {
+    await supabase
+      .from("companies")
+      .update({ plan_type: "enterprise" } as any)
+      .in("id", demosToFix.map((c) => c.id));
+    // Actualizar en memoria para que el cliente vea "enterprise" de inmediato
+    demosToFix.forEach((c) => { c.plan_type = "enterprise"; });
+  }
+
+  return companies;
 }
 
 export async function updateCompanyAction(
   companyId: string,
   updates: { plan_type: string; subscription_status: string; settings: any },
 ): Promise<void> {
+  // Demo = acceso enterprise completo siempre
+  if (updates.subscription_status === "demo") {
+    updates.plan_type = "enterprise";
+  }
   const supabase = await createSuperadminServerClient();
   const { error } = await supabase
     .from("companies")
