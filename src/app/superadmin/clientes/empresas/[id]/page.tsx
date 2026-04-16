@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { createSuperadminClient } from "@/lib/supabase/superadmin-client";
 import { ArrowLeft, Building2, Calendar, CreditCard, Download, FileText, Mail, Phone, User, Wallet, Loader2, CheckCircle2, AlertTriangle, XCircle, Save, Clock, Sparkles } from "lucide-react";
 import { format, addDays } from "date-fns";
 import { es } from "date-fns/locale";
@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 
 export default function CompanyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const supabase = createClient();
+  const supabase = createSuperadminClient();
   const router = useRouter();
   
   const [company, setCompany] = useState<any>(null);

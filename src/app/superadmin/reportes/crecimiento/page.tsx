@@ -1,11 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
+import { createSuperadminServerClient } from "@/lib/supabase/superadmin-server";
 import { TrendingUp, Target, CalendarDays, LineChart } from "lucide-react";
 import { SaasLineChart } from "@/components/superadmin/saas-line-chart";
 import { IncomeBarChart } from "@/components/superadmin/income-bar-chart";
 import { HorizontalBarChart } from "@/components/superadmin/horizontal-bar-chart"; // Can be reused for day of week
 
 export default async function CrecimientoReporte() {
-  const supabase = await createClient();
+  const supabase = await createSuperadminServerClient();
 
   const [{ data: allCompaniesRaw }] = await Promise.all([
     supabase.from("companies").select("id, name, created_at, subscription_status, plan_type"),

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createSuperadminServerClient } from "@/lib/supabase/superadmin-server";
 import { DollarSign, AlertCircle, TrendingUp, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { PlanDonutChart } from "@/components/superadmin/plan-donut-chart";
 import { IncomeBarChart } from "@/components/superadmin/income-bar-chart";
@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 export default async function IngresosReporte() {
-  const supabase = await createClient();
+  const supabase = await createSuperadminServerClient();
 
   // Queries
   const [{ data: allCompaniesRaw }, { data: allPaymentsRaw }] = await Promise.all([

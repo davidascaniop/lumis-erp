@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createSuperadminClient } from "@/lib/supabase/superadmin-client";
 import { 
   Building2, 
   Search, 
@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
 export default function EmpresasUsuariosPage() {
-  const supabase = createClient();
+  const supabase = createSuperadminClient();
   const [companies, setCompanies] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createSuperadminServerClient } from "@/lib/supabase/superadmin-server";
 import { Users, TrendingUp, UserCheck, UserMinus, AlertTriangle } from "lucide-react";
 import { RetentionBarChart } from "@/components/superadmin/retention-bar-chart";
 import { HorizontalBarChart } from "@/components/superadmin/horizontal-bar-chart";
@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 export default async function ClientesReporte() {
-  const supabase = await createClient();
+  const supabase = await createSuperadminServerClient();
 
   const [
     { data: allCompaniesRaw }, 

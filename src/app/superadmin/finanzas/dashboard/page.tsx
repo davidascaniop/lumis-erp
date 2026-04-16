@@ -1,11 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
+import { createSuperadminServerClient } from "@/lib/supabase/superadmin-server";
 import { DollarSign, TrendingUp, TrendingDown, Target, Wallet } from "lucide-react";
 import { FinanzaComposedChart } from "@/components/superadmin/finanza-composed-chart";
 import { PlanDonutChart } from "@/components/superadmin/plan-donut-chart";
 import Link from "next/link";
 
 export default async function FinanzasDashboard() {
-  const supabase = await createClient();
+  const supabase = await createSuperadminServerClient();
 
   // Queries
   const [

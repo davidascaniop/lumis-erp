@@ -1,9 +1,9 @@
-import { createClient } from '@/lib/supabase/server'
+import { createSuperadminServerClient } from '@/lib/supabase/superadmin-server'
 import { MoreVertical, UserPlus, Shield, User } from 'lucide-react'
 import { revalidatePath } from 'next/cache'
 
 export default async function UsuariosPage() {
-  const supabase = await createClient()
+  const supabase = await createSuperadminServerClient()
 
   const { data: users } = await supabase
     .from('users')
@@ -71,7 +71,7 @@ function UserRow({ user }: { user: any }) {
       <div className="flex justify-end">
         <form action={async () => {
           'use server'
-          const supabase = await createClient()
+          const supabase = await createSuperadminServerClient()
           const newRole = user.role === 'superadmin' ? 'user' : 'superadmin'
           await supabase.from('users').update({ role: newRole }).eq('id', user.id)
           revalidatePath('/superadmin/usuarios')

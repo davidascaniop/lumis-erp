@@ -1,11 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
+import { createSuperadminServerClient } from "@/lib/supabase/superadmin-server";
 import { DollarSign, ArrowDownToLine, TrendingUp, TrendingDown, Wallet } from "lucide-react";
 import { AreaFlowChart } from "@/components/superadmin/area-flow-chart";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 export default async function FlujoCajaPage() {
-  const supabase = await createClient();
+  const supabase = await createSuperadminServerClient();
 
   const [
     { data: payRaw },

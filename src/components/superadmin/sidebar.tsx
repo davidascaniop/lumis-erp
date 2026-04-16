@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createSuperadminClient } from "@/lib/supabase/superadmin-client";
 
 export function SuperAdminSidebar() {
   const path = usePathname();
@@ -51,7 +51,7 @@ export function SuperAdminSidebar() {
 
   useEffect(() => {
     const fetchPending = async () => {
-      const supabase = createClient();
+      const supabase = createSuperadminClient();
       const { count } = await supabase
         .from("subscription_payments")
         .select("*", { count: "exact", head: true })

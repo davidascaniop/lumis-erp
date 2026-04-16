@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createSuperadminServerClient } from "@/lib/supabase/superadmin-server";
 import { BcvOverrideForm } from "@/components/superadmin/bcv-override-form";
 import { FeatureFlagsSection } from "@/components/superadmin/config/feature-flags-section";
 import { PaymentMethodsSection } from "@/components/superadmin/config/payment-methods-section";
@@ -6,7 +6,7 @@ import { PlansSection } from "@/components/superadmin/config/plans-section";
 import { NotificationsSection } from "@/components/superadmin/config/notifications-section";
 
 export default async function ConfigPage() {
-  const supabase = await createClient();
+  const supabase = await createSuperadminServerClient();
 
   // Fetch all feature flags (which includes JSON configs)
   const { data: flags } = await supabase

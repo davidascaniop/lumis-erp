@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export async function createClient() {
+export async function createSuperadminServerClient() {
   const cookieStore = await cookies();
 
   return createServerClient(
@@ -9,7 +9,7 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookieOptions: {
-        name: 'lumis-session'
+        name: 'lumis-superadmin-session'
       },
       cookies: {
         getAll() {

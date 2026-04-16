@@ -1,9 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
+import { createSuperadminServerClient } from "@/lib/supabase/superadmin-server";
 import { ComunicacionForm } from "@/components/superadmin/comunicacion-form";
 import { Megaphone, Copy, Trash2, Send, Clock, Eye } from "lucide-react";
 
 export default async function ComunicacionPage() {
-  const supabase = await createClient();
+  const supabase = await createSuperadminServerClient();
 
   // Obtener conteos por plan para la segmentación en el form
   const { data: companies } = await supabase.from("companies").select("plan");

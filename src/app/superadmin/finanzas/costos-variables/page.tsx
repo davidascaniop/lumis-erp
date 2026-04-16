@@ -1,13 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createSuperadminClient } from "@/lib/supabase/superadmin-client";
 import { ListOrdered, Plus, ArrowUpRight, ArrowDownRight, Users, TrendingUp, XCircle, FileText } from "lucide-react";
 import { HorizontalBarChart } from "@/components/superadmin/horizontal-bar-chart";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 export default function CostosVariablesPage() {
-  const supabase = createClient();
+  const supabase = createSuperadminClient();
   const [costos, setCostos] = useState<any[]>([]);
   const [activeClients, setActiveClients] = useState(0);
   const [loading, setLoading] = useState(true);

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createSuperadminServerClient } from "@/lib/supabase/superadmin-server";
 import { SuperAdminSidebar } from "@/components/superadmin/sidebar";
 import { SuperAdminTopbar } from "@/components/superadmin/topbar";
 import { UserProvider } from "@/components/providers/user-provider";
@@ -9,7 +9,7 @@ export default async function SuperAdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
+  const supabase = await createSuperadminServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

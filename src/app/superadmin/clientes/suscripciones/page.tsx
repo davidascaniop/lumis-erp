@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createSuperadminClient } from "@/lib/supabase/superadmin-client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check, X, Eye, Loader2, FileText, Search, CreditCard, Bell, AlertTriangle } from "lucide-react";
@@ -41,7 +41,7 @@ export default function SuscripcionesPage({ searchParams }: { searchParams?: { f
   // Modal State
   const [selectedReceipt, setSelectedReceipt] = useState<any | null>(null);
 
-  const supabase = createClient();
+  const supabase = createSuperadminClient();
 
   useEffect(() => {
     fetchPayments();

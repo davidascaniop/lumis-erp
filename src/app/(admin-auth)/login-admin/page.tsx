@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Shield, Mail, Lock, ArrowRight, Loader2, User, CheckCircle2, AlertTriangle, Eye, EyeOff } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { createSuperadminClient } from '@/lib/supabase/superadmin-client'
 import { validateInvitationToken, processSetupPassword } from '@/lib/actions/invitations'
 import { toast } from 'sonner'
 
@@ -62,7 +62,7 @@ function SetupForm({ token }: { token: string }) {
       const res = await processSetupPassword(token, password, fullName)
       if (res.success) {
         // Auto-login from client side to set browser cookies
-        const supabase = createClient()
+        const supabase = createSuperadminClient()
         await supabase.auth.signInWithPassword({ email, password })
 
         setSuccess(true)
@@ -261,7 +261,7 @@ function SetupForm({ token }: { token: string }) {
 function LoginForm() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = createSuperadminClient()
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()

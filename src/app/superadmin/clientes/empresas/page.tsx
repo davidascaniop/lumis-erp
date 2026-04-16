@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { createSuperadminClient } from "@/lib/supabase/superadmin-client";
 import { Building2, Eye, Loader2, Search, X } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { Edit2, Save, Trash2 } from "lucide-react";
 
 export default function EmpresasPage() {
-  const supabase = createClient();
+  const supabase = createSuperadminClient();
   const router = useRouter();
   const [companies, setCompanies] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);

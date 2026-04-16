@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createSuperadminServerClient } from "@/lib/supabase/superadmin-server";
 import {
   DollarSign,
   TrendingUp,
@@ -13,7 +13,7 @@ import {
 import { MrrBreakdownChart } from "@/components/superadmin/mrr-breakdown-chart";
 
 export default async function ResumenReporte() {
-  const supabase = await createClient();
+  const supabase = await createSuperadminServerClient();
 
   const [{ data: allCompaniesRaw }] = await Promise.all([
     supabase.from("companies").select("id, name, created_at, subscription_status, plan_type"),

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createSuperadminServerClient } from "@/lib/supabase/superadmin-server";
 import {
   Building2,
   Users,
@@ -20,7 +20,7 @@ import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
 export default async function SuperAdminHome() {
-  const supabase = await createClient();
+  const supabase = await createSuperadminServerClient();
 
   // ─── QUERIES PARALELAS ─────────────────────────────────────
   const [

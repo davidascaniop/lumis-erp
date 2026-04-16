@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createSuperadminClient } from "@/lib/supabase/superadmin-client";
 import { useUser } from "@/hooks/use-user";
 import { updateSeedStatus, deleteSeed } from "@/lib/actions/seeds";
 import { toast } from "sonner";
@@ -45,7 +45,7 @@ const MONTHS = [
 ];
 
 export default function SemillasPage() {
-  const supabase = createClient();
+  const supabase = createSuperadminClient();
   const { user } = useUser();
   const [seeds, setSeeds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

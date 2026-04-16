@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createSuperadminClient } from "@/lib/supabase/superadmin-client";
 import { 
   Shield, 
   Search, 
@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { inviteAdminUser, updateUserPermissions } from "@/lib/actions/invitations";
 
 export default function EquipoAdminPage() {
-  const supabase = createClient();
+  const supabase = createSuperadminClient();
   const [team, setTeam] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");

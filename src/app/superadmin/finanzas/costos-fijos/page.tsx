@@ -1,10 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createSuperadminClient } from "@/lib/supabase/superadmin-client";
 import { Calculator, Plus, MoreVertical, CheckCircle2, Clock, XCircle, AlertCircle } from "lucide-react";
 
 export default function CostosFijosPage() {
-  const supabase = createClient();
+  const supabase = createSuperadminClient();
   const [costos, setCostos] = useState<any[]>([]);
   const [paymentsThisMonth, setPaymentsThisMonth] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
