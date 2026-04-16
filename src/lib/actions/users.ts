@@ -25,10 +25,18 @@ export async function inviteCompanyUser(
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    // 2. Enviar invitación por email a través de Supabase Auth
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
-      email.toLowerCase().trim(),
-      {
+    // 1.5 Obtener logo de empresa
+    const { data: companyData } = await supabaseAdmin
+      .from("companies")
+      .select("name, logo_url")
+      .eq("id", companyId)
+      .single();
+
+    // 2. Generar link de invitación sin enviarlo con Supabase 
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.generateLink({
+      type: "invite",
+      email: email.toLowerCase().trim(),
+      options: {
         data: {
           full_name: fullName.trim(),
           role: role,
@@ -38,11 +46,24 @@ export async function inviteCompanyUser(
         // Redirigir a la página donde el usuario creará su contraseña
         redirectTo: 'https://uselumisapp.com/auth/confirm'
       }
+    });
+
+    if (authError || !authData.properties?.action_link) {
+      console.error("[inviteCompanyUser] Auth error:", authError);
+      return { success: false, error: authError?.message || "Error al generar la invitación de Supabase" };
+    }
+
+    // 2.5 Enviar email vía Resend con el logo de la empresa
+    const { sendInvitationEmail } = await import("@/lib/mail");
+    const mailRes = await sendInvitationEmail(
+      email.toLowerCase().trim(),
+      fullName.trim(),
+      authData.properties.action_link,
+      { name: companyData?.name, logo_url: companyData?.logo_url }
     );
 
-    if (authError || !authData.user) {
-      console.error("[inviteCompanyUser] Auth error:", authError);
-      return { success: false, error: authError?.message || "Error al enviar la invitación de Supabase" };
+    if (!mailRes.success) {
+      return { success: false, error: "Error enviando correo de invitación vía Resend: " + mailRes.error };
     }
 
     // 3. Crear o actualizar el registro en la tabla dedicada de invitaciones

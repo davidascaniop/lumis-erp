@@ -1,7 +1,15 @@
 import { Resend } from 'resend';
 
-export async function sendInvitationEmail(email: string, name: string, token: string) {
-  const setupUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://uselumisapp.com'}/login-admin?token=${token}`;
+export async function sendInvitationEmail(
+  email: string, 
+  name: string, 
+  tokenOrUrl: string, 
+  companyObj?: { name?: string, logo_url?: string }
+) {
+  // Support both a raw token (for superadmin) and a full URL (from Supabase generateLink)
+  const setupUrl = tokenOrUrl.startsWith('http') 
+    ? tokenOrUrl
+    : `${process.env.NEXT_PUBLIC_APP_URL || 'https://uselumisapp.com'}/login-admin?token=${tokenOrUrl}`;
 
   try {
     const apiKey = process.env.RESEND_API_KEY;
@@ -16,13 +24,16 @@ export async function sendInvitationEmail(email: string, name: string, token: st
       subject: '¡Bienvenido al Equipo Administrativo de Lumis!',
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-          <div style="background: linear-gradient(to right, #E040FB, #7C4DFF); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+          <div style="background: linear-gradient(to right, #E040FB, #7C4DFF); padding: ${companyObj?.logo_url ? '20px' : '30px'}; text-align: center; border-radius: 12px 12px 0 0;">
+            ${companyObj?.logo_url && companyObj.logo_url !== '' ? `
+              <img src="${companyObj.logo_url}" alt="${companyObj.name ?? 'Logo'}" style="max-width: 150px; max-height: 80px; object-fit: contain; margin-bottom: 10px;" />
+            ` : ''}
             <h1 style="color: white; margin: 0; font-size: 24px;">¡Hola, ${name}!</h1>
           </div>
           
           <div style="padding: 30px; border: 1px solid #eee; border-top: none; border-radius: 0 0 12px 12px; background: #fff;">
             <p style="font-size: 16px; line-height: 1.6;">
-              Has sido invitado a formar parte del **Equipo Administrativo de Lumis**. Se te han asignado permisos específicos para gestionar módulos de nuestra plataforma.
+              Has sido invitado a formar parte del equipo de <strong>${companyObj?.name ?? 'LUMIS'}</strong>. Se te han asignado permisos específicos para gestionar módulos de la plataforma.
             </p>
             
             <p style="font-size: 16px; line-height: 1.6;">

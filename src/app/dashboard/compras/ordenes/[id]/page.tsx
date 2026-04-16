@@ -343,9 +343,28 @@ export default function PurchaseDetailPage() {
   if (!purchase) return null;
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-20 animate-fade-in px-4">
+    <div className="space-y-6 max-w-5xl mx-auto pb-20 animate-fade-in px-4 print:p-0 print:m-0 print:space-y-4">
+      {/* ── PRINT ONLY HEADER ── */}
+      <div className="hidden print:flex flex-row justify-between items-start border-b pb-4 mb-4">
+        <div className="flex flex-col">
+          {currentUser?.companies?.logo_url ? (
+             <div className="flex items-center gap-3 mb-2">
+                <img src={currentUser.companies.logo_url} alt="Logo" style={{ maxWidth: '120px', maxHeight: '60px', objectFit: 'contain' }} />
+                <h2 className="text-xl font-bold font-montserrat text-black">{currentUser?.companies?.name_comercial || currentUser?.companies?.name}</h2>
+             </div>
+          ) : (
+            <h2 className="text-xl font-bold text-black mb-1">{currentUser?.companies?.name_comercial || currentUser?.companies?.name}</h2>
+          )}
+          <span className="text-xs text-black">RIF: {currentUser?.companies?.rif || "J-XXXXXXXX-X"}</span>
+        </div>
+        <div className="text-right">
+           <h1 className="text-2xl font-bold text-black uppercase">Orden de Compra</h1>
+           <p className="text-lg text-black font-mono">{purchase.purchase_number}</p>
+        </div>
+      </div>
+
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
         <div className="flex items-center gap-4">
           <button onClick={() => router.back()} className="p-2 rounded-xl bg-surface-card border border-border text-text-3 hover:text-text-1">
             <ChevronLeft className="w-5 h-5" />

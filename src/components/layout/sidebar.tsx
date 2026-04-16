@@ -251,10 +251,14 @@ export function Sidebar() {
       <div className="px-5 py-5 border-b border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="relative w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] shadow-[0_0_20px_rgba(224,64,251,0.40)]">
-              <span className="font-display font-bold text-white text-lg leading-none">L</span>
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent" />
-            </div>
+            {user?.companies?.logo_url ? (
+              <img src={user.companies.logo_url} alt="Logo Empresa" className="w-9 h-9 rounded-xl object-contain bg-white shadow-sm" />
+            ) : (
+              <div className="relative w-9 h-9 flex-shrink-0 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] shadow-[0_0_20px_rgba(224,64,251,0.40)] overflow-hidden">
+                <span className="font-display font-bold text-white text-lg leading-none">L</span>
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent" />
+              </div>
+            )}
             <div>
               <span className="font-display font-bold text-[17px] text-text-1 tracking-tight">LUMIS</span>
               <p className="text-[10px] text-text-3 font-medium tracking-widest uppercase leading-none mt-0.5">ERP · CRM</p>

@@ -47,6 +47,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Suspense } from "react";
+import { LogoUpload } from "@/components/settings/logo-upload";
 import { CommissionRulesEditor } from "@/components/users/commission-rules-editor";
 import { Percent } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
@@ -78,6 +79,7 @@ function SettingsContent() {
     rif: string;
     plan_type: string;
     subscription_status: string;
+    logo_url: string;
   } | null>(null);
   const [bcvRate, setBcvRate] = useState("56.42");
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
@@ -129,7 +131,7 @@ function SettingsContent() {
 
       const { data: companyData } = await supabase
         .from("companies")
-        .select("id, name, name_comercial, rif, plan_type, subscription_status, billing_day, modules_enabled")
+        .select("id, name, name_comercial, rif, plan_type, subscription_status, billing_day, modules_enabled, logo_url")
         .eq("id", companyId)
         .single();
 
@@ -426,30 +428,7 @@ function SettingsContent() {
                 <h2 className="text-xl font-bold font-montserrat text-text-1 mb-6">
                   Logo de tu Empresa
                 </h2>
-                <div className="flex items-center gap-6">
-                  <div className="w-24 h-24 rounded-2xl bg-surface-base border-2 border-dashed border-border/60 flex flex-col items-center justify-center gap-2 group cursor-pointer hover:border-brand transition-colors overflow-hidden relative shadow-sm">
-                    <Upload className="w-6 h-6 text-brand group-hover:scale-110 transition-transform" />
-                    <span className="text-[10px] text-text-3 font-bold uppercase tracking-wider">
-                      Subir logo
-                    </span>
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    <p className="text-sm text-text-1 font-bold font-montserrat">
-                      Sube el logotipo de tu organización.
-                    </p>
-                    <p className="text-xs text-text-2 font-medium">
-                      Se recomienda un formato .PNG cuadrado (ej. 512x512) sin
-                      fondo. Este logo aparecerá en el dashboard y en las
-                      facturas/notas de entrega.
-                    </p>
-                    <Button
-                      variant="outline"
-                      className="mt-2 bg-white border-border/60 text-text-2 hover:bg-surface-base font-bold rounded-xl px-6"
-                    >
-                      Seleccionar Archivo
-                    </Button>
-                  </div>
-                </div>
+                <LogoUpload currentLogoUrl={company?.logo_url} />
               </div>
 
               <div className="bg-surface-card border border-border/50 shadow-card rounded-2xl p-6">

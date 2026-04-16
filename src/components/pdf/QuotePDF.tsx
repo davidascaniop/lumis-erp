@@ -162,9 +162,16 @@ export const QuotePDF = ({
       {/* HEADER */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.logoPlaceholder}>
-            {company?.name || "Distribuidora S.A."}
-          </Text>
+          {company?.logo_url ? (
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
+              <Image src={company.logo_url} style={{ width: 120, height: 60, objectFit: "contain", marginRight: 10 }} />
+              <Text style={{ fontSize: 16, fontWeight: "bold", color: "#333" }}>{company.name}</Text>
+            </View>
+          ) : (
+            <Text style={styles.logoPlaceholder}>
+              {company?.name || "Distribuidora S.A."}
+            </Text>
+          )}
           <Text>{company?.rif || "J-XXXXXXXX-X"}</Text>
           <Text>Documento de Presupuesto / Cotización</Text>
         </View>
