@@ -37,7 +37,7 @@ export function UserProvider({ children, initialUser }: UserProviderProps) {
       if (authUser) {
         const { data: profile } = await supabase
           .from("users")
-          .select("*, companies(id, is_active, plan_type, settings, subscription_status, modules_enabled)")
+          .select("*, companies(id, is_active, plan_type, settings, subscription_status, modules_enabled, logo_url, name, name_comercial, rif)")
           .eq("auth_id", authUser.id)
           .single();
 

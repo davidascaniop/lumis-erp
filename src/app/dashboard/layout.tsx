@@ -18,7 +18,7 @@ export default async function DashboardLayout({
   // Fetch full user profile on the server — eliminates client-side waterfall
   const { data: serverProfile } = await supabase
     .from("users")
-    .select("*, companies(id, is_active, plan_type, settings, subscription_status, modules_enabled)")
+    .select("*, companies(id, is_active, plan_type, settings, subscription_status, modules_enabled, logo_url, name, name_comercial, rif)")
     .eq("auth_id", authUser.id)
     .single();
 
