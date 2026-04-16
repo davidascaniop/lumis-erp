@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { motion } from "framer-motion";
 import { Search, Loader2, Plus, FileText, CheckCircle, Clock, XCircle, Send, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -58,7 +57,8 @@ export default function PresupuestosPage() {
       .from("quotes")
       .select("*, partners(name, rif)")
       .eq("company_id", companyId)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(100);
 
     setQuotes((data as Quote[]) || []);
     setLoading(false);
@@ -75,21 +75,16 @@ export default function PresupuestosPage() {
     const toastId = toast.loading("Convirtiendo presupuesto...");
 
     try {
-      // 1. Obtener detalles completos del presupuesto
-      const { data: fullQuote, error: qError } = await supabase
-        .from("quotes")
-        .select("*")
-        .eq("id", quote.id)
-        .single();
+      // 1+2. Obtener presupuesto e items en paralelo
+      const [
+        { data: fullQuote, error: qError },
+        { data: items, error: iError },
+      ] = await Promise.all([
+        supabase.from("quotes").select("*").eq("id", quote.id).single(),
+        supabase.from("quote_items").select("*").eq("quote_id", quote.id),
+      ]);
 
       if (qError) throw qError;
-
-      // 2. Obtener items del presupuesto
-      const { data: items, error: iError } = await supabase
-        .from("quote_items")
-        .select("*")
-        .eq("quote_id", quote.id);
-
       if (iError) throw iError;
 
       // 3. Obtener el usuario ID interno desde contexto
@@ -128,21 +123,29 @@ export default function PresupuestosPage() {
       if (oError) throw oError;
 
 
-      // 4. Crear los items del pedido y actualizar stock
-      for (const item of items) {
-        await supabase.from("order_items").insert({
-          order_id: newOrder.id,
-          product_id: item.product_id,
-          qty: item.qty,
-          price_usd: item.price_usd,
-          subtotal: item.subtotal
-        });
-
-        const { data: product } = await supabase.from("products").select("stock").eq("id", item.product_id).single();
-        if (product) {
-          await supabase.from("products").update({ stock: product.stock - item.qty }).eq("id", item.product_id);
-        }
-      }
+      // 4. Crear los items del pedido y actualizar stock (en paralelo por item)
+      await Promise.all(
+        (items ?? []).map(async (item: any) => {
+          await supabase.from("order_items").insert({
+            order_id: newOrder.id,
+            product_id: item.product_id,
+            qty: item.qty,
+            price_usd: item.price_usd,
+            subtotal: item.subtotal,
+          });
+          const { data: product } = await supabase
+            .from("products")
+            .select("stock")
+            .eq("id", item.product_id)
+            .single();
+          if (product) {
+            await supabase
+              .from("products")
+              .update({ stock: product.stock - item.qty })
+              .eq("id", item.product_id);
+          }
+        })
+      );
 
       // 5. Marcar presupuesto como convertido
       await supabase
@@ -245,14 +248,11 @@ export default function PresupuestosPage() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((q, idx) => {
+                filtered.map((q) => {
                   const { label, icon: Icon, color } = STATUS_CONFIG[q.status];
                   return (
-                    <motion.tr
+                    <tr
                       key={q.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.02 }}
                       onClick={() => router.push(`/dashboard/ventas/presupuestos/${q.id}`)}
                       className="hover:bg-surface-hover/50 transition-colors group cursor-pointer"
                     >
@@ -327,7 +327,7 @@ export default function PresupuestosPage() {
                           </a>
                         </div>
                       </td>
-                    </motion.tr>
+                    </tr>
                   );
                 })
               )}

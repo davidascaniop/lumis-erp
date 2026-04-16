@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { motion } from "framer-motion";
 import {
   Search,
   Loader2,
@@ -29,7 +28,6 @@ import { ThermalInvoiceModal, type InvoiceOrderData } from "@/components/ventas/
 import { useCompanyProfile } from "@/hooks/use-company-profile";
 
 import { useUser } from "@/hooks/use-user";
-import { TableSkeleton } from "@/components/ui/skeletons";
 import { useDataCache } from "@/lib/data-cache";
 
 export default function VentasPage() {
@@ -56,30 +54,28 @@ export default function VentasPage() {
       setOrders(cached.orders);
       if (cached.ivaPercent !== undefined) setIvaPercent(cached.ivaPercent);
       setLoading(false);
+      return;
     }
 
-    if (!cached) setLoading(true);
+    setLoading(true);
 
-    const { data: companyData } = await supabase
-      .from("companies")
-      .select("settings")
-      .eq("id", companyId)
-      .single();
+    const [{ data: companyData }, { data }] = await Promise.all([
+      supabase.from("companies").select("settings").eq("id", companyId).single(),
+      supabase
+        .from("orders")
+        .select(
+          `*,
+          partners (name, credit_status, rif, phone),
+          order_items (qty, price_usd, products(name))`,
+        )
+        .eq("company_id", companyId)
+        .order("created_at", { ascending: false })
+        .limit(100),
+    ]);
+
     if (companyData?.settings?.iva_percent !== undefined) {
       setIvaPercent(Number(companyData.settings.iva_percent));
     }
-
-    const { data } = await supabase
-      .from("orders")
-      .select(
-        `
-        *,
-        partners (name, credit_status, rif, phone),
-        order_items (qty, price_usd, products(name))
-        `,
-      )
-      .eq("company_id", companyId)
-      .order("created_at", { ascending: false });
 
     setOrders(data || []);
     useDataCache.getState().set(cacheKey, { orders: data || [], ivaPercent: companyData?.settings?.iva_percent });
