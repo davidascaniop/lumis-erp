@@ -17,6 +17,7 @@ const ActiveAlertsPanel = dynamic(() => import("@/components/dashboard/active-al
 const RecentActivity = dynamic(() => import("@/components/dashboard/recent-activity").then(m => ({ default: m.RecentActivity })), { ssr: false });
 const PortalPaymentsAlert = dynamic(() => import("@/components/dashboard/portal-payments-alert").then(m => ({ default: m.PortalPaymentsAlert })), { ssr: false });
 const BroadcastBanner = dynamic(() => import("@/components/dashboard/broadcast-banner").then(m => ({ default: m.BroadcastBanner })), { ssr: false });
+const DailySeed = dynamic(() => import("@/components/dashboard/daily-seed").then(m => ({ default: m.DailySeed })), { ssr: false });
 import {
   Wallet,
   CheckCircle,
@@ -498,6 +499,7 @@ export default function DashboardPage() {
 
       {/* ═══ SEMILLA + ALERTAS PORTAL ═══ */}
       {user && <BroadcastBanner companyId={data.companyId} userId={user.id} />}
+      {user && <DailySeed companyId={data.companyId} />}
 
       <PortalPaymentsAlert companyId={data.companyId} />
 
