@@ -39,8 +39,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://yygiwznhxmnytbbvohfx.supabase.co" />
+        <link rel="dns-prefetch" href="https://yygiwznhxmnytbbvohfx.supabase.co" />
+      </head>
       <body
-        className={`${montserrat.variable} ${jetbrainsMono.variable} antialiased font-sans transition-colors duration-300`}
+        className={`${montserrat.variable} ${jetbrainsMono.variable} antialiased font-sans transition-colors duration-200`}
       >
         <ThemeProvider
           attribute="class"

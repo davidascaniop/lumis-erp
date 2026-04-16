@@ -1,19 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/client";
 import { KpiCardWithSparkline } from "@/components/dashboard/kpi-card-sparkline";
-import { AgingChart } from "@/components/dashboard/aging-chart";
-import { AlertsPanel } from "@/components/dashboard/alerts-panel";
-import { ActiveAlertsPanel, countActiveAlerts } from "@/components/dashboard/active-alerts-panel";
-import { RecentActivity } from "@/components/dashboard/recent-activity";
-
-import { PortalPaymentsAlert } from "@/components/dashboard/portal-payments-alert";
-import { BroadcastBanner } from "@/components/dashboard/broadcast-banner";
+import { countActiveAlerts } from "@/components/dashboard/active-alerts-panel";
 import { useUser } from "@/hooks/use-user";
 import { DashboardSkeleton } from "@/components/ui/skeletons";
 import { useDataCache } from "@/lib/data-cache";
 import { formatCurrency } from "@/lib/utils";
+
+/* ─── Lazy-loaded below-fold components (reduces initial JS ~120KiB) ─── */
+const AgingChart = dynamic(() => import("@/components/dashboard/aging-chart").then(m => ({ default: m.AgingChart })), { ssr: false });
+const AlertsPanel = dynamic(() => import("@/components/dashboard/alerts-panel").then(m => ({ default: m.AlertsPanel })), { ssr: false });
+const ActiveAlertsPanel = dynamic(() => import("@/components/dashboard/active-alerts-panel").then(m => ({ default: m.ActiveAlertsPanel })), { ssr: false });
+const RecentActivity = dynamic(() => import("@/components/dashboard/recent-activity").then(m => ({ default: m.RecentActivity })), { ssr: false });
+const PortalPaymentsAlert = dynamic(() => import("@/components/dashboard/portal-payments-alert").then(m => ({ default: m.PortalPaymentsAlert })), { ssr: false });
+const BroadcastBanner = dynamic(() => import("@/components/dashboard/broadcast-banner").then(m => ({ default: m.BroadcastBanner })), { ssr: false });
 import {
   Wallet,
   CheckCircle,
@@ -171,10 +174,15 @@ export default function DashboardPage() {
         let rpcData: any = null;
 
         let recs: any[], pays: any[], risks: any[], ordersTrend: any[];
-        let lowStockRaw: any[], creditsDueRaw: any[], topClientsRaw: any[];
-        let topProductsRaw: any[], recurringAlerts: any[];
-        let inactiveClientsRaw: any[], overdueReceivablesRaw: any[];
-        let pendingOrdersCount: number, pendingVerifCount: number, newClientsCount: number;
+        let lowStockRaw: any[], topProductsRaw: any[], recurringAlerts: any[];
+        let pendingOrdersCount: number;
+        // These are always derived from broad queries (or set by RPC fallback)
+        let creditsDueRaw: any[] = [];
+        let topClientsRaw: any[] = [];
+        let inactiveClientsRaw: any[] = [];
+        let overdueReceivablesRaw: any[] = [];
+        let pendingVerifCount: number = 0;
+        let newClientsCount: number = 0;
 
         if (rpcData) {
           // Fast path: single RPC call returned all data
@@ -183,52 +191,106 @@ export default function DashboardPage() {
           risks = rpcData.risk_clients || [];
           ordersTrend = rpcData.orders_trend || [];
           lowStockRaw = rpcData.low_stock || [];
-          creditsDueRaw = rpcData.credits_due_today || [];
-          topClientsRaw = rpcData.top_clients_raw || [];
           topProductsRaw = rpcData.top_products_raw || [];
           recurringAlerts = rpcData.recurring_expenses || [];
-          inactiveClientsRaw = rpcData.inactive_clients || [];
-          overdueReceivablesRaw = rpcData.overdue_receivables || [];
           pendingOrdersCount = rpcData.active_orders_count || 0;
           pendingVerifCount = rpcData.pending_verifications_count || 0;
           newClientsCount = rpcData.new_clients_count || 0;
         } else {
-          // Fallback: parallel queries (if RPC not yet created)
+          // Consolidated queries: 14 → 8 (removed duplicate receivables/partners/payments)
           const [
-            receivablesRes, paymentsVerifiedRes, paymentsPendingRes,
-            ordersActiveRes, riskRes, ordersTrendRes, newClientsRes,
-            lowStockRes, creditsDueTodayRes, topClientsRes,
-            topProductsRes, recurringRes, inactiveRes, overdueRes,
+            allReceivablesRes,    // 1 query replaces 4 separate receivables queries
+            allPaymentsRes,       // 1 query replaces 2 separate payments queries
+            allPartnersRes,       // 1 query replaces 3 separate partners queries
+            ordersActiveRes,
+            ordersTrendRes,
+            lowStockRes,
+            topProductsRes,
+            recurringRes,
           ] = await Promise.all([
-            supabase.from("receivables").select("balance_usd, amount_usd, due_date, status, created_at").eq("company_id", companyId).neq("status", "paid"),
-            supabase.from("payments").select("amount_usd, verified_at, created_at").eq("company_id", companyId).eq("status", "verified").gte("verified_at", startMonth),
-            supabase.from("payments").select("id", { count: "exact", head: true }).eq("company_id", companyId).eq("status", "pending"),
-            supabase.from("orders").select("*", { count: "exact", head: true }).eq("company_id", companyId).in("status", ["draft", "confirmed", "dispatched", "pending"]),
-            supabase.from("partners").select("id, name, current_balance, credit_status, users(full_name)").eq("company_id", companyId).eq("credit_status", "red").order("current_balance", { ascending: false }).limit(6),
-            supabase.from("orders").select("total_usd, created_at").eq("company_id", companyId).gte("created_at", eightMonthsAgo).order("created_at", { ascending: true }),
-            supabase.from("partners").select("id, created_at", { count: "exact" }).eq("company_id", companyId).gte("created_at", startMonth),
-            supabase.from("products").select("id, name, stock, unit, min_stock").eq("company_id", companyId).not("min_stock", "is", null).order("stock", { ascending: true }).limit(5),
-            supabase.from("receivables").select("id, balance_usd, due_date, partners(name)").eq("company_id", companyId).neq("status", "paid").gte("due_date", todayStart).lt("due_date", todayEnd),
-            supabase.from("receivables").select("partner_id, balance_usd, partners(name)").eq("company_id", companyId).neq("status", "paid").order("balance_usd", { ascending: false }).limit(20),
-            supabase.from("order_items").select("product_id, qty, subtotal, products(name, unit), orders!inner(company_id, created_at)").eq("orders.company_id", companyId).gte("orders.created_at", startMonth),
-            supabase.from("recurring_expenses").select("*").eq("company_id", companyId).eq("is_active", true),
-            supabase.from("partners").select("id, name, last_order_at").eq("company_id", companyId).lt("last_order_at", thirtyDaysAgo).order("last_order_at", { ascending: true }).limit(10),
-            supabase.from("receivables").select("id, invoice_number, balance_usd, due_date, partners(name)").eq("company_id", companyId).neq("status", "paid").lt("due_date", todayStart).order("due_date", { ascending: true }).limit(10),
+            // ── RECEIVABLES (single broad query) ──
+            supabase.from("receivables")
+              .select("id, invoice_number, partner_id, balance_usd, amount_usd, due_date, status, created_at, partners(name)")
+              .eq("company_id", companyId)
+              .neq("status", "paid"),
+            // ── PAYMENTS (single broad query) ──
+            supabase.from("payments")
+              .select("id, amount_usd, status, verified_at, created_at")
+              .eq("company_id", companyId)
+              .in("status", ["verified", "pending"]),
+            // ── PARTNERS (single broad query) ──
+            supabase.from("partners")
+              .select("id, name, current_balance, credit_status, created_at, last_order_at, users(full_name)")
+              .eq("company_id", companyId),
+            // ── ORDERS (count active) ──
+            supabase.from("orders")
+              .select("*", { count: "exact", head: true })
+              .eq("company_id", companyId)
+              .in("status", ["draft", "confirmed", "dispatched", "pending"]),
+            // ── ORDERS TREND ──
+            supabase.from("orders")
+              .select("total_usd, created_at")
+              .eq("company_id", companyId)
+              .gte("created_at", eightMonthsAgo)
+              .order("created_at", { ascending: true }),
+            // ── LOW STOCK ──
+            supabase.from("products")
+              .select("id, name, stock, unit, min_stock")
+              .eq("company_id", companyId)
+              .not("min_stock", "is", null)
+              .order("stock", { ascending: true })
+              .limit(5),
+            // ── TOP PRODUCTS (order_items) ──
+            supabase.from("order_items")
+              .select("product_id, qty, subtotal, products(name, unit), orders!inner(company_id, created_at)")
+              .eq("orders.company_id", companyId)
+              .gte("orders.created_at", startMonth),
+            // ── RECURRING EXPENSES ──
+            supabase.from("recurring_expenses")
+              .select("*")
+              .eq("company_id", companyId)
+              .eq("is_active", true),
           ]);
-          recs = (receivablesRes.data as any[]) || [];
-          pays = (paymentsVerifiedRes.data as any[]) || [];
-          risks = (riskRes.data as any[]) || [];
+
+          // ── Derive from RECEIVABLES ──
+          const allReceivables = (allReceivablesRes.data as any[]) || [];
+          recs = allReceivables;
+          // Credits due today (derived)
+          creditsDueRaw = allReceivables.filter((r: any) => {
+            const d = r.due_date;
+            return d && d >= todayStart && d < todayEnd;
+          });
+          // Top clients by balance (derived)
+          topClientsRaw = allReceivables;
+          // Overdue receivables (derived)
+          overdueReceivablesRaw = allReceivables
+            .filter((r: any) => r.due_date && r.due_date < todayStart)
+            .sort((a: any, b: any) => (a.due_date > b.due_date ? 1 : -1))
+            .slice(0, 10);
+
+          // ── Derive from PAYMENTS ──
+          const allPayments = (allPaymentsRes.data as any[]) || [];
+          pays = allPayments.filter((p: any) => p.status === "verified" && p.verified_at && p.verified_at >= startMonth);
+          pendingVerifCount = allPayments.filter((p: any) => p.status === "pending").length;
+
+          // ── Derive from PARTNERS ──
+          const allPartners = (allPartnersRes.data as any[]) || [];
+          risks = allPartners
+            .filter((p: any) => p.credit_status === "red")
+            .sort((a: any, b: any) => (b.current_balance || 0) - (a.current_balance || 0))
+            .slice(0, 6);
+          newClientsCount = allPartners.filter((p: any) => p.created_at && p.created_at >= startMonth).length;
+          inactiveClientsRaw = allPartners
+            .filter((p: any) => p.last_order_at && p.last_order_at < thirtyDaysAgo)
+            .sort((a: any, b: any) => (a.last_order_at > b.last_order_at ? 1 : -1))
+            .slice(0, 10);
+
+          // ── Direct results ──
           ordersTrend = (ordersTrendRes.data as any[]) || [];
           lowStockRaw = (lowStockRes.data as any[]) || [];
-          creditsDueRaw = (creditsDueTodayRes.data as any[]) || [];
-          topClientsRaw = (topClientsRes.data as any[]) || [];
           topProductsRaw = (topProductsRes.data as any[]) || [];
           recurringAlerts = (recurringRes.data as any[]) || [];
-          inactiveClientsRaw = (inactiveRes.data as any[]) || [];
-          overdueReceivablesRaw = (overdueRes.data as any[]) || [];
           pendingOrdersCount = ordersActiveRes.count ?? 0;
-          pendingVerifCount = paymentsPendingRes.count ?? 0;
-          newClientsCount = newClientsRes.count ?? 0;
         }
 
         const totalCartera = recs.reduce(
