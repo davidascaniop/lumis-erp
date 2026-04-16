@@ -47,18 +47,13 @@ export default function NotaDeEntregaPage({ params }: { params: any }) {
         .eq("id", orderData.company_id)
         .single();
 
-      // Convertir logo a base64 para evitar bloqueo CORS en react-pdf
+      // Convertir logo a base64 via proxy server-side para evitar CORS en react-pdf
       let finalCompany = companyData;
       if (companyData?.logo_url) {
         try {
-          const res = await fetch(companyData.logo_url);
-          const blob = await res.blob();
-          const base64 = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(blob);
-          });
-          finalCompany = { ...companyData, logo_url: base64 };
+          const res = await fetch(`/api/image-proxy?url=${encodeURIComponent(companyData.logo_url)}`);
+          const json = await res.json();
+          finalCompany = { ...companyData, logo_url: json.dataUrl ?? null };
         } catch {
           finalCompany = { ...companyData, logo_url: null };
         }

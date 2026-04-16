@@ -27,18 +27,13 @@ export default function QuotePDFPage() {
           .select("*")
           .eq("quote_id", id);
 
-        // Convertir logo a base64 para evitar bloqueo CORS en react-pdf
+        // Convertir logo a base64 via proxy server-side para evitar CORS en react-pdf
         let company = quote.companies;
         if (company?.logo_url) {
           try {
-            const res = await fetch(company.logo_url);
-            const blob = await res.blob();
-            const base64 = await new Promise<string>((resolve) => {
-              const reader = new FileReader();
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.readAsDataURL(blob);
-            });
-            company = { ...company, logo_url: base64 };
+            const res = await fetch(`/api/image-proxy?url=${encodeURIComponent(company.logo_url)}`);
+            const json = await res.json();
+            company = { ...company, logo_url: json.dataUrl ?? null };
           } catch {
             company = { ...company, logo_url: null };
           }
