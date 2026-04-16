@@ -41,7 +41,12 @@ export default function EmpresasPage() {
     }
 
     if (statusFilter !== "all") {
-      query = query.eq("subscription_status", statusFilter);
+      // "trial" tab muestra tanto trial como demo
+      if (statusFilter === "trial") {
+        query = query.in("subscription_status", ["trial", "demo"]);
+      } else {
+        query = query.eq("subscription_status", statusFilter);
+      }
     }
 
     const { data } = await query;
@@ -223,6 +228,11 @@ export default function EmpresasPage() {
                       {c.subscription_status === "trial" && (
                         <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-status-warn/10 text-status-warn text-[10px] font-bold uppercase tracking-wider border border-status-warn/20">
                           <span className="w-1.5 h-1.5 rounded-full bg-status-warn" /> Trial
+                        </span>
+                      )}
+                      {c.subscription_status === "demo" && (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-brand/10 text-brand text-[10px] font-bold uppercase tracking-wider border border-brand/20">
+                          <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" /> Demo
                         </span>
                       )}
                       {c.subscription_status === "pending_verification" && (

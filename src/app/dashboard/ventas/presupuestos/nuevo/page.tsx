@@ -55,7 +55,8 @@ function NuevoPresupuestoContent() {
     if (!user?.company_id) return;
 
     const plan = user?.companies?.plan_type?.toLowerCase() || 'starter';
-    if (!plan.includes('pro') && !plan.includes('enterprise')) {
+    const isDemo = user?.companies?.subscription_status === 'demo';
+    if (!isDemo && !plan.includes('pro') && !plan.includes('enterprise')) {
         const { count } = await supabase.from('partners').select('*', { count: 'exact', head: true }).eq('company_id', user.company_id);
         if (count !== null && count >= 50) {
             toast.error('Alcanzaste el límite de tu plan, mejora a Pro Business para clientes ilimitados');

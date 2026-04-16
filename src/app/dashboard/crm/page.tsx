@@ -38,7 +38,8 @@ export default function CRMPage() {
       const PLANS_WITH_CRM = ["pro", "enterprise", "basic", "starter", "full"];
       const hasCRM =
         PLANS_WITH_CRM.includes(org?.plan_type ?? "") ||
-        org?.subscription_status === "active";
+        org?.subscription_status === "active" ||
+        org?.subscription_status === "demo";
 
       if (!hasCRM) {
         router.push("/dashboard/upgrade");
