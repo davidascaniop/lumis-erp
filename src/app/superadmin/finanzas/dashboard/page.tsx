@@ -7,12 +7,11 @@ import Link from "next/link";
 export default async function FinanzasDashboard() {
   const supabase = await createSuperadminServerClient();
 
-  // Queries
   const [
-    { data: payRaw }, 
+    { data: payRaw },
     { data: varRaw },
     { data: fixPayRaw },
-    { data: fixCostsRaw } // To infer categories if needed, but fixPayRaw doesn't have category joined if simple schema. Wait, we need categories of fixed costs. Let's assume we can fetch them or join them.
+    { data: fixCostsRaw }
   ] = await Promise.all([
     supabase.from("subscription_payments")
       .select("amount_usd, plan_price, created_at, status, companies!inner(subscription_status)")
@@ -20,7 +19,7 @@ export default async function FinanzasDashboard() {
       .neq("companies.subscription_status", "demo"),
     supabase.from("admin_variable_costs").select("amount_usd, category, date"),
     supabase.from("admin_fixed_cost_payments").select("amount_usd, paid_at, admin_fixed_costs(category)"),
-    supabase.from("admin_fixed_costs").select("amount_usd, category") // to simulate fixed costs expected if not paid, but prompt says "Costos fijos registrados"
+    supabase.from("admin_fixed_costs").select("amount_usd, category"),
   ]);
 
   const payments = payRaw || [];

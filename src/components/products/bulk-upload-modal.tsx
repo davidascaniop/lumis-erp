@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUser } from "@/hooks/use-user";
-import { UploadCloud, FileSpreadsheet, X, CheckCircle2, AlertCircle, Warehouse } from "lucide-react";
+import { UploadCloud, FileSpreadsheet, CheckCircle2, AlertCircle, Warehouse } from "lucide-react";
 
 export function BulkUploadModal({
   open,
@@ -166,8 +166,7 @@ export function BulkUploadModal({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[600px] bg-white border-slate-200">
         <DialogHeader>
-          <div className="flex justify-between items-center mb-2">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 pr-8">
                <div className="w-10 h-10 rounded-xl bg-[#E040FB]/10 flex items-center justify-center text-[#E040FB]">
                   <FileSpreadsheet className="w-5 h-5" />
                </div>
@@ -177,8 +176,6 @@ export function BulkUploadModal({
                    Sube cientos de productos de forma automática.
                  </DialogDescription>
                </div>
-            </div>
-            <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-800 transition-colors p-1 rounded-full"><X className="w-5 h-5" /></button>
           </div>
         </DialogHeader>
 

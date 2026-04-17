@@ -27,23 +27,24 @@ export default function CRMPage() {
   useEffect(() => {
     async function init() {
       if (!user?.company_id) return;
-      
-      // Verify Plan — cualquier plan activo tiene acceso al CRM
-      const { data: org } = await supabase
-        .from("companies")
-        .select("plan_type, subscription_status")
-        .eq("id", user.company_id)
-        .single();
+      try {
+        const { data: org } = await supabase
+          .from("companies")
+          .select("plan_type, subscription_status")
+          .eq("id", user.company_id)
+          .single();
 
-      const PLANS_WITH_CRM = ["pro", "enterprise", "basic", "starter", "full"];
-      const hasCRM =
-        PLANS_WITH_CRM.includes(org?.plan_type ?? "") ||
-        org?.subscription_status === "active" ||
-        org?.subscription_status === "demo";
+        const hasCRM =
+          ["pro", "enterprise", "basic", "starter", "full"].includes(org?.plan_type ?? "") ||
+          org?.subscription_status === "active" ||
+          org?.subscription_status === "demo";
 
-      if (!hasCRM) {
-        router.push("/dashboard/upgrade");
-        return;
+        if (!hasCRM) {
+          router.push("/dashboard/upgrade");
+          return;
+        }
+      } catch {
+        // Fail open — don't block access on network error
       }
       setCheckingPlan(false);
       fetchOportunidades();
@@ -59,7 +60,8 @@ export default function CRMPage() {
         *,
         partners:cliente_id (id, name, phone, whatsapp, email)
       `)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(500);
 
     if (error) {
       toast.error("Error al cargar oportunidades");

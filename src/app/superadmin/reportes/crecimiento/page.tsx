@@ -1,4 +1,5 @@
 import { createSuperadminServerClient } from "@/lib/supabase/superadmin-server";
+import { PLAN_PRICES } from "@/lib/constants/plans";
 import { TrendingUp, Target, CalendarDays, LineChart } from "lucide-react";
 import { SaasLineChart } from "@/components/superadmin/saas-line-chart";
 import { IncomeBarChart } from "@/components/superadmin/income-bar-chart";
@@ -29,7 +30,6 @@ export default async function CrecimientoReporte() {
   const yoyGrowth = activeLastYear ? ((activeNow - activeLastYear) / activeLastYear) * 100 : 0;
 
   // Proyección MRR
-  const PLAN_PRICES = { basic: 19.99, pro: 79.99, enterprise: 119.99 };
   const currentMrr = payingCompanies.filter(c => c.subscription_status === 'active').reduce((sum, c) => sum + ((PLAN_PRICES as any)[c.plan_type || 'basic'] || 0), 0);
   const projectedMrr = currentMrr * Math.pow(1 + (Math.max(0, momGrowth) / 100), 3); // Compounding MoM growth for 3 months
 

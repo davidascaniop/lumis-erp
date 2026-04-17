@@ -1,4 +1,5 @@
 import { createSuperadminServerClient } from "@/lib/supabase/superadmin-server";
+import { PLAN_PRICES } from "@/lib/constants/plans";
 import {
   DollarSign,
   TrendingUp,
@@ -24,7 +25,7 @@ export default async function ResumenReporte() {
   const payingCompanies = allCompanies.filter(c => c.subscription_status !== 'demo');
 
   // Base Variables
-  const PLAN_PRICES = { basic: 19.99, pro: 79.99, enterprise: 119.99 };
+
   const now = new Date();
 
   // Meses para comparar

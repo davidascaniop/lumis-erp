@@ -1,4 +1,5 @@
 import { createSuperadminServerClient } from "@/lib/supabase/superadmin-server";
+import { PLAN_PRICES } from "@/lib/constants/plans";
 import { DollarSign, AlertCircle, TrendingUp, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { PlanDonutChart } from "@/components/superadmin/plan-donut-chart";
 import { IncomeBarChart } from "@/components/superadmin/income-bar-chart";
@@ -31,7 +32,6 @@ export default async function IngresosReporte() {
   const avgIncomePerCompany = activeCount ? collectedThisMonth / activeCount : 0;
 
   // Gráfica 1: Distribución por plan (Con MRR)
-  const PLAN_PRICES = { basic: 19.99, pro: 79.99, enterprise: 119.99 };
   const planData = [
     { name: "Starter", type: "basic", color: "#4FC3F7" },
     { name: "Pro", type: "pro", color: "#E040FB" },

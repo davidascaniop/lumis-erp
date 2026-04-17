@@ -119,7 +119,8 @@ export default function OrdenesCompraPage() {
         .from("purchases")
         .select("*, suppliers(name,rif,phone)")
         .eq("company_id", cid)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(200);
 
       const ids = (data ?? []).map((p: any) => p.id);
       let counts: Record<string, number> = {};

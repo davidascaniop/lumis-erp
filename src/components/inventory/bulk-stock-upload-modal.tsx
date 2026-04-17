@@ -15,7 +15,6 @@ import {
 import {
   UploadCloud,
   FileSpreadsheet,
-  X,
   CheckCircle2,
   AlertCircle,
   Loader2,
@@ -242,8 +241,7 @@ export function BulkStockUploadModal({
     }}>
       <DialogContent className="sm:max-w-[800px] bg-white border-slate-200">
         <DialogHeader>
-          <div className="flex justify-between items-center mb-2">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 pr-8">
                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-teal-100 text-teal-600">
                   <FileSpreadsheet className="w-5 h-5" />
                </div>
@@ -253,8 +251,6 @@ export function BulkStockUploadModal({
                    Sube un CSV para registrar entradas y salidas múltiples.
                  </DialogDescription>
                </div>
-            </div>
-            <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-800 transition-colors p-1 rounded-full"><X className="w-5 h-5" /></button>
           </div>
         </DialogHeader>
 

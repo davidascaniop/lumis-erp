@@ -13,6 +13,7 @@ import { PlanDonutChart } from "@/components/superadmin/plan-donut-chart";
 import { MrrLineChart } from "@/components/superadmin/mrr-line-chart";
 import { RetentionBarChart } from "@/components/superadmin/retention-bar-chart";
 import { ActionCenter } from "@/components/superadmin/action-center";
+import { PLAN_PRICES } from "@/lib/constants/plans";
 import { cn } from "@/lib/utils";
 import { Activity } from "lucide-react";
 import Link from "next/link";
@@ -62,8 +63,7 @@ export default async function SuperAdminHome() {
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfYesterday = new Date(startOfToday.getTime() - 24 * 60 * 60 * 1000);
 
-  // Cálculos Financieros (Simplificado)
-  const PLAN_PRICES = { basic: 19.99, pro: 79.99, enterprise: 119.99 };
+  // Cálculos Financieros
   const activeCompaniesList = allCompanies.filter(c => c.subscription_status === 'active');
   const totalMrr = activeCompaniesList.reduce((sum, c) => sum + ((PLAN_PRICES as any)[c.plan_type || 'basic'] || 0), 0);
   const arr = totalMrr * 12;

@@ -42,7 +42,8 @@ export default function ClientesPage() {
             `,
       )
       .eq("company_id", companyId)
-      .order("name", { ascending: true });
+      .order("name", { ascending: true })
+      .limit(500);
 
     const partnersWithBalance = (data || []).map((p: any) => ({
       ...p,
