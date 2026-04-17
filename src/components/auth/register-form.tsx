@@ -473,7 +473,7 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="bg-white/90 backdrop-blur-xl p-6 sm:p-8 rounded-[32px] w-full shadow-[0_20px_60px_rgba(0,0,0,0.05)] border border-white relative flex flex-col flex-1 min-h-[480px]"
+          className="bg-white/90 backdrop-blur-xl p-6 sm:p-8 rounded-[32px] w-full shadow-[0_20px_60px_rgba(0,0,0,0.05)] border border-white relative flex flex-col flex-1 min-h-[620px]"
         >
           {/* Top Gradient Bar */}
           <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand/10 via-brand to-brand/10" />
@@ -571,7 +571,7 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
                   <p className="text-xs text-[#64748B] font-medium font-outfit">Pruébalo gratis o elige el plan que mejor se adapte a ti</p>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3 overflow-y-auto no-scrollbar max-h-[300px] pb-2 pr-1">
+                <div className="grid grid-cols-1 gap-3 overflow-y-auto no-scrollbar flex-1 min-h-0 pb-2 pr-1">
                   {/* DEMO — 15-day free trial with full access */}
                   {(() => {
                     const isDemoSelected = form.watch("plan") === "demo";
