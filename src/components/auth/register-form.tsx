@@ -509,14 +509,14 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
                   <p className="text-xs text-[#64748B] font-medium font-outfit">Pruébalo gratis o elige el plan que mejor se adapte a ti</p>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3 overflow-y-auto no-scrollbar flex-1 min-h-0 pb-2 pr-1">
+                <div className="grid grid-cols-1 gap-3 overflow-y-auto no-scrollbar flex-1 min-h-0 pt-3 pb-2 pr-1">
                   {/* DEMO — 15-day free trial with full access */}
                   {(() => {
                     const isDemoSelected = form.watch("plan") === "demo";
                     return (
                       <div
                         onClick={() => form.setValue("plan", "demo")}
-                        className={`p-4 sm:p-5 rounded-2xl border transition-all duration-300 relative cursor-pointer active:scale-[0.98] shrink-0 overflow-hidden ${
+                        className={`p-4 sm:p-5 rounded-2xl border transition-all duration-300 relative cursor-pointer active:scale-[0.98] shrink-0 ${
                           isDemoSelected
                             ? "bg-gradient-to-br from-[#00E5CC]/10 via-brand/5 to-[#7C4DFF]/10 border-[#00AF9C] border-2 shadow-md"
                             : "bg-gradient-to-br from-[#F8FAFC] to-white border-[#EDF2F7] hover:border-[#00AF9C]/40"
