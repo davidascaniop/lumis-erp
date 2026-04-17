@@ -108,10 +108,9 @@ const PLANS: Plan[] = [
       'Account Manager dedicado · VIP 24/7',
     ],
     cta: {
-      label: 'Hablar con el equipo',
-      href: 'https://wa.me/584149406419?text=Hola%20LUMIS%2C%20me%20interesa%20Enterprise',
-      external: true,
-      variant: 'soft',
+      label: 'Empezar con Enterprise',
+      href: '/register',
+      variant: 'outline',
     },
     accent: 'text-[#6366F1]',
     gradientFrom: '#7C4DFF',
@@ -280,7 +279,7 @@ export function Pricing() {
 
                 <h3 className="font-outfit font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.05] tracking-tight text-slate-900 mb-3">
                   15 días{' '}
-                  <span className="bg-gradient-to-r from-[#EC4899] via-[#A855F7] to-[#6366F1] bg-clip-text text-transparent font-zilla italic font-medium">
+                  <span className="inline-block bg-gradient-to-r from-[#EC4899] via-[#A855F7] to-[#6366F1] bg-clip-text text-transparent font-zilla italic font-medium pr-2">
                     gratis
                   </span>
                   <br />
