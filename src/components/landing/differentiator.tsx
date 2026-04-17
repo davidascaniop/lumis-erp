@@ -10,7 +10,7 @@ type Row = {
   feature: string
   lumis: boolean | string
   excel: boolean | string
-  gringos: boolean | string
+  internacional: boolean | string
 }
 
 const ROWS: Row[] = [
@@ -18,49 +18,49 @@ const ROWS: Row[] = [
     feature: 'Tasa BCV automática',
     lumis: true,
     excel: 'Manual, a mano',
-    gringos: false,
+    internacional: false,
   },
   {
     feature: 'Facturación en USD y Bs.',
     lumis: true,
     excel: 'A mano',
-    gringos: 'Solo USD',
+    internacional: 'Solo USD',
   },
   {
     feature: 'Soporte 100% en español',
     lumis: true,
     excel: false,
-    gringos: 'En inglés',
+    internacional: 'En inglés',
   },
   {
     feature: 'Entiende Venezuela (SENIAT, IGTF)',
     lumis: true,
     excel: false,
-    gringos: false,
+    internacional: false,
   },
   {
     feature: 'Precio accesible',
     lumis: '$19.99/mes',
     excel: 'Gratis pero...',
-    gringos: '$200-500/mes',
+    internacional: '$200-500/mes',
   },
   {
     feature: 'Multi-sucursal',
     lumis: true,
     excel: 'Imposible',
-    gringos: true,
+    internacional: true,
   },
   {
     feature: 'Cuentas por cobrar',
     lumis: true,
     excel: 'Cuaderno',
-    gringos: true,
+    internacional: true,
   },
   {
     feature: 'Alertas de stock bajo',
     lumis: true,
     excel: false,
-    gringos: true,
+    internacional: true,
   },
 ]
 
@@ -172,7 +172,7 @@ export function Differentiator() {
             transition={{ duration: 0.7, delay: 0.25 }}
             className="font-zilla text-base sm:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed"
           >
-            Los sistemas gringos no entienden Venezuela. El Excel no escala.
+            Los sistemas internacionales no entienden Venezuela. El Excel no escala.
             LUMIS fue hecho específicamente para tu realidad.
           </motion.p>
         </div>
@@ -192,7 +192,7 @@ export function Differentiator() {
               icon: DollarSign,
               title: 'Precio de aquí',
               description:
-                '$19.99/mes vs $200-500 de los sistemas gringos. Mismo poder. Décima parte del precio. Tu margen intacto.',
+                '$19.99/mes vs $200-500 de los sistemas internacionales. Mismo poder. Décima parte del precio. Tu margen intacto.',
               accent: 'text-[#A855F7]',
               bg: 'from-[#A855F7]/15 to-[#A855F7]/5',
             },
@@ -275,7 +275,7 @@ export function Differentiator() {
                 Excel / Cuaderno
               </div>
               <div className="px-4 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">
-                Sistemas gringos
+                Sistemas internacionales
               </div>
             </div>
 
@@ -307,7 +307,7 @@ export function Differentiator() {
                   <Cell value={row.excel} />
                 </div>
                 <div className="px-2 sm:px-4 py-3 sm:py-4 flex items-center justify-center">
-                  <Cell value={row.gringos} />
+                  <Cell value={row.internacional} />
                 </div>
               </motion.div>
             ))}
@@ -323,7 +323,7 @@ export function Differentiator() {
               Excel
             </div>
             <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
-              Gringos
+              Internacional
             </div>
           </div>
         </motion.div>
