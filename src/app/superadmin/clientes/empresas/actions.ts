@@ -10,7 +10,7 @@ export async function fetchCompaniesAction(
 
   let query = supabase
     .from("companies")
-    .select("id, name, plan_type, subscription_status, created_at, owner_email, settings")
+    .select("id, name, plan_type, subscription_status, trial_ends_at, created_at, owner_email, settings")
     .order("created_at", { ascending: false });
 
   if (search) {

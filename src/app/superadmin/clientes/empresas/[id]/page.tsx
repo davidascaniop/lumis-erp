@@ -292,7 +292,23 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
               </div>
               <div className="text-right">
                 {company.subscription_status === "demo" ? (
-                  <p className="text-xl font-black text-[#1E88E5] tracking-tight overflow-hidden text-ellipsis whitespace-nowrap">ACCESO TOTAL</p>
+                  <>
+                    <p className="text-xl font-black text-[#1E88E5] tracking-tight overflow-hidden text-ellipsis whitespace-nowrap">ACCESO TOTAL</p>
+                    {company.trial_ends_at && (() => {
+                      const endsAt = new Date(company.trial_ends_at);
+                      const daysLeft = Math.ceil((endsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                      const expired = daysLeft < 0;
+                      return (
+                        <p className={`text-[10px] font-bold uppercase mt-1 ${
+                          expired ? "text-status-danger" : daysLeft <= 3 ? "text-status-warn" : "text-text-3"
+                        }`}>
+                          {expired
+                            ? `Vencida hace ${Math.abs(daysLeft)}d`
+                            : `Vence: ${format(endsAt, "dd/MMM/yyyy")} (${daysLeft}d)`}
+                        </p>
+                      );
+                    })()}
+                  </>
                 ) : company.subscription_status === "trial" ? (
                   <>
                     <p className="text-lg font-black text-status-warn tracking-tight overflow-hidden text-ellipsis whitespace-nowrap hidden sm:block">TRIAL ACTIVO</p>

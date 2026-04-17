@@ -193,11 +193,33 @@ export default function EmpresasPage() {
                           <span className="w-1.5 h-1.5 rounded-full bg-status-warn" /> Trial
                         </span>
                       )}
-                      {c.subscription_status === "demo" && (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-brand/10 text-brand text-[10px] font-bold uppercase tracking-wider border border-brand/20">
-                          <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" /> Demo
-                        </span>
-                      )}
+                      {c.subscription_status === "demo" && (() => {
+                        const endsAt = c.trial_ends_at ? new Date(c.trial_ends_at) : null;
+                        const daysLeft = endsAt
+                          ? Math.ceil((endsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+                          : null;
+                        const expired = daysLeft !== null && daysLeft < 0;
+                        return (
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-brand/10 text-brand text-[10px] font-bold uppercase tracking-wider border border-brand/20">
+                              <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" /> Demo
+                            </span>
+                            {daysLeft !== null && (
+                              <span
+                                className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold font-mono border ${
+                                  expired
+                                    ? "bg-status-danger/10 text-status-danger border-status-danger/20"
+                                    : daysLeft <= 3
+                                    ? "bg-status-warn/10 text-status-warn border-status-warn/20"
+                                    : "bg-surface-base text-text-2 border-border"
+                                }`}
+                              >
+                                {expired ? `Vencida · ${Math.abs(daysLeft)}d` : `${daysLeft}d restantes`}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
                       {c.subscription_status === "pending_verification" && (
                         <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-status-info/10 text-[#0288D1] text-[10px] font-bold uppercase tracking-wider border border-[#0288D1]/20">
                           <span className="w-1.5 h-1.5 rounded-full bg-[#0288D1] animate-pulse" /> Pendiente
