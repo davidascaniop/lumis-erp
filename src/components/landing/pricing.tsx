@@ -1,177 +1,523 @@
 'use client'
-import { motion, useInView } from 'framer-motion'
-import { useRef } from 'react'
-import { Check } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+import {
+  Check,
+  Sparkles,
+  Rocket,
+  Gift,
+  Star,
+  Crown,
+  Clock,
+  ShieldCheck,
+  MessageCircle,
+  ArrowRight,
+} from 'lucide-react'
+import { useBCV } from '@/hooks/use-bcv'
 
-const FEATURES_ALL = [
-  'Tasa BCV automática',
-  'Semilla Diaria',
-  'Soporte WhatsApp',
-  'Sin contrato',
-  'Actualizaciones incluidas'
-]
+// ══════════════════════════════════════════════════════════════════════
+// PLANS DATA
+// ══════════════════════════════════════════════════════════════════════
 
-const PLANES = [
+type Plan = {
+  id: string
+  name: string
+  tagline: string
+  price: number
+  icon: React.ComponentType<{ className?: string }>
+  highlight: boolean
+  badge?: string
+  features: string[]
+  cta: {
+    label: string
+    href: string
+    external?: boolean
+    variant: 'primary' | 'outline' | 'soft'
+  }
+  accent: string
+  gradientFrom: string
+  gradientTo: string
+}
+
+const PLANS: Plan[] = [
   {
-    name: 'LUMIS',
-    price: 35,
-    desc: 'Ideal para negocios con una sola sede que buscan digitalizarse.',
-    popular: false,
-    color: '#7C4DFF',
+    id: 'starter',
+    name: 'Starter',
+    tagline: 'Para el que arranca',
+    price: 19.99,
+    icon: Rocket,
+    highlight: false,
     features: [
-      '1 sede',
-      '5 usuarios',
-      'Inventario completo',
-      'Pedidos y ventas',
-      'Cartera y cobranza (CxC)',
-      'Tasa BCV automática',
-      'Semilla Diaria',
+      'Facturación en USD y Bs.',
+      'Hasta 500 productos',
+      '1 sucursal · 1 usuario admin',
+      '50 clientes con cuentas por cobrar',
+      'BCV automático',
+      'Reportes básicos',
       'Soporte por WhatsApp',
     ],
+    cta: {
+      label: 'Empezar con Starter',
+      href: '/register',
+      variant: 'outline',
+    },
+    accent: 'text-slate-900',
+    gradientFrom: '#94A3B8',
+    gradientTo: '#64748B',
   },
   {
-    name: 'LUMIS PRO',
-    price: 75,
-    desc: 'La solución definitiva para expansiones y control multi-sucursal.',
-    popular: true,
-    color: '#E040FB',
+    id: 'pro',
+    name: 'Pro Business',
+    tagline: 'Para el que crece',
+    price: 79.99,
+    icon: Star,
+    highlight: true,
+    badge: 'Más popular',
     features: [
-      'Sedes ilimitadas',
-      'Usuarios ilimitados',
-      'Todo lo del plan LUMIS +',
-      'Portal de pago para clientes',
-      'Escáner de código de barras',
-      'Reportes avanzados consolidados',
-      'Módulo fiscal (Ctrl Ingresos)',
+      'TODO lo de Starter, más:',
+      'Productos y clientes ilimitados',
+      'Hasta 5 usuarios (vendedores)',
+      'CRM avanzado · Pipeline de ventas',
+      'Integración WhatsApp nativa',
+      'Comisiones por vendedor',
       'Soporte prioritario',
     ],
+    cta: {
+      label: 'Empezar con Pro',
+      href: '/register',
+      variant: 'primary',
+    },
+    accent: 'text-[#A855F7]',
+    gradientFrom: '#EC4899',
+    gradientTo: '#A855F7',
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise',
+    tagline: 'Para el que domina',
+    price: 119.99,
+    icon: Crown,
+    highlight: false,
+    features: [
+      'TODO lo de Pro, más:',
+      'Multi-sucursal ilimitada',
+      'Usuarios ilimitados',
+      'Multi-depósito sincronizado',
+      'API para integraciones',
+      'Reportes consolidados',
+      'Account Manager dedicado · VIP 24/7',
+    ],
+    cta: {
+      label: 'Hablar con el equipo',
+      href: 'https://wa.me/584149406419?text=Hola%20LUMIS%2C%20me%20interesa%20Enterprise',
+      external: true,
+      variant: 'soft',
+    },
+    accent: 'text-[#6366F1]',
+    gradientFrom: '#7C4DFF',
+    gradientTo: '#6366F1',
   },
 ]
 
-export function Pricing() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-100px' })
+// ══════════════════════════════════════════════════════════════════════
+// CURRENCY TOGGLE
+// ══════════════════════════════════════════════════════════════════════
 
+function CurrencyToggle({
+  currency,
+  setCurrency,
+  rate,
+  updatedAt,
+}: {
+  currency: 'USD' | 'BS'
+  setCurrency: (c: 'USD' | 'BS') => void
+  rate: number | null
+  updatedAt: string
+}) {
   return (
-    <section 
-      ref={ref}
-      className="py-32 bg-white relative px-6 overflow-hidden" 
-      id="precios"
-    >
-      <div className="max-w-5xl mx-auto">
-        
-        <div className="text-center mb-20">
-          <motion.h2 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            className="font-display font-bold text-4xl md:text-6xl text-slate-900 mb-6 tracking-tight leading-tight"
+    <div className="inline-flex flex-col items-center gap-2">
+      <div className="inline-flex bg-white border border-slate-200 rounded-full p-1 shadow-sm">
+        {(['USD', 'BS'] as const).map((c) => (
+          <button
+            key={c}
+            onClick={() => setCurrency(c)}
+            className={`relative px-5 py-2 rounded-full text-xs font-black tracking-wider uppercase transition-all ${
+              currency === c
+                ? 'text-white'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
           >
-            Simple. Transparente. 
-            <br />
-            <span className="text-[#E040FB]">Sin sorpresas.</span>
-          </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : {}}
-            className="text-slate-500 text-lg max-w-xl mx-auto"
-          >
-            Sin contrato de permanencia. Cancela cuando quieras.
-          </motion.p>
-        </div>
-
-        {/* Banner Beneficios Globales */}
-        <motion.div 
-           initial={{ opacity: 0, y: 20 }}
-           animate={isInView ? { opacity: 1, y: 0 } : {}}
-           className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 mb-16 px-8 py-4 bg-slate-50 border border-slate-200 rounded-[2rem]"
-        >
-           {FEATURES_ALL.map((f, i) => (
-             <div key={i} className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-widest">
-                <Check className="w-3 h-3 text-[#00E5CC]" strokeWidth={3} />
-                {f}
-             </div>
-           ))}
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {PLANES.map((plan, i) => (
-            <motion.div 
-               key={i}
-               initial={{ opacity: 0, y: 40 }}
-               animate={isInView ? { opacity: 1, y: 0 } : {}}
-               transition={{ delay: 0.2 + (i * 0.2), duration: 0.8 }}
-               className={`relative flex flex-col p-10 rounded-[2.5rem] border transition-all duration-200 overflow-hidden group
-                  ${plan.popular
-                    ? 'bg-white border-[#E040FB]/50 shadow-[0_0_40px_rgba(224,64,251,0.08)]'
-                    : 'bg-white border-slate-200 shadow-md hover:border-slate-300'
-                  }`}
-            >
-               {plan.popular && (
-                 <div className="absolute top-8 right-8 px-3 py-1 rounded-full bg-[#E040FB] text-[10px] font-bold text-white uppercase tracking-widest shadow-lg">
-                    ⭐ MÁS ELEGIDO
-                 </div>
-               )}
-
-               <div className="mb-10">
-                  <div className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">{plan.name}</div>
-                  <div className="flex items-baseline gap-1 mb-2">
-                     <span className="text-6xl font-display font-bold text-slate-900 tracking-tighter">${plan.price}</span>
-                     <span className="text-lg font-bold text-slate-400">/mes</span>
-                  </div>
-                  <p className="text-sm text-slate-500 leading-relaxed font-normal">{plan.desc}</p>
-               </div>
-
-               <LinkToWA
-                  href="https://wa.me/584149406419?text=Hola%20LUMIS%2C%20quiero%20una%20demo"
-                  popular={plan.popular}
-               />
-
-               <div className="space-y-4">
-                  {plan.features.map((feat, idx) => (
-                    <div key={idx} className="flex items-start gap-4">
-                       <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <Check className="w-3 h-3 text-white" style={{ color: plan.color }} strokeWidth={4} />
-                       </div>
-                       <span className="text-[13px] font-bold text-slate-600 tracking-tight">{feat}</span>
-                    </div>
-                  ))}
-               </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Competitor note */}
-        <motion.div 
-           initial={{ opacity: 0 }}
-           animate={isInView ? { opacity: 1 } : {}}
-           transition={{ delay: 1 }}
-           className="mt-16 text-center"
-        >
-           <p className="text-slate-400 text-xs font-medium">
-              vs FINA: ellos cobran $30-35/mes por menos funciones y sin multi-sede.
-           </p>
-        </motion.div>
-
+            {currency === c && (
+              <motion.div
+                layoutId="currency-pill"
+                className="absolute inset-0 bg-gradient-to-r from-[#EC4899] via-[#A855F7] to-[#6366F1] rounded-full shadow-sm"
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              />
+            )}
+            <span className="relative z-10">
+              {c === 'USD' ? '💵 USD' : '🇻🇪 Bs.'}
+            </span>
+          </button>
+        ))}
       </div>
-    </section>
+
+      {rate && (
+        <div className="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
+          <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+          <span>
+            BCV: Bs. {rate.toFixed(2)}
+            {updatedAt && ` · actualizado ${updatedAt}`}
+          </span>
+        </div>
+      )}
+    </div>
   )
 }
 
-function LinkToWA({ href, popular }: { href: string, popular: boolean }) {
+// ══════════════════════════════════════════════════════════════════════
+// MAIN
+// ══════════════════════════════════════════════════════════════════════
+
+export function Pricing() {
+  const [currency, setCurrency] = useState<'USD' | 'BS'>('USD')
+  const { rate, updatedAt } = useBCV()
+
+  const formatPrice = (usd: number) => {
+    if (currency === 'USD') {
+      return `$${usd.toFixed(2)}`
+    }
+    if (rate) {
+      return `Bs. ${Math.round(usd * rate).toLocaleString('es-VE')}`
+    }
+    return `$${usd.toFixed(2)}`
+  }
+
   return (
-    <motion.a 
-       href={href}
-       target="_blank"
-       whileHover={{ scale: 1.02 }}
-       whileTap={{ scale: 0.98 }}
-       className={`w-full py-5 rounded-2xl text-base font-bold text-center mb-10 transition-all tracking-tight flex items-center justify-center gap-2
-          ${popular
-            ? 'bg-[#25D366] text-white shadow-lg hover:bg-[#1da851]'
-            : 'bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200'
-          }`}
+    <section
+      id="precios"
+      className="relative py-20 sm:py-28 lg:py-32 overflow-hidden bg-white"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-      Hablar por WhatsApp
-    </motion.a>
+      {/* Background */}
+      <div className="absolute inset-0 bg-[radial-gradient(#E040FB_1px,transparent_1px)] bg-[size:32px_32px] opacity-[0.02] pointer-events-none" />
+      <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-[#A855F7]/5 blur-[140px] rounded-full pointer-events-none" />
+
+      <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-6 lg:px-8">
+        {/* ─── Header ─── */}
+        <div className="text-center mb-12 sm:mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full mb-5 sm:mb-6 bg-gradient-to-r from-[#EC4899]/10 to-[#6366F1]/10 border border-[#A855F7]/20"
+          >
+            <Sparkles className="w-3 h-3 text-[#A855F7]" />
+            <span className="text-[9px] sm:text-[10px] font-bold text-[#A855F7] tracking-[0.15em] sm:tracking-[0.18em] uppercase font-outfit">
+              Precios
+            </span>
+          </motion.div>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="font-outfit font-bold text-[32px] sm:text-[42px] md:text-[52px] leading-[1.1] tracking-tight mb-5 text-slate-900 max-w-3xl mx-auto"
+          >
+            Precios que{' '}
+            <span className="bg-gradient-to-r from-[#EC4899] via-[#A855F7] to-[#6366F1] bg-clip-text text-transparent font-zilla italic font-medium">
+              no te van a asustar.
+            </span>
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="font-zilla text-base sm:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed mb-8"
+          >
+            Sin letra chica. Sin contratos de 12 meses. Sin sorpresas al mes 3.
+            Paga mientras te funciona, cancela cuando quieras.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            <CurrencyToggle
+              currency={currency}
+              setCurrency={setCurrency}
+              rate={rate}
+              updatedAt={updatedAt}
+            />
+          </motion.div>
+        </div>
+
+        {/* ─── DEMO CARD (destacada) ─── */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.8 }}
+          className="relative mb-12 sm:mb-16"
+        >
+          <div className="relative rounded-3xl bg-gradient-to-br from-[#EC4899]/10 via-[#A855F7]/10 to-[#6366F1]/10 border-2 border-[#A855F7]/30 overflow-hidden p-6 sm:p-8 lg:p-10 shadow-[0_20px_60px_-15px_rgba(168,85,247,0.25)]">
+            {/* Sparkle bg */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-[#EC4899]/20 to-transparent rounded-bl-full pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-[#6366F1]/15 to-transparent rounded-tr-full pointer-events-none" />
+
+            <div className="relative grid lg:grid-cols-[1.2fr_1fr] gap-8 items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-[#A855F7]/30 shadow-sm mb-4">
+                  <Gift className="w-3.5 h-3.5 text-[#A855F7]" />
+                  <span className="text-[10px] font-black text-[#A855F7] tracking-widest uppercase">
+                    Prueba sin pagar
+                  </span>
+                </div>
+
+                <h3 className="font-outfit font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.05] tracking-tight text-slate-900 mb-3">
+                  15 días{' '}
+                  <span className="bg-gradient-to-r from-[#EC4899] via-[#A855F7] to-[#6366F1] bg-clip-text text-transparent font-zilla italic font-medium">
+                    gratis
+                  </span>
+                  <br />
+                  con acceso total.
+                </h3>
+
+                <p className="font-zilla text-base sm:text-lg text-slate-600 leading-relaxed mb-5 max-w-md">
+                  Prueba todo LUMIS Enterprise sin tarjeta, sin compromiso,
+                  sin spam. Si te gusta, eliges tu plan. Si no, no pasa nada.
+                </p>
+
+                <motion.a
+                  href="/register"
+                  whileHover={{ scale: 1.03, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="inline-flex items-center gap-2 px-7 py-4 rounded-xl text-base font-black text-white bg-gradient-to-r from-[#EC4899] via-[#A855F7] to-[#6366F1] shadow-[0_10px_30px_rgba(168,85,247,0.4)] hover:shadow-[0_14px_40px_rgba(168,85,247,0.55)] transition-all font-outfit active:scale-95"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  Empezar mi demo ahora
+                  <ArrowRight className="w-5 h-5" />
+                </motion.a>
+
+                <p className="text-[11px] font-medium text-slate-500 mt-3">
+                  Sin tarjeta · Sin compromiso · Sin spam
+                </p>
+              </div>
+
+              {/* Lista de features incluidas */}
+              <div className="space-y-3">
+                <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                  Incluye
+                </div>
+                {[
+                  'Acceso completo a TODO (como Enterprise)',
+                  'Productos y clientes ilimitados',
+                  'Facturación en USD y Bs. con BCV',
+                  'CRM, Inventario, Finanzas y Cobranza',
+                  'Soporte por WhatsApp',
+                ].map((feat, i) => (
+                  <motion.div
+                    key={feat}
+                    initial={{ opacity: 0, x: 10 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.3 + i * 0.1 }}
+                    className="flex items-start gap-2.5"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#EC4899] to-[#A855F7] flex items-center justify-center shrink-0 mt-0.5">
+                      <Check
+                        className="w-3 h-3 text-white"
+                        strokeWidth={3}
+                      />
+                    </div>
+                    <span className="text-sm font-medium text-slate-700">
+                      {feat}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ─── 3 PLANES PAGOS ─── */}
+        <div className="text-center mb-8 sm:mb-10">
+          <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] mb-2">
+            O elige un plan
+          </div>
+          <div className="h-px max-w-xs mx-auto bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 mb-12 sm:mb-16">
+          {PLANS.map((plan, i) => {
+            const Icon = plan.icon
+            return (
+              <motion.div
+                key={plan.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ duration: 0.7, delay: i * 0.1 }}
+                className={`relative ${plan.highlight ? 'lg:-mt-4 lg:-mb-4' : ''}`}
+              >
+                {/* Popular badge */}
+                {plan.highlight && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.4 }}
+                    className="absolute -top-4 left-1/2 -translate-x-1/2 z-10"
+                  >
+                    <div className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-[#EC4899] via-[#A855F7] to-[#6366F1] rounded-full shadow-[0_4px_20px_rgba(168,85,247,0.4)]">
+                      <Sparkles className="w-3 h-3 text-white" />
+                      <span className="text-[10px] font-black text-white uppercase tracking-[0.18em]">
+                        {plan.badge}
+                      </span>
+                    </div>
+                  </motion.div>
+                )}
+
+                <div
+                  className={`h-full rounded-3xl p-6 sm:p-8 flex flex-col ${
+                    plan.highlight
+                      ? 'bg-gradient-to-br from-[#EC4899]/5 via-white to-[#6366F1]/5 border-2 border-[#A855F7]/40 shadow-[0_20px_60px_-15px_rgba(168,85,247,0.25)]'
+                      : 'bg-white border border-slate-200 shadow-sm hover:shadow-lg transition-shadow'
+                  }`}
+                >
+                  {/* Icon + name */}
+                  <div className="flex items-center gap-3 mb-5">
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
+                      style={{
+                        background: `linear-gradient(135deg, ${plan.gradientFrom}, ${plan.gradientTo})`,
+                      }}
+                    >
+                      <Icon className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-outfit font-bold text-lg text-slate-900 leading-tight">
+                        {plan.name}
+                      </div>
+                      <div className="text-[11px] text-slate-500 font-medium">
+                        {plan.tagline}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Price */}
+                  <div className="mb-6">
+                    <div className="flex items-baseline gap-1">
+                      <span
+                        className={`font-outfit font-black text-4xl sm:text-5xl leading-none tracking-tight ${
+                          plan.highlight
+                            ? 'bg-gradient-to-r from-[#EC4899] via-[#A855F7] to-[#6366F1] bg-clip-text text-transparent'
+                            : 'text-slate-900'
+                        }`}
+                      >
+                        {formatPrice(plan.price)}
+                      </span>
+                      <span className="text-sm font-semibold text-slate-400">
+                        /mes
+                      </span>
+                    </div>
+                    {currency === 'BS' && rate && (
+                      <div className="text-[11px] text-slate-400 font-medium mt-1">
+                        ≈ ${plan.price.toFixed(2)} USD
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Features */}
+                  <ul className="space-y-2.5 mb-7 flex-1">
+                    {plan.features.map((feat, j) => (
+                      <li key={j} className="flex items-start gap-2.5 text-sm">
+                        <div
+                          className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                            plan.highlight
+                              ? 'bg-gradient-to-br from-[#EC4899] to-[#A855F7]'
+                              : 'bg-slate-100'
+                          }`}
+                        >
+                          <Check
+                            className={`w-3 h-3 ${
+                              plan.highlight ? 'text-white' : 'text-slate-600'
+                            }`}
+                            strokeWidth={3}
+                          />
+                        </div>
+                        <span
+                          className={`${
+                            feat.startsWith('TODO')
+                              ? 'font-bold text-slate-900'
+                              : 'font-medium text-slate-600'
+                          }`}
+                        >
+                          {feat}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* CTA */}
+                  <motion.a
+                    href={plan.cta.href}
+                    target={plan.cta.external ? '_blank' : undefined}
+                    rel={plan.cta.external ? 'noopener noreferrer' : undefined}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-sm font-black transition-all font-outfit active:scale-95 ${
+                      plan.cta.variant === 'primary'
+                        ? 'bg-gradient-to-r from-[#EC4899] via-[#A855F7] to-[#6366F1] text-white shadow-[0_8px_24px_rgba(168,85,247,0.35)] hover:shadow-[0_12px_32px_rgba(168,85,247,0.5)]'
+                        : plan.cta.variant === 'soft'
+                        ? 'bg-gradient-to-r from-[#6366F1]/10 to-[#7C4DFF]/10 text-[#6366F1] border border-[#6366F1]/30 hover:bg-[#6366F1]/15'
+                        : 'bg-white text-slate-700 border border-slate-300 hover:border-slate-400 hover:bg-slate-50'
+                    }`}
+                  >
+                    {plan.cta.variant === 'soft' && (
+                      <MessageCircle className="w-4 h-4" />
+                    )}
+                    {plan.cta.label}
+                    {plan.cta.variant !== 'soft' && (
+                      <ArrowRight className="w-4 h-4" />
+                    )}
+                  </motion.a>
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
+
+        {/* ─── Trust row ─── */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.7, delay: 0.2 }}
+          className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-xs font-medium text-slate-500"
+        >
+          <span className="flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            Cancela cuando quieras
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Clock className="w-4 h-4 text-emerald-500" />
+            Sin permanencia
+          </span>
+          <span className="flex items-center gap-1.5">
+            <MessageCircle className="w-4 h-4 text-emerald-500" />
+            Soporte por WhatsApp
+          </span>
+          <span className="flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            Tus datos siempre son tuyos
+          </span>
+        </motion.div>
+      </div>
+    </section>
   )
 }
