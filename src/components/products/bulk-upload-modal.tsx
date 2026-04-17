@@ -19,7 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUser } from "@/hooks/use-user";
-import { UploadCloud, FileSpreadsheet, CheckCircle2, AlertCircle, Warehouse } from "lucide-react";
+import { UploadCloud, FileSpreadsheet, CheckCircle2, AlertCircle } from "lucide-react";
+import { MF_SELECT } from "@/components/ui/modal-form";
 
 export function BulkUploadModal({
   open,
@@ -194,7 +195,7 @@ export function BulkUploadModal({
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
               <p className="text-xs font-bold text-slate-500 uppercase mb-2">2. Destino del Stock</p>
               <Select value={selectedWarehouse} onValueChange={setSelectedWarehouse}>
-                <SelectTrigger className="h-9 bg-white border-slate-200 text-slate-900 rounded-lg text-xs shadow-sm">
+                <SelectTrigger className={`${MF_SELECT} h-9 text-xs`}>
                   <SelectValue placeholder="Almacén (Opcional)" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-slate-200 text-slate-900">

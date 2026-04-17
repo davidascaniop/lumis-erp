@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
 import { Card } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
-import { 
-  Plus, Layers, AlertCircle, Edit, Trash2, Loader2, Package, Search, 
+import {
+  Plus, Layers, AlertCircle, Edit, Trash2, Loader2, Package, Search,
   ArrowRight, SearchIcon, Image as ImageIcon, Box, Eye
 } from "lucide-react";
 import {
@@ -19,9 +19,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-
-const INPUT_CLS = "h-11 bg-white border-slate-200 text-slate-900 placeholder:text-slate-300 text-sm rounded-xl shadow-none focus:ring-1 focus:ring-brand font-montserrat";
-const LABEL_CLS = "block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 font-montserrat";
+import { MF_INPUT as INPUT_CLS, MF_LABEL as LABEL_CLS, ModalHeader, ModalFooter } from "@/components/ui/modal-form";
 
 interface ComponentItem {
   product_id: string;
@@ -389,14 +387,11 @@ export default function KitsPage() {
       {/* MODAL CREAR/EDITAR KIT */}
       <Dialog open={openModal} onOpenChange={val => { if (!val) setOpenModal(false) }}>
          <DialogContent className="sm:max-w-[700px] bg-white border-slate-200 p-0 shadow-2xl rounded-2xl overflow-hidden">
-             <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
-                 <p className="text-[10px] font-bold uppercase tracking-widest text-brand mb-1 font-montserrat flex items-center gap-1.5">
-                    <Layers className="w-3 h-3" /> Constructor de Kit
-                 </p>
-                 <DialogTitle className="text-xl font-bold font-primary text-slate-900">
-                    {form.id ? "Modificar Ensamble" : "Nuevo Kit & Ensamble"}
-                 </DialogTitle>
-             </div>
+             <ModalHeader
+               eyebrow="Constructor de Kit"
+               title={form.id ? "Modificar Ensamble" : "Nuevo Kit & Ensamble"}
+               icon={<Layers className="w-5 h-5" />}
+             />
              <form onSubmit={saveKit} className="flex flex-col" style={{maxHeight:'80vh'}}>
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
                     {/* General Specs */}
@@ -518,20 +513,14 @@ export default function KitsPage() {
                     </div>
                 </div>
 
-                <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0">
-                    <p className="text-[11px] font-semibold text-slate-500">
-                        {components.length} componentes · Total: {components.reduce((acc, c)=>acc+c.qty_required, 0)} unidades
-                    </p>
-                    <div className="flex items-center gap-3">
-                        <button type="button" onClick={() => setOpenModal(false)} className="px-5 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider font-montserrat hover:text-slate-800">
-                           Cancelar
-                        </button>
-                        <button type="submit" disabled={isSaving || components.length === 0} className="px-6 py-2.5 bg-brand text-white rounded-full text-[11px] font-bold uppercase tracking-widest shadow-brand hover:opacity-90 disabled:opacity-50 transition-all active:scale-95 flex items-center gap-2">
-                           {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
-                           {form.id ? 'Guardar Cambios' : 'Crear Kit'}
-                        </button>
-                    </div>
-                </div>
+                <ModalFooter
+                    onCancel={() => setOpenModal(false)}
+                    submitLabel={form.id ? "Guardar Cambios" : "Crear Kit"}
+                    loadingLabel="Guardando..."
+                    loading={isSaving}
+                    disabled={components.length === 0}
+                    leftContent={`${components.length} componentes · ${components.reduce((acc, c) => acc + c.qty_required, 0)} unidades`}
+                />
              </form>
          </DialogContent>
       </Dialog>

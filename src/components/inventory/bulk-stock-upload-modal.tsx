@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { MF_SELECT } from "@/components/ui/modal-form";
 
 interface ParsedRow {
   sku: string;
@@ -271,7 +272,7 @@ export function BulkStockUploadModal({
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-center gap-3">
                   <p className="text-xs font-bold text-slate-500 uppercase">2. Depósito de Ajuste *</p>
                   <Select value={warehouseId} onValueChange={setWarehouseId}>
-                    <SelectTrigger className="h-9 bg-white border-slate-200 text-slate-900 rounded-lg text-xs font-montserrat shadow-sm">
+                    <SelectTrigger className={`${MF_SELECT} h-9 text-xs font-montserrat`}>
                       <SelectValue placeholder="Seleccionar Depósito" />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-slate-200 text-slate-900 font-montserrat">
