@@ -125,50 +125,32 @@ const PLANS: Plan[] = [
 function CurrencyToggle({
   currency,
   setCurrency,
-  rate,
-  updatedAt,
 }: {
   currency: 'USD' | 'BS'
   setCurrency: (c: 'USD' | 'BS') => void
-  rate: number | null
-  updatedAt: string
 }) {
   return (
-    <div className="inline-flex flex-col items-center gap-2">
-      <div className="inline-flex bg-white border border-slate-200 rounded-full p-1 shadow-sm">
-        {(['USD', 'BS'] as const).map((c) => (
-          <button
-            key={c}
-            onClick={() => setCurrency(c)}
-            className={`relative px-5 py-2 rounded-full text-xs font-black tracking-wider uppercase transition-all ${
-              currency === c
-                ? 'text-white'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            {currency === c && (
-              <motion.div
-                layoutId="currency-pill"
-                className="absolute inset-0 bg-gradient-to-r from-[#EC4899] via-[#A855F7] to-[#6366F1] rounded-full shadow-sm"
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              />
-            )}
-            <span className="relative z-10">
-              {c === 'USD' ? '💵 USD' : '🇻🇪 Bs.'}
-            </span>
-          </button>
-        ))}
-      </div>
-
-      {rate && (
-        <div className="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
-          <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-          <span>
-            BCV: Bs. {rate.toFixed(2)}
-            {updatedAt && ` · actualizado ${updatedAt}`}
+    <div className="inline-flex bg-white border border-slate-200 rounded-full p-1 shadow-sm">
+      {(['USD', 'BS'] as const).map((c) => (
+        <button
+          key={c}
+          onClick={() => setCurrency(c)}
+          className={`relative px-5 py-2 rounded-full text-xs font-black tracking-wider uppercase transition-all ${
+            currency === c ? 'text-white' : 'text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          {currency === c && (
+            <motion.div
+              layoutId="currency-pill"
+              className="absolute inset-0 bg-gradient-to-r from-[#EC4899] via-[#A855F7] to-[#6366F1] rounded-full shadow-sm"
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            />
+          )}
+          <span className="relative z-10">
+            {c === 'USD' ? '💵 USD' : '🇻🇪 Bs.'}
           </span>
-        </div>
-      )}
+        </button>
+      ))}
     </div>
   )
 }
@@ -179,7 +161,7 @@ function CurrencyToggle({
 
 export function Pricing() {
   const [currency, setCurrency] = useState<'USD' | 'BS'>('USD')
-  const { rate, updatedAt } = useBCV()
+  const { rate } = useBCV()
 
   const formatPrice = (usd: number) => {
     if (currency === 'USD') {
@@ -246,12 +228,7 @@ export function Pricing() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <CurrencyToggle
-              currency={currency}
-              setCurrency={setCurrency}
-              rate={rate}
-              updatedAt={updatedAt}
-            />
+            <CurrencyToggle currency={currency} setCurrency={setCurrency} />
           </motion.div>
         </div>
 
