@@ -23,15 +23,15 @@ function WhatsAppIcon({ className = '' }: { className?: string }) {
 
 export function CTAFinal() {
   return (
-    <section className="relative py-24 sm:py-32 lg:py-40 overflow-hidden bg-slate-950">
-      {/* Animated gradient glows */}
+    <section className="relative py-24 sm:py-32 lg:py-40 overflow-hidden bg-gradient-to-b from-white via-slate-50/80 to-white">
+      {/* Animated gradient glows — softer than dark version */}
       <motion.div
         animate={{
           x: [0, 30, 0],
           y: [0, -20, 0],
         }}
         transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-[10%] left-[10%] w-[500px] h-[500px] bg-[#EC4899]/25 blur-[150px] rounded-full pointer-events-none"
+        className="absolute top-[10%] left-[10%] w-[500px] h-[500px] bg-[#EC4899]/12 blur-[140px] rounded-full pointer-events-none"
       />
       <motion.div
         animate={{
@@ -39,18 +39,18 @@ export function CTAFinal() {
           y: [0, 20, 0],
         }}
         transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute bottom-[10%] right-[10%] w-[500px] h-[500px] bg-[#6366F1]/25 blur-[150px] rounded-full pointer-events-none"
+        className="absolute bottom-[10%] right-[10%] w-[500px] h-[500px] bg-[#6366F1]/12 blur-[140px] rounded-full pointer-events-none"
       />
       <motion.div
         animate={{
           scale: [1, 1.1, 1],
         }}
         transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#A855F7]/15 blur-[180px] rounded-full pointer-events-none"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#A855F7]/10 blur-[160px] rounded-full pointer-events-none"
       />
 
       {/* Dot grid */}
-      <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(#E040FB_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.035] pointer-events-none" />
 
       <div className="relative z-10 max-w-5xl mx-auto px-5 sm:px-6 lg:px-8 text-center">
         {/* Eyebrow */}
@@ -59,10 +59,10 @@ export function CTAFinal() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6 bg-white/5 border border-white/10 backdrop-blur-sm"
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6 bg-gradient-to-r from-[#EC4899]/10 to-[#6366F1]/10 border border-[#A855F7]/25 backdrop-blur-sm shadow-sm"
         >
-          <Zap className="w-3.5 h-3.5 text-[#E040FB]" />
-          <span className="text-[10px] sm:text-[11px] font-bold text-white/90 tracking-[0.2em] uppercase font-outfit">
+          <Zap className="w-3.5 h-3.5 text-[#A855F7]" />
+          <span className="text-[10px] sm:text-[11px] font-bold text-[#A855F7] tracking-[0.2em] uppercase font-outfit">
             El momento es ahora
           </span>
         </motion.div>
@@ -73,7 +73,7 @@ export function CTAFinal() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="font-outfit font-bold text-[40px] sm:text-[56px] md:text-[72px] lg:text-[88px] leading-[1.02] tracking-tight mb-6 text-white"
+          className="font-outfit font-bold text-[40px] sm:text-[56px] md:text-[72px] lg:text-[88px] leading-[1.02] tracking-tight mb-6 text-slate-900"
         >
           Tu negocio{' '}
           <span className="inline-block bg-gradient-to-r from-[#EC4899] via-[#A855F7] to-[#6366F1] bg-clip-text text-transparent font-zilla italic font-medium pr-2">
@@ -93,11 +93,11 @@ export function CTAFinal() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.25 }}
-          className="font-zilla text-lg sm:text-xl lg:text-2xl text-white/70 max-w-3xl mx-auto mb-10 leading-relaxed"
+          className="font-zilla text-lg sm:text-xl lg:text-2xl text-slate-500 max-w-3xl mx-auto mb-10 leading-relaxed"
         >
           15 días gratis para dejar de improvisar. Sin tarjeta, sin compromiso,
           sin excusas. El cuaderno ya cumplió —{' '}
-          <span className="text-white font-semibold">ahora vas tú.</span>
+          <span className="text-slate-900 font-semibold">ahora vas tú.</span>
         </motion.p>
 
         {/* CTAs */}
@@ -112,13 +112,13 @@ export function CTAFinal() {
             href="/register"
             whileHover={{ scale: 1.04, y: -2 }}
             whileTap={{ scale: 0.97 }}
-            className="group relative flex items-center justify-center gap-2 px-8 py-4 sm:px-10 sm:py-5 rounded-xl text-base sm:text-lg font-black text-white bg-gradient-to-r from-[#EC4899] via-[#A855F7] to-[#6366F1] shadow-[0_10px_40px_rgba(168,85,247,0.5)] hover:shadow-[0_14px_50px_rgba(168,85,247,0.7)] transition-all font-outfit active:scale-95 overflow-hidden"
+            className="group relative flex items-center justify-center gap-2 px-8 py-4 sm:px-10 sm:py-5 rounded-xl text-base sm:text-lg font-black text-white bg-gradient-to-r from-[#EC4899] via-[#A855F7] to-[#6366F1] shadow-[0_10px_40px_rgba(168,85,247,0.35)] hover:shadow-[0_14px_50px_rgba(168,85,247,0.5)] transition-all font-outfit active:scale-95 overflow-hidden"
           >
             {/* Shimmer effect */}
             <motion.div
               animate={{ x: ['-100%', '200%'] }}
               transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-12"
             />
             <Sparkles className="w-5 h-5 relative z-10" />
             <span className="relative z-10">Empezar mi demo gratis</span>
@@ -131,7 +131,7 @@ export function CTAFinal() {
             rel="noopener noreferrer"
             whileHover={{ scale: 1.04, y: -2 }}
             whileTap={{ scale: 0.97 }}
-            className="flex items-center justify-center gap-2 px-8 py-4 sm:px-10 sm:py-5 rounded-xl text-base sm:text-lg font-bold text-white bg-white/5 border border-white/20 hover:bg-white/10 backdrop-blur-sm transition-all font-outfit active:scale-95"
+            className="flex items-center justify-center gap-2 px-8 py-4 sm:px-10 sm:py-5 rounded-xl text-base sm:text-lg font-bold text-slate-700 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-sm transition-all font-outfit active:scale-95"
           >
             <WhatsAppIcon className="w-5 h-5 text-[#25D366]" />
             Hablar por WhatsApp
@@ -144,18 +144,18 @@ export function CTAFinal() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 1, delay: 0.6 }}
-          className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-xs sm:text-sm text-white/50 font-medium"
+          className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-xs sm:text-sm text-slate-500 font-medium"
         >
           <span className="flex items-center gap-1.5">
-            <CreditCard className="w-3.5 h-3.5 text-emerald-400" />
+            <CreditCard className="w-3.5 h-3.5 text-emerald-500" />
             Sin tarjeta para probar
           </span>
           <span className="flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
             Cancela cuando quieras
           </span>
           <span className="flex items-center gap-1.5">
-            <Zap className="w-3.5 h-3.5 text-emerald-400" />
+            <Zap className="w-3.5 h-3.5 text-emerald-500" />
             Listo en 10 minutos
           </span>
         </motion.div>
@@ -163,12 +163,12 @@ export function CTAFinal() {
         {/* Decorative "15 días" huge text bg */}
         <motion.div
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 0.04 }}
+          whileInView={{ opacity: 0.05 }}
           viewport={{ once: true }}
           transition={{ duration: 2, delay: 0.8 }}
           className="absolute inset-x-0 bottom-0 text-center pointer-events-none select-none overflow-hidden"
         >
-          <div className="font-outfit font-black text-[20vw] leading-none text-white tracking-tighter opacity-100">
+          <div className="font-outfit font-black text-[20vw] leading-none bg-gradient-to-b from-[#A855F7] to-transparent bg-clip-text text-transparent tracking-tighter">
             15 DÍAS
           </div>
         </motion.div>
