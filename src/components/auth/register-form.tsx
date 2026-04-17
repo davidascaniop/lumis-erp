@@ -21,7 +21,10 @@ import {
   FileText,
   Copy,
   Check,
-  ChevronDown
+  ChevronDown,
+  Gift,
+  Rocket,
+  Clock,
 } from "lucide-react";
 
 import { useBCV } from "@/hooks/use-bcv";
@@ -47,13 +50,17 @@ const formSchema = z.object({
   fullName: z.string().min(3, "Ingresa tu nombre completo"),
   email: z.string().email("Ingresa un correo válido"),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
-  plan: z.enum(["basic", "pro", "enterprise"]),
+  plan: z.enum(["demo", "basic", "pro", "enterprise"]),
   paymentMethod: z.string().optional(),
   paymentName: z.string().optional(),
   paymentEmailOrPhone: z.string().optional(),
   paymentBankOrLast4: z.string().optional(),
   paymentConfirmed: z.boolean().optional(),
 });
+
+/** Days granted for the free demo trial. After this window the account is
+ * redirected to /dashboard/upgrade until a paid plan is activated. */
+const DEMO_TRIAL_DAYS = 15;
 
 const steps = [
   { id: 1, title: "Empresa", icon: Building2 },
@@ -186,6 +193,8 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
     if (isValid && step < 4) setStep((s) => s + 1);
   };
 
+  const isDemoFlow = form.watch("plan") === "demo";
+
   const prevStep = () => setStep((s) => s - 1);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -200,29 +209,40 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (step < 4) return;
-    
-    // Validación de Paso 4
-    if (!paymentMethod) {
-      toast.error("Selecciona un método de pago");
-      return;
-    }
-    if (!receiptFile) {
-      toast.error("Debes adjuntar el comprobante de pago");
-      return;
-    }
-    if (!paymentConfirmed) {
-      toast.error("Debes confirmar que realizaste el pago");
-      return;
-    }
+    const isDemo = values.plan === "demo";
 
-    if (paymentMethod === "pago_movil") {
-      if (!values.paymentEmailOrPhone) { toast.error("Ingresa el teléfono del pago móvil"); return; }
-      if (!values.paymentBankOrLast4) { toast.error("Ingresa los últimos 4 dígitos de la referencia"); return; }
-    } else if (paymentMethod === "zinli") {
-      if (!values.paymentName) { toast.error("Ingresa el nombre y apellido del titular de Zinli"); return; }
-    } else if (paymentMethod === "binance") {
-      if (!values.paymentEmailOrPhone) { toast.error("Ingresa el correo de Binance"); return; }
+    // For paid plans, require being on step 4 with all payment fields valid
+    if (!isDemo) {
+      if (step < 4) return;
+
+      if (!paymentMethod) {
+        toast.error("Selecciona un método de pago");
+        return;
+      }
+      if (!receiptFile) {
+        toast.error("Debes adjuntar el comprobante de pago");
+        return;
+      }
+      if (!paymentConfirmed) {
+        toast.error("Debes confirmar que realizaste el pago");
+        return;
+      }
+
+      if (paymentMethod === "pago_movil") {
+        if (!values.paymentEmailOrPhone) { toast.error("Ingresa el teléfono del pago móvil"); return; }
+        if (!values.paymentBankOrLast4) { toast.error("Ingresa los últimos 4 dígitos de la referencia"); return; }
+      } else if (paymentMethod === "zinli") {
+        if (!values.paymentName) { toast.error("Ingresa el nombre y apellido del titular de Zinli"); return; }
+      } else if (paymentMethod === "binance") {
+        if (!values.paymentEmailOrPhone) { toast.error("Ingresa el correo de Binance"); return; }
+      }
+    } else {
+      // Demo flow — validate all earlier fields (email/password/name/rif) before submitting
+      const stepsValid = await form.trigger(["companyName", "rif", "fullName", "email", "password"]);
+      if (!stepsValid) {
+        toast.error("Completa los datos de la empresa y del administrador antes de activar la demo.");
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -241,15 +261,24 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
         return;
       }
 
-      // Crear empresa en estado pendiente
+      // Demo accounts get full feature access (plan_type=enterprise) for
+      // DEMO_TRIAL_DAYS, and switch to subscription_status="demo" so the
+      // SuspendedGuard can enforce the expiry window. Paid accounts go through
+      // the existing pending_verification → active flow once the receipt is
+      // approved by the superadmin.
+      const trialEndsAt = isDemo
+        ? new Date(Date.now() + DEMO_TRIAL_DAYS * 24 * 60 * 60 * 1000).toISOString()
+        : null;
+
       const { data: companyData, error: companyError } = await supabase
         .from("companies")
         .insert({
           name: values.companyName,
           rif: values.rif,
-          plan_type: values.plan,
+          plan_type: isDemo ? "enterprise" : values.plan,
           primary_color: "#E040FB",
-          subscription_status: "pending_verification"
+          subscription_status: isDemo ? "demo" : "pending_verification",
+          trial_ends_at: trialEndsAt,
         } as any)
         .select("id")
         .single();
@@ -264,59 +293,58 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
 
       const cData = companyData as any;
 
-      // Subir archivo
-      const fileExt = receiptFile.name.split('.').pop();
-      const fileName = `${cData.id}-${Date.now()}.${fileExt}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("receipts")
-        .upload(fileName, receiptFile);
+      // Demo accounts skip receipt upload and payment record entirely.
+      if (!isDemo) {
+        const fileExt = receiptFile!.name.split('.').pop();
+        const fileName = `${cData.id}-${Date.now()}.${fileExt}`;
+        const { data: uploadData } = await supabase.storage
+          .from("receipts")
+          .upload(fileName, receiptFile!);
 
-      let receiptUrl = "";
-      if (uploadData) {
-        const { data: publicURLData } = supabase.storage.from("receipts").getPublicUrl(uploadData.path);
-        receiptUrl = publicURLData.publicUrl;
+        let receiptUrl = "";
+        if (uploadData) {
+          const { data: publicURLData } = supabase.storage.from("receipts").getPublicUrl(uploadData.path);
+          receiptUrl = publicURLData.publicUrl;
+        }
+
+        const planPriceStr = selectedPlan?.price.replace("$", "") || "0";
+        const amountUsd = Number(planPriceStr);
+        const amountBs = amountUsd * (rate || 0);
+
+        const now = new Date();
+        const periodStart = now.toISOString().split("T")[0];
+        const nextMonth = new Date(now);
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
+        const periodEnd = nextMonth.toISOString().split("T")[0];
+
+        const { error: paymentError } = await supabase.from("subscription_payments").insert({
+          company_id: cData.id,
+          plan: values.plan,
+          plan_type: values.plan,
+          plan_price: amountUsd,
+          amount_usd: amountUsd,
+          amount_bs: amountBs,
+          bcv_rate: rate || 0,
+          period_start: periodStart,
+          period_end: periodEnd,
+          method: paymentMethod,
+          holder_name: values.paymentName || null,
+          contact_info: values.paymentEmailOrPhone || null,
+          last_digits: values.paymentBankOrLast4 || null,
+          receipt_url: receiptUrl,
+          paid_at: now.toISOString(),
+          status: "pending",
+        } as any);
+
+        if (paymentError) {
+          console.error("Payment insert error:", paymentError);
+          toast.error("Error al registrar el pago", {
+            description: paymentError.message || "Es posible que falten columnas en la base de datos",
+          });
+        }
       }
 
-      // Guardar pago
-      const planPriceStr = selectedPlan?.price.replace("$", "") || "0";
-      const amountUsd = Number(planPriceStr);
-      const amountBs = amountUsd * (rate || 0);
-      
-      const now = new Date();
-      const periodStart = now.toISOString().split("T")[0]; // YYYY-MM-DD
-      const nextMonth = new Date(now);
-      nextMonth.setMonth(nextMonth.getMonth() + 1);
-      const periodEnd = nextMonth.toISOString().split("T")[0]; // YYYY-MM-DD
-
-      const { error: paymentError } = await supabase.from("subscription_payments").insert({
-        company_id: cData.id,
-        plan: values.plan,        // Nombre de la columna original NOT NULL
-        plan_type: values.plan,   // Mantenemos por compatibilidad si la otra vista lo usa
-        plan_price: amountUsd,    // Nuevo campo solicitado
-        amount_usd: amountUsd,    // Original NOT NULL
-        amount_bs: amountBs,
-        bcv_rate: rate || 0,
-        period_start: periodStart, // Original NOT NULL
-        period_end: periodEnd,     // Original NOT NULL
-        method: paymentMethod,
-        holder_name: values.paymentName || null,
-        contact_info: values.paymentEmailOrPhone || null,
-        last_digits: values.paymentBankOrLast4 || null,
-        receipt_url: receiptUrl,
-        paid_at: now.toISOString(),
-        status: "pending"
-      } as any);
-
-      if (paymentError) {
-        console.error("Payment insert error:", paymentError);
-        toast.error("Error al registrar el pago", {
-          description: paymentError.message || "Es posible que falten columnas en la base de datos",
-        });
-        // Removemos el return para que igual cree el usuario y no quede la cuenta a medias, 
-        // o lo dejamos, pero como ya creó la empresa es mejor advertir.
-      }
-
-      // Crear Admin User
+      // Crear Admin User (ambos flujos)
       const { error: userError } = await supabase.from("users").insert({
         auth_id: authData.user.id,
         company_id: cData.id,
@@ -337,7 +365,7 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
       setTimeout(() => {
         router.push("/dashboard");
         router.refresh();
-      }, 3500);
+      }, isDemo ? 2000 : 3500);
     } catch (err: any) {
       toast.error("Error inesperado: " + err.message);
       setIsLoading(false);
@@ -345,6 +373,7 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
   }
 
   if (isSuccess) {
+    const wasDemo = form.getValues().plan === "demo";
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
@@ -355,20 +384,42 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 200, damping: 20 }}
-          className="w-20 h-20 bg-brand rounded-full flex items-center justify-center mb-6 shadow-lg shadow-brand/30"
+          className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg ${
+            wasDemo
+              ? "bg-gradient-to-br from-[#00AF9C] to-[#00E5CC] shadow-[#00AF9C]/30"
+              : "bg-brand shadow-brand/30"
+          }`}
         >
-          <CheckCircle2 className="w-10 h-10 text-white" />
+          {wasDemo ? <Rocket className="w-10 h-10 text-white" /> : <CheckCircle2 className="w-10 h-10 text-white" />}
         </motion.div>
-        <h2 className="text-2xl font-bold text-[#1A1125] font-outfit mb-3">
-          ¡Documentación Recibida!
-        </h2>
-        <p className="text-[#64748B] font-medium font-outfit mb-2">
-          Gracias por subir tu comprobante de pago, {form.getValues().fullName}.
-        </p>
-        <p className="text-brand font-bold font-outfit text-sm max-w-sm mb-6 bg-brand/5 p-3 rounded-lg border border-brand/10">
-          Tu pago está siendo verificado. Recibirás acceso completo en un máximo de 24 horas.
-        </p>
-        <Loader2 className="w-6 h-6 animate-spin text-brand" />
+
+        {wasDemo ? (
+          <>
+            <h2 className="text-2xl font-bold text-[#1A1125] font-outfit mb-3">
+              ¡Bienvenido, {form.getValues().fullName.split(" ")[0]}!
+            </h2>
+            <p className="text-[#64748B] font-medium font-outfit mb-2">
+              Tu demo con acceso completo está activa.
+            </p>
+            <p className="text-[#00AF9C] font-bold font-outfit text-sm max-w-sm mb-6 bg-[#00AF9C]/5 p-3 rounded-lg border border-[#00AF9C]/10 flex items-center gap-2 justify-center">
+              <Clock className="w-4 h-4" /> Tienes {DEMO_TRIAL_DAYS} días para explorar LUMIS sin límites
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 className="text-2xl font-bold text-[#1A1125] font-outfit mb-3">
+              ¡Documentación Recibida!
+            </h2>
+            <p className="text-[#64748B] font-medium font-outfit mb-2">
+              Gracias por subir tu comprobante de pago, {form.getValues().fullName}.
+            </p>
+            <p className="text-brand font-bold font-outfit text-sm max-w-sm mb-6 bg-brand/5 p-3 rounded-lg border border-brand/10">
+              Tu pago está siendo verificado. Recibirás acceso completo en un máximo de 24 horas.
+            </p>
+          </>
+        )}
+
+        <Loader2 className={`w-6 h-6 animate-spin ${wasDemo ? "text-[#00AF9C]" : "text-brand"}`} />
       </motion.div>
     );
   }
@@ -517,10 +568,60 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
               <div className={step === 3 ? "flex flex-col flex-1" : "hidden"}>
                 <div className="space-y-1 mb-4">
                   <h3 className="text-xl font-bold text-[#1A1125] font-outfit">Selecciona un Plan</h3>
-                  <p className="text-xs text-[#64748B] font-medium font-outfit">Elige el plan que mejor se adapte a ti</p>
+                  <p className="text-xs text-[#64748B] font-medium font-outfit">Pruébalo gratis o elige el plan que mejor se adapte a ti</p>
                 </div>
 
                 <div className="grid grid-cols-1 gap-3 overflow-y-auto no-scrollbar max-h-[300px] pb-2 pr-1">
+                  {/* DEMO — 15-day free trial with full access */}
+                  {(() => {
+                    const isDemoSelected = form.watch("plan") === "demo";
+                    return (
+                      <div
+                        onClick={() => form.setValue("plan", "demo")}
+                        className={`p-4 sm:p-5 rounded-2xl border transition-all duration-300 relative cursor-pointer active:scale-[0.98] shrink-0 overflow-hidden ${
+                          isDemoSelected
+                            ? "bg-gradient-to-br from-[#00E5CC]/10 via-brand/5 to-[#7C4DFF]/10 border-[#00AF9C] border-2 shadow-md"
+                            : "bg-gradient-to-br from-[#F8FAFC] to-white border-[#EDF2F7] hover:border-[#00AF9C]/40"
+                        }`}
+                      >
+                        <div className="absolute -top-3 right-5 px-3 py-1 bg-gradient-to-r from-[#00AF9C] to-[#00E5CC] text-white text-[10px] font-bold rounded-full flex items-center gap-1.5 shadow-lg shadow-[#00AF9C]/30">
+                          <Gift className="w-3 h-3" /> GRATIS
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <div className="space-y-1 flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <Rocket className={`w-4 h-4 shrink-0 ${isDemoSelected ? "text-[#00AF9C]" : "text-[#64748B]"}`} />
+                              <p className={`font-bold font-outfit ${isDemoSelected ? "text-[#00AF9C]" : "text-[#1A1125]"}`}>
+                                Quiero una Demo
+                              </p>
+                            </div>
+                            <p className="text-[11px] font-medium text-[#64748B] font-outfit leading-snug pr-2">
+                              Acceso completo por 15 días. Sin tarjeta, sin compromiso.
+                            </p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div className="flex items-baseline gap-1 justify-end">
+                              <span className={`text-xl font-black font-outfit ${isDemoSelected ? "text-[#00AF9C]" : "text-[#1A1125]"}`}>15</span>
+                              <span className="text-[10px] font-bold text-[#94A3B8] font-outfit uppercase tracking-tighter">días</span>
+                            </div>
+                            {isDemoSelected && (
+                              <div className="w-4 h-4 rounded-full bg-[#00AF9C] flex items-center justify-center mt-2 ml-auto">
+                                <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Subtle separator between demo and paid plans */}
+                  <div className="flex items-center gap-3 py-1">
+                    <div className="flex-1 h-px bg-[#EDF2F7]" />
+                    <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest font-outfit">O elige un plan</span>
+                    <div className="flex-1 h-px bg-[#EDF2F7]" />
+                  </div>
+
                   {dynamicPlans.map((p: any) => {
                     const isSelected = form.watch("plan") === p.id;
                     return (
@@ -818,7 +919,21 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
                   <ArrowLeft className="w-4 h-4 mr-2" /> Atrás
                 </Button>
 
-                {step < 4 ? (
+                {step === 3 && isDemoFlow ? (
+                  /* Demo plan → activate trial directly, bypassing the payment step */
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="bg-gradient-to-r from-[#00AF9C] to-[#00E5CC] hover:opacity-90 text-white font-bold rounded-xl px-4 sm:px-8 shadow-lg shadow-[#00AF9C]/30 h-10 sm:h-12 transition-all active:scale-95 font-outfit uppercase tracking-widest text-xs"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Rocket className="mr-2 h-4 w-4" />
+                    )}
+                    Activar Demo 15 Días
+                  </Button>
+                ) : step < 4 ? (
                   <Button
                     type="button"
                     onClick={nextStep}

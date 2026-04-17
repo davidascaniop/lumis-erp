@@ -322,26 +322,27 @@ export function useNotifications(companyId?: string, userCompanies?: any) {
       });
 
       // ── ALERTA DE PLAN ────────────────────────────────────────────────────
-      if (userCompanies) {
-        const status = userCompanies.subscription_status || userCompanies.plan_status;
-        const trialEndsAt = userCompanies.trial_ends_at;
-        const isDemoOrEnterprise = status === "demo" || userCompanies.plan_type === "enterprise";
-
-        if (!isDemoOrEnterprise && trialEndsAt) {
-          const daysLeft = differenceInDays(new Date(trialEndsAt), new Date());
-          if (daysLeft >= 0 && daysLeft <= 7) {
-            notifs.push({
-              id: "plan-trial",
-              type: "plan",
-              read: false,
-              title: daysLeft === 0 ? "Tu período de prueba vence hoy" : `Tu prueba vence en ${daysLeft} día${daysLeft !== 1 ? "s" : ""}`,
-              description: "Actualiza tu plan para no perder el acceso a LUMIS",
-              time: daysLeft === 0 ? "Hoy" : `En ${daysLeft} días`,
-              href: "/dashboard/settings",
-              priority: daysLeft <= 1 ? "high" : "medium",
-              createdAt: new Date(),
-            });
-          }
+      // Demo accounts (15-day trial) and pending_verification accounts both
+      // have a trial_ends_at — both should see a countdown when ≤ 7 days left.
+      // Active enterprise accounts don't have a trial_ends_at set, so the
+      // condition naturally skips them.
+      if (userCompanies?.trial_ends_at) {
+        const daysLeft = differenceInDays(new Date(userCompanies.trial_ends_at), new Date());
+        if (daysLeft >= 0 && daysLeft <= 7) {
+          const isDemo = userCompanies.subscription_status === "demo";
+          notifs.push({
+            id: "plan-trial",
+            type: "plan",
+            read: false,
+            title: daysLeft === 0
+              ? (isDemo ? "Tu demo vence hoy" : "Tu período de prueba vence hoy")
+              : `${isDemo ? "Tu demo" : "Tu prueba"} vence en ${daysLeft} día${daysLeft !== 1 ? "s" : ""}`,
+            description: "Activa un plan para no perder el acceso a LUMIS",
+            time: daysLeft === 0 ? "Hoy" : `En ${daysLeft} días`,
+            href: "/dashboard/upgrade",
+            priority: daysLeft <= 1 ? "high" : "medium",
+            createdAt: new Date(),
+          });
         }
       }
 
