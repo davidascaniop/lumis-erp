@@ -280,7 +280,10 @@ function DashboardMockup() {
 // ─── HERO ──────────────────────────────────────────────────────────────
 export function Hero() {
   return (
-    <section className="relative pt-[88px] sm:pt-24 pb-16 sm:pb-20 overflow-hidden bg-white min-h-[calc(100vh-64px)] sm:min-h-screen flex items-center">
+    <section
+      id="hero"
+      className="relative pt-[88px] sm:pt-24 pb-16 sm:pb-20 overflow-hidden bg-white min-h-[calc(100vh-64px)] sm:min-h-screen flex items-center"
+    >
       {/* Background glows */}
       <div className="absolute top-[-5%] left-[-10%] w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-[#E040FB]/8 blur-[100px] sm:blur-[140px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-5%] right-[-10%] w-[400px] sm:w-[500px] h-[400px] sm:h-[500px] bg-[#7C4DFF]/8 blur-[100px] sm:blur-[140px] rounded-full pointer-events-none" />

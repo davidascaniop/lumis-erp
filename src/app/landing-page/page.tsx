@@ -1,5 +1,6 @@
 'use client'
 import { Nav } from '@/components/landing/nav'
+import { SectionNav } from '@/components/landing/section-nav'
 import { Hero } from '@/components/landing/hero'
 import { Problem } from '@/components/landing/problem'
 import { ProductShowcase } from '@/components/landing/product-showcase'
@@ -30,6 +31,7 @@ export default function LandingPage() {
   return (
     <main className="min-h-screen bg-white selection:bg-[#E040FB]/30 selection:text-slate-900 overflow-x-hidden">
       <Nav />
+      <SectionNav />
       <Hero />
       <Problem />
       <ProductShowcase />
