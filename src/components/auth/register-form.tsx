@@ -43,6 +43,7 @@ import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import Link from "next/link";
+import { registerCompanyAction } from "@/app/(auth)/register/actions";
 
 const formSchema = z.object({
   companyName: z.string().min(2, "Mínimo 2 caracteres"),
@@ -211,7 +212,7 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const isDemo = values.plan === "demo";
 
-    // For paid plans, require being on step 4 with all payment fields valid
+    // ─── Client-side validation before hitting the server ────────────────
     if (!isDemo) {
       if (step < 4) return;
 
@@ -237,7 +238,6 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
         if (!values.paymentEmailOrPhone) { toast.error("Ingresa el correo de Binance"); return; }
       }
     } else {
-      // Demo flow — validate all earlier fields (email/password/name/rif) before submitting
       const stepsValid = await form.trigger(["companyName", "rif", "fullName", "email", "password"]);
       if (!stepsValid) {
         toast.error("Completa los datos de la empresa y del administrador antes de activar la demo.");
@@ -248,116 +248,54 @@ export function RegisterForm({ flags = [] }: { flags?: any[] }) {
     setIsLoading(true);
 
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
-      });
+      // ─── Call atomic server action (bypass RLS + rollback on failure) ───
+      const formData = new FormData();
+      formData.append("companyName", values.companyName);
+      formData.append("rif", values.rif);
+      formData.append("fullName", values.fullName);
+      formData.append("email", values.email);
+      formData.append("password", values.password);
+      formData.append("plan", values.plan);
 
-      if (authError || !authData.user) {
-        toast.error("Error al registrar usuario", {
-          description: authError?.message,
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Demo accounts get full feature access (plan_type=enterprise) for
-      // DEMO_TRIAL_DAYS, and switch to subscription_status="demo" so the
-      // SuspendedGuard can enforce the expiry window. Paid accounts go through
-      // the existing pending_verification → active flow once the receipt is
-      // approved by the superadmin.
-      const trialEndsAt = isDemo
-        ? new Date(Date.now() + DEMO_TRIAL_DAYS * 24 * 60 * 60 * 1000).toISOString()
-        : null;
-
-      const { data: companyData, error: companyError } = await supabase
-        .from("companies")
-        .insert({
-          name: values.companyName,
-          rif: values.rif,
-          plan_type: isDemo ? "enterprise" : values.plan,
-          primary_color: "#E040FB",
-          subscription_status: isDemo ? "demo" : "pending_verification",
-          trial_ends_at: trialEndsAt,
-        } as any)
-        .select("id")
-        .single();
-
-      if (companyError || !companyData) {
-        toast.error("Error al registrar empresa", {
-          description: companyError?.message,
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      const cData = companyData as any;
-
-      // Demo accounts skip receipt upload and payment record entirely.
       if (!isDemo) {
-        const fileExt = receiptFile!.name.split('.').pop();
-        const fileName = `${cData.id}-${Date.now()}.${fileExt}`;
-        const { data: uploadData } = await supabase.storage
-          .from("receipts")
-          .upload(fileName, receiptFile!);
-
-        let receiptUrl = "";
-        if (uploadData) {
-          const { data: publicURLData } = supabase.storage.from("receipts").getPublicUrl(uploadData.path);
-          receiptUrl = publicURLData.publicUrl;
-        }
-
         const planPriceStr = selectedPlan?.price.replace("$", "") || "0";
         const amountUsd = Number(planPriceStr);
         const amountBs = amountUsd * (rate || 0);
 
-        const now = new Date();
-        const periodStart = now.toISOString().split("T")[0];
-        const nextMonth = new Date(now);
-        nextMonth.setMonth(nextMonth.getMonth() + 1);
-        const periodEnd = nextMonth.toISOString().split("T")[0];
-
-        const { error: paymentError } = await supabase.from("subscription_payments").insert({
-          company_id: cData.id,
-          plan: values.plan,
-          plan_type: values.plan,
-          plan_price: amountUsd,
-          amount_usd: amountUsd,
-          amount_bs: amountBs,
-          bcv_rate: rate || 0,
-          period_start: periodStart,
-          period_end: periodEnd,
-          method: paymentMethod,
-          holder_name: values.paymentName || null,
-          contact_info: values.paymentEmailOrPhone || null,
-          last_digits: values.paymentBankOrLast4 || null,
-          receipt_url: receiptUrl,
-          paid_at: now.toISOString(),
-          status: "pending",
-        } as any);
-
-        if (paymentError) {
-          console.error("Payment insert error:", paymentError);
-          toast.error("Error al registrar el pago", {
-            description: paymentError.message || "Es posible que falten columnas en la base de datos",
-          });
-        }
+        formData.append("paymentMethod", paymentMethod || "");
+        formData.append("paymentName", values.paymentName || "");
+        formData.append("paymentEmailOrPhone", values.paymentEmailOrPhone || "");
+        formData.append("paymentBankOrLast4", values.paymentBankOrLast4 || "");
+        formData.append("amountUsd", String(amountUsd));
+        formData.append("amountBs", String(amountBs));
+        formData.append("bcvRate", String(rate || 0));
+        if (receiptFile) formData.append("receipt", receiptFile);
       }
 
-      // Crear Admin User (ambos flujos)
-      const { error: userError } = await supabase.from("users").insert({
-        auth_id: authData.user.id,
-        company_id: cData.id,
-        full_name: values.fullName,
-        email: values.email,
-        role: "admin",
-      } as any);
+      const result = await registerCompanyAction(formData);
 
-      if (userError) {
-        toast.error("Error al crear perfil", {
-          description: userError.message,
+      if (!result.ok) {
+        toast.error("No se pudo completar el registro", { description: result.error });
+        setIsLoading(false);
+        return;
+      }
+
+      if (result.warning) {
+        toast.warning(result.warning);
+      }
+
+      // Sign the user in so they land authenticated in the dashboard
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (signInError) {
+        toast.error("Cuenta creada pero no se pudo iniciar sesión automáticamente", {
+          description: "Intenta iniciar sesión manualmente con tus credenciales.",
         });
         setIsLoading(false);
+        setTimeout(() => router.push("/login"), 2500);
         return;
       }
 
