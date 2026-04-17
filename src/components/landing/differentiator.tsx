@@ -1,157 +1,349 @@
 'use client'
-import { motion, useInView } from 'framer-motion'
-import { useRef } from 'react'
-import { Link2, FileText, CheckCircle, Clock } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Check, X, Flag, Zap, Heart, MessageCircle, DollarSign, Sparkles } from 'lucide-react'
 
-const FEATURES = [
+// ══════════════════════════════════════════════════════════════════════
+// COMPARISON TABLE ROWS
+// ══════════════════════════════════════════════════════════════════════
+
+type Row = {
+  feature: string
+  lumis: boolean | string
+  excel: boolean | string
+  gringos: boolean | string
+}
+
+const ROWS: Row[] = [
   {
-    icon: Link2,
-    text: 'El cliente entra con su link personal único',
+    feature: 'Tasa BCV automática',
+    lumis: true,
+    excel: 'Manual, a mano',
+    gringos: false,
   },
   {
-    icon: FileText,
-    text: 'Ve todas sus facturas pendientes en Bs. y USD',
+    feature: 'Facturación en USD y Bs.',
+    lumis: true,
+    excel: 'A mano',
+    gringos: 'Solo USD',
   },
   {
-    icon: Clock,
-    text: 'Marca el pago con número de referencia o foto',
+    feature: 'Soporte 100% en español',
+    lumis: true,
+    excel: false,
+    gringos: 'En inglés',
   },
   {
-    icon: CheckCircle,
-    text: 'Tú verificas y confirmas en segundos desde LUMIS',
+    feature: 'Entiende Venezuela (SENIAT, IGTF)',
+    lumis: true,
+    excel: false,
+    gringos: false,
+  },
+  {
+    feature: 'Precio accesible',
+    lumis: '$19.99/mes',
+    excel: 'Gratis pero...',
+    gringos: '$200-500/mes',
+  },
+  {
+    feature: 'Multi-sucursal',
+    lumis: true,
+    excel: 'Imposible',
+    gringos: true,
+  },
+  {
+    feature: 'Cuentas por cobrar',
+    lumis: true,
+    excel: 'Cuaderno',
+    gringos: true,
+  },
+  {
+    feature: 'Alertas de stock bajo',
+    lumis: true,
+    excel: false,
+    gringos: true,
   },
 ]
 
-export function Differentiator() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-100px' })
+// ══════════════════════════════════════════════════════════════════════
+// UTILITIES
+// ══════════════════════════════════════════════════════════════════════
 
+function Cell({
+  value,
+  isLumis = false,
+}: {
+  value: boolean | string
+  isLumis?: boolean
+}) {
+  if (value === true) {
+    return (
+      <div className="flex items-center justify-center">
+        <div
+          className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center ${
+            isLumis
+              ? 'bg-gradient-to-br from-emerald-400 to-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.4)]'
+              : 'bg-emerald-100'
+          }`}
+        >
+          <Check
+            className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
+              isLumis ? 'text-white' : 'text-emerald-600'
+            }`}
+            strokeWidth={3}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  if (value === false) {
+    return (
+      <div className="flex items-center justify-center">
+        <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-red-50 border border-red-100 flex items-center justify-center">
+          <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-400" strokeWidth={3} />
+        </div>
+      </div>
+    )
+  }
+
+  // String value
   return (
-    <section 
-      ref={ref}
-      className="py-32 bg-slate-50 relative overflow-hidden px-6"
+    <div className="text-center">
+      <span
+        className={`inline-block text-[11px] sm:text-xs font-bold px-2 py-1 rounded-md ${
+          isLumis
+            ? 'bg-gradient-to-r from-[#EC4899] to-[#A855F7] text-white'
+            : 'bg-slate-100 text-slate-500 font-mono'
+        }`}
+      >
+        {value}
+      </span>
+    </div>
+  )
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// MAIN
+// ══════════════════════════════════════════════════════════════════════
+
+export function Differentiator() {
+  return (
+    <section
+      id="por-que-lumis"
+      className="relative py-20 sm:py-28 lg:py-32 overflow-hidden bg-gradient-to-b from-slate-50/50 via-white to-white"
     >
-      {/* Background Effect */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#E040FB]/[0.02] to-transparent pointer-events-none" />
-      
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-          
-          {/* Texto Side */}
-          <div className="relative z-10 text-center lg:text-left">
-            <motion.div 
-               initial={{ opacity: 0, x: -20 }}
-               animate={isInView ? { opacity: 1, x: 0 } : {}}
-               className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8
-                          bg-[#E040FB]/10 border border-[#E040FB]/20"
-            >
-               <span className="text-[10px] font-bold text-[#E040FB] uppercase tracking-[0.3em]">
-                 ✦ EXCLUSIVO DE LUMIS
-               </span>
-            </motion.div>
+      <div className="absolute inset-0 bg-[radial-gradient(#E040FB_1px,transparent_1px)] bg-[size:32px_32px] opacity-[0.025] pointer-events-none" />
+      <div className="absolute top-[15%] left-[5%] w-[400px] h-[400px] bg-[#A855F7]/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-[15%] right-[5%] w-[400px] h-[400px] bg-[#EC4899]/5 blur-[120px] rounded-full pointer-events-none" />
 
-            <motion.h2 
-               initial={{ opacity: 0, y: 20 }}
-               animate={isInView ? { opacity: 1, y: 0 } : {}}
-               transition={{ delay: 0.2 }}
-               className="font-display font-bold text-4xl md:text-6xl text-white mb-10 tracking-tight leading-[1.1]"
-            >
-              Tu cliente sabe lo que debe 
-              <br />
-              <span className="text-[#E040FB]">antes de llamarte.</span>
-            </motion.h2>
+      <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-6 lg:px-8">
+        {/* ─── Header ─── */}
+        <div className="text-center mb-14 sm:mb-20">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full mb-5 sm:mb-6 bg-gradient-to-r from-[#EC4899]/10 to-[#6366F1]/10 border border-[#A855F7]/20"
+          >
+            <Flag className="w-3 h-3 text-[#A855F7]" />
+            <span className="text-[9px] sm:text-[10px] font-bold text-[#A855F7] tracking-[0.15em] sm:tracking-[0.18em] uppercase font-outfit">
+              Por qué LUMIS
+            </span>
+          </motion.div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-16">
-               {FEATURES.map((item, i) => (
-                 <motion.div 
-                   key={i}
-                   initial={{ opacity: 0, y: 10 }}
-                   animate={isInView ? { opacity: 1, y: 0 } : {}}
-                   transition={{ delay: 0.4 + (i * 0.1) }}
-                   className="flex items-start gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5"
-                 >
-                    <div className="w-10 h-10 rounded-xl bg-[#E040FB]/10 flex items-center justify-center flex-shrink-0">
-                       <item.icon className="w-5 h-5 text-[#E040FB]" />
-                    </div>
-                    <p className="text-sm font-medium text-[#9585B8] leading-snug">
-                       {item.text}
-                    </p>
-                 </motion.div>
-               ))}
+          <motion.h2
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="font-outfit font-bold text-[32px] sm:text-[42px] md:text-[52px] leading-[1.1] tracking-tight mb-5 text-slate-900 max-w-3xl mx-auto"
+          >
+            No somos SAP.{' '}
+            <span className="bg-gradient-to-r from-[#EC4899] via-[#A855F7] to-[#6366F1] bg-clip-text text-transparent font-zilla italic font-medium">
+              Somos mejor.
+            </span>
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.25 }}
+            className="font-zilla text-base sm:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed"
+          >
+            Los sistemas gringos no entienden Venezuela. El Excel no escala.
+            LUMIS fue hecho específicamente para tu realidad.
+          </motion.p>
+        </div>
+
+        {/* ─── 4 PILLARS DE DIFERENCIA ─── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-16 sm:mb-20">
+          {[
+            {
+              icon: Flag,
+              title: 'Hecho en Venezuela',
+              description:
+                'Entendemos BCV, SENIAT, IGTF y la moneda dual. Cada feature nació de un problema real que vive un comerciante venezolano.',
+              accent: 'text-[#EC4899]',
+              bg: 'from-[#EC4899]/15 to-[#EC4899]/5',
+            },
+            {
+              icon: DollarSign,
+              title: 'Precio de aquí',
+              description:
+                '$19.99/mes vs $200-500 de los sistemas gringos. Mismo poder. Décima parte del precio. Tu margen intacto.',
+              accent: 'text-[#A855F7]',
+              bg: 'from-[#A855F7]/15 to-[#A855F7]/5',
+            },
+            {
+              icon: Zap,
+              title: 'Listo en 10 min',
+              description:
+                'Sin consultores, sin implementación de 6 meses, sin "contacta a ventas". Te registras, subes tu Excel, y vendes.',
+              accent: 'text-[#7C4DFF]',
+              bg: 'from-[#7C4DFF]/15 to-[#7C4DFF]/5',
+            },
+            {
+              icon: MessageCircle,
+              title: 'Soporte que te entiende',
+              description:
+                'WhatsApp directo con venezolanos. Sin tickets, sin menús en inglés, sin "press 1 for Spanish". Hablamos tu idioma.',
+              accent: 'text-[#6366F1]',
+              bg: 'from-[#6366F1]/15 to-[#6366F1]/5',
+            },
+          ].map((p, i) => {
+            const Icon = p.icon
+            return (
+              <motion.div
+                key={p.title}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                whileHover={{ y: -4 }}
+                className="group bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300"
+              >
+                <div
+                  className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${p.bg} flex items-center justify-center mb-4 border border-slate-100 group-hover:scale-110 transition-transform duration-300`}
+                >
+                  <Icon className={`w-5 h-5 ${p.accent}`} />
+                </div>
+                <h3 className="font-outfit font-bold text-lg text-slate-900 mb-2">
+                  {p.title}
+                </h3>
+                <p className="font-zilla text-[14px] text-slate-500 leading-relaxed">
+                  {p.description}
+                </p>
+              </motion.div>
+            )
+          })}
+        </div>
+
+        {/* ─── COMPARISON TABLE ─── */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.8 }}
+          className="relative"
+        >
+          <div className="text-center mb-8">
+            <h3 className="font-outfit font-bold text-xl sm:text-2xl text-slate-900 mb-2">
+              Comparado con lo que tienes hoy
+            </h3>
+            <p className="font-zilla text-sm text-slate-500">
+              Lo que vas a ganar (y a dejar de sufrir) el día 1
+            </p>
+          </div>
+
+          <div className="relative bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-lg">
+            {/* Desktop header */}
+            <div className="hidden sm:grid grid-cols-[2fr_1.2fr_1fr_1fr] border-b-2 border-slate-100">
+              <div className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                Característica
+              </div>
+              <div className="px-4 py-4 text-center relative">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-[#EC4899] to-[#A855F7] rounded-full shadow-[0_4px_15px_rgba(168,85,247,0.3)]">
+                  <Sparkles className="w-3 h-3 text-white" />
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest">
+                    LUMIS
+                  </span>
+                </div>
+              </div>
+              <div className="px-4 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">
+                Excel / Cuaderno
+              </div>
+              <div className="px-4 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">
+                Sistemas gringos
+              </div>
             </div>
 
-            <motion.div 
-               initial={{ opacity: 0 }}
-               animate={isInView ? { opacity: 1 } : {}}
-               transition={{ delay: 1 }}
-               className="space-y-2"
-            >
-               <p className="font-display text-2xl md:text-3xl font-bold text-white tracking-tighter opacity-80">
-                  Sin llamadas. Sin WhatsApp. Sin Excel.
-               </p>
-            </motion.div>
-          </div>
-
-          {/* Visual Side (Mockup Teléfono) */}
-          <div className="relative flex justify-center lg:justify-end">
-             {/* Glow detrás del teléfono */}
-             <motion.div 
-               animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
-               transition={{ duration: 8, repeat: Infinity }}
-               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#E040FB] rounded-full blur-[120px] pointer-events-none"
-             />
-
-             <motion.div 
-               initial={{ opacity: 0, rotate: 10, y: 60 }}
-               animate={isInView ? { opacity: 1, rotate: 0, y: 0 } : {}}
-               transition={{ duration: 1, ease: 'backOut' }}
-               className="relative w-[300px] h-[600px] bg-slate-50 border-[8px] border-[#110B1A] rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.8)] overflow-hidden"
-             >
-                {/* Notch */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-white rounded-b-2xl z-20" />
-                
-                {/* Pantalla del Portal */}
-                <div className="h-full bg-white p-6 pt-12">
-                   <div className="flex items-center gap-3 mb-8">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] flex items-center justify-center">
-                         <Link2 className="w-4 h-4 text-white" />
-                      </div>
-                      <div className="text-xs font-bold text-white uppercase tracking-widest">Portal LUMIS</div>
-                   </div>
-
-                   <div className="bg-white/5 rounded-2xl p-4 mb-6">
-                      <div className="text-[10px] text-[#9585B8] uppercase font-bold mb-1">Tu deuda total</div>
-                      <div className="text-2xl font-mono font-bold text-[#E040FB]">$1,240.00</div>
-                      <div className="text-[10px] text-[#00E5CC] font-bold">Bs. 51,112.80</div>
-                   </div>
-
-                   <div className="space-y-4">
-                      <div className="text-[10px] text-[#9585B8] uppercase font-bold tracking-widest mb-2">Facturas Pendientes</div>
-                      {[
-                        { id: '#0012', m: '$450.00', s: 'Vencida', c: '#FF2D55' },
-                        { id: '#0024', m: '$320.00', s: 'En espera', c: '#FFB800' },
-                        { id: '#0035', m: '$470.00', s: 'Al día', c: '#00E5CC' },
-                      ].map((f, i) => (
-                        <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
-                           <div>
-                              <div className="text-[10px] font-bold text-white">{f.id}</div>
-                              <div className="text-[8px] font-bold" style={{ color: f.c }}>{f.s}</div>
-                           </div>
-                           <div className="text-xs font-mono font-bold text-white">{f.m}</div>
-                        </div>
-                      ))}
-                   </div>
-
-                   <div className="absolute bottom-10 left-6 right-6">
-                      <div className="w-full py-3 rounded-xl bg-[#E040FB] text-white text-xs font-bold text-center shadow-[0_10px_20px_rgba(224,64,251,0.3)]">
-                         REPORTAR PAGO
-                      </div>
-                   </div>
+            {/* Rows */}
+            {ROWS.map((row, i) => (
+              <motion.div
+                key={row.feature}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.05 }}
+                className={`grid grid-cols-[1.5fr_1fr_1fr_1fr] sm:grid-cols-[2fr_1.2fr_1fr_1fr] border-b border-slate-100 last:border-b-0 ${
+                  i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'
+                }`}
+              >
+                <div className="px-3 sm:px-6 py-3 sm:py-4 text-[12px] sm:text-sm font-bold text-slate-700 flex items-center">
+                  {row.feature}
                 </div>
-             </motion.div>
+                <div
+                  className={`px-2 sm:px-4 py-3 sm:py-4 flex items-center justify-center relative ${
+                    row.lumis === true
+                      ? 'bg-gradient-to-b from-emerald-50/50 to-transparent'
+                      : ''
+                  }`}
+                >
+                  <Cell value={row.lumis} isLumis />
+                </div>
+                <div className="px-2 sm:px-4 py-3 sm:py-4 flex items-center justify-center">
+                  <Cell value={row.excel} />
+                </div>
+                <div className="px-2 sm:px-4 py-3 sm:py-4 flex items-center justify-center">
+                  <Cell value={row.gringos} />
+                </div>
+              </motion.div>
+            ))}
           </div>
 
-        </div>
+          {/* Mobile labels — visible only on mobile, above the table */}
+          <div className="sm:hidden grid grid-cols-[1.5fr_1fr_1fr_1fr] gap-0 mt-4 text-center">
+            <div />
+            <div className="text-[8px] font-black text-[#A855F7] uppercase tracking-widest">
+              LUMIS
+            </div>
+            <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
+              Excel
+            </div>
+            <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
+              Gringos
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ─── Heart closing message ─── */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="mt-14 sm:mt-20 text-center"
+        >
+          <div className="inline-flex items-center gap-2 text-slate-500 mb-3">
+            <Heart className="w-4 h-4 text-[#EC4899] fill-[#EC4899]" />
+            <span className="font-zilla italic text-sm">
+              Hecho por venezolanos, para negocios venezolanos
+            </span>
+            <Heart className="w-4 h-4 text-[#EC4899] fill-[#EC4899]" />
+          </div>
+        </motion.div>
       </div>
     </section>
   )
