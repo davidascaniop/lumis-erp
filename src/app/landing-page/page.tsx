@@ -1,7 +1,6 @@
 'use client'
 import { Nav } from '@/components/landing/nav'
 import { Hero } from '@/components/landing/hero'
-import { PainNumbers } from '@/components/landing/pain-numbers'
 import { Problem } from '@/components/landing/problem'
 import { ProductShowcase } from '@/components/landing/product-showcase'
 import { Differentiator } from '@/components/landing/differentiator'
@@ -29,7 +28,6 @@ export default function LandingPage() {
     <main className="min-h-screen bg-white selection:bg-[#E040FB]/30 selection:text-slate-900 overflow-x-hidden">
       <Nav />
       <Hero />
-      <PainNumbers />
       <Problem />
       <ProductShowcase />
       <Differentiator />
