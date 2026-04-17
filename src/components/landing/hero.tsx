@@ -25,7 +25,7 @@ function WhatsAppIcon({ className = '' }: { className?: string }) {
   )
 }
 
-// ─── Dashboard Mockup (CSS puro, sin dependencia de imagen) ────────────
+// ─── Dashboard Mockup (CSS puro, responsive) ──────────────────────────
 function DashboardMockup() {
   const chartBars = [30, 48, 25, 60, 85, 68, 92, 78, 95, 70, 88, 100]
 
@@ -37,27 +37,27 @@ function DashboardMockup() {
       className="relative w-full"
     >
       {/* Browser chrome */}
-      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] overflow-hidden">
+      <div className="rounded-xl sm:rounded-2xl bg-white border border-slate-200/80 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.12)] sm:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] overflow-hidden">
         {/* Top bar */}
-        <div className="bg-slate-50 border-b border-slate-200 px-4 py-2.5 flex items-center gap-2">
-          <div className="flex gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
-            <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/80" />
-            <div className="w-2.5 h-2.5 rounded-full bg-green-400/80" />
+        <div className="bg-slate-50 border-b border-slate-200 px-3 py-2 sm:px-4 sm:py-2.5 flex items-center gap-2">
+          <div className="flex gap-1 sm:gap-1.5">
+            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-red-400/80" />
+            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-yellow-400/80" />
+            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-green-400/80" />
           </div>
           <div className="flex-1 flex justify-center">
-            <div className="bg-white border border-slate-200 rounded-md px-3 py-1 text-[10px] text-slate-500 font-mono">
+            <div className="bg-white border border-slate-200 rounded-md px-2 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-[10px] text-slate-500 font-mono">
               uselumisapp.com/dashboard
             </div>
           </div>
         </div>
 
         {/* Dashboard content */}
-        <div className="flex bg-slate-50 h-[420px]">
-          {/* Mini sidebar */}
+        <div className="flex bg-slate-50 h-[340px] sm:h-[420px]">
+          {/* Mini sidebar — hidden en móvil para que el contenido respire */}
           <div className="w-[130px] bg-white border-r border-slate-200 p-3 hidden sm:flex flex-col shrink-0">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#E040FB] to-[#7C4DFF] flex items-center justify-center text-white text-xs font-black">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#EC4899] via-[#A855F7] to-[#6366F1] flex items-center justify-center text-white text-xs font-black">
                 L
               </div>
               <div>
@@ -88,47 +88,49 @@ function DashboardMockup() {
                 <div className="w-1 h-1 rounded-full bg-[#E040FB]" />
                 Dashboard
               </div>
-              {['Ventas', 'Compras', 'Inventario', 'Finanzas', 'CRM'].map((item) => (
-                <div
-                  key={item}
-                  className="px-2 py-1.5 text-slate-500 text-[10px] font-medium"
-                >
-                  {item}
-                </div>
-              ))}
+              {['Ventas', 'Compras', 'Inventario', 'Finanzas', 'CRM'].map(
+                (item) => (
+                  <div
+                    key={item}
+                    className="px-2 py-1.5 text-slate-500 text-[10px] font-medium"
+                  >
+                    {item}
+                  </div>
+                ),
+              )}
             </div>
           </div>
 
           {/* Main content */}
-          <div className="flex-1 p-4 overflow-hidden">
+          <div className="flex-1 p-3 sm:p-4 overflow-hidden">
             {/* Greeting + period toggle */}
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <div className="text-sm font-black text-slate-900">
+            <div className="flex justify-between items-start mb-3 gap-2">
+              <div className="min-w-0">
+                <div className="text-xs sm:text-sm font-black text-slate-900 truncate">
                   ¡Buenas tardes, David! 👋
                 </div>
-                <div className="text-[9px] text-slate-400 font-medium mt-0.5">
-                  Viernes, 17 de Abril 2026
+                <div className="text-[8px] sm:text-[9px] text-slate-400 font-medium mt-0.5">
+                  Viernes, 17 Abril 2026
                 </div>
               </div>
-              <div className="flex gap-0.5 bg-white border border-slate-200 rounded-lg p-0.5">
-                <div className="px-2 py-0.5 text-[9px] text-slate-400 font-medium rounded">
+              <div className="flex gap-0.5 bg-white border border-slate-200 rounded-lg p-0.5 shrink-0">
+                <div className="px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[9px] text-slate-400 font-medium rounded">
                   Hoy
                 </div>
-                <div className="px-2 py-0.5 text-[9px] text-slate-400 font-medium rounded">
+                <div className="hidden sm:block px-2 py-0.5 text-[9px] text-slate-400 font-medium rounded">
                   Semana
                 </div>
-                <div className="px-2 py-0.5 bg-[#E040FB] text-white text-[9px] font-bold rounded">
+                <div className="px-1.5 sm:px-2 py-0.5 bg-[#E040FB] text-white text-[8px] sm:text-[9px] font-bold rounded">
                   Mes
                 </div>
-                <div className="px-2 py-0.5 text-[9px] text-slate-400 font-medium rounded">
+                <div className="hidden sm:block px-2 py-0.5 text-[9px] text-slate-400 font-medium rounded">
                   Año
                 </div>
               </div>
             </div>
 
             {/* Metric cards */}
-            <div className="grid grid-cols-3 gap-2 mb-3">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-3">
               {[
                 {
                   icon: DollarSign,
@@ -146,7 +148,7 @@ function DashboardMockup() {
                 },
                 {
                   icon: ShoppingCart,
-                  label: 'Pedidos activos',
+                  label: 'Pedidos',
                   value: '4',
                   bg: 'bg-amber-100',
                   color: 'text-amber-600',
@@ -156,17 +158,17 @@ function DashboardMockup() {
                 return (
                   <div
                     key={card.label}
-                    className="bg-white border border-slate-200 rounded-lg p-2.5"
+                    className="bg-white border border-slate-200 rounded-lg p-2 sm:p-2.5"
                   >
                     <div
-                      className={`w-6 h-6 rounded-md ${card.bg} flex items-center justify-center mb-1.5`}
+                      className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md ${card.bg} flex items-center justify-center mb-1 sm:mb-1.5`}
                     >
-                      <Icon className={`w-3 h-3 ${card.color}`} />
+                      <Icon className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ${card.color}`} />
                     </div>
-                    <div className="text-base font-black text-slate-900 leading-none">
+                    <div className="text-sm sm:text-base font-black text-slate-900 leading-none">
                       {card.value}
                     </div>
-                    <div className="text-[8px] text-slate-400 font-medium mt-0.5 uppercase tracking-wider">
+                    <div className="text-[7px] sm:text-[8px] text-slate-400 font-medium mt-0.5 uppercase tracking-wider truncate">
                       {card.label}
                     </div>
                   </div>
@@ -175,27 +177,27 @@ function DashboardMockup() {
             </div>
 
             {/* Chart card */}
-            <div className="bg-white border border-slate-200 rounded-lg p-3">
+            <div className="bg-white border border-slate-200 rounded-lg p-2.5 sm:p-3">
               <div className="flex justify-between items-center mb-2">
-                <div>
-                  <div className="text-[10px] font-black text-slate-900">
+                <div className="min-w-0">
+                  <div className="text-[9px] sm:text-[10px] font-black text-slate-900">
                     Ventas por Mes
                   </div>
-                  <div className="text-[8px] text-slate-400 font-medium">
+                  <div className="text-[7px] sm:text-[8px] text-slate-400 font-medium">
                     Facturación total en USD
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-sm font-black text-[#E040FB]">
+                <div className="text-right shrink-0">
+                  <div className="text-xs sm:text-sm font-black text-[#E040FB]">
                     $2,608.88
                   </div>
-                  <div className="text-[8px] text-emerald-600 font-bold flex items-center gap-0.5 justify-end">
-                    <TrendingUp className="w-2.5 h-2.5" />
+                  <div className="text-[7px] sm:text-[8px] text-emerald-600 font-bold flex items-center gap-0.5 justify-end">
+                    <TrendingUp className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
                     +12.4%
                   </div>
                 </div>
               </div>
-              <div className="h-[110px] flex items-end gap-1 mt-2">
+              <div className="h-[85px] sm:h-[110px] flex items-end gap-1 mt-2">
                 {chartBars.map((h, i) => (
                   <motion.div
                     key={i}
@@ -216,47 +218,50 @@ function DashboardMockup() {
         </div>
       </div>
 
-      {/* Floating card — "Antes" (el cuaderno) */}
+      {/* Floating card — "Antes" (el cuaderno). En mobile se muestra más pequeño y mejor posicionado. */}
       <motion.div
-        initial={{ opacity: 0, x: -30, rotate: -8, y: 10 }}
+        initial={{ opacity: 0, x: -20, rotate: -8, y: 10 }}
         animate={{ opacity: 1, x: 0, rotate: -6, y: 0 }}
         transition={{ duration: 0.8, delay: 1.2 }}
-        className="absolute -left-4 -bottom-8 bg-[#FEF9C3] border border-amber-200 rounded-lg px-4 py-3 shadow-xl max-w-[220px] hidden sm:block"
+        className="absolute -left-2 sm:-left-4 -bottom-4 sm:-bottom-8 bg-[#FEF9C3] border border-amber-200 rounded-lg px-2.5 sm:px-4 py-2 sm:py-3 shadow-xl max-w-[180px] sm:max-w-[220px]"
         style={{
           backgroundImage:
-            'repeating-linear-gradient(transparent 0, transparent 18px, rgba(0,0,0,0.08) 19px)',
+            'repeating-linear-gradient(transparent 0, transparent 16px, rgba(0,0,0,0.08) 17px)',
         }}
       >
-        <div className="text-[9px] font-black text-amber-700 uppercase tracking-widest mb-1 flex items-center gap-1">
-          📓 Antes (en cuaderno)
+        <div className="text-[8px] sm:text-[9px] font-black text-amber-700 uppercase tracking-widest mb-0.5 sm:mb-1 flex items-center gap-1">
+          📓 Antes
         </div>
-        <div className="text-xs text-slate-800 font-zilla italic leading-relaxed">
+        <div className="text-[10px] sm:text-xs text-slate-800 font-zilla italic leading-snug sm:leading-relaxed">
           &quot;Sra. María — $120, pagó 60, debe 60. Dios mío se me olvida
           cobrarle…&quot;
         </div>
       </motion.div>
 
-      {/* Floating card — "Ahora" (check verde) */}
+      {/* Floating card — "Ahora" */}
       <motion.div
-        initial={{ opacity: 0, x: 30, scale: 0.85 }}
+        initial={{ opacity: 0, x: 20, scale: 0.85 }}
         animate={{ opacity: 1, x: 0, scale: 1 }}
         transition={{ duration: 0.8, delay: 1.5 }}
-        className="absolute -right-3 -top-5 bg-white border border-emerald-200 rounded-xl px-4 py-3 shadow-2xl hidden sm:flex items-center gap-2.5"
+        className="absolute -right-1 sm:-right-3 -top-3 sm:-top-5 bg-white border border-emerald-200 rounded-xl px-2.5 sm:px-4 py-2 sm:py-3 shadow-2xl flex items-center gap-2 sm:gap-2.5"
       >
-        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-          <Check className="w-4 h-4 text-emerald-600" strokeWidth={3} />
+        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+          <Check
+            className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-600"
+            strokeWidth={3}
+          />
         </div>
         <div>
-          <div className="text-[9px] text-emerald-600 font-black uppercase tracking-widest">
+          <div className="text-[8px] sm:text-[9px] text-emerald-600 font-black uppercase tracking-widest">
             Ahora con LUMIS
           </div>
-          <div className="text-xs font-black text-slate-900">
+          <div className="text-[11px] sm:text-xs font-black text-slate-900">
             Todo en 1 clic ✨
           </div>
         </div>
       </motion.div>
 
-      {/* Floating pill — inventory badge (medio arriba derecha) */}
+      {/* Floating pill — Stock sincronizado (solo desktop) */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -275,13 +280,13 @@ function DashboardMockup() {
 // ─── HERO ──────────────────────────────────────────────────────────────
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center pt-24 pb-20 overflow-hidden bg-white">
+    <section className="relative pt-[88px] sm:pt-24 pb-16 sm:pb-20 overflow-hidden bg-white min-h-[calc(100vh-64px)] sm:min-h-screen flex items-center">
       {/* Background glows */}
-      <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] bg-[#E040FB]/8 blur-[140px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-[500px] h-[500px] bg-[#7C4DFF]/8 blur-[140px] rounded-full pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(#E040FB_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.03] pointer-events-none" />
+      <div className="absolute top-[-5%] left-[-10%] w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-[#E040FB]/8 blur-[100px] sm:blur-[140px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-[-5%] right-[-10%] w-[400px] sm:w-[500px] h-[400px] sm:h-[500px] bg-[#7C4DFF]/8 blur-[100px] sm:blur-[140px] rounded-full pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(#E040FB_1px,transparent_1px)] bg-[size:32px_32px] sm:bg-[size:40px_40px] opacity-[0.025] pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 grid lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-12 items-center">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 grid lg:grid-cols-[1.05fr_1fr] gap-10 sm:gap-14 lg:gap-12 items-center">
         {/* ─── LEFT · Copy ─── */}
         <div className="text-center lg:text-left">
           {/* Eyebrow */}
@@ -289,15 +294,15 @@ export function Hero() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6 bg-gradient-to-r from-[#E040FB]/8 to-[#7C4DFF]/8 border border-[#E040FB]/15 backdrop-blur-sm"
+            className="inline-flex items-center gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full mb-5 sm:mb-6 bg-gradient-to-r from-[#E040FB]/8 to-[#7C4DFF]/8 border border-[#E040FB]/15 backdrop-blur-sm"
           >
-            <span className="text-[10px] font-bold text-[#E040FB] tracking-[0.18em] uppercase font-outfit">
+            <span className="text-[9px] sm:text-[10px] font-bold text-[#E040FB] tracking-[0.15em] sm:tracking-[0.18em] uppercase font-outfit">
               🇻🇪 Hecho en Venezuela · Desde $19.99/mes
             </span>
           </motion.div>
 
           {/* Headline */}
-          <h1 className="font-outfit font-bold text-[40px] sm:text-[48px] md:text-[56px] lg:text-[60px] leading-[1.05] tracking-tight mb-6">
+          <h1 className="font-outfit font-bold text-[34px] sm:text-[44px] md:text-[52px] lg:text-[60px] leading-[1.05] tracking-tight mb-5 sm:mb-6">
             <motion.span
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -318,7 +323,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.45 }}
-              className="bg-gradient-to-r from-[#E040FB] via-[#B266FF] to-[#7C4DFF] bg-clip-text text-transparent font-zilla italic font-medium block"
+              className="bg-gradient-to-r from-[#EC4899] via-[#A855F7] to-[#6366F1] bg-clip-text text-transparent font-zilla italic font-medium block"
             >
               Ahora vas tú.
             </motion.span>
@@ -329,7 +334,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="font-zilla text-base md:text-lg lg:text-xl text-slate-500 max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed"
+            className="font-zilla text-[15px] sm:text-base md:text-lg lg:text-xl text-slate-500 max-w-xl mx-auto lg:mx-0 mb-6 sm:mb-8 leading-relaxed"
           >
             LUMIS digitaliza tu negocio sin que dejes de ser tú. Factura en{' '}
             <span className="text-slate-800 font-semibold">
@@ -342,20 +347,20 @@ export function Hero() {
             todo en un solo lugar.
           </motion.p>
 
-          {/* CTAs */}
+          {/* CTAs — stack vertical en mobile, side-by-side en sm+ */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.75 }}
-            className="flex flex-col sm:flex-row gap-3 mb-7 justify-center lg:justify-start"
+            className="flex flex-col sm:flex-row gap-3 mb-6 sm:mb-7 justify-center lg:justify-start"
           >
             <motion.a
               href="/register"
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
-              className="flex items-center justify-center gap-2 px-7 py-4 rounded-xl text-base font-bold text-white bg-gradient-to-r from-[#E040FB] to-[#7C4DFF] shadow-[0_10px_30px_rgba(224,64,251,0.35)] hover:shadow-[0_14px_40px_rgba(224,64,251,0.5)] transition-all font-outfit"
+              className="flex items-center justify-center gap-2 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl text-[15px] sm:text-base font-bold text-white bg-gradient-to-r from-[#E040FB] to-[#7C4DFF] shadow-[0_8px_24px_rgba(224,64,251,0.35)] hover:shadow-[0_14px_40px_rgba(224,64,251,0.5)] transition-all font-outfit active:scale-95"
             >
-              <Sparkles className="w-5 h-5" />
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
               Empezar gratis 15 días
             </motion.a>
             <motion.a
@@ -364,9 +369,9 @@ export function Hero() {
               rel="noopener noreferrer"
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
-              className="flex items-center justify-center gap-2 px-7 py-4 rounded-xl text-base font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-sm transition-all font-outfit"
+              className="flex items-center justify-center gap-2 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl text-[15px] sm:text-base font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-sm transition-all font-outfit active:scale-95"
             >
-              <WhatsAppIcon className="w-5 h-5" />
+              <WhatsAppIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               Hablar por WhatsApp
             </motion.a>
           </motion.div>
@@ -376,25 +381,25 @@ export function Hero() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 1 }}
-            className="flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium text-slate-500 justify-center lg:justify-start"
+            className="flex flex-wrap gap-x-4 sm:gap-x-5 gap-y-2 text-[11px] sm:text-xs font-medium text-slate-500 justify-center lg:justify-start"
           >
             <span className="flex items-center gap-1.5">
-              <CreditCard className="w-3.5 h-3.5 text-emerald-500" />
+              <CreditCard className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-500" />
               Sin tarjeta para probar
             </span>
             <span className="flex items-center gap-1.5">
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
+              <TrendingUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-500" />
               BCV automático
             </span>
             <span className="flex items-center gap-1.5">
-              <Languages className="w-3.5 h-3.5 text-emerald-500" />
+              <Languages className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-500" />
               100% en español
             </span>
           </motion.div>
         </div>
 
         {/* ─── RIGHT · Dashboard mockup ─── */}
-        <div className="relative">
+        <div className="relative w-full mt-4 sm:mt-8 lg:mt-0">
           <DashboardMockup />
         </div>
       </div>
