@@ -119,7 +119,8 @@ export function SupplierForm({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="space-y-4 px-6 py-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 space-y-1.5">
               <label className="text-xs font-medium text-text-2 uppercase">Nombre / Razón Social</label>
@@ -156,8 +157,9 @@ export function SupplierForm({
               placeholder="Ubicación física del proveedor..."
             />
           </div>
+          </div>
 
-          <DialogFooter className="mt-6">
+          <DialogFooter>
             <button type="button" onClick={() => setOpen(false)} className="px-4 py-2 text-sm text-text-2 hover:bg-white/5 rounded-xl transition-colors">
               Cancelar
             </button>

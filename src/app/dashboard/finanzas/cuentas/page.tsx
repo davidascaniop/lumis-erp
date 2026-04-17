@@ -503,7 +503,7 @@ function CuentasContent() {
             <DialogTitle className="text-xl font-bold font-montserrat">Nueva Cuenta</DialogTitle>
             <DialogDescription className="text-text-3 text-xs">Registra una nueva cuenta bancaria, efectivo o plataforma digital.</DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-6 py-4">
             <div className="space-y-1.5 sm:col-span-2">
               <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Nombre de la Cuenta *</label>
               <Input placeholder="Ej: Banesco Principal, Caja Chica Sede" value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} className="h-11 bg-surface-input" />
@@ -577,7 +577,7 @@ function CuentasContent() {
             <DialogTitle className="text-xl font-bold font-montserrat">Editar Cuenta</DialogTitle>
             <DialogDescription className="text-text-3 text-xs">Modifica los datos de la cuenta. El saldo actual no se puede editar directamente.</DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-6 py-4">
             <div className="space-y-1.5 sm:col-span-2">
               <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Nombre de la Cuenta</label>
               <Input value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} className="h-11 bg-surface-input" />
@@ -636,7 +636,7 @@ function CuentasContent() {
             <DialogTitle className="text-xl font-bold font-montserrat flex items-center gap-2"><ArrowLeftRight className="w-5 h-5 text-brand" /> Transferencia entre Cuentas</DialogTitle>
             <DialogDescription className="text-text-3 text-xs">Mueve fondos entre tus cuentas registradas.</DialogDescription>
           </DialogHeader>
-          <div className="space-y-5 py-4">
+          <div className="space-y-5 px-6 py-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Cuenta Origen</label>
               <Select value={transferData.from_account_id} onValueChange={val => setTransferData(p => ({ ...p, from_account_id: val }))}>

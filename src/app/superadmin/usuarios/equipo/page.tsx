@@ -368,7 +368,7 @@ export default function EquipoAdminPage() {
                 : 'El usuario recibirá un correo con un enlace seguro para establecer su propia contraseña y cuenta.'}
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-3">
+          <div className="grid gap-4 px-6 py-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-text-2 uppercase tracking-wider">Nombre Completo</label>
               <Input 

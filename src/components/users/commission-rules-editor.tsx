@@ -103,7 +103,7 @@ export function CommissionRulesEditor({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto no-scrollbar pr-2">
+        <div className="space-y-4 px-6 py-4 max-h-[60vh] overflow-y-auto no-scrollbar">
           {rules.length === 0 && (
             <div className="text-center py-10 bg-surface-base/50 rounded-2xl border border-dashed border-border/60">
               <Target className="w-10 h-10 text-text-3/20 mx-auto mb-2" />
@@ -193,7 +193,7 @@ export function CommissionRulesEditor({
           ))}
         </div>
 
-        <div className="flex justify-between items-center mt-6 pt-6 border-t border-border/40">
+        <div className="flex justify-between items-center px-6 py-4 border-t border-border/40">
           <button 
             onClick={addRule}
             className="flex items-center gap-2 text-sm font-bold text-brand hover:opacity-80 transition-all font-montserrat"

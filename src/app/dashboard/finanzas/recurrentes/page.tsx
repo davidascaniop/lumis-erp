@@ -487,7 +487,7 @@ function RecurrentesContent() {
                <DialogTitle className="font-bold flex items-center gap-2"><History className="w-5 h-5 text-brand" /> Historial de Pagos</DialogTitle>
                <DialogDescription className="text-xs">Registro cronológico para: {selectedRecurrente?.name}</DialogDescription>
             </DialogHeader>
-            <div className="py-4 space-y-4 max-h-[400px] overflow-y-auto no-scrollbar">
+            <div className="px-6 py-4 space-y-4 max-h-[400px] overflow-y-auto no-scrollbar">
                {history.length === 0 ? (
                   <div className="text-center py-10 text-text-3">
                      <p className="text-xs italic">No se han registrado pagos para este gasto aún.</p>

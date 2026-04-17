@@ -670,7 +670,7 @@ export default function DespachosPage() {
               <Loader2 className="w-8 h-8 animate-spin text-brand mx-auto" />
             </div>
           ) : (
-            <div className="space-y-6 py-2">
+            <div className="space-y-6 px-6 py-4">
               {/* ── Timeline ── */}
               <div className="bg-surface-card border border-border rounded-2xl p-5">
                 <p className="text-xs font-bold text-text-1 font-montserrat mb-5">
@@ -872,7 +872,7 @@ export default function DespachosPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-2">
+          <div className="space-y-4 px-6 py-4">
             {/* Pedido vinculado */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-text-1 font-montserrat">
@@ -1016,7 +1016,7 @@ export default function DespachosPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-2">
+          <div className="space-y-4 px-6 py-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-text-1 font-montserrat">
                 Nuevo estado

@@ -107,22 +107,24 @@ export function WarehouseForm({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text-2 uppercase">Nombre del Almacén</label>
-            <Input {...form.register("name")} placeholder="Almacén Principal / Sede Norte" />
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="space-y-4 px-6 py-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-text-2 uppercase">Nombre del Almacén</label>
+              <Input {...form.register("name")} placeholder="Almacén Principal / Sede Norte" />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-text-2 uppercase">Ubicación / Dirección</label>
+              <textarea
+                {...form.register("location")}
+                className="w-full bg-surface-input border-none rounded-xl p-3 text-sm text-white placeholder:text-text-3 min-h-[80px] focus:ring-1 focus:ring-brand outline-none"
+                placeholder="Ej: Av. Principal, Galpón #4..."
+              />
+            </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text-2 uppercase">Ubicación / Dirección</label>
-            <textarea
-              {...form.register("location")}
-              className="w-full bg-surface-input border-none rounded-xl p-3 text-sm text-white placeholder:text-text-3 min-h-[80px] focus:ring-1 focus:ring-brand outline-none"
-              placeholder="Ej: Av. Principal, Galpón #4..."
-            />
-          </div>
-
-          <DialogFooter className="mt-6">
+          <DialogFooter>
             <button type="button" onClick={() => setOpen(false)} className="px-4 py-2 text-sm text-text-2 hover:bg-white/5 rounded-xl transition-colors">
               Cancelar
             </button>

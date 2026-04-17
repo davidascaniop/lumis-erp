@@ -442,7 +442,7 @@ export default function OrderDetailsPage({ params }: { params: any }) {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-6 py-6">
+          <div className="space-y-6 px-6 py-4">
             {/* CONDICION */}
             <div className="space-y-3">
               <label className="text-xs font-bold text-text-2 uppercase tracking-widest">

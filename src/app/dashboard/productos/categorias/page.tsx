@@ -499,7 +499,8 @@ export default function CategoriasPage() {
               {catForm.id ? "Editar Categoría" : "Nueva Categoría"}
             </DialogTitle>
           </DialogHeader>
-          <form className="space-y-4 py-4" onSubmit={saveCategory}>
+          <form onSubmit={saveCategory}>
+            <div className="space-y-4 px-6 py-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Nombre *</label>
               <Input
@@ -570,8 +571,9 @@ export default function CategoriasPage() {
                 ))}
               </div>
             </div>
+            </div>
 
-            <DialogFooter className="pt-2">
+            <DialogFooter>
               <button type="button" onClick={() => setOpenCatModal(false)} className="px-6 py-2 text-text-3 font-bold">
                 Cancelar
               </button>
@@ -595,7 +597,8 @@ export default function CategoriasPage() {
               {attrForm.id ? "Editar Atributo" : "Nuevo Atributo"}
             </DialogTitle>
           </DialogHeader>
-          <form className="space-y-4 py-4" onSubmit={saveAttribute}>
+          <form onSubmit={saveAttribute}>
+            <div className="space-y-4 px-6 py-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Nombre del Atributo *</label>
               <Input
@@ -639,8 +642,9 @@ export default function CategoriasPage() {
                 </div>
               </div>
             )}
+            </div>
 
-            <DialogFooter className="pt-2">
+            <DialogFooter>
               <button type="button" onClick={() => setOpenAttrModal(false)} className="px-6 py-2 text-text-3 font-bold">
                 Cancelar
               </button>

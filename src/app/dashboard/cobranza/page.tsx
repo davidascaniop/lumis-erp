@@ -534,7 +534,7 @@ function CobranzaContent() {
               {formatCurrency(selectedReceivable?.balance_usd)}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 px-6 py-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-text-3 uppercase tracking-wider">
                 Monto a Abonar
@@ -623,7 +623,7 @@ function CobranzaContent() {
               Acepta o rechaza los reportes de pago de los vendedores.
             </DialogDescription>
           </DialogHeader>
-          <div className="max-h-[50vh] overflow-y-auto space-y-3 py-4 pr-2 no-scrollbar">
+          <div className="max-h-[50vh] overflow-y-auto space-y-3 px-6 py-4 no-scrollbar">
             {pendingVerifications.length === 0 ? (
               <div className="py-10 text-center text-text-3 font-medium">
                 No hay pagos pendientes de verificación.

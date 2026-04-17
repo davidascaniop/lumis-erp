@@ -253,7 +253,7 @@ export default function EmpresasPage() {
           <DialogHeader>
             <DialogTitle>Editar: {editingCompany?.name}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 px-6 py-4">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-text-2 uppercase">Plan de Suscripción</label>
               <select

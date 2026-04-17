@@ -715,7 +715,7 @@ function FlujoContent() {
             <DialogTitle className="text-xl font-montserrat font-bold">Nuevo Movimiento Manual</DialogTitle>
             <p className="text-text-3 text-xs">Registra entradas o salidas manuales a una cuenta específica.</p>
           </DialogHeader>
-          <div className="space-y-5 py-4">
+          <div className="space-y-5 px-6 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Tipo</label>
