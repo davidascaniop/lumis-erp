@@ -54,6 +54,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useDataCache } from "@/lib/data-cache";
 
 // --- Tab Types ---
 type GastoTab = "todos" | "proveedores" | "operativos" | "nomina" | "vencidos";
@@ -137,6 +138,16 @@ function GastosContent() {
 
   const fetchData = async () => {
     if (!user?.company_id) return;
+
+    const cacheKey = `finanzas_gastos_${user.company_id}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setExpenses(cached.expenses);
+      setPartners(cached.partners);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const { data: expData, error: expErr } = await supabase
@@ -144,7 +155,7 @@ function GastosContent() {
         .select("*, partners(name, rif)")
         .eq("company_id", user.company_id)
         .order("due_date", { ascending: true });
-      
+
       const { data: partData } = await supabase
         .from("partners")
         .select("id, name, rif, type")
@@ -154,6 +165,7 @@ function GastosContent() {
       if (expErr) throw expErr;
       setExpenses(expData || []);
       setPartners(partData || []);
+      useDataCache.getState().set(cacheKey, { expenses: expData || [], partners: partData || [] });
     } catch (err: any) {
       toast.error("Error al cargar datos", { description: err.message });
     } finally {
@@ -250,6 +262,7 @@ function GastosContent() {
       toast.success("Gasto registrado");
       setCreateOpen(false);
       resetExpenseForm();
+      useDataCache.getState().invalidatePrefix("finanzas_");
       fetchData();
     } catch (err: any) {
       toast.error("Error al guardar", { description: err.message });
@@ -317,6 +330,7 @@ function GastosContent() {
 
       toast.success("Pago registrado con éxito");
       setPayOpen(false);
+      useDataCache.getState().invalidatePrefix("finanzas_");
       fetchData();
     } catch (err: any) {
       toast.error("Error al pagar", { description: err.message });
@@ -618,6 +632,7 @@ function GastosContent() {
       const { error } = await supabase.from("expenses").delete().eq("id", id);
       if (error) throw error;
       toast.success("Gasto eliminado");
+      useDataCache.getState().invalidatePrefix("finanzas_");
       fetchData();
     } catch (err: any) {
       toast.error("Error al eliminar", { description: err.message });

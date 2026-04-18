@@ -25,6 +25,7 @@ import {
 import { cn, formatCurrency } from "@/lib/utils";
 import Papa from "papaparse";
 import { useUser } from "@/hooks/use-user";
+import { useDataCache } from "@/lib/data-cache";
 
 type PeriodKey = "week" | "month" | "quarter" | "year";
 
@@ -105,6 +106,26 @@ export default function ResumenEjecutivoPage() {
     async function load() {
       const cid = currentUser?.company_id;
       if (!cid) return;
+
+      const cacheKey = `reportes_ejecutivo_${cid}`;
+      const cached = useDataCache.getState().get(cacheKey);
+      if (cached) {
+        setOrders(cached.orders);
+        setReceivables(cached.receivables);
+        setPayments(cached.payments);
+        setProducts(cached.products);
+        setOrderItems(cached.orderItems);
+        setTreasuryAccounts(cached.treasuryAccounts);
+        setTreasuryMoves(cached.treasuryMoves);
+        setPurchases(cached.purchases);
+        setExpenses(cached.expenses);
+        setRecurringExp(cached.recurringExp);
+        setSellers(cached.sellers);
+        setCrmOpps(cached.crmOpps);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       try {
         const oneYearAgo = subYears(new Date(), 1).toISOString();
@@ -127,18 +148,33 @@ export default function ResumenEjecutivoPage() {
           (supabase.from("crm_oportunidades") as any).select("id,etapa,score,created_at").eq("company_id", cid),
         ]);
 
-        setOrders(ordRes.data || []);
-        setReceivables(recvRes.data || []);
-        setPayments(payRes.data || []);
-        setProducts(prodRes.data || []);
-        setOrderItems(itemRes.data || []);
-        setTreasuryAccounts(tacRes.data || []);
-        setTreasuryMoves(tmRes.data || []);
-        setPurchases(purRes.data || []);
-        setExpenses(expRes.data || []);
-        setRecurringExp(recurRes.data || []);
-        setSellers(selRes.data || []);
-        setCrmOpps(crmRes.data || []);
+        const payload = {
+          orders: ordRes.data || [],
+          receivables: recvRes.data || [],
+          payments: payRes.data || [],
+          products: prodRes.data || [],
+          orderItems: itemRes.data || [],
+          treasuryAccounts: tacRes.data || [],
+          treasuryMoves: tmRes.data || [],
+          purchases: purRes.data || [],
+          expenses: expRes.data || [],
+          recurringExp: recurRes.data || [],
+          sellers: selRes.data || [],
+          crmOpps: crmRes.data || [],
+        };
+        setOrders(payload.orders);
+        setReceivables(payload.receivables);
+        setPayments(payload.payments);
+        setProducts(payload.products);
+        setOrderItems(payload.orderItems);
+        setTreasuryAccounts(payload.treasuryAccounts);
+        setTreasuryMoves(payload.treasuryMoves);
+        setPurchases(payload.purchases);
+        setExpenses(payload.expenses);
+        setRecurringExp(payload.recurringExp);
+        setSellers(payload.sellers);
+        setCrmOpps(payload.crmOpps);
+        useDataCache.getState().set(`reportes_ejecutivo_${cid}`, payload);
       } finally {
         setLoading(false);
       }

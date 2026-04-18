@@ -20,6 +20,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { MF_INPUT as INPUT_CLS, MF_LABEL as LABEL_CLS, ModalHeader, ModalFooter } from "@/components/ui/modal-form";
+import { useDataCache } from "@/lib/data-cache";
 
 interface ComponentItem {
   product_id: string;
@@ -52,6 +53,16 @@ export default function KitsPage() {
 
   const fetchKits = async () => {
     if (!user?.company_id) return;
+
+    const cacheKey = `productos_kits_${user.company_id}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setKits(cached.kits);
+      setProducts(cached.products);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       // 1. Get all Kits (products where is_kit = true) with their components
@@ -68,6 +79,7 @@ export default function KitsPage() {
         .eq("is_kit", true)
         .order("created_at", { ascending: false });
 
+      let finalKits: any[] = [];
       if (kError) {
         console.error("Kits Fetch Error:", kError);
         // If the relation doesn't exist yet, fall back to simple fetch
@@ -78,10 +90,11 @@ export default function KitsPage() {
             .eq("company_id", user.company_id)
             .eq("is_kit", true)
             .order("created_at", { ascending: false });
-          setKits((simpleKits || []).map(k => ({ ...k, comps: [], availableStock: 0 })));
+          finalKits = (simpleKits || []).map(k => ({ ...k, comps: [], availableStock: 0 }));
+          setKits(finalKits);
         }
       } else {
-        const processedKits = (kitsData || []).map(k => {
+        finalKits = (kitsData || []).map(k => {
           const comps = (k.product_kit_items || []).map((pki: any) => ({
             ...(pki.component || {}),
             qty_required: pki.quantity,
@@ -98,7 +111,7 @@ export default function KitsPage() {
 
           return { ...k, comps, availableStock };
         });
-        setKits(processedKits);
+        setKits(finalKits);
       }
 
       // 2. Fetch regular products for the component search (non-kits)
@@ -109,6 +122,7 @@ export default function KitsPage() {
         .neq("is_kit", true);
 
       setProducts(prodData || []);
+      useDataCache.getState().set(cacheKey, { kits: finalKits, products: prodData || [] });
     } catch (e) {
       console.error("fetchKits error:", e);
     } finally {
@@ -222,6 +236,7 @@ export default function KitsPage() {
 
       toast.success(isEditing ? "Kit actualizado correctamente" : "Kit creado exitosamente");
       setOpenModal(false);
+      if (user?.company_id) useDataCache.getState().invalidatePrefix("productos_");
       await fetchKits(); // await to ensure table refreshes immediately
     } catch (err: any) {
       toast.error("Error al guardar kit", { description: err.message });
@@ -236,6 +251,7 @@ export default function KitsPage() {
       const { error } = await supabase.from("products").delete().eq("id", id);
       if (error) throw error;
       toast.success("Kit eliminado");
+      if (user?.company_id) useDataCache.getState().invalidatePrefix("productos_");
       await fetchKits();
     } catch (error: any) {
       toast.error("Error al eliminar", { description: error.message });

@@ -9,6 +9,7 @@ import { TableCard } from "@/components/restaurant/table-card";
 import { NewTableModal } from "@/components/restaurant/new-table-modal";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useDataCache } from "@/lib/data-cache";
 
 const DEFAULT_ZONES = [
   { id: "default-1", name: "Salón", color: "#10B981" },
@@ -32,6 +33,12 @@ export default function MesasPage() {
   useEffect(() => {
     if (!companyId) return;
     (async () => {
+      const cacheKey = `restaurante_mesas_${companyId}`;
+      const cached = useDataCache.getState().get(cacheKey, 30_000);
+      if (cached) {
+        if (cached.zones && cached.zones.length > 0) setZones(cached.zones);
+        return;
+      }
       const { data } = await supabase
         .from("restaurant_zones")
         .select("*")
@@ -40,6 +47,7 @@ export default function MesasPage() {
       if (data && data.length > 0) {
         setZones(data);
       }
+      useDataCache.getState().set(cacheKey, { zones: data || [] });
     })();
   }, [companyId, supabase]);
 
@@ -106,6 +114,7 @@ export default function MesasPage() {
       toast.error("Error al eliminar mesa");
     } else {
       toast.success("Mesa eliminada");
+      if (companyId) useDataCache.getState().invalidatePrefix("restaurante_");
     }
   };
 

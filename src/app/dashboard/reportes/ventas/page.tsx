@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useDataCache } from "@/lib/data-cache";
 
 // Helper for fetching data
 const supabase = createClient();
@@ -30,6 +31,16 @@ export default function ReporteVentasPage() {
 
   const fetchData = useCallback(async () => {
     if (!companyId) return;
+
+    const cacheKey = `reportes_ventas_${companyId}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setOrders(cached.orders);
+      setOrderItems(cached.orderItems);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const oneYearAgo = subYears(new Date(), 1).toISOString();
@@ -46,6 +57,7 @@ export default function ReporteVentasPage() {
 
       setOrders(ordRes.data || []);
       setOrderItems(itemRes.data || []);
+      useDataCache.getState().set(cacheKey, { orders: ordRes.data || [], orderItems: itemRes.data || [] });
     } finally {
       setLoading(false);
     }

@@ -40,6 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUser } from "@/hooks/use-user";
+import { useDataCache } from "@/lib/data-cache";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface Dispatch {
@@ -199,6 +200,15 @@ export default function DespachosPage() {
     if (!cid) return;
     setCompanyId(cid);
     setUserId(currentUser?.id || null);
+
+    const cacheKey = `compras_despachos_${cid}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setDispatches(cached.dispatches);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const { data } = await supabase
@@ -210,6 +220,7 @@ export default function DespachosPage() {
         .order("created_at", { ascending: false });
 
       setDispatches((data as Dispatch[]) || []);
+      useDataCache.getState().set(cacheKey, { dispatches: (data as Dispatch[]) || [] });
     } catch (error) {
       console.error("Error fetching dispatches:", error);
       toast.error("Error al cargar despachos");
@@ -382,6 +393,7 @@ export default function DespachosPage() {
 
       toast.success(`Despacho ${dispatchNumber} creado`);
       setNewOpen(false);
+      useDataCache.getState().invalidate(`compras_despachos_${companyId}`);
       fetchData();
     } catch (error: any) {
       toast.error("Error al crear despacho", { description: error.message });
@@ -431,6 +443,7 @@ export default function DespachosPage() {
 
       toast.success("Estado actualizado");
       setUpdateOpen(false);
+      if (companyId) useDataCache.getState().invalidate(`compras_despachos_${companyId}`);
       fetchData();
 
       // Refresh detail if open

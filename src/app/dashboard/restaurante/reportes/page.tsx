@@ -6,6 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
 import { useBCV } from "@/hooks/use-bcv";
+import { useDataCache } from "@/lib/data-cache";
 
 export default function RestaurantReportsPage() {
   const { user } = useUser();
@@ -40,6 +41,14 @@ export default function RestaurantReportsPage() {
     }
 
     async function fetchData() {
+       const cacheKey = `restaurante_reportes_${user.company_id}_${dateRange}`;
+       const cached = useDataCache.getState().get(cacheKey);
+       if (cached) {
+         setData(cached.data);
+         setLoading(false);
+         return;
+       }
+
        setLoading(true);
        const startIso = startDate.toISOString();
        const endIso = endDate.toISOString();
@@ -47,7 +56,7 @@ export default function RestaurantReportsPage() {
        const { data: orders } = await supabase
          .from("restaurant_orders")
          .select(`
-            id, created_at, closed_at, status, 
+            id, created_at, closed_at, status,
             users:waiter_id(full_name),
             restaurant_order_items(
                id, status, quantity, unit_price, product_name, modifications, created_at, sent_to_kitchen_at
@@ -58,6 +67,7 @@ export default function RestaurantReportsPage() {
          .lte("created_at", endIso);
 
        setData(orders || []);
+       useDataCache.getState().set(cacheKey, { data: orders || [] });
        setLoading(false);
     }
     fetchData();

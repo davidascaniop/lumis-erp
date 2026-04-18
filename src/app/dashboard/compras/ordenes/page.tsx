@@ -25,6 +25,7 @@ import { useBCV } from "@/hooks/use-bcv";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/hooks/use-user";
+import { useDataCache } from "@/lib/data-cache";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type PurchaseStatus = "draft" | "confirmed" | "partial" | "received" | "cancelled";
@@ -113,6 +114,16 @@ export default function OrdenesCompraPage() {
     const cid = currentUser?.company_id;
     if (!cid) return;
     setCompanyId(cid);
+
+    const cacheKey = `compras_ordenes_${cid}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setPurchases(cached.purchases);
+      setTopAlerts(cached.topAlerts);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const { data } = await supabase
@@ -129,19 +140,23 @@ export default function OrdenesCompraPage() {
         (ic ?? []).forEach((r: any) => { counts[r.purchase_id] = (counts[r.purchase_id] ?? 0) + 1; });
       }
 
-      setPurchases(((data as any[]) ?? []).map(p => ({ 
-        ...p, 
+      const mappedPurchases = ((data as any[]) ?? []).map(p => ({
+        ...p,
         _item_count: counts[p.id] ?? 0,
         total_usd: Number(p.total_usd || 0),
         total_bs: Number(p.total_bs || 0),
         subtotal_usd: Number(p.subtotal_usd || 0)
-      })));
+      }));
+      setPurchases(mappedPurchases);
 
       const { data: alerts } = await supabase.from("price_alerts").select("*, products(name), suppliers(name)").eq("company_id", cid).eq("is_read", false).order("created_at", { ascending: false }).limit(3);
+      const alertsData = alerts || [];
       if (alerts) setTopAlerts(alerts);
-    } catch (e: any) { 
+
+      useDataCache.getState().set(cacheKey, { purchases: mappedPurchases, topAlerts: alertsData });
+    } catch (e: any) {
       console.error("Error fetching purchases:", e);
-      toast.error("Error al cargar órdenes"); 
+      toast.error("Error al cargar órdenes");
     }
     finally { setLoading(false); }
   }, [currentUser?.company_id]);
@@ -403,6 +418,9 @@ export default function OrdenesCompraPage() {
 
       toast.success(emit ? `Orden ${pNum} emitida ✓` : `Borrador ${pNum} guardado`);
       setNewOpen(false);
+      useDataCache.getState().invalidatePrefix("compras_");
+      useDataCache.getState().invalidatePrefix("inventario_");
+      useDataCache.getState().invalidatePrefix("finanzas_");
       fetchData();
     } catch (e: any) { 
       toast.error("Error al guardar", { description: e.message }); 
@@ -463,6 +481,7 @@ export default function OrdenesCompraPage() {
     try {
       await supabase.from("purchases").update({ status: "cancelled" } as any).eq("id", p.id);
       toast.success("Orden cancelada");
+      useDataCache.getState().invalidatePrefix("compras_");
       fetchData();
     } catch {
       toast.error("Error al cancelar");

@@ -10,6 +10,7 @@ import { Plus, Search, Flame } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useDataCache } from "@/lib/data-cache";
 
 export default function CRMPage() {
   const { user } = useUser();
@@ -53,6 +54,16 @@ export default function CRMPage() {
   }, [user]);
 
   const fetchOportunidades = async () => {
+    if (!user?.company_id) return;
+
+    const cacheKey = `crm_${user.company_id}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setOportunidades(cached.oportunidades);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     const { data, error } = await supabase
       .from("crm_oportunidades")
@@ -67,6 +78,7 @@ export default function CRMPage() {
       toast.error("Error al cargar oportunidades");
     } else {
       setOportunidades(data || []);
+      useDataCache.getState().set(cacheKey, { oportunidades: data || [] });
     }
     setLoading(false);
   };
@@ -74,15 +86,17 @@ export default function CRMPage() {
   const handleUpdateEtapa = async (id: string, newEtapa: string) => {
     const orig = [...oportunidades];
     setOportunidades(ops => ops.map(o => o.id === id ? { ...o, etapa: newEtapa } : o));
-    
+
     const { error } = await supabase
       .from("crm_oportunidades")
       .update({ etapa: newEtapa })
       .eq("id", id);
-      
+
     if (error) {
       toast.error("No se pudo mover la oportunidad");
       setOportunidades(orig);
+    } else if (user?.company_id) {
+      useDataCache.getState().invalidate(`crm_${user.company_id}`);
     }
   };
 
@@ -168,6 +182,7 @@ export default function CRMPage() {
               oportunidad={selectedOp} 
               onClose={() => setSelectedOp(null)}
               onUpdate={() => {
+                if (user?.company_id) useDataCache.getState().invalidate(`crm_${user.company_id}`);
                 fetchOportunidades();
                 setSelectedOp(null);
               }}
@@ -176,10 +191,13 @@ export default function CRMPage() {
         )}
       </div>
 
-      <NuevaOportunidadModal 
-        open={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSuccess={fetchOportunidades}
+      <NuevaOportunidadModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={() => {
+          if (user?.company_id) useDataCache.getState().invalidate(`crm_${user.company_id}`);
+          fetchOportunidades();
+        }}
       />
     </div>
   );

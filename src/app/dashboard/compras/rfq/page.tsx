@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { useDataCache } from "@/lib/data-cache";
 
 type Product = { id: string; name: string; sku: string };
 type Supplier = { id: string; name: string; rif: string };
@@ -63,6 +64,17 @@ export default function RFQPage() {
 
   const fetchData = useCallback(async () => {
     if (!user?.company_id) return;
+
+    const cacheKey = `compras_rfq_${user.company_id}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setRfqs(cached.rfqs);
+      setProducts(cached.products);
+      setSuppliers(cached.suppliers);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const [rfqRes, prodRes, supRes] = await Promise.all([
@@ -79,6 +91,11 @@ export default function RFQPage() {
       setRfqs(rfqRes.data || []);
       setProducts(prodRes.data || []);
       setSuppliers(supRes.data || []);
+      useDataCache.getState().set(cacheKey, {
+        rfqs: rfqRes.data || [],
+        products: prodRes.data || [],
+        suppliers: supRes.data || [],
+      });
     } catch (err: any) {
       toast.error("Error cargando RFQs", { description: err.message });
     } finally {
@@ -140,6 +157,7 @@ export default function RFQPage() {
       setFormItems([]);
       setSelectedSuppliers([]);
       setFormDates({ created_at: new Date().toISOString().split("T")[0], expires_at: "", notes: "" });
+      if (user?.company_id) useDataCache.getState().invalidate(`compras_rfq_${user.company_id}`);
       fetchData();
     } catch (err: any) {
       toast.error("Error al crear RFQ", { description: err.message });
@@ -153,6 +171,7 @@ export default function RFQPage() {
      try {
        await supabase.from("purchase_rfq").update({ status: 'Cancelada' }).eq("id", id);
        toast.success("Cancelada correctamente");
+       if (user?.company_id) useDataCache.getState().invalidate(`compras_rfq_${user.company_id}`);
        fetchData();
      } catch(e:any) { toast.error("Error", {description: e.message}); }
   };

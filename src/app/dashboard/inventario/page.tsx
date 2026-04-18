@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
+import { useDataCache } from "@/lib/data-cache";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { MovementHistoryTable } from "@/components/inventory/movement-history-table";
@@ -31,11 +32,24 @@ export default function InventarioPage() {
     exitsThisMonth: 0,
   });
 
-  const triggerRefresh = () => setRefreshKey((k) => k + 1);
+  const triggerRefresh = () => {
+    if (user?.company_id) {
+      useDataCache.getState().invalidate(`inventario_${user.company_id}`);
+    }
+    setRefreshKey((k) => k + 1);
+  };
 
   // ─── Stats de movimientos ──────────────────────────────────────────────────
   const fetchStats = useCallback(async () => {
     if (!user?.company_id) return;
+
+    const cacheKey = `inventario_${user.company_id}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setStats(cached.stats);
+      setStatsLoading(false);
+      return;
+    }
 
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
@@ -61,11 +75,13 @@ export default function InventarioPage() {
           .gte("created_at", startOfMonth.toISOString()),
       ]);
 
-      setStats({
+      const newStats = {
         totalMovements: totalRes.count ?? 0,
         entriesThisMonth: entriesRes.count ?? 0,
         exitsThisMonth: exitsRes.count ?? 0,
-      });
+      };
+      setStats(newStats);
+      useDataCache.getState().set(cacheKey, { stats: newStats });
     } finally {
       setStatsLoading(false);
     }

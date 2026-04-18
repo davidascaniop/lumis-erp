@@ -16,6 +16,7 @@ import {
 } from "@/lib/utils/branding-utils";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "sonner";
+import { useDataCache } from "@/lib/data-cache";
 
 type FollowupType = "ventas" | "cobranza" | "fidelizacion";
 
@@ -45,8 +46,17 @@ export default function SeguimientoPage() {
   useEffect(() => {
     async function fetchData() {
       if (!user?.company_id) return;
+
+      const cacheKey = `crm_prospectos_${user.company_id}_${filter}`;
+      const cached = useDataCache.getState().get(cacheKey);
+      if (cached) {
+        setData(cached.data);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
-      
+
       try {
         if (filter === "ventas") {
           // Fetch pending quotes
@@ -62,7 +72,9 @@ export default function SeguimientoPage() {
             .eq("status", "open")
             .limit(50);
           
-          setData(quotes || []);
+          const _q = quotes || [];
+          setData(_q);
+          useDataCache.getState().set(cacheKey, { data: _q });
         } else if (filter === "cobranza") {
           // Fetch overdue receivables — only real open/overdue records
           const { data: receivables } = await supabase
@@ -79,7 +91,9 @@ export default function SeguimientoPage() {
             .in("status", ["open", "overdue", "partial"])
             .limit(50);
           
-          setData(receivables || []);
+          const _r = receivables || [];
+          setData(_r);
+          useDataCache.getState().set(cacheKey, { data: _r });
         } else {
           // Fidelización: only real partners who have placed orders before
           const { data: partners } = await supabase
@@ -91,7 +105,9 @@ export default function SeguimientoPage() {
             .order("last_order_at", { ascending: true })
             .limit(50);
           
-          setData(partners?.map(p => ({ ...p, partners: p })) || []);
+          const _p = partners?.map(p => ({ ...p, partners: p })) || [];
+          setData(_p);
+          useDataCache.getState().set(cacheKey, { data: _p });
         }
       } catch (error) {
         console.error("Error fetching followup data:", error);

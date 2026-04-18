@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { recordSeedBlessing, recordSeedShare } from "@/lib/actions/seeds";
+import { useDataCache } from "@/lib/data-cache";
 
 export default function SemillasAppPage() {
   const supabase = createClient();
@@ -16,6 +17,14 @@ export default function SemillasAppPage() {
   const [blessedSeeds, setBlessedSeeds] = useState<Set<string>>(new Set());
 
   const fetchSeeds = async () => {
+    const cacheKey = `semillas_global`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setSeeds(cached.seeds);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     const { data } = await supabase
       .from("daily_seeds")
@@ -24,6 +33,7 @@ export default function SemillasAppPage() {
       .order("scheduled_date", { ascending: false });
 
     setSeeds(data || []);
+    useDataCache.getState().set(cacheKey, { seeds: data || [] });
     setLoading(false);
   };
 

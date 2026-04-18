@@ -31,6 +31,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import Link from "next/link";
+import { useDataCache } from "@/lib/data-cache";
 
 const ACCOUNT_TYPE_ICONS: Record<string, { icon: any; color: string; bg: string }> = {
   banco: { icon: Landmark, color: "text-blue-500", bg: "bg-blue-500/10" },
@@ -94,6 +95,19 @@ function FlujoContent() {
 
   const fetchData = async () => {
     if (!companyId) return;
+
+    const cacheKey = `finanzas_flujo_${companyId}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setAccounts(cached.accounts);
+      setMovements(cached.movements);
+      setUpcomingInflows(cached.upcomingInflows);
+      setUpcomingOutflows(cached.upcomingOutflows);
+      setProjection(cached.projection);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       // Fetch treasury accounts
@@ -216,6 +230,14 @@ function FlujoContent() {
       }
       setProjection(projData);
 
+      useDataCache.getState().set(cacheKey, {
+        accounts: acctData || [],
+        movements: mvData || [],
+        upcomingInflows: upIn,
+        upcomingOutflows: [...upOut, ...recurOut],
+        projection: projData,
+      });
+
     } catch (error) {
       console.error("Error fetching flow data:", error);
     } finally {
@@ -333,6 +355,7 @@ function FlujoContent() {
       toast.success("Movimiento registrado");
       setManualOpen(false);
       setFormData({ type: "entrada", account_id: "", amount: "", description: "", category: "Ajuste manual", date: format(new Date(), "yyyy-MM-dd") });
+      useDataCache.getState().invalidatePrefix("finanzas_");
       fetchData();
     } catch (err: any) {
       toast.error("Error al registrar", { description: err.message });

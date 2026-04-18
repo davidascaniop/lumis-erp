@@ -34,6 +34,7 @@ import {
   Tags,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useDataCache } from "@/lib/data-cache";
 
 const CATEGORY_COLORS = [
   "#E040FB", "#7C4DFF", "#00E5CC", "#FFB800",
@@ -79,6 +80,17 @@ export default function CategoriasPage() {
 
   async function fetchData() {
     if (!user?.company_id) return;
+
+    const cacheKey = `productos_categorias_${user.company_id}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setCategories(cached.categories);
+      setAttributes(cached.attributes);
+      setProductCountMap(cached.productCountMap);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const [catRes, attrRes, prodRes] = await Promise.all([
@@ -108,6 +120,12 @@ export default function CategoriasPage() {
         if (p.category) countMap[p.category] = (countMap[p.category] || 0) + 1;
       });
       setProductCountMap(countMap);
+
+      useDataCache.getState().set(cacheKey, {
+        categories: catRes.data || [],
+        attributes: attrRes.data || [],
+        productCountMap: countMap,
+      });
     } catch (err) {
       console.error(err);
     } finally {
@@ -156,6 +174,7 @@ export default function CategoriasPage() {
         toast.success("Categoría creada");
       }
       setOpenCatModal(false);
+      if (user?.company_id) useDataCache.getState().invalidatePrefix("productos_");
       await fetchData();
     } catch (error: any) {
       toast.error("Error al guardar categoría", { description: error.message });
@@ -169,6 +188,7 @@ export default function CategoriasPage() {
     try {
       await supabase.from("product_categories").delete().eq("id", id);
       toast.success("Categoría eliminada");
+      if (user?.company_id) useDataCache.getState().invalidatePrefix("productos_");
       fetchData();
     } catch (error: any) {
       toast.error("Error al eliminar", { description: error.message });
@@ -207,6 +227,7 @@ export default function CategoriasPage() {
         toast.success("Atributo creado");
       }
       setOpenAttrModal(false);
+      if (user?.company_id) useDataCache.getState().invalidatePrefix("productos_");
       await fetchData();
     } catch (error: any) {
       toast.error("Error al guardar atributo", { description: error.message });
@@ -220,6 +241,7 @@ export default function CategoriasPage() {
     try {
       await supabase.from("product_attributes").delete().eq("id", id);
       toast.success("Atributo eliminado");
+      if (user?.company_id) useDataCache.getState().invalidatePrefix("productos_");
       fetchData();
     } catch (error: any) {
       toast.error("Error al eliminar", { description: error.message });

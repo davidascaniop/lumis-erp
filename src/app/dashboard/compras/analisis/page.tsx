@@ -25,6 +25,7 @@ import {
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useDataCache } from "@/lib/data-cache";
 
 // ─── Interfaces ─────────────────────────────────────────────────────────────
 interface PriceHistoryRow {
@@ -98,6 +99,17 @@ export default function AnalisisPreciosPage() {
   // Fetch
   const fetchData = useCallback(async () => {
     if (!user?.company_id) return;
+
+    const cacheKey = `compras_analisis_${user.company_id}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setRawData(cached.rawData);
+      setAlerts(cached.alerts);
+      setAllProducts(cached.allProducts);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const [histRes, alertRes] = await Promise.all([
@@ -135,6 +147,18 @@ export default function AnalisisPreciosPage() {
       // 3. Independent: Fetch all products for searching
       const { data: pData } = await supabase.from("products").select("id, name, sku").eq("company_id", user.company_id);
       if (pData) setAllProducts(pData);
+
+      const mappedAlerts = alertRes.data ? alertRes.data.map((a: any) => ({
+        ...a,
+        product_name: a.products?.name ?? "–", supplier_name: a.suppliers?.name ?? "–",
+        old_price: Number(a.old_price), new_price: Number(a.new_price), variation_percent: Number(a.variation_percent)
+      })) : [];
+
+      useDataCache.getState().set(cacheKey, {
+        rawData: mapped,
+        alerts: mappedAlerts,
+        allProducts: pData || [],
+      });
     } catch (err: any) {
       toast.error("Error al cargar datos", { description: err.message });
     } finally {
@@ -231,6 +255,7 @@ export default function AnalisisPreciosPage() {
     try {
       await supabase.from("price_alerts").update({ is_read: true }).eq("company_id", user.company_id).eq("is_read", false);
       setAlerts(prev => prev.map(a => ({...a, is_read:true})));
+      useDataCache.getState().invalidate(`compras_analisis_${user.company_id}`);
       toast.success("Alertas marcadas como leídas");
     } catch { toast.error("Error al actualizar alertas"); }
   };

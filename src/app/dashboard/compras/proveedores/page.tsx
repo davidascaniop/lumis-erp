@@ -44,6 +44,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUser } from "@/hooks/use-user";
+import { useDataCache } from "@/lib/data-cache";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface Supplier {
@@ -144,6 +145,17 @@ export default function ProveedoresPage() {
     if (!cid) return;
     setCompanyId(cid);
     setUserId(currentUser?.id || null);
+
+    const cacheKey = `compras_proveedores_${cid}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setSuppliers(cached.suppliers);
+      setPurchasesThisMonth(cached.purchasesThisMonth);
+      setTotalThisMonth(cached.totalThisMonth);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const [{ data }, { data: ordersData }, { data: monthPurchases }] = await Promise.all([
@@ -157,15 +169,22 @@ export default function ProveedoresPage() {
         if (o.supplier_id) orderCounts[o.supplier_id] = (orderCounts[o.supplier_id] ?? 0) + 1;
       });
 
-      setSuppliers(((data as Supplier[]) ?? []).map(s => ({
+      const mappedSuppliers = ((data as Supplier[]) ?? []).map(s => ({
         ...s,
         _total_orders: orderCounts[s.id] ?? 0
-      })));
+      }));
+      setSuppliers(mappedSuppliers);
 
-      setPurchasesThisMonth(monthPurchases?.length ?? 0);
-      setTotalThisMonth(
-        (monthPurchases ?? []).reduce((sum, p) => sum + (p.total_usd ?? 0), 0)
-      );
+      const ptm = monthPurchases?.length ?? 0;
+      const ttm = (monthPurchases ?? []).reduce((sum, p) => sum + (p.total_usd ?? 0), 0);
+      setPurchasesThisMonth(ptm);
+      setTotalThisMonth(ttm);
+
+      useDataCache.getState().set(cacheKey, {
+        suppliers: mappedSuppliers,
+        purchasesThisMonth: ptm,
+        totalThisMonth: ttm,
+      });
     } catch (err) {
       console.error("Error fetching suppliers:", err);
       toast.error("Error al cargar proveedores");
@@ -249,6 +268,7 @@ export default function ProveedoresPage() {
       }
 
       setModalOpen(false);
+      useDataCache.getState().invalidatePrefix("compras_");
       fetchData();
     } catch (err: any) {
       toast.error("Error al guardar proveedor", { description: err.message });
@@ -266,6 +286,7 @@ export default function ProveedoresPage() {
         .eq("id", supplier.id);
       if (error) throw error;
       toast.success(supplier.is_active ? "Proveedor desactivado" : "Proveedor activado");
+      useDataCache.getState().invalidatePrefix("compras_");
       fetchData();
     } catch (err: any) {
       toast.error("Error al cambiar estado", { description: err.message });

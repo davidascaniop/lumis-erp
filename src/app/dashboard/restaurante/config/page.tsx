@@ -5,6 +5,7 @@ import { Loader2, Save, Plus, Trash2, UtensilsCrossed, Palette } from "lucide-re
 import { useUser } from "@/hooks/use-user";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { useDataCache } from "@/lib/data-cache";
 
 const DEFAULT_COLORS = ["#10B981", "#F59E0B", "#3B82F6", "#8B5CF6", "#EF4444", "#EC4899", "#14B8A6", "#F97316"];
 
@@ -28,6 +29,14 @@ export default function RestaurantConfigPage() {
   useEffect(() => {
     if (!companyId) return;
     (async () => {
+      const cacheKey = `restaurante_config_${companyId}`;
+      const cached = useDataCache.getState().get(cacheKey);
+      if (cached) {
+        setZones(cached.zones);
+        setConfig(cached.config);
+        return;
+      }
+
       // Load zones
       const { data: zonesData } = await supabase
         .from("restaurant_zones")
@@ -42,15 +51,22 @@ export default function RestaurantConfigPage() {
         .select("*")
         .eq("company_id", companyId)
         .single();
-      if (configData) {
-        setConfig({
-          alert_minutes_yellow: configData.alert_minutes_yellow ?? 10,
-          alert_minutes_red: configData.alert_minutes_red ?? 15,
-          require_guests: configData.require_guests ?? true,
-          allow_multiple_sends: configData.allow_multiple_sends ?? true,
-          notify_waiter_on_ready: configData.notify_waiter_on_ready ?? true,
-        });
-      }
+
+      const configObj = configData ? {
+        alert_minutes_yellow: configData.alert_minutes_yellow ?? 10,
+        alert_minutes_red: configData.alert_minutes_red ?? 15,
+        require_guests: configData.require_guests ?? true,
+        allow_multiple_sends: configData.allow_multiple_sends ?? true,
+        notify_waiter_on_ready: configData.notify_waiter_on_ready ?? true,
+      } : {
+        alert_minutes_yellow: 10,
+        alert_minutes_red: 15,
+        require_guests: true,
+        allow_multiple_sends: true,
+        notify_waiter_on_ready: true,
+      };
+      if (configData) setConfig(configObj);
+      useDataCache.getState().set(cacheKey, { zones: zonesData || [], config: configObj });
     })();
   }, [companyId, supabase]);
 
@@ -65,6 +81,7 @@ export default function RestaurantConfigPage() {
           ...config,
         }, { onConflict: "company_id" });
       if (error) throw error;
+      if (companyId) useDataCache.getState().invalidatePrefix("restaurante_");
       toast.success("Configuración guardada");
     } catch (err: any) {
       toast.error("Error al guardar", { description: err.message });
@@ -84,6 +101,7 @@ export default function RestaurantConfigPage() {
       if (error) throw error;
       setZones((prev) => [...prev, data]);
       setNewZoneName("");
+      if (companyId) useDataCache.getState().invalidatePrefix("restaurante_");
       toast.success(`Zona "${newZoneName}" creada`);
     } catch (err: any) {
       toast.error("Error al crear zona", { description: err.message });
@@ -95,6 +113,7 @@ export default function RestaurantConfigPage() {
       const { error } = await supabase.from("restaurant_zones").delete().eq("id", zoneId);
       if (error) throw error;
       setZones((prev) => prev.filter((z) => z.id !== zoneId));
+      if (companyId) useDataCache.getState().invalidatePrefix("restaurante_");
       toast.success("Zona eliminada");
     } catch (err: any) {
       toast.error("Error al eliminar zona");

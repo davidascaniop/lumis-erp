@@ -14,6 +14,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUser } from "@/hooks/use-user";
+import { useDataCache } from "@/lib/data-cache";
 
 const supabase = createClient();
 
@@ -43,6 +44,17 @@ export default function EquipoVentasPage() {
     const cid = currentUser?.company_id;
     if (!cid) return;
     setCompanyId(cid);
+
+    const cacheKey = `reportes_equipo_${cid}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setUsers(cached.users);
+      setOrders(cached.orders);
+      setPartners(cached.partners);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const oneYearAgo = subYears(new Date(), 1).toISOString();
@@ -60,6 +72,11 @@ export default function EquipoVentasPage() {
       setUsers(usrRes.data || []);
       setOrders(ordRes.data || []);
       setPartners(ptnRes.data || []);
+      useDataCache.getState().set(cacheKey, {
+        users: usrRes.data || [],
+        orders: ordRes.data || [],
+        partners: ptnRes.data || [],
+      });
     } finally {
       setLoading(false);
     }

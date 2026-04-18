@@ -8,6 +8,7 @@ import { KitchenTicket } from "@/components/restaurant/kitchen-ticket";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useDataCache } from "@/lib/data-cache";
 
 export default function CocinaPage() {
   const { user, loading: userLoading } = useUser();
@@ -21,16 +22,24 @@ export default function CocinaPage() {
   useEffect(() => {
     if (!companyId) return;
     (async () => {
+      const cacheKey = `restaurante_cocina_${companyId}`;
+      const cached = useDataCache.getState().get(cacheKey, 30_000);
+      if (cached) {
+        setConfig(cached.config);
+        return;
+      }
       const { data } = await supabase
         .from("restaurant_config")
         .select("*")
         .eq("company_id", companyId)
         .single();
       if (data) {
-        setConfig({
+        const c = {
           alert_minutes_yellow: data.alert_minutes_yellow || 10,
           alert_minutes_red: data.alert_minutes_red || 15,
-        });
+        };
+        setConfig(c);
+        useDataCache.getState().set(cacheKey, { config: c });
       }
     })();
   }, [companyId, supabase]);

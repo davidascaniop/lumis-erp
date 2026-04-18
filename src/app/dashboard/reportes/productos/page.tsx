@@ -15,6 +15,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
 import { useUser } from "@/hooks/use-user";
+import { useDataCache } from "@/lib/data-cache";
 
 const supabase = createClient();
 
@@ -37,6 +38,16 @@ export default function ProductosReportePage() {
     const cid = currentUser?.company_id;
     if (!cid) return;
     setCompanyId(cid);
+
+    const cacheKey = `reportes_productos_${cid}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setProducts(cached.products);
+      setOrderItems(cached.orderItems);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const oneYearAgo = subYears(new Date(), 1).toISOString();
@@ -53,6 +64,7 @@ export default function ProductosReportePage() {
 
       setProducts(prodRes.data || []);
       setOrderItems(itemRes.data || []);
+      useDataCache.getState().set(cacheKey, { products: prodRes.data || [], orderItems: itemRes.data || [] });
     } finally {
       setLoading(false);
     }

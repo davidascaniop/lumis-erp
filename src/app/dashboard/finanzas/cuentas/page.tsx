@@ -23,6 +23,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { useDataCache } from "@/lib/data-cache";
 
 const ACCOUNT_TYPE_CONFIG: Record<string, { icon: any; color: string; bg: string; label: string }> = {
   banco: { icon: Landmark, color: "text-blue-500", bg: "bg-blue-500/10", label: "Banco" },
@@ -73,6 +74,15 @@ function CuentasContent() {
 
   const fetchData = async () => {
     if (!user?.company_id) return;
+
+    const cacheKey = `finanzas_cuentas_${user.company_id}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setAccounts(cached.accounts);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -82,6 +92,7 @@ function CuentasContent() {
         .order("created_at", { ascending: false });
       if (error) throw error;
       setAccounts(data || []);
+      useDataCache.getState().set(cacheKey, { accounts: data || [] });
     } catch (err: any) {
       console.error("Error fetching accounts:", err);
     } finally {
@@ -181,6 +192,7 @@ function CuentasContent() {
       toast.success("Cuenta creada exitosamente");
       setCreateOpen(false);
       resetForm();
+      useDataCache.getState().invalidatePrefix("finanzas_");
       fetchData();
     } catch (err: any) {
       toast.error("Error al crear cuenta", { description: err.message });
@@ -207,6 +219,7 @@ function CuentasContent() {
 
       toast.success("Cuenta actualizada");
       setEditOpen(false);
+      useDataCache.getState().invalidatePrefix("finanzas_");
       fetchData();
     } catch (err: any) {
       toast.error("Error al actualizar", { description: err.message });
@@ -219,6 +232,7 @@ function CuentasContent() {
     try {
       await supabase.from("treasury_accounts").update({ is_active: !account.is_active }).eq("id", account.id);
       toast.success(account.is_active ? "Cuenta desactivada" : "Cuenta activada");
+      useDataCache.getState().invalidatePrefix("finanzas_");
       fetchData();
     } catch (err: any) {
       toast.error("Error al cambiar estado");
@@ -301,6 +315,7 @@ function CuentasContent() {
       toast.success("Transferencia realizada exitosamente");
       setTransferOpen(false);
       setTransferData({ from_account_id: "", to_account_id: "", amount: "", date: format(new Date(), "yyyy-MM-dd"), notes: "", exchange_rate: "" });
+      useDataCache.getState().invalidatePrefix("finanzas_");
       fetchData();
     } catch (err: any) {
       toast.error("Error en transferencia", { description: err.message });

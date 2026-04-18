@@ -9,6 +9,7 @@ import { OrderEditor } from "@/components/restaurant/order-editor";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useDataCache } from "@/lib/data-cache";
 
 function ComandasContent() {
   const { user, loading: userLoading } = useUser();
@@ -37,6 +38,13 @@ function ComandasContent() {
   useEffect(() => {
     if (!companyId) return;
     (async () => {
+      const cacheKey = `restaurante_comandas_${companyId}`;
+      const cached = useDataCache.getState().get(cacheKey, 30_000);
+      if (cached) {
+        setProducts(cached.products);
+        setCategories(cached.categories);
+        return;
+      }
       const [prRes, catRes] = await Promise.all([
         supabase
           .from("products")
@@ -49,8 +57,11 @@ function ComandasContent() {
           .eq("company_id", companyId)
           .order("name"),
       ]);
-      setProducts(prRes.data || []);
-      setCategories((catRes.data || []).map((c: any) => c.name));
+      const prods = prRes.data || [];
+      const cats = (catRes.data || []).map((c: any) => c.name);
+      setProducts(prods);
+      setCategories(cats);
+      useDataCache.getState().set(cacheKey, { products: prods, categories: cats });
     })();
   }, [companyId, supabase]);
 

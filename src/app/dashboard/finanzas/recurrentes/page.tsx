@@ -57,6 +57,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatCurrency, cn } from "@/lib/utils";
+import { useDataCache } from "@/lib/data-cache";
 
 // --- Types ---
 type Frequency = "Semanal" | "Quincenal" | "Mensual" | "Bimestral" | "Anual";
@@ -112,6 +113,15 @@ function RecurrentesContent() {
 
   const fetchData = async () => {
     if (!user?.company_id) return;
+
+    const cacheKey = `finanzas_recurrentes_${user.company_id}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setRecurrentes(cached.recurrentes);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -122,6 +132,7 @@ function RecurrentesContent() {
 
       if (error) throw error;
       setRecurrentes(data || []);
+      useDataCache.getState().set(cacheKey, { recurrentes: data || [] });
     } catch (err: any) {
       console.error("Fetch recurrentes error:", err);
       // Fail gracefully if table doesn't exist yet
@@ -185,6 +196,7 @@ function RecurrentesContent() {
       toast.success("Gasto recurrente programado");
       setCreateOpen(false);
       resetForm();
+      useDataCache.getState().invalidatePrefix("finanzas_");
       fetchData();
     } catch (err: any) {
       toast.error("Error al guardar", { description: "Verifica que la tabla de base de datos exista." });
@@ -257,6 +269,7 @@ function RecurrentesContent() {
       }
 
       toast.success("Pago registrado y descontado del flujo de caja");
+      useDataCache.getState().invalidatePrefix("finanzas_");
       fetchData();
     } catch (err: any) {
       toast.error("Error al registrar pago", { description: err.message });
@@ -268,6 +281,7 @@ function RecurrentesContent() {
   const toggleActive = async (id: string, current: boolean) => {
      try {
        await supabase.from("recurring_expenses").update({ is_active: !current }).eq("id", id);
+       useDataCache.getState().invalidatePrefix("finanzas_");
        fetchData();
      } catch (err) {}
   };
