@@ -4,6 +4,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { formatCurrency } from "@/lib/utils";
 import { WhatsAppButton } from "./WhatsAppButton";
 import { Star } from "lucide-react";
+import { useCallback, useMemo } from "react";
 
 interface KanbanBoardProps {
   oportunidades: any[];
@@ -19,22 +20,37 @@ const ETAPAS = [
 ];
 
 export function KanbanBoard({ oportunidades, onUpdateEtapa, onSelectOp }: KanbanBoardProps) {
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
-    
-    const sourceCol = result.source.droppableId;
-    const destCol = result.destination.droppableId;
-    
-    if (sourceCol === destCol) return;
-    
-    onUpdateEtapa(result.draggableId, destCol);
-  };
+  // Agrupar oportunidades por etapa en un solo pase.
+  // Antes, cada render iteraba el array completo 4 veces (una por etapa)
+  // — con 100+ oportunidades y drag-drop triggereando renders constantes,
+  // eso se notaba en devices modestos. Ahora es O(n) una vez por cambio.
+  const opsByEtapa = useMemo(() => {
+    const map: Record<string, any[]> = {};
+    ETAPAS.forEach((e) => {
+      map[e.id] = [];
+    });
+    for (const op of oportunidades) {
+      if (map[op.etapa]) map[op.etapa].push(op);
+    }
+    return map;
+  }, [oportunidades]);
+
+  const handleDragEnd = useCallback(
+    (result: any) => {
+      if (!result.destination) return;
+      const sourceCol = result.source.droppableId;
+      const destCol = result.destination.droppableId;
+      if (sourceCol === destCol) return;
+      onUpdateEtapa(result.draggableId, destCol);
+    },
+    [onUpdateEtapa],
+  );
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="flex gap-4 h-full pb-4 overflow-x-auto min-w-max">
         {ETAPAS.map((etapa) => {
-          const columnOps = oportunidades.filter((op) => op.etapa === etapa.id);
+          const columnOps = opsByEtapa[etapa.id] || [];
           
           return (
             <div key={etapa.id} className="w-[300px] flex flex-col flex-shrink-0 bg-surface-base border border-border rounded-2xl overflow-hidden shadow-sm">

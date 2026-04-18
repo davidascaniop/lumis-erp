@@ -68,8 +68,16 @@ export default async function DashboardPage() {
   let recurringAlerts = recurringRes.data || [];
   let pendingOrdersCount = ordersActiveRes.count ?? 0;
 
-  const totalCartera = allReceivables.reduce((s, r) => s + (r.balance_usd ?? 0), 0);
-  const totalMora = allReceivables.filter((r) => new Date(r.due_date) < today).reduce((s, r) => s + (r.balance_usd ?? 0), 0);
+  // Single-pass sobre allReceivables: antes eran 2 iteraciones (reduce + filter+reduce)
+  const { totalCartera, totalMora } = allReceivables.reduce(
+    (acc, r) => {
+      const balance = r.balance_usd ?? 0;
+      acc.totalCartera += balance;
+      if (new Date(r.due_date) < today) acc.totalMora += balance;
+      return acc;
+    },
+    { totalCartera: 0, totalMora: 0 },
+  );
   const recaudadoMes = pays.reduce((s, p) => s + (p.amount_usd ?? 0), 0);
 
   const activeRecurringAlerts = recurringAlerts.filter(r => { const day = Number(r.due_day); const todayNum = today.getDate(); return (day - todayNum) >= 0 && (day - todayNum) <= (r.alert_days || 3); });

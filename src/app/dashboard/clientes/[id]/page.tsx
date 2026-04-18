@@ -77,11 +77,13 @@ export default function ClientDetailsPage({ params }: { params: any }) {
     }
     setClientData(rawClient);
 
-    const [ordersRes, recesRes, opsRes, fullOrdersRes] = await Promise.all([
+    // Una sola query a orders con count + data completa (antes eran 2)
+    const [ordersRes, recesRes, opsRes] = await Promise.all([
       supabase
         .from("orders")
-        .select("total_usd", { count: "exact" })
-        .eq("partner_id", id),
+        .select("*", { count: "exact" })
+        .eq("partner_id", id)
+        .order("created_at", { ascending: false }),
       supabase
         .from("receivables")
         .select("*")
@@ -91,19 +93,15 @@ export default function ClientDetailsPage({ params }: { params: any }) {
         .select("*")
         .eq("cliente_id", id)
         .order("created_at", { ascending: false }),
-      supabase
-        .from("orders")
-        .select("*")
-        .eq("partner_id", id)
-        .order("created_at", { ascending: false })
     ]);
 
-    setOrderCount(ordersRes.count || 0);
+    const ordersData = ordersRes.data || [];
+    setOrderCount(ordersRes.count ?? ordersData.length);
     setTotalVentas(
-      ordersRes.data?.reduce(
-        (acc: number, cur: any) => acc + Number(cur.total_usd),
+      ordersData.reduce(
+        (acc: number, cur: any) => acc + Number(cur.total_usd || 0),
         0,
-      ) || 0,
+      ),
     );
     const currentDebt =
       recesRes.data?.reduce(
@@ -113,7 +111,7 @@ export default function ClientDetailsPage({ params }: { params: any }) {
     setTotalDebt(currentDebt);
     setReceivables(recesRes.data || []);
     setOportunidades(opsRes.data || []);
-    setOrders(fullOrdersRes.data || []);
+    setOrders(ordersData);
     setLoading(false);
   };
 

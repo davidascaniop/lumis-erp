@@ -150,7 +150,6 @@ function NuevaVentaContent() {
         ]);
 
         const partnersData = pRes.data || [];
-        setPartners(partnersData);
 
         const processedKits = (kitsRes.data || []).map((k: any) => {
           const comps = (k.product_kit_items || []).map((pki: any) => ({
@@ -170,10 +169,7 @@ function NuevaVentaContent() {
         });
 
         const allProducts = [...(prRes.data || []), ...processedKits];
-        setProducts(allProducts);
-
         const categoriesData = catRes.data ? catRes.data.map((c: any) => c.name) : [];
-        setCategories(categoriesData);
 
         // Save to cache for instant load next time
         useDataCache.getState().set(cacheKey, {
@@ -182,7 +178,16 @@ function NuevaVentaContent() {
           categories: categoriesData,
         });
 
-        if (preSelectedPartnerId && partnersData) {
+        // Batch updates juntas para evitar cascada de re-renders.
+        // React 18+ auto-batching ya combina estos updates dentro del mismo
+        // microtask async, pero dejamos el comentario para que quede claro
+        // que el orden importa: preSelected debe leerse de partnersData (no
+        // del state que todavía no se commiteó).
+        setPartners(partnersData);
+        setProducts(allProducts);
+        setCategories(categoriesData);
+
+        if (preSelectedPartnerId && partnersData.length > 0) {
           const p = partnersData.find((x: any) => x.id === preSelectedPartnerId);
           if (p) setSelectedPartner(p);
         }

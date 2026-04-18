@@ -123,29 +123,46 @@ export default function PresupuestosPage() {
       if (oError) throw oError;
 
 
-      // 4. Crear los items del pedido y actualizar stock (en paralelo por item)
-      await Promise.all(
-        (items ?? []).map(async (item: any) => {
-          await supabase.from("order_items").insert({
-            order_id: newOrder.id,
-            product_id: item.product_id,
-            qty: item.qty,
-            price_usd: item.price_usd,
-            subtotal: item.subtotal,
-          });
-          const { data: product } = await supabase
-            .from("products")
-            .select("stock")
-            .eq("id", item.product_id)
-            .single();
-          if (product) {
-            await supabase
+      // 4. Crear items + actualizar stock en BATCH (antes eran 3N queries:
+      //    N inserts + N selects de product + N updates. Ahora son 2 queries
+      //    + N updates paralelos, con el stock actual fetcheado de una sola vez).
+      const itemsList = (items ?? []) as any[];
+      if (itemsList.length > 0) {
+        // 4a. Batch insert de todos los order_items (1 query)
+        const itemsPayload = itemsList.map((item) => ({
+          order_id: newOrder.id,
+          product_id: item.product_id,
+          qty: item.qty,
+          price_usd: item.price_usd,
+          subtotal: item.subtotal,
+        }));
+        const { error: itemsError } = await supabase
+          .from("order_items")
+          .insert(itemsPayload);
+        if (itemsError) throw itemsError;
+
+        // 4b. Batch fetch del stock actual de todos los products (1 query)
+        const productIds = itemsList.map((i) => i.product_id);
+        const { data: productsStock } = await supabase
+          .from("products")
+          .select("id, stock")
+          .in("id", productIds);
+
+        // 4c. Updates de stock en paralelo (solo si tenemos stock actual)
+        const stockMap = new Map(
+          (productsStock || []).map((p: any) => [p.id, p.stock ?? 0]),
+        );
+        await Promise.all(
+          itemsList.map((item) => {
+            const currentStock = stockMap.get(item.product_id);
+            if (currentStock == null) return Promise.resolve();
+            return supabase
               .from("products")
-              .update({ stock: product.stock - item.qty })
+              .update({ stock: currentStock - item.qty })
               .eq("id", item.product_id);
-          }
-        })
-      );
+          }),
+        );
+      }
 
       // 5. Marcar presupuesto como convertido
       await supabase
