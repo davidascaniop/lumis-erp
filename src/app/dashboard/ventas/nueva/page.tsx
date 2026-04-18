@@ -10,7 +10,8 @@ import { useTreasuryAccounts, registerTreasuryMovement } from "@/hooks/use-treas
 import { useCompanyProfile } from "@/hooks/use-company-profile";
 import { useDataCache } from "@/lib/data-cache";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, LayoutGrid, ShoppingCart } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { ProductoGrid } from "@/components/ventas/nueva/producto-grid";
 import { CarritoPanel } from "@/components/ventas/nueva/carrito-panel";
 import { ThermalInvoiceModal, type InvoiceOrderData } from "@/components/ventas/thermal-invoice-modal";
@@ -74,6 +75,9 @@ function NuevaVentaContent() {
   const [newClientRif, setNewClientRif] = useState("");
   const [newClientPhone, setNewClientPhone] = useState("");
   const [newClientAddress, setNewClientAddress] = useState("");
+
+  // ── Mobile view toggle: en pantallas <md solo una vista visible a la vez ──
+  const [mobileView, setMobileView] = useState<"catalog" | "cart">("catalog");
 
   // ── Print Modal State ──────────────────────────────────
   const [printModalOpen, setPrintModalOpen] = useState(false);
@@ -678,27 +682,28 @@ function NuevaVentaContent() {
 
   // ── RENDER ───────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-[calc(100vh-48px)] -m-6 bg-surface-base">
-      {/* ── TOPBAR ── */}
-      <div className="px-6 py-4 flex-shrink-0 z-20 bg-white border-b border-[#F1F5F9] flex items-center justify-between">
-        <div className="flex items-center gap-4">
+    <div className="flex flex-col h-[calc(100vh-56px)] md:h-[calc(100vh-48px)] -m-3 sm:-m-4 md:-m-6 bg-surface-base">
+      {/* ── TOPBAR ── responsive */}
+      <div className="px-3 sm:px-4 md:px-6 py-3 md:py-4 flex-shrink-0 z-20 bg-white border-b border-[#F1F5F9] flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
           <button
             onClick={() => router.push("/dashboard/ventas")}
-            className="p-2 hover:bg-[#F8F9FA] rounded-full transition-all text-text-3"
+            className="p-2 hover:bg-[#F8F9FA] rounded-full transition-all text-text-3 shrink-0 active:scale-95"
+            aria-label="Volver a ventas"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="flex flex-col">
-            <h1 className="text-xl font-bold font-outfit text-[#1A1125]">
-              {editingOrder ? `Edición de Pedido ${editingOrder.order_number}` : "Nueva Venta"}
+          <div className="flex flex-col min-w-0">
+            <h1 className="text-base md:text-xl font-bold font-outfit text-[#1A1125] truncate">
+              {editingOrder ? `Edición ${editingOrder.order_number}` : "Nueva Venta"}
             </h1>
-            <p className="text-[11px] font-medium text-text-3 font-outfit uppercase tracking-wider">
+            <p className="hidden sm:block text-[11px] font-medium text-text-3 font-outfit uppercase tracking-wider">
               {editingOrder ? "Formulario de Presupuesto" : "Facturación POS"}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3 shrink-0">
           {/* Restaurant: Cobrar Mesa badge */}
           {modulesEnabled.includes('restaurante') && (
             <PendingTablesBadge
@@ -706,25 +711,41 @@ function NuevaVentaContent() {
               onClick={() => setShowCollectModal(true)}
             />
           )}
-          <div className="flex items-center gap-3 bg-[#F8F9FA] px-4 py-2 rounded-xl border border-[#E2E8F0]">
-            <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest text-right">Tasa BCV del día:</span>
-            <p className="text-[15px] font-bold text-brand font-outfit">
+          {/* BCV pill — compacta en mobile, extendida en desktop */}
+          <div className="flex items-center gap-2 md:gap-3 bg-[#F8F9FA] px-2.5 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl border border-[#E2E8F0]">
+            <span className="hidden md:inline text-[10px] font-bold text-text-3 uppercase tracking-widest text-right">
+              Tasa BCV del día:
+            </span>
+            <span className="md:hidden text-[9px] font-bold text-text-3 uppercase tracking-widest">
+              BCV:
+            </span>
+            <p className="text-[13px] md:text-[15px] font-bold text-brand font-outfit whitespace-nowrap">
               Bs. {rate?.toFixed(2)}
             </p>
           </div>
         </div>
       </div>
 
-      {/* ── BODY ── */}
-      <div className="flex flex-1 overflow-hidden bg-[#F8FAFC]">
-        {/* CATÁLOGO */}
-        <div className="flex-[7] flex flex-col overflow-hidden">
+      {/* ── BODY ── responsive: mobile toggle catálogo/carrito · desktop split */}
+      <div className="flex flex-1 overflow-hidden bg-[#F8FAFC] min-h-0">
+        {/* CATÁLOGO — visible en mobile solo cuando view=catalog · siempre visible en desktop */}
+        <div
+          className={cn(
+            "flex-col overflow-hidden flex-1 md:flex-[7]",
+            mobileView === "catalog" ? "flex" : "hidden md:flex",
+          )}
+        >
           <ProductoGrid productos={products} cart={cart} onAdd={addToCart} categories={categories} />
         </div>
 
-        {/* SIDEBAR CARRITO */}
-        <div className="flex-[4.2] flex flex-col overflow-hidden bg-[#F8FAFC] p-4 xl:p-6 border-l border-[#F1F5F9]">
-          <div className="flex-1 bg-white rounded-[40px] shadow-[0_12px_40px_rgba(0,0,0,0.03)] border border-[#EDF2F7] overflow-hidden flex flex-col">
+        {/* SIDEBAR CARRITO — visible en mobile solo cuando view=cart · siempre visible en desktop */}
+        <div
+          className={cn(
+            "flex-col overflow-hidden bg-[#F8FAFC] p-0 md:p-4 xl:p-6 md:border-l border-[#F1F5F9] flex-1 md:flex-[4.2]",
+            mobileView === "cart" ? "flex" : "hidden md:flex",
+          )}
+        >
+          <div className="flex-1 bg-white rounded-none md:rounded-[40px] shadow-none md:shadow-[0_12px_40px_rgba(0,0,0,0.03)] border-0 md:border border-[#EDF2F7] overflow-hidden flex flex-col">
             <CarritoPanel
               cart={cart}
               onUpdateQty={updateQty}
@@ -762,6 +783,56 @@ function NuevaVentaContent() {
             />
           </div>
         </div>
+      </div>
+
+      {/* ── BOTTOM TAB BAR (mobile only) ──
+          Toggle entre "Catálogo" y "Carrito". El carrito muestra un badge
+          con la cantidad de ítems. */}
+      <div className="md:hidden flex-shrink-0 grid grid-cols-2 gap-0 bg-white border-t border-[#E2E8F0] shadow-[0_-4px_12px_rgba(0,0,0,0.04)]">
+        <button
+          onClick={() => setMobileView("catalog")}
+          className={cn(
+            "flex flex-col items-center justify-center gap-0.5 py-2.5 transition-colors active:scale-95",
+            mobileView === "catalog"
+              ? "text-brand"
+              : "text-text-3",
+          )}
+          aria-pressed={mobileView === "catalog"}
+        >
+          <LayoutGrid className="w-5 h-5" />
+          <span className="text-[10px] font-bold uppercase tracking-wider">
+            Productos
+          </span>
+          {mobileView === "catalog" && (
+            <span className="absolute top-0 left-0 right-1/2 h-0.5 bg-gradient-to-r from-[#E040FB] to-[#7C4DFF]" />
+          )}
+        </button>
+
+        <button
+          onClick={() => setMobileView("cart")}
+          className={cn(
+            "relative flex flex-col items-center justify-center gap-0.5 py-2.5 transition-colors active:scale-95",
+            mobileView === "cart"
+              ? "text-brand"
+              : "text-text-3",
+          )}
+          aria-pressed={mobileView === "cart"}
+        >
+          <div className="relative">
+            <ShoppingCart className="w-5 h-5" />
+            {cart.length > 0 && (
+              <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] rounded-full bg-[#FF2D55] text-white text-[9px] font-bold flex items-center justify-center px-1 shadow-[0_0_10px_rgba(255,45,85,0.5)]">
+                {cart.length > 9 ? "9+" : cart.length}
+              </span>
+            )}
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-wider">
+            Carrito
+          </span>
+          {mobileView === "cart" && (
+            <span className="absolute top-0 left-1/2 right-0 h-0.5 bg-gradient-to-r from-[#E040FB] to-[#7C4DFF]" />
+          )}
+        </button>
       </div>
 
       {/* ── THERMAL INVOICE MODAL ── */}

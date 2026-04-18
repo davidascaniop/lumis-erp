@@ -127,27 +127,25 @@ export default function VentasPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto min-h-[80vh] flex flex-col animate-fade-in pb-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-primary text-text-1">Ventas y Pedidos</h1>
-          <p className="text-text-2 mt-1 text-sm">
+    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto min-h-[80vh] flex flex-col animate-fade-in pb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-primary text-text-1">Ventas y Pedidos</h1>
+          <p className="text-text-2 mt-1 text-xs sm:text-sm">
             Registro centralizado de cotizaciones y despachos.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/dashboard/ventas/nueva"
-            className="px-6 py-3 bg-brand-gradient text-white font-bold rounded-xl text-sm shadow-brand hover:opacity-90 transition-all active:scale-95 flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Nueva Venta
-          </Link>
-        </div>
+        <Link
+          href="/dashboard/ventas/nueva"
+          className="px-4 sm:px-6 py-2.5 sm:py-3 bg-brand-gradient text-white font-bold rounded-xl text-xs sm:text-sm shadow-brand hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2 shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          Nueva Venta
+        </Link>
       </div>
 
       <div className="bg-surface-card border border-border rounded-2xl overflow-hidden shadow-card flex flex-col flex-1 min-h-[500px]">
-        <div className="p-4 border-b border-border bg-surface-base/50 flex justify-between items-center">
+        <div className="p-3 sm:p-4 border-b border-border bg-surface-base/50 flex justify-between items-center">
           <div className="relative w-full sm:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
             <Input
@@ -159,7 +157,107 @@ export default function VentasPage() {
           </div>
         </div>
 
-        <div className="overflow-y-auto flex-1 no-scrollbar p-0">
+        {/* ═══════════════════════════════════════════════════════════════
+            MOBILE LIST — cards apiladas (< md)
+            ═══════════════════════════════════════════════════════════════ */}
+        <div className="md:hidden overflow-y-auto flex-1 no-scrollbar divide-y divide-border">
+          {loading ? (
+            <div className="space-y-2 p-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="skeleton h-24 rounded-xl" />
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-16 px-6 text-text-2 text-sm">
+              No hay pedidos registrados con esos filtros.
+            </div>
+          ) : (
+            filtered.map((o) => {
+              const isPaid =
+                o.status === "completed" || o.status === "paid" || o.status === "despachado";
+              const isContado = o.payment_type === "contado";
+              const legacyBug = isPaid && isContado && Number(o.amount_paid || 0) === 0;
+              const displayDue = legacyBug ? 0 : Number(o.amount_due || 0);
+              return (
+                <Link
+                  key={o.id}
+                  href={`/dashboard/ventas/${o.id}`}
+                  className="block p-3 hover:bg-surface-hover/50 active:bg-surface-hover/70 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono font-bold text-brand text-sm">
+                          {o.order_number}
+                        </span>
+                        <StatusBadge status={o.status || "draft"} />
+                      </div>
+                      {o.invoice_number && (
+                        <div className="text-[10px] text-text-3 font-mono mt-0.5">
+                          {o.invoice_number}
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="font-bold text-text-1 text-sm">
+                        {formatCurrency(o.total_usd)}
+                      </div>
+                      <div className="text-[10px] text-text-3 font-semibold">
+                        Bs. {formatCurrency(o.total_bs, "")}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 mb-2">
+                    <Semaforo status={o.partners?.credit_status || "green"} />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-text-1 text-sm truncate">
+                        {o.partners?.name}
+                      </p>
+                      <p className="text-[10px] text-text-3 truncate">
+                        {o.partners?.rif}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 text-[11px]">
+                    <span className="text-text-3">
+                      {format(new Date(o.created_at), "dd MMM yyyy", { locale: es })}
+                    </span>
+                    {displayDue > 0 && (
+                      <span className="font-bold text-status-danger">
+                        Debe {formatCurrency(displayDue)}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/40">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleReprint(o);
+                      }}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-brand/10 text-brand text-xs font-bold active:scale-95 transition-transform"
+                    >
+                      <Printer className="w-3.5 h-3.5" />
+                      Imprimir
+                    </button>
+                    <span className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-surface-base text-text-2 text-xs font-bold">
+                      <FileText className="w-3.5 h-3.5" />
+                      Ver detalles
+                    </span>
+                  </div>
+                </Link>
+              );
+            })
+          )}
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            DESKTOP TABLE — tabla tradicional (md+)
+            ═══════════════════════════════════════════════════════════════ */}
+        <div className="hidden md:block overflow-y-auto flex-1 no-scrollbar p-0">
           <table className="w-full text-sm text-left whitespace-nowrap">
             <thead className="bg-surface-base/80 text-text-2 sticky top-0 z-10 backdrop-blur-lg border-b-2 border-border/50">
               <tr>
