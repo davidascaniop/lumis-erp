@@ -539,6 +539,17 @@ function NuevaVentaContent() {
 
       toast.success(`Pedido ${orderNumber} creado con éxito`);
 
+      // Invalidar caches afectados: el historial de ventas debe ver el
+      // nuevo pedido, los productos cambiaron de stock, y si se creó una
+      // cuenta por cobrar también afecta cobranza.
+      if (user?.company_id) {
+        const cid = user.company_id;
+        useDataCache.getState().invalidate(`ventas_${cid}`);
+        useDataCache.getState().invalidate(`presupuestos_${cid}`);
+        useDataCache.getState().invalidatePrefix("productos_");
+        useDataCache.getState().invalidatePrefix("cobranza_");
+      }
+
       // ── Open print modal instead of redirecting immediately ──
       setPendingOrderData({
         id: order.id,
@@ -620,6 +631,14 @@ function NuevaVentaContent() {
       if (itemsErr) throw itemsErr;
 
       toast.success("Presupuesto modificado exitosamente");
+
+      // Invalidar caches: el historial cambió (orden editada) y los items
+      // pueden haberse modificado.
+      if (user?.company_id) {
+        const cid = user.company_id;
+        useDataCache.getState().invalidate(`ventas_${cid}`);
+        useDataCache.getState().invalidate(`presupuestos_${cid}`);
+      }
       router.push("/dashboard/ventas");
     } catch (error: any) {
       toast.error("Error al guardar cambios", { description: error.message });

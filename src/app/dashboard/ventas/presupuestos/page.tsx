@@ -12,6 +12,7 @@ import { formatCurrency } from "@/lib/utils";
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 import { toast } from "sonner";
 import { useUser } from "@/hooks/use-user";
+import { useDataCache } from "@/lib/data-cache";
 
 type Quote = {
   id: string;
@@ -51,6 +52,18 @@ export default function PresupuestosPage() {
   async function fetchQuotes() {
     const companyId = currentUser?.company_id;
     if (!companyId) return;
+
+    // Stale-while-revalidate: si hay cache reciente, mostrarlo al instante
+    // y saltar el fetch. Así navegar a esta página en <5min se siente
+    // instantánea (mismo patrón que /dashboard/ventas).
+    const cacheKey = `presupuestos_${companyId}`;
+    const cached = useDataCache.getState().get(cacheKey);
+    if (cached) {
+      setQuotes(cached);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
 
     const { data } = await supabase
@@ -60,7 +73,9 @@ export default function PresupuestosPage() {
       .order("created_at", { ascending: false })
       .limit(100);
 
-    setQuotes((data as Quote[]) || []);
+    const rows = (data as Quote[]) || [];
+    setQuotes(rows);
+    useDataCache.getState().set(cacheKey, rows);
     setLoading(false);
   }
 
@@ -174,6 +189,16 @@ export default function PresupuestosPage() {
         .eq("id", quote.id);
 
       toast.success("¡Presupuesto convertido a venta con éxito!", { id: toastId });
+
+      // Cache invalidation: la conversión modificó el quote (status=converted)
+      // y también afectó la tabla orders/products, así que invalidamos todo
+      // el prefix para que la próxima visita traiga data fresca.
+      const companyId = currentUser?.company_id;
+      if (companyId) {
+        useDataCache.getState().invalidate(`presupuestos_${companyId}`);
+        useDataCache.getState().invalidate(`ventas_${companyId}`);
+        useDataCache.getState().invalidatePrefix("productos_");
+      }
       fetchQuotes();
     } catch (error: any) {
       console.error("Error converting quote:", error);
