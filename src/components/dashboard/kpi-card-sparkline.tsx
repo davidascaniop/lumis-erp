@@ -31,9 +31,9 @@ export function KpiCardWithSparkline({
 
   return (
     <div
-      className="relative bg-surface-card border border-border rounded-2xl p-4 overflow-hidden
+      className="relative bg-surface-card border border-border rounded-2xl p-3 sm:p-4 overflow-hidden
                         shadow-card hover-card-effect
-                        group card-enter h-[140px] flex flex-col justify-between"
+                        group card-enter min-h-[130px] sm:min-h-[140px] flex flex-col justify-between"
     >
       {/* Glow en hover */}
       <div
@@ -62,12 +62,17 @@ export function KpiCardWithSparkline({
       </div>
 
       {/* Valor */}
-      <div className="font-primary text-2xl leading-tight mb-0.5 relative text-text-1">
+      <div className="font-primary text-xl sm:text-2xl leading-tight mb-0.5 relative text-text-1 truncate">
         {value}
       </div>
-      <p className="text-[11px] text-text-2 relative">
-        {label}{" "}
-        {sublabel && <span className="text-text-3">· {sublabel}</span>}
+      <p className="text-[10px] sm:text-[11px] text-text-2 relative leading-tight">
+        {label}
+        {sublabel && (
+          <>
+            <span className="hidden sm:inline text-text-3"> · {sublabel}</span>
+            <span className="sm:hidden block text-[9px] text-text-3">{sublabel}</span>
+          </>
+        )}
       </p>
 
       {/* Sparkline */}

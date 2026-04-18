@@ -32,31 +32,33 @@ export function RecentActivity({ companyId }: { companyId: string }) {
   ];
 
   return (
-    <Card className="p-6 bg-surface-card border-border shadow-card hover-card-effect no-scrollbar">
-      <h3 className="text-lg font-primary text-text-1 mb-6">
+    <Card className="p-4 sm:p-6 bg-surface-card border-border shadow-card hover-card-effect no-scrollbar">
+      <h3 className="text-base sm:text-lg font-primary text-text-1 mb-4 sm:mb-6">
         Actividad Reciente
       </h3>
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {mockActivities.map((act) => (
           <div
             key={act.id}
-            className="flex gap-4 items-start pb-4 border-b border-white/5 last:border-0"
+            className="flex gap-3 sm:gap-4 items-start pb-3 sm:pb-4 border-b border-white/5 last:border-0"
           >
-            <div className="w-10 h-10 rounded-full flex-shrink-0 bg-brand-gradient flex items-center justify-center">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex-shrink-0 bg-brand-gradient flex items-center justify-center">
               {act.type === "order_created" && (
-                <ShoppingCart className="w-5 h-5 text-white" />
+                <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               )}
               {act.type === "payment" && (
-                <DollarSign className="w-5 h-5 text-white" />
+                <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               )}
-              {act.type === "note" && <Edit className="w-5 h-5 text-white" />}
+              {act.type === "note" && (
+                <Edit className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              )}
             </div>
-            <div>
-              <p className="text-sm font-medium text-text-1">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-text-1 leading-snug">
                 <span className="font-bold text-brand">{act.user}</span> ha
                 actuado sobre {act.entity}
               </p>
-              <p className="text-xs text-text-3 mt-1">
+              <p className="text-[11px] sm:text-xs text-text-3 mt-1">
                 {formatDistanceToNow(act.time, { addSuffix: true, locale: es })}
               </p>
             </div>

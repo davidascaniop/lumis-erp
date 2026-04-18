@@ -50,7 +50,14 @@ export function DashboardShell({
   }, [drawerOpen]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-surface-base font-montserrat">
+    <div
+      className="flex h-screen overflow-hidden bg-surface-base font-montserrat"
+      style={{
+        // iOS safe area insets — respeta el notch / home indicator
+        paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+      }}
+    >
       {/* ═══════════════════════════════════════════════════════════════
           SIDEBAR — desktop fixed / mobile drawer
           ═══════════════════════════════════════════════════════════════ */}
@@ -108,9 +115,9 @@ export function DashboardShell({
         </header>
 
         {/* Content area */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-5 md:p-6 relative">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-6 relative">
           {companyId && (
-            <div className="absolute top-4 right-4 sm:top-5 sm:right-5 md:top-6 md:right-6 z-40 max-w-[calc(100vw-2rem)] sm:max-w-sm">
+            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 md:top-6 md:right-6 z-40 max-w-[calc(100vw-1.5rem)] sm:max-w-sm">
               <PortalPaymentsAlert companyId={companyId} />
             </div>
           )}

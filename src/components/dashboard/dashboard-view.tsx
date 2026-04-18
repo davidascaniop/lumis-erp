@@ -50,28 +50,31 @@ export function DashboardView({ data, firstName, user, portalPayments, dailySeed
 
   return (
     <div className="space-y-5 animate-fade-up max-w-7xl mx-auto font-montserrat font-light">
-      {/* ═══ ZONA 0: HEADER ═══ */}
-      <div className="flex items-start justify-between">
-        <div>
+      {/* ═══ ZONA 0: HEADER — mobile-first stacked layout ═══ */}
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        {/* Greeting + fecha */}
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-2xl">{getGreetingEmoji()}</span>
-            <h1 className="font-primary text-2xl">
+            <span className="text-xl md:text-2xl shrink-0">{getGreetingEmoji()}</span>
+            <h1 className="font-primary text-xl md:text-2xl truncate">
               ¡{getGreeting()}, {firstName}!
             </h1>
           </div>
-          <p className="text-sm text-text-2">{formatDateEs(new Date())}</p>
+          <p className="text-xs md:text-sm text-text-2">{formatDateEs(new Date())}</p>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Controls: campana + toggle período */}
+        <div className="flex items-center gap-2 md:gap-3 flex-wrap">
           {/* Bell with counter */}
-          <div className="relative">
+          <div className="relative shrink-0">
             <button
               onClick={() => {
                 document.getElementById('alerts-section')?.scrollIntoView({ behavior: 'smooth' });
               }}
               className="w-9 h-9 rounded-xl bg-surface-card border border-border flex items-center justify-center
-                         shadow-card hover:border-border-brand/40 transition-colors"
+                         shadow-card hover:border-border-brand/40 transition-colors active:scale-95"
               title="Ir a las alertas activas"
+              aria-label={`Ver ${alertCount} alertas activas`}
             >
               <Bell className="w-4 h-4 text-text-2" />
             </button>
@@ -79,20 +82,20 @@ export function DashboardView({ data, firstName, user, portalPayments, dailySeed
               <span
                 className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full bg-[#FF2D55]
                            text-white text-[9px] font-bold flex items-center justify-center px-1
-                           shadow-[0_0_10px_rgba(255,45,85,0.5)] animate-pulse"
+                           shadow-[0_0_10px_rgba(255,45,85,0.5)] animate-pulse pointer-events-none"
               >
                 {alertCount > 9 ? "9+" : alertCount}
               </span>
             )}
           </div>
 
-          {/* Selector de período */}
-          <div className="flex items-center gap-1 p-1 bg-surface-card rounded-xl border border-border shadow-card">
+          {/* Selector de período — compacto en mobile, full en desktop */}
+          <div className="flex-1 md:flex-none flex items-center gap-0.5 md:gap-1 p-1 bg-surface-card rounded-xl border border-border shadow-card overflow-x-auto no-scrollbar">
             {["hoy", "semana", "mes", "año"].map((p) => (
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
-                className={`px-4 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${
+                className={`flex-1 md:flex-none px-2.5 md:px-4 py-1.5 rounded-lg text-[11px] md:text-xs font-semibold capitalize transition-all whitespace-nowrap active:scale-95 ${
                   period === p
                     ? "bg-gradient-to-r from-brand to-brand-dark text-white shadow-brand"
                     : "text-text-2 hover:text-text-1"
@@ -167,24 +170,24 @@ export function DashboardView({ data, firstName, user, portalPayments, dailySeed
 
         {/* KPI 5: Eficiencia de Cobro */}
         <div
-          className="relative bg-surface-card border border-border rounded-2xl p-4 overflow-hidden
-                     shadow-card hover-card-effect group card-enter h-[140px]"
+          className="relative bg-surface-card border border-border rounded-2xl p-3 sm:p-4 overflow-hidden
+                     shadow-card hover-card-effect group card-enter min-h-[130px] sm:min-h-[140px]"
         >
           <div
             className="absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl pointer-events-none
                        opacity-0 group-hover:opacity-100 transition-opacity duration-200"
             style={{ background: "var(--brand-glow)" }}
           />
-          <div className="flex items-start justify-between mb-2 relative">
-            <div className="p-2 rounded-xl bg-brand/10">
+          <div className="flex items-start justify-between mb-2 relative gap-1">
+            <div className="p-2 rounded-xl bg-brand/10 shrink-0">
               <Target className="w-4 h-4 text-brand" />
             </div>
-            <span className="text-[10px] font-semibold text-text-3">este mes</span>
+            <span className="text-[9px] sm:text-[10px] font-semibold text-text-3 text-right">este mes</span>
           </div>
-          <div className="font-primary text-2xl leading-tight mb-0.5 relative">
+          <div className="font-primary text-xl sm:text-2xl leading-tight mb-0.5 relative">
             {data.collectionRate}%
           </div>
-          <p className="text-[11px] text-text-2 mb-3 relative">Efic. de Cobro</p>
+          <p className="text-[10px] sm:text-[11px] text-text-2 mb-3 relative">Efic. de Cobro</p>
           <div className="h-1 bg-surface-card/10 rounded-full overflow-hidden relative">
             <div
               className="h-full rounded-full transition-all duration-200"
