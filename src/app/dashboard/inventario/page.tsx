@@ -24,6 +24,7 @@ export default function InventarioPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [openAdd, setOpenAdd] = useState(false);
   const [openBulk, setOpenBulk] = useState(false);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [stats, setStats] = useState({
     totalMovements: 0,
     entriesThisMonth: 0,
@@ -40,30 +41,34 @@ export default function InventarioPage() {
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
 
-    const [totalRes, entriesRes, exitsRes] = await Promise.all([
-      supabase
-        .from("stock_movements")
-        .select("id", { count: "exact", head: true })
-        .eq("company_id", user.company_id),
-      supabase
-        .from("stock_movements")
-        .select("id", { count: "exact", head: true })
-        .eq("company_id", user.company_id)
-        .eq("type", "IN")
-        .gte("created_at", startOfMonth.toISOString()),
-      supabase
-        .from("stock_movements")
-        .select("id", { count: "exact", head: true })
-        .eq("company_id", user.company_id)
-        .eq("type", "OUT")
-        .gte("created_at", startOfMonth.toISOString()),
-    ]);
+    try {
+      const [totalRes, entriesRes, exitsRes] = await Promise.all([
+        supabase
+          .from("stock_movements")
+          .select("id", { count: "exact", head: true })
+          .eq("company_id", user.company_id),
+        supabase
+          .from("stock_movements")
+          .select("id", { count: "exact", head: true })
+          .eq("company_id", user.company_id)
+          .eq("type", "IN")
+          .gte("created_at", startOfMonth.toISOString()),
+        supabase
+          .from("stock_movements")
+          .select("id", { count: "exact", head: true })
+          .eq("company_id", user.company_id)
+          .eq("type", "OUT")
+          .gte("created_at", startOfMonth.toISOString()),
+      ]);
 
-    setStats({
-      totalMovements: totalRes.count ?? 0,
-      entriesThisMonth: entriesRes.count ?? 0,
-      exitsThisMonth: exitsRes.count ?? 0,
-    });
+      setStats({
+        totalMovements: totalRes.count ?? 0,
+        entriesThisMonth: entriesRes.count ?? 0,
+        exitsThisMonth: exitsRes.count ?? 0,
+      });
+    } finally {
+      setStatsLoading(false);
+    }
   }, [user?.company_id]);
 
   useEffect(() => {
@@ -108,7 +113,11 @@ export default function InventarioPage() {
             <p className="text-xs text-text-3 font-bold uppercase tracking-wider">
               Total Movimientos
             </p>
-            <p className="text-2xl font-primary text-black dark:text-white">{stats.totalMovements}</p>
+            {statsLoading ? (
+              <div className="h-7 w-16 bg-slate-200 rounded animate-pulse mt-1" />
+            ) : (
+              <p className="text-2xl font-primary text-black dark:text-white">{stats.totalMovements}</p>
+            )}
           </div>
         </Card>
         <Card className="p-4 bg-surface-card border-border flex items-center gap-4 hover:border-status-ok/30 transition-colors cursor-default">
@@ -119,7 +128,11 @@ export default function InventarioPage() {
             <p className="text-xs text-text-3 font-bold uppercase tracking-wider">
               Entradas del Mes
             </p>
-            <p className="text-2xl font-primary text-black dark:text-white">{stats.entriesThisMonth}</p>
+            {statsLoading ? (
+              <div className="h-7 w-12 bg-slate-200 rounded animate-pulse mt-1" />
+            ) : (
+              <p className="text-2xl font-primary text-black dark:text-white">{stats.entriesThisMonth}</p>
+            )}
           </div>
         </Card>
         <Card className="p-4 bg-surface-card border-border flex items-center gap-4 hover:border-status-danger/30 transition-colors cursor-default">
@@ -130,7 +143,11 @@ export default function InventarioPage() {
             <p className="text-xs text-text-3 font-bold uppercase tracking-wider">
               Salidas del Mes
             </p>
-            <p className="text-2xl font-primary text-black dark:text-white">{stats.exitsThisMonth}</p>
+            {statsLoading ? (
+              <div className="h-7 w-12 bg-slate-200 rounded animate-pulse mt-1" />
+            ) : (
+              <p className="text-2xl font-primary text-black dark:text-white">{stats.exitsThisMonth}</p>
+            )}
           </div>
         </Card>
       </div>
