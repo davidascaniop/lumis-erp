@@ -1,10 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Sidebar } from "@/components/layout/sidebar";
-import { SuspendedGuard } from "@/components/layout/SuspendedGuard";
 import { Toaster } from "sonner";
 import { UserProvider } from "@/components/providers/user-provider";
-import { PortalPaymentsAlert } from "@/components/dashboard/portal-payments-alert";
+import { DashboardShell } from "@/components/layout/dashboard-shell";
 
 export default async function DashboardLayout({
   children,
@@ -19,30 +17,18 @@ export default async function DashboardLayout({
   // Fetch full user profile on the server — eliminates client-side waterfall
   const { data: serverProfile } = await supabase
     .from("users")
-    .select("*, companies(id, is_active, plan_type, settings, subscription_status, trial_ends_at, modules_enabled, logo_url, name, name_comercial, rif)")
+    .select(
+      "*, companies(id, is_active, plan_type, settings, subscription_status, trial_ends_at, modules_enabled, logo_url, name, name_comercial, rif)",
+    )
     .eq("auth_id", authUser.id)
     .single();
 
   return (
     <UserProvider initialUser={serverProfile}>
-      <div className="flex h-screen overflow-hidden bg-surface-base font-montserrat">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <main className="flex-1 overflow-y-auto p-6 relative">
-            {serverProfile?.company_id && (
-                <div className="absolute top-6 right-6 z-50 max-w-sm">
-                    <PortalPaymentsAlert companyId={serverProfile.company_id} />
-                </div>
-            )}
-            <SuspendedGuard>{children}</SuspendedGuard>
-          </main>
-        </div>
-        <Toaster
-          position="top-right"
-          theme="system"
-          className="font-montserrat"
-        />
-      </div>
+      <DashboardShell companyId={serverProfile?.company_id ?? null}>
+        {children}
+      </DashboardShell>
+      <Toaster position="top-right" theme="system" className="font-montserrat" />
     </UserProvider>
   );
 }

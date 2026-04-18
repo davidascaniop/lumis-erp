@@ -136,7 +136,13 @@ const configItems = [
   { href: "/dashboard/settings", label: "Configuración", icon: Settings },
 ];
 
-export function Sidebar() {
+export function Sidebar({
+  isMobileOpen = false,
+  onMobileClose,
+}: {
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
+} = {}) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -246,7 +252,28 @@ export function Sidebar() {
     : "U";
 
   return (
-    <aside className="w-[240px] flex-shrink-0 flex flex-col border-r border-border bg-background transition-colors duration-300">
+    <aside
+      className={cn(
+        "flex flex-col border-r border-border bg-background transition-all duration-300",
+        // Desktop (md+): fixed width sidebar, always visible in flex row
+        "md:w-[240px] md:flex-shrink-0 md:static md:translate-x-0 md:z-auto",
+        // Mobile (<md): fixed drawer, slides in/out
+        "fixed inset-y-0 left-0 z-50 w-[280px] max-w-[85vw] shadow-2xl md:shadow-none",
+        isMobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+      )}
+      aria-label="Menú de navegación"
+    >
+      {/* Mobile close button */}
+      {onMobileClose && (
+        <button
+          onClick={onMobileClose}
+          className="md:hidden absolute top-3 right-3 p-2 rounded-lg text-text-3 hover:text-text-1 hover:bg-surface-hover/20 transition-colors active:scale-95 z-10"
+          aria-label="Cerrar menú"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
+
       {/* Logo + BCV */}
       <div className="px-5 py-5 border-b border-border">
         <div className="flex items-center justify-between">
